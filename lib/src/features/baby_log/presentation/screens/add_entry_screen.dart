@@ -26,7 +26,7 @@ class _AddEntryState extends ConsumerState<AddEntryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Entry')),
+      appBar: AppBar(title: const Text('記録')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -43,18 +43,12 @@ class _AddEntryState extends ConsumerState<AddEntryScreen> {
             TextFormField(
               controller: amountCtrl,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: type == EntryType.feeding
-                    ? 'Amount (ml)'
-                    : type == EntryType.sleep
-                        ? 'Duration (hours)'
-                        : 'Amount (optional)',
-              ),
+              decoration: InputDecoration(labelText: type.amountLabel),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: noteCtrl,
-              decoration: const InputDecoration(labelText: 'Note (optional)'),
+              decoration: const InputDecoration(labelText: 'メモ'),
             ),
             const Spacer(),
             SizedBox(
@@ -67,7 +61,7 @@ class _AddEntryState extends ConsumerState<AddEntryScreen> {
                   if (context.mounted) Navigator.pop(context);
                 },
                 icon: const Icon(Icons.save),
-                label: const Text('Save'),
+                label: const Text('保存'),
               ),
             ),
           ],

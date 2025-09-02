@@ -8,15 +8,13 @@ class EntryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final subtitle = switch (entry.type) {
-      EntryType.feeding => entry.amount != null ? 'Feeding ${entry.amount!.toStringAsFixed(0)} ml' : 'Feeding',
-      EntryType.sleep => entry.amount != null ? 'Sleep ${entry.amount} h' : 'Sleep',
-      EntryType.diaper => 'Diaper',
+      EntryType.feeding => entry.amount != null ? '授乳 ${entry.amount!.toStringAsFixed(0)} ml' : '授乳',
+      EntryType.sleep => entry.amount != null ? '睡眠 ${entry.amount} h' : '睡眠',
     };
 
     return ListTile(
       leading: Icon(switch (entry.type) {
         EntryType.feeding => Icons.local_drink,
-        EntryType.diaper => Icons.baby_changing_station,
         EntryType.sleep => Icons.bedtime,
       }),
       title: Text(subtitle),

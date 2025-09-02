@@ -12,10 +12,10 @@ class LogListScreen extends ConsumerWidget {
     final state = ref.watch(logControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Baby Log (Today)')),
+      appBar: AppBar(title: const Text('ベビまむ手帳')),
       body: state.when(
         data: (list) => list.isEmpty
-            ? const Center(child: Text('No entries yet.'))
+            ? const Center(child: Text('まだデータがありません'))
             : ListView.builder(
                 itemCount: list.length,
                 itemBuilder: (_, i) => EntryTile(entry: list[i]),
@@ -25,7 +25,7 @@ class LogListScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.pushNamed('add'),
-        label: const Text('Add'),
+        label: const Text('追加'),
         icon: const Icon(Icons.add),
       ),
     );
