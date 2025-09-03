@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../baby_log.dart';
 import '../controllers/log_controller.dart';
+import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 
 class AddEntryScreen extends ConsumerStatefulWidget {
   const AddEntryScreen({super.key});
@@ -67,6 +68,7 @@ class _AddEntryState extends ConsumerState<AddEntryScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: const AppBottomNav(),
     );
   }
 }

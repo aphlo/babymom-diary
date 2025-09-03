@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 import '../controllers/log_controller.dart';
 import '../components/entry_tile.dart';
 
@@ -28,6 +29,7 @@ class LogListScreen extends ConsumerWidget {
         label: const Text('追加'),
         icon: const Icon(Icons.add),
       ),
+      bottomNavigationBar: const AppBottomNav(),
     );
   }
 }

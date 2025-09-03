@@ -4,7 +4,6 @@ import '../../baby_log.dart';
 import '../../application/usecases/add_entry.dart';
 import '../../application/usecases/get_entries_for_day.dart';
 import '../../data/repositories/log_repository_impl.dart';
-import '../../data/sources/log_firestore_data_source.dart';
 import '../../data/sources/log_local_data_source.dart';
 
 // Firestore instance
