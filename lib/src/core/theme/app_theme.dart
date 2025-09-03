@@ -17,6 +17,23 @@ ThemeData buildTheme() {
         bottom: BorderSide(color: Colors.black.withOpacity(0.12), width: 1),
       ),
     ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: scheme.primary,
+      surfaceTintColor: Colors.transparent,
+      indicatorColor: scheme.onPrimary.withOpacity(0.20),
+      iconTheme: MaterialStateProperty.resolveWith(
+        (states) => IconThemeData(
+          color: scheme.onPrimary.withOpacity(states.contains(MaterialState.selected) ? 1.0 : 0.85),
+        ),
+      ),
+      labelTextStyle: MaterialStateProperty.resolveWith(
+        (states) => TextStyle(
+          color: scheme.onPrimary.withOpacity(states.contains(MaterialState.selected) ? 1.0 : 0.85),
+          fontWeight: states.contains(MaterialState.selected) ? FontWeight.w600 : FontWeight.w500,
+          fontSize: 11, // slightly smaller labels
+        ),
+      ),
+    ),
     inputDecorationTheme: const InputDecorationTheme(
       border: OutlineInputBorder(),
     ),
