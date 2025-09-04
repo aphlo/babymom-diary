@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 ThemeData buildTheme() {
   final base = ThemeData(useMaterial3: true);
-  final scheme = ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 219, 13, 81));
+  final scheme = ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 199, 43, 111));
 
   return base.copyWith(
     colorScheme: scheme,
