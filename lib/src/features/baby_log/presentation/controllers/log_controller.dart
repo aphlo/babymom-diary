@@ -4,7 +4,7 @@ import '../../baby_log.dart';
 import '../../application/usecases/add_entry.dart';
 import '../../application/usecases/get_entries_for_day.dart';
 import '../../data/repositories/log_repository_impl.dart';
-import '../../data/sources/log_local_data_source.dart';
+import '../../data/sources/log_firestore_data_source.dart';
 
 // Firestore instance
 final firebaseFirestoreProvider = Provider<FirebaseFirestore>((ref) {
@@ -12,17 +12,14 @@ final firebaseFirestoreProvider = Provider<FirebaseFirestore>((ref) {
 });
 
 // DI graph (Firestore): data source -> repository -> usecases
-// final _firestoreDataSourceProvider = Provider((ref) {
-//   final db = ref.watch(firebaseFirestoreProvider);
-//   return LogFirestoreDataSource(db);
-// });
-
-final _localDataSourceProvider = Provider((ref) => LogLocalDataSource());
+final _firestoreDataSourceProvider = Provider((ref) {
+  final db = ref.watch(firebaseFirestoreProvider);
+  return LogFirestoreDataSource(db);
+});
 
 final logRepositoryProvider = Provider<LogRepository>((ref) {
-  // Use local data source for now (can switch to Firestore later)
-  final local = ref.watch(_localDataSourceProvider);
-  return LogRepositoryImpl(local: local);
+  final remote = ref.watch(_firestoreDataSourceProvider);
+  return LogRepositoryImpl(remote: remote);
 });
 
 final addEntryUseCaseProvider =
