@@ -5,45 +5,50 @@ import '../../application/usecases/add_entry.dart';
 import '../../application/usecases/get_entries_for_day.dart';
 import '../../data/repositories/log_repository_impl.dart';
 import '../../data/sources/log_firestore_data_source.dart';
+import '../../../../core/firebase/household_service.dart' as fbcore;
 
 // Firestore instance
-final firebaseFirestoreProvider = Provider<FirebaseFirestore>((ref) {
-  return FirebaseFirestore.instance;
-});
+// Use central Firebase providers from core
+final firebaseFirestoreProvider = Provider<FirebaseFirestore>((ref) =>
+    ref.watch(fbcore.firebaseFirestoreProvider));
 
 // DI graph (Firestore): data source -> repository -> usecases
-final _firestoreDataSourceProvider = Provider((ref) {
+final _firestoreDataSourceProvider = Provider.family<LogFirestoreDataSource, String>((ref, hid) {
   final db = ref.watch(firebaseFirestoreProvider);
-  return LogFirestoreDataSource(db);
+  return LogFirestoreDataSource(db, hid);
 });
 
-final logRepositoryProvider = Provider<LogRepository>((ref) {
-  final remote = ref.watch(_firestoreDataSourceProvider);
+final logRepositoryProvider = Provider.family<LogRepository, String>((ref, hid) {
+  final remote = ref.watch(_firestoreDataSourceProvider(hid));
   return LogRepositoryImpl(remote: remote);
 });
 
-final addEntryUseCaseProvider =
-    Provider((ref) => AddEntry(ref.watch(logRepositoryProvider)));
+final addEntryUseCaseProvider = Provider.family<AddEntry, String>((ref, hid) =>
+    AddEntry(ref.watch(logRepositoryProvider(hid))));
 final getEntriesForDayUseCaseProvider =
-    Provider((ref) => GetEntriesForDay(ref.watch(logRepositoryProvider)));
+    Provider.family<GetEntriesForDay, String>((ref, hid) =>
+        GetEntriesForDay(ref.watch(logRepositoryProvider(hid))));
 
 class LogController extends AsyncNotifier<List<Entry>> {
   @override
   Future<List<Entry>> build() async {
-    final get = ref.read(getEntriesForDayUseCaseProvider);
+    final hid = await ref.read(fbcore.currentHouseholdIdProvider.future);
+    final get = ref.read(getEntriesForDayUseCaseProvider(hid));
     return get(DateTime.now());
   }
 
   Future<void> refreshToday() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      final get = ref.read(getEntriesForDayUseCaseProvider);
+      final hid = await ref.read(fbcore.currentHouseholdIdProvider.future);
+      final get = ref.read(getEntriesForDayUseCaseProvider(hid));
       return get(DateTime.now());
     });
   }
 
   Future<void> add(Entry entry) async {
-    final add = ref.read(addEntryUseCaseProvider);
+    final hid = await ref.read(fbcore.currentHouseholdIdProvider.future);
+    final add = ref.read(addEntryUseCaseProvider(hid));
     await add(entry);
     await refreshToday();
   }
