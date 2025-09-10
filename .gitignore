@@ -118,3 +118,12 @@ app.*.symbols
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
+
+/android/app/build.gradle
+/android/app/google-services.json
+/android/settings.gradle
+/firebase.json
+/firestore.indexes.json
+/firestore.rules
+/ios/Runner.xcodeproj/project.pbxproj
+/ios/Runner/GoogleService-Info.plist
