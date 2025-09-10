@@ -13,7 +13,7 @@ class LogListScreen extends ConsumerWidget {
     final state = ref.watch(logControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('ベビまむ手帳')),
+      appBar: AppBar(title: const Text('Milu')),
       body: state.when(
         data: (list) => list.isEmpty
             ? const Center(child: Text('まだデータがありません'))

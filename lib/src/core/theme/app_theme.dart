@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 ThemeData buildTheme() {
   final base = ThemeData(useMaterial3: true);
-  final scheme = ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 219, 13, 81));
+  final scheme = ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 199, 43, 111));
 
   return base.copyWith(
     colorScheme: scheme,
@@ -21,15 +21,15 @@ ThemeData buildTheme() {
       backgroundColor: scheme.primary,
       surfaceTintColor: Colors.transparent,
       indicatorColor: scheme.onPrimary.withOpacity(0.20),
-      iconTheme: MaterialStateProperty.resolveWith(
+      iconTheme: WidgetStateProperty.resolveWith(
         (states) => IconThemeData(
-          color: scheme.onPrimary.withOpacity(states.contains(MaterialState.selected) ? 1.0 : 0.85),
+          color: scheme.onPrimary.withOpacity(states.contains(WidgetState.selected) ? 1.0 : 0.85),
         ),
       ),
-      labelTextStyle: MaterialStateProperty.resolveWith(
+      labelTextStyle: WidgetStateProperty.resolveWith(
         (states) => TextStyle(
-          color: scheme.onPrimary.withOpacity(states.contains(MaterialState.selected) ? 1.0 : 0.85),
-          fontWeight: states.contains(MaterialState.selected) ? FontWeight.w600 : FontWeight.w500,
+          color: scheme.onPrimary.withOpacity(states.contains(WidgetState.selected) ? 1.0 : 0.85),
+          fontWeight: states.contains(WidgetState.selected) ? FontWeight.w600 : FontWeight.w500,
           fontSize: 11, // slightly smaller labels
         ),
       ),

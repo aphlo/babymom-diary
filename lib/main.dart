@@ -1,14 +1,15 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'src/core/router/app_router.dart';
 import 'src/core/theme/app_theme.dart';
+import 'src/core/firebase/household_service.dart' as fbcore;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Firebase initialization is optional for local development
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
+  await Firebase.initializeApp();
+  await FirebaseAuth.instance.signInAnonymously();
   runApp(const ProviderScope(child: App()));
 }
 
@@ -16,12 +17,43 @@ class App extends ConsumerWidget {
   const App({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(appRouterProvider);
-    return MaterialApp.router(
-      title: 'Baby Mom Diary',
-      theme: buildTheme(),
-      routerConfig: router,
-      debugShowCheckedModeBanner: false,
+    // Gate the app until initial household setup completes
+    final initHousehold = ref.watch(fbcore.currentHouseholdIdProvider);
+
+    return initHousehold.when(
+      data: (_) {
+        final router = ref.watch(appRouterProvider);
+        return MaterialApp.router(
+          title: 'Milu',
+          theme: buildTheme(),
+          routerConfig: router,
+          debugShowCheckedModeBanner: false,
+        );
+      },
+      loading: () => MaterialApp(
+        title: 'Milu',
+        theme: buildTheme(),
+        debugShowCheckedModeBanner: false,
+        home: const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+      error: (e, __) => MaterialApp(
+        title: 'Milu',
+        theme: buildTheme(),
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Text(
+                '初期化に失敗しました\n${e}',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

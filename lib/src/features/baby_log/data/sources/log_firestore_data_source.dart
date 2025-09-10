@@ -2,13 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../baby_log.dart';
 
 class LogFirestoreDataSource {
-  LogFirestoreDataSource(this.db);
+  LogFirestoreDataSource(this.db, this.householdId);
   final FirebaseFirestore db;
+  final String householdId;
 
   static const collectionName = 'entries';
 
-  CollectionReference<Map<String, dynamic>> get _col =>
-      db.collection(collectionName);
+  CollectionReference<Map<String, dynamic>> get _col => db
+      .collection('households')
+      .doc(householdId)
+      .collection(collectionName);
 
   Future<List<Entry>> getForDay(DateTime day) async {
     final start = DateTime(day.year, day.month, day.day);

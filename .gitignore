@@ -127,3 +127,4 @@ app.*.symbols
 /firestore.rules
 /ios/Runner.xcodeproj/project.pbxproj
 /ios/Runner/GoogleService-Info.plist
+firebase.json
