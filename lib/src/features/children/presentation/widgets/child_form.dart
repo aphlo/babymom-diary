@@ -6,20 +6,14 @@ class ChildFormData {
   final String name;
   final Gender gender;
   final DateTime? birthday;
-  final double? birthWeight;
-  final double? height;
-  final double? headCircumference;
-  final double? chestCircumference;
+  final DateTime? dueDate;
   final Color color;
 
   const ChildFormData({
     this.name = '',
     this.gender = Gender.unknown,
     this.birthday,
-    this.birthWeight,
-    this.height,
-    this.headCircumference,
-    this.chestCircumference,
+    this.dueDate,
     this.color = Colors.blueAccent,
   });
 
@@ -27,20 +21,14 @@ class ChildFormData {
     String? name,
     Gender? gender,
     DateTime? birthday,
-    double? birthWeight,
-    double? height,
-    double? headCircumference,
-    double? chestCircumference,
+    DateTime? dueDate,
     Color? color,
   }) {
     return ChildFormData(
       name: name ?? this.name,
       gender: gender ?? this.gender,
       birthday: birthday ?? this.birthday,
-      birthWeight: birthWeight ?? this.birthWeight,
-      height: height ?? this.height,
-      headCircumference: headCircumference ?? this.headCircumference,
-      chestCircumference: chestCircumference ?? this.chestCircumference,
+      dueDate: dueDate ?? this.dueDate,
       color: color ?? this.color,
     );
   }
@@ -56,16 +44,24 @@ class ChildForm extends StatefulWidget {
 }
 
 class _ChildFormState extends State<ChildForm> {
+  static const List<Color> _palette = <Color>[
+    Colors.redAccent,
+    Colors.pinkAccent,
+    Colors.orangeAccent,
+    Colors.amber,
+    Colors.greenAccent,
+    Colors.lightBlueAccent,
+    Colors.purpleAccent,
+    Colors.teal,
+  ];
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
-  final _birthWeightCtrl = TextEditingController();
-  final _heightCtrl = TextEditingController();
-  final _headCtrl = TextEditingController();
-  final _chestCtrl = TextEditingController();
   final _birthdayCtrl = TextEditingController();
+  final _dueDateCtrl = TextEditingController();
 
   late Gender _gender;
   DateTime? _birthday;
+  DateTime? _dueDate;
   Color _pickedColor = Colors.blueAccent;
 
   @override
@@ -78,25 +74,28 @@ class _ChildFormState extends State<ChildForm> {
     if (_birthday != null) {
       _birthdayCtrl.text = '${_birthday!.year}/${_birthday!.month}/${_birthday!.day}';
     }
-    _birthWeightCtrl.text = i.birthWeight?.toString() ?? '';
-    _heightCtrl.text = i.height?.toString() ?? '';
-    _headCtrl.text = i.headCircumference?.toString() ?? '';
-    _chestCtrl.text = i.chestCircumference?.toString() ?? '';
-    _pickedColor = i.color;
+    _dueDate = i.dueDate;
+    if (_dueDate != null) {
+      _dueDateCtrl.text = '${_dueDate!.year}/${_dueDate!.month}/${_dueDate!.day}';
+    }
+    // no measurement fields
+    if (widget.initial == null) {
+      _pickedColor = Colors.redAccent;
+    } else {
+      final inPalette = _palette.any((c) => c.value == i.color.value);
+      _pickedColor = inPalette ? i.color : Colors.redAccent;
+    }
   }
 
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _birthWeightCtrl.dispose();
-    _heightCtrl.dispose();
-    _headCtrl.dispose();
-    _chestCtrl.dispose();
     _birthdayCtrl.dispose();
+    _dueDateCtrl.dispose();
     super.dispose();
   }
 
-  double? _parseDouble(String s) => s.trim().isEmpty ? null : double.tryParse(s);
+  // no numeric parsing needed
 
   Future<void> _pickBirthday() async {
     final now = DateTime.now();
@@ -116,6 +115,24 @@ class _ChildFormState extends State<ChildForm> {
     }
   }
 
+  Future<void> _pickDueDate() async {
+    final now = DateTime.now();
+    final first = DateTime(now.year - 10);
+    final last = DateTime(now.year + 1);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dueDate ?? _birthday ?? now,
+      firstDate: first,
+      lastDate: last,
+    );
+    if (picked != null) {
+      setState(() {
+        _dueDate = picked;
+        _dueDateCtrl.text = '${picked.year}/${picked.month}/${picked.day}';
+      });
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_birthday == null) {
@@ -129,10 +146,7 @@ class _ChildFormState extends State<ChildForm> {
       name: _nameCtrl.text.trim(),
       gender: _gender,
       birthday: _birthday,
-      birthWeight: _parseDouble(_birthWeightCtrl.text),
-      height: _parseDouble(_heightCtrl.text),
-      headCircumference: _parseDouble(_headCtrl.text),
-      chestCircumference: _parseDouble(_chestCtrl.text),
+      dueDate: _dueDate,
       color: _pickedColor,
     );
 
@@ -190,85 +204,58 @@ class _ChildFormState extends State<ChildForm> {
           ),
           const SizedBox(height: 12),
           TextFormField(
-            controller: _birthWeightCtrl,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: '出生体重 (g)',
+            controller: _dueDateCtrl,
+            readOnly: true,
+            showCursor: false,
+            decoration: InputDecoration(
+              labelText: '出産予定日',
+              hintText: '未選択',
+              suffixIcon: _dueDate != null
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          _dueDate = null;
+                          _dueDateCtrl.clear();
+                        });
+                      },
+                    )
+                  : null,
             ),
+            onTap: _pickDueDate,
           ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _heightCtrl,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: '身長 (cm)',
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _headCtrl,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: '頭囲 (cm)',
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _chestCtrl,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: '胸囲 (cm)',
-            ),
-          ),
+          // measurement fields removed
           const SizedBox(height: 16),
           Text('カラー', style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 8),
-          Builder(
-            builder: (context) {
-              final palette = <Color>[
-                Colors.redAccent,
-                Colors.pinkAccent,
-                Colors.orangeAccent,
-                Colors.amber,
-                Colors.greenAccent,
-                Colors.lightBlueAccent,
-                Colors.purpleAccent,
-                Colors.teal,
-              ];
-              final colors = List<Color>.from(palette);
-              if (!colors.any((c) => c.value == _pickedColor.value)) {
-                colors.insert(0, _pickedColor);
-              }
-              return Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final c in colors)
-                    GestureDetector(
-                      onTap: () => setState(() => _pickedColor = c),
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: c,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: _pickedColor.value == c.value
-                                ? Colors.black
-                                : Colors.transparent,
-                            width: 2,
-                          ),
-                        ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final c in _palette)
+                GestureDetector(
+                  onTap: () => setState(() => _pickedColor = c),
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: c,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: _pickedColor.value == c.value
+                            ? Colors.black
+                            : Colors.transparent,
+                        width: 2,
                       ),
                     ),
-                ],
-              );
-            },
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton.icon(
+            child: FilledButton.icon(
               onPressed: _submit,
               icon: const Icon(Icons.save),
               label: const Text('保存'),

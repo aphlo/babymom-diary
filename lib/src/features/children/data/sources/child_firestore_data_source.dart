@@ -20,20 +20,14 @@ class ChildFirestoreDataSource {
     required String name,
     required Gender gender,
     required DateTime birthday,
-    double? birthWeight,
-    double? height,
-    double? headCircumference,
-    double? chestCircumference,
+    DateTime? dueDate,
     required String color,
   }) async {
     await _col.add({
       'name': name,
       'gender': gender.key,
       'birthday': Timestamp.fromDate(birthday),
-      'birthWeight': birthWeight,
-      'height': height,
-      'headCircumference': headCircumference,
-      'chestCircumference': chestCircumference,
+      'dueDate': dueDate != null ? Timestamp.fromDate(dueDate) : null,
       'color': color, // hex string like #RRGGBB
       'createdAt': FieldValue.serverTimestamp(),
     });
@@ -46,20 +40,14 @@ class ChildFirestoreDataSource {
     required String name,
     required Gender gender,
     required DateTime birthday,
-    double? birthWeight,
-    double? height,
-    double? headCircumference,
-    double? chestCircumference,
+    DateTime? dueDate,
     required String color,
   }) async {
     await _col.doc(id).set({
       'name': name,
       'gender': gender.key,
       'birthday': Timestamp.fromDate(birthday),
-      'birthWeight': birthWeight,
-      'height': height,
-      'headCircumference': headCircumference,
-      'chestCircumference': chestCircumference,
+      'dueDate': dueDate != null ? Timestamp.fromDate(dueDate) : null,
       'color': color,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));

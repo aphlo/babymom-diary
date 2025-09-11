@@ -37,14 +37,12 @@ class _EditChildScreenState extends ConsumerState<EditChildScreen> {
     final data = doc.data();
     if (data != null) {
       final ts = data['birthday'] as Timestamp?;
+      final due = data['dueDate'] as Timestamp?;
       _initial = ChildFormData(
         name: (data['name'] as String?) ?? '',
         gender: genderFromKey(data['gender'] as String?),
         birthday: ts?.toDate(),
-        birthWeight: (data['birthWeight'] as num?)?.toDouble(),
-        height: (data['height'] as num?)?.toDouble(),
-        headCircumference: (data['headCircumference'] as num?)?.toDouble(),
-        chestCircumference: (data['chestCircumference'] as num?)?.toDouble(),
+        dueDate: due?.toDate(),
         color: _parseColor(data['color'] as String?),
       );
     }
@@ -81,23 +79,21 @@ class _EditChildScreenState extends ConsumerState<EditChildScreen> {
                         name: form.name,
                         gender: form.gender,
                         birthday: form.birthday!,
-                        birthWeight: form.birthWeight,
-                        height: form.height,
-                        headCircumference: form.headCircumference,
-                        chestCircumference: form.chestCircumference,
+                        dueDate: form.dueDate,
                         color: _toHex(form.color),
                       );
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('更新しました')),
-                        );
-                        context.pop();
-                      }
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('更新しました')),
+                      );
+                      context.pop();
                     } on FirebaseException catch (e) {
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('保存に失敗しました: ${e.message}')),
                       );
                     } catch (e) {
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('保存に失敗しました: $e')),
                       );

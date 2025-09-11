@@ -38,10 +38,7 @@ class _AddChildScreenState extends ConsumerState<AddChildScreen> {
                   name: data.name,
                   gender: data.gender,
                   birthday: data.birthday!,
-                  birthWeight: data.birthWeight,
-                  height: data.height,
-                  headCircumference: data.headCircumference,
-                  chestCircumference: data.chestCircumference,
+                  dueDate: data.dueDate,
                   color: _toHex(data.color),
                 );
                 if (context.mounted) {
