@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/features/children/data/sources/child_firestore_data_source.dart';
+import 'package:babymom_diary/src/core/theme/app_colors.dart';
 
 class MenuScreen extends ConsumerWidget {
   const MenuScreen({super.key});
@@ -27,7 +28,7 @@ class MenuScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncHid = ref.watch(currentHouseholdIdProvider);
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.pageBackground,
       appBar: AppBar(title: const Text('メニュー')),
       body: asyncHid.when(
         loading: () => const Center(child: CircularProgressIndicator()),
