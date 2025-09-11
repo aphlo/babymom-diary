@@ -46,40 +46,15 @@ class MenuScreen extends ConsumerWidget {
                 return Center(child: Text('子どもの読み込みに失敗しました\n${snap.error}'));
               }
               final docs = snap.data?.docs ?? const [];
-              final selectedId = ref.watch(selectedChildControllerProvider).value;
               return ListView(
                 children: [
                   // 子ども一覧セクション
-                  for (int i = 0; i < docs.length; i++) ...[
-                    Builder(
-                      builder: (context) {
-                        final d = docs[i];
-                        final id = d.id;
-                        final data = d.data();
-                        final color = _parseColor(data['color'] as String?);
-                        return ListTile(
-                          tileColor: Colors.white,
-                          leading: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Radio<String?>.adaptive(
-                                value: id,
-                                groupValue: selectedId,
-                                activeColor: Theme.of(context).colorScheme.primary,
-                                onChanged: (v) => ref.read(selectedChildControllerProvider.notifier).select(v),
-                              ),
-                              const SizedBox(width: 8),
-                              CircleAvatar(
-                                backgroundColor: color,
-                                child: const Icon(Icons.child_care, color: Colors.white),
-                              ),
-                            ],
-                          ),
-                          title: Text((data['name'] as String?) ?? '未設定'),
-                          subtitle: Text(_formatBirthday(data['birthday'] as Timestamp?)),
-                          onTap: () => ref.read(selectedChildControllerProvider.notifier).select(id),
-                        );
-                      },
+                  for (final d in docs) ...[
+                    _ChildListTile(
+                      id: d.id,
+                      name: (d.data()['name'] as String?) ?? '未設定',
+                      color: _parseColor(d.data()['color'] as String?),
+                      subtitle: _formatBirthday(d.data()['birthday'] as Timestamp?),
                     ),
                     const Divider(height: 0),
                   ],
@@ -107,6 +82,45 @@ class MenuScreen extends ConsumerWidget {
         },
       ),
       bottomNavigationBar: const AppBottomNav(),
+    );
+  }
+}
+
+class _ChildListTile extends ConsumerWidget {
+  const _ChildListTile({required this.id, required this.name, required this.color, required this.subtitle});
+  final String id;
+  final String name;
+  final Color color;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isSelected = ref.watch(
+      selectedChildControllerProvider.select((v) => v.value == id),
+    );
+    final scheme = Theme.of(context).colorScheme;
+    return ListTile(
+      key: ValueKey('child-$id'),
+      tileColor: isSelected ? scheme.primaryContainer : Colors.white,
+      leading: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Radio<String?>.adaptive(
+            value: id,
+            groupValue: isSelected ? id : null,
+            activeColor: Theme.of(context).colorScheme.primary,
+            onChanged: (v) => ref.read(selectedChildControllerProvider.notifier).select(v),
+          ),
+          const SizedBox(width: 8),
+          CircleAvatar(
+            backgroundColor: color,
+            child: const Icon(Icons.child_care, color: Colors.white),
+          ),
+        ],
+      ),
+      title: Text(name),
+      subtitle: Text(subtitle),
+      onTap: () => ref.read(selectedChildControllerProvider.notifier).select(id),
     );
   }
 }
