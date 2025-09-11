@@ -30,8 +30,10 @@ class _EditChildScreenState extends ConsumerState<EditChildScreen> {
 
   Future<void> _load() async {
     final hid = await ref.read(currentHouseholdIdProvider.future);
+    if (!mounted) return;
     final ds = ChildFirestoreDataSource(ref.read(firebaseFirestoreProvider), hid);
     final doc = await ds.getChild(widget.childId);
+    if (!mounted) return;
     final data = doc.data();
     if (data != null) {
       final ts = data['birthday'] as Timestamp?;
@@ -46,13 +48,13 @@ class _EditChildScreenState extends ConsumerState<EditChildScreen> {
         color: _parseColor(data['color'] as String?),
       );
     }
+    if (!mounted) return;
     setState(() => _loading = false);
   }
 
   @override
   void initState() {
     super.initState();
-    // ignore: discarded_futures
     _load();
   }
 
