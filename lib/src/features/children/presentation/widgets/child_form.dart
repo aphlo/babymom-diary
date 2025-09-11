@@ -223,11 +223,9 @@ class _ChildFormState extends State<ChildForm> {
           const SizedBox(height: 16),
           Text('カラー', style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final c in [
+          Builder(
+            builder: (context) {
+              final palette = <Color>[
                 Colors.redAccent,
                 Colors.pinkAccent,
                 Colors.orangeAccent,
@@ -236,25 +234,36 @@ class _ChildFormState extends State<ChildForm> {
                 Colors.lightBlueAccent,
                 Colors.purpleAccent,
                 Colors.teal,
-              ])
-                GestureDetector(
-                  onTap: () => setState(() => _pickedColor = c),
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: c,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: _pickedColor == c
-                            ? Colors.black
-                            : Colors.transparent,
-                        width: 2,
+              ];
+              final colors = List<Color>.from(palette);
+              if (!colors.any((c) => c.value == _pickedColor.value)) {
+                colors.insert(0, _pickedColor);
+              }
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final c in colors)
+                    GestureDetector(
+                      onTap: () => setState(() => _pickedColor = c),
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: c,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: _pickedColor.value == c.value
+                                ? Colors.black
+                                : Colors.transparent,
+                            width: 2,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-            ],
+                ],
+              );
+            },
           ),
           const SizedBox(height: 24),
           SizedBox(
