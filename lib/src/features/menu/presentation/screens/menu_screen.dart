@@ -75,6 +75,7 @@ class MenuScreen extends ConsumerWidget {
                     subtitle: const Text('招待コードの発行 / コードで参加'),
                     onTap: () => context.push('/household/share'),
                   ),
+                  const Divider(height: 0),
                 ],
               );
             },
