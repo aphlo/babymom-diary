@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/firebase/household_service.dart';
+import '../../../../core/types/gender.dart';
 import '../../data/sources/child_firestore_data_source.dart';
 
 class EditChildScreen extends ConsumerStatefulWidget {
@@ -17,7 +18,7 @@ class EditChildScreen extends ConsumerStatefulWidget {
 class _EditChildScreenState extends ConsumerState<EditChildScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
-  String _gender = 'unknown';
+  Gender _gender = Gender.unknown;
   DateTime? _birthday;
   final _birthWeightCtrl = TextEditingController();
   final _heightCtrl = TextEditingController();
@@ -66,7 +67,7 @@ class _EditChildScreenState extends ConsumerState<EditChildScreen> {
     final data = doc.data();
     if (data != null) {
       _nameCtrl.text = (data['name'] as String?) ?? '';
-      _gender = (data['gender'] as String?) ?? 'unknown';
+      _gender = genderFromKey(data['gender'] as String?);
       final ts = data['birthday'] as Timestamp?;
       if (ts != null) {
         _birthday = ts.toDate();
@@ -155,16 +156,15 @@ class _EditChildScreenState extends ConsumerState<EditChildScreen> {
                             : null,
                       ),
                       const SizedBox(height: 12),
-                      DropdownButtonFormField<String>(
+                      DropdownButtonFormField<Gender>(
                         value: _gender,
                         decoration: const InputDecoration(labelText: '性別'),
                         items: const [
-                          DropdownMenuItem(value: 'unknown', child: Text('未選択')),
-                          DropdownMenuItem(value: 'male', child: Text('男の子')),
-                          DropdownMenuItem(value: 'female', child: Text('女の子')),
-                          DropdownMenuItem(value: 'other', child: Text('その他')),
+                          DropdownMenuItem(value: Gender.unknown, child: Text('未選択')),
+                          DropdownMenuItem(value: Gender.male, child: Text('男の子')),
+                          DropdownMenuItem(value: Gender.female, child: Text('女の子')),
                         ],
-                        onChanged: (v) => setState(() => _gender = v ?? 'unknown'),
+                        onChanged: (v) => setState(() => _gender = v ?? Gender.unknown),
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -252,4 +252,3 @@ class _EditChildScreenState extends ConsumerState<EditChildScreen> {
     );
   }
 }
-

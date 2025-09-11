@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/types/gender.dart';
 
 class ChildFirestoreDataSource {
   ChildFirestoreDataSource(this.db, this.householdId);
@@ -17,7 +18,7 @@ class ChildFirestoreDataSource {
 
   Future<void> addChild({
     required String name,
-    required String gender,
+    required Gender gender,
     required DateTime birthday,
     double? birthWeight,
     double? height,
@@ -27,7 +28,7 @@ class ChildFirestoreDataSource {
   }) async {
     await _col.add({
       'name': name,
-      'gender': gender,
+      'gender': gender.key,
       'birthday': Timestamp.fromDate(birthday),
       'birthWeight': birthWeight,
       'height': height,
@@ -43,7 +44,7 @@ class ChildFirestoreDataSource {
   Future<void> updateChild({
     required String id,
     required String name,
-    required String gender,
+    required Gender gender,
     required DateTime birthday,
     double? birthWeight,
     double? height,
@@ -53,7 +54,7 @@ class ChildFirestoreDataSource {
   }) async {
     await _col.doc(id).set({
       'name': name,
-      'gender': gender,
+      'gender': gender.key,
       'birthday': Timestamp.fromDate(birthday),
       'birthWeight': birthWeight,
       'height': height,

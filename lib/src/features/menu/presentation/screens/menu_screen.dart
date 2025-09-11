@@ -27,6 +27,7 @@ class MenuScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncHid = ref.watch(currentHouseholdIdProvider);
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(title: const Text('メニュー')),
       body: asyncHid.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -42,6 +43,7 @@ class MenuScreen extends ConsumerWidget {
                   // 子ども一覧セクション
                   for (final d in docs)
                     ListTile(
+                      tileColor: Colors.white,
                       leading: CircleAvatar(
                         backgroundColor: _parseColor(d.data()['color'] as String?),
                         child: const Icon(Icons.child_care, color: Colors.white),
@@ -52,14 +54,16 @@ class MenuScreen extends ConsumerWidget {
                     ),
                   const Divider(height: 0),
                   ListTile(
+                    tileColor: Colors.white,
                     leading: const Icon(Icons.edit),
                     title: const Text('子どもの追加・編集'),
-                    onTap: () => context.push('/children/manage'),
+                    onTap: () => context.push('/children/manage', extra: 'slide'),
                   ),
 
                   const SizedBox(height: 24),
                   const Divider(height: 0),
                   ListTile(
+                    tileColor: Colors.white,
                     leading: const Icon(Icons.group_add),
                     title: const Text('世帯の共有'),
                     subtitle: const Text('招待コードの発行 / コードで参加'),

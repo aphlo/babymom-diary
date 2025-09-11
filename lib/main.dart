@@ -61,9 +61,9 @@ class App extends ConsumerWidget {
         home: Scaffold(
           body: Center(
             child: Padding(
-              padding: EdgeInsets.all(24),
+              padding: const EdgeInsets.all(24),
               child: Text(
-                '初期化に失敗しました\n${e}',
+                '初期化に失敗しました\n$e',
                 textAlign: TextAlign.center,
               ),
             ),

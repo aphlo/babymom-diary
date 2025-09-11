@@ -50,7 +50,7 @@ class _HouseholdShareScreenState extends ConsumerState<HouseholdShareScreen> {
       final hid = await svc.joinWithCode(code);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('世帯(${hid})に参加しました')),
+          SnackBar(content: Text('世帯($hid)に参加しました')),
         );
       }
     } catch (e) {

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/firebase/household_service.dart';
+import '../../../../core/types/gender.dart';
 import '../../data/sources/child_firestore_data_source.dart';
 
 class ManageChildrenScreen extends ConsumerWidget {
@@ -23,18 +24,7 @@ class ManageChildrenScreen extends ConsumerWidget {
     return '${d.year}年${d.month}月${d.day}日';
   }
 
-  String _formatGender(String? g) {
-    switch (g) {
-      case 'male':
-        return '（男）';
-      case 'female':
-        return '（女）';
-      case 'other':
-        return '（その他）';
-      default:
-        return '';
-    }
-  }
+  String _formatGender(String? g) => genderFromKey(g).labelJa;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,13 +36,6 @@ class ManageChildrenScreen extends ConsumerWidget {
           appBar: AppBar(
             leading: BackButton(onPressed: () => context.pop()),
             title: const Text('子どもの追加・編集'),
-            actions: [
-              IconButton(
-                onPressed: () => context.push('/children/add'),
-                icon: const Icon(Icons.add),
-                tooltip: '新規追加',
-              )
-            ],
           ),
           body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream: ds.childrenQuery().snapshots(),
@@ -93,4 +76,3 @@ class ManageChildrenScreen extends ConsumerWidget {
     );
   }
 }
-
