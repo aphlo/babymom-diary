@@ -6,6 +6,7 @@ import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/features/children/data/sources/child_firestore_data_source.dart';
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/features/children/application/selected_child_provider.dart';
 
 class MenuScreen extends ConsumerWidget {
   const MenuScreen({super.key});
@@ -38,22 +39,49 @@ class MenuScreen extends ConsumerWidget {
           return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream: ds.childrenQuery().snapshots(),
             builder: (context, snap) {
+              if (snap.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snap.hasError) {
+                return Center(child: Text('子どもの読み込みに失敗しました\n${snap.error}'));
+              }
               final docs = snap.data?.docs ?? const [];
+              final selectedId = ref.watch(selectedChildControllerProvider).value;
               return ListView(
                 children: [
                   // 子ども一覧セクション
-                  for (final d in docs)
-                    ListTile(
-                      tileColor: Colors.white,
-                      leading: CircleAvatar(
-                        backgroundColor: _parseColor(d.data()['color'] as String?),
-                        child: const Icon(Icons.child_care, color: Colors.white),
-                      ),
-                      title: Text((d.data()['name'] as String?) ?? '未設定'),
-                      subtitle: Text(_formatBirthday(d.data()['birthday'] as Timestamp?)),
-                      onTap: () => context.push('/children/edit/${d.id}'),
+                  for (int i = 0; i < docs.length; i++) ...[
+                    Builder(
+                      builder: (context) {
+                        final d = docs[i];
+                        final id = d.id;
+                        final data = d.data();
+                        final color = _parseColor(data['color'] as String?);
+                        return ListTile(
+                          tileColor: Colors.white,
+                          leading: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Radio<String?>.adaptive(
+                                value: id,
+                                groupValue: selectedId,
+                                onChanged: (v) => ref.read(selectedChildControllerProvider.notifier).select(v),
+                              ),
+                              const SizedBox(width: 8),
+                              CircleAvatar(
+                                backgroundColor: color,
+                                child: const Icon(Icons.child_care, color: Colors.white),
+                              ),
+                            ],
+                          ),
+                          title: Text((data['name'] as String?) ?? '未設定'),
+                          subtitle: Text(_formatBirthday(data['birthday'] as Timestamp?)),
+                          onTap: () => ref.read(selectedChildControllerProvider.notifier).select(id),
+                        );
+                      },
                     ),
-                  const Divider(height: 0),
+                    const Divider(height: 0),
+                  ],
                   ListTile(
                     tileColor: Colors.white,
                     leading: const Icon(Icons.edit),
