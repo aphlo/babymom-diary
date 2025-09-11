@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function authed() { return request.auth != null; }
+
+    function isMember(hid) {
+      return authed() &&
+             exists(/databases/$(database)/documents/households/$(hid)/members/$(request.auth.uid));
+    }
+
+    // households/{hid} の作成者かどうか
+    function isCreator(hid) {
+      return authed() &&
+             get(/databases/$(database)/documents/households/$(hid)).data.createdBy == request.auth.uid;
+    }
+
+    // households/{hid} の joinTokens/{tokenId} が生きているか検証
+    function validToken(hid) {
+      return request.resource.data.joinToken is string
+        && exists(/databases/$(database)/documents/households/$(hid)/joinTokens/$(request.resource.data.joinToken))
+        && get(/databases/$(database)/documents/households/$(hid)/joinTokens/$(request.resource.data.joinToken)).data.expireAt > request.time;
+    }
+
+    match /households/{hid} {
+      // 作成者の記録
+      allow create: if authed() && request.resource.data.createdBy == request.auth.uid;
+      // household 本体の閲覧・更新・削除はメンバーのみ
+      allow read, update, delete: if isMember(hid);
+
+      // メンバー管理：ドキュメント = uid
+      // 非メンバーが自分のメンバードキュメントを作成できるようにする（作成者 or 有効トークン）
+      match /members/{uid} {
+        allow read: if isMember(hid);
+        allow create: if authed() && request.auth.uid == uid && (isCreator(hid) || validToken(hid));
+        // 既存メンバーなら自由に更新/削除可（下の包括ルールでも許可されるが明示）
+        allow update, delete: if isMember(hid);
+      }
+
+      // 招待トークン：メンバーは自由に書き込み、読み取りは有効なものは誰でも
+      match /joinTokens/{tokenId} {
+        allow read: if resource.data.expireAt > request.time || isMember(hid);
+        allow write: if isMember(hid);
+      }
+
+      // households 配下はメンバーであれば全て読み書き可能（包括ルール）
+      match /{document=**} {
+        allow read, write: if isMember(hid);
+      }
+    }
+
+    // collectionGroup('joinTokens') 検索のための読み取り許可（有効なもののみ）
+    match /{path=**}/joinTokens/{tokenId} {
+      allow read: if resource.data.expireAt > request.time;
+    }
+
+    // collectionGroup('members') から "自分の" メンバーシップだけ読めるようにする
+    // クエリ互換のため、ドキュメントID(uid)ではなく resource.data.uid で判定する
+    // → クライアントは必ず where('uid', '==', request.auth.uid) を付与する必要がある
+    match /{path=**}/members/{uid} {
+      allow read: if authed() && resource.data.uid == request.auth.uid;
+    }
+  }
+}

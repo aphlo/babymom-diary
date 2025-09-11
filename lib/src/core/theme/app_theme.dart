@@ -6,6 +6,15 @@ ThemeData buildTheme() {
 
   return base.copyWith(
     colorScheme: scheme,
+    radioTheme: RadioThemeData(
+      fillColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return scheme.primary;
+        if (states.contains(WidgetState.disabled)) {
+          return scheme.onSurface.withOpacity(0.38);
+        }
+        return scheme.onSurfaceVariant;
+      }),
+    ),
     appBarTheme: AppBarTheme(
       backgroundColor: scheme.primary,
       foregroundColor: scheme.onPrimary, // text & icons
