@@ -58,6 +58,7 @@ class MenuScreen extends ConsumerWidget {
                     leading: const Icon(Icons.edit),
                     title: const Text('子どもの追加・編集'),
                     onTap: () => context.push('/children/manage', extra: 'slide'),
+                    trailing: const Icon(Icons.chevron_right),
                   ),
 
                   const SizedBox(height: 24),
