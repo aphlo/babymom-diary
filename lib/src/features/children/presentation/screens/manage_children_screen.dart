@@ -33,6 +33,7 @@ class ManageChildrenScreen extends ConsumerWidget {
       data: (hid) {
         final ds = ChildFirestoreDataSource(ref.watch(firebaseFirestoreProvider), hid);
         return Scaffold(
+          backgroundColor: const Color(0xFFF5F5F5),
           appBar: AppBar(
             leading: BackButton(onPressed: () => context.pop()),
             title: const Text('子どもの追加・編集'),
@@ -48,17 +49,19 @@ class ManageChildrenScreen extends ConsumerWidget {
                 itemCount: docs.length + 1,
                 separatorBuilder: (_, __) => const Divider(height: 0),
                 itemBuilder: (context, index) {
-                  if (index == 0) {
+                  if (index == docs.length) {
                     return ListTile(
+                      tileColor: Colors.white,
                       leading: const Icon(Icons.add),
                       title: const Text('新規追加'),
                       onTap: () => context.push('/children/add'),
                     );
                   }
-                  final d = docs[index - 1];
+                  final d = docs[index];
                   final data = d.data();
                   final color = _parseColor(data['color'] as String?);
                   return ListTile(
+                    tileColor: Colors.white,
                     leading: CircleAvatar(backgroundColor: color, child: const Icon(Icons.child_care, color: Colors.white)),
                     title: Text((data['name'] as String?) ?? '未設定'),
                     subtitle: Text('${_formatBirthday(data['birthday'] as Timestamp?)} ${_formatGender(data['gender'] as String?)}'),
