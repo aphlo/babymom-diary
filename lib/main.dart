@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'src/core/router/app_router.dart';
 import 'src/core/theme/app_theme.dart';
 import 'src/core/firebase/household_service.dart' as fbcore;
@@ -28,12 +29,22 @@ class App extends ConsumerWidget {
           theme: buildTheme(),
           routerConfig: router,
           debugShowCheckedModeBanner: false,
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          supportedLocales: const [
+            Locale('ja'),
+            Locale('en'),
+          ],
         );
       },
       loading: () => MaterialApp(
         title: 'Milu',
         theme: buildTheme(),
         debugShowCheckedModeBanner: false,
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        supportedLocales: const [
+          Locale('ja'),
+          Locale('en'),
+        ],
         home: const Scaffold(
           body: Center(child: CircularProgressIndicator()),
         ),
@@ -42,6 +53,11 @@ class App extends ConsumerWidget {
         title: 'Milu',
         theme: buildTheme(),
         debugShowCheckedModeBanner: false,
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        supportedLocales: const [
+          Locale('ja'),
+          Locale('en'),
+        ],
         home: Scaffold(
           body: Center(
             child: Padding(

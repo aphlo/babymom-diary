@@ -123,8 +123,6 @@ app.*.symbols
 /android/app/google-services.json
 /android/settings.gradle
 /firebase.json
-/firestore.indexes.json
-/firestore.rules
 /ios/Runner.xcodeproj/project.pbxproj
 /ios/Runner/GoogleService-Info.plist
 firebase.json
