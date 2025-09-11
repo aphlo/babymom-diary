@@ -65,6 +65,7 @@ class MenuScreen extends ConsumerWidget {
                               Radio<String?>.adaptive(
                                 value: id,
                                 groupValue: selectedId,
+                                activeColor: Theme.of(context).colorScheme.primary,
                                 onChanged: (v) => ref.read(selectedChildControllerProvider.notifier).select(v),
                               ),
                               const SizedBox(width: 8),
