@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/baby_log/presentation/screens/log_list_screen.dart';
@@ -59,27 +60,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/children/add',
         name: 'children_add',
         pageBuilder: (context, state) =>
-            const NoTransitionPage(child: AddChildScreen()),
+            const CupertinoPage(child: AddChildScreen()),
       ),
       GoRoute(
         path: '/children/manage',
         name: 'children_manage',
         pageBuilder: (context, state) =>
-            const NoTransitionPage(child: ManageChildrenScreen()),
+            const CupertinoPage(child: ManageChildrenScreen()),
       ),
       GoRoute(
         path: '/children/edit/:id',
         name: 'children_edit',
         pageBuilder: (context, state) {
           final id = state.pathParameters['id']!;
-          return NoTransitionPage(child: EditChildScreen(childId: id));
+          return CupertinoPage(child: EditChildScreen(childId: id));
         },
       ),
       GoRoute(
         path: '/household/share',
         name: 'household_share',
         pageBuilder: (context, state) =>
-            const NoTransitionPage(child: HouseholdShareScreen()),
+            const CupertinoPage(child: HouseholdShareScreen()),
       ),
     ],
   );
