@@ -171,9 +171,20 @@ class _ChildFormState extends State<ChildForm> {
             controller: _birthdayCtrl,
             readOnly: true,
             showCursor: false,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: '誕生日',
               hintText: '未選択',
+              suffixIcon: _birthday != null
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          _birthday = null;
+                          _birthdayCtrl.clear();
+                        });
+                      },
+                    )
+                  : null,
             ),
             onTap: _pickBirthday,
           ),
