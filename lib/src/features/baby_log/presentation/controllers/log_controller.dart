@@ -6,6 +6,7 @@ import '../../application/usecases/get_entries_for_day.dart';
 import '../../data/repositories/log_repository_impl.dart';
 import '../../data/sources/log_firestore_data_source.dart';
 import '../../../../core/firebase/household_service.dart' as fbcore;
+import '../controllers/selected_log_date_provider.dart';
 
 // Firestore instance
 // Use central Firebase providers from core
@@ -32,17 +33,19 @@ final getEntriesForDayUseCaseProvider =
 class LogController extends AsyncNotifier<List<Entry>> {
   @override
   Future<List<Entry>> build() async {
+    final date = ref.watch(selectedLogDateProvider);
     final hid = await ref.read(fbcore.currentHouseholdIdProvider.future);
     final get = ref.read(getEntriesForDayUseCaseProvider(hid));
-    return get(DateTime.now());
+    return get(date);
   }
 
-  Future<void> refreshToday() async {
+  Future<void> refreshSelected() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      final date = ref.read(selectedLogDateProvider);
       final hid = await ref.read(fbcore.currentHouseholdIdProvider.future);
       final get = ref.read(getEntriesForDayUseCaseProvider(hid));
-      return get(DateTime.now());
+      return get(date);
     });
   }
 
@@ -50,7 +53,7 @@ class LogController extends AsyncNotifier<List<Entry>> {
     final hid = await ref.read(fbcore.currentHouseholdIdProvider.future);
     final add = ref.read(addEntryUseCaseProvider(hid));
     await add(entry);
-    await refreshToday();
+    await refreshSelected();
   }
 }
 

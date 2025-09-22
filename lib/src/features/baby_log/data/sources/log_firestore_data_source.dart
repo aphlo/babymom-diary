@@ -24,9 +24,25 @@ class LogFirestoreDataSource {
 
     return snap.docs.map((d) {
       final data = d.data();
+      EntryType type;
+      final rawType = data['type'] as String?;
+      try {
+        type = rawType != null
+            ? EntryType.values.byName(rawType)
+            : EntryType.other;
+      } catch (_) {
+        // Backward compatibility: map old types to new ones
+        switch (rawType) {
+          case 'feeding':
+            type = EntryType.formula;
+            break;
+          default:
+            type = EntryType.other;
+        }
+      }
       return Entry(
         id: d.id,
-        type: EntryType.values.byName(data['type'] as String),
+        type: type,
         at: (data['at'] as Timestamp).toDate(),
         amount: (data['amount'] as num?)?.toDouble(),
         note: data['note'] as String?,
