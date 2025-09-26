@@ -68,6 +68,16 @@ class LogListScreen extends ConsumerWidget {
       );
     }
 
+    Widget buildTotalValueCell(String value) => SizedBox(
+          height: bodyRowHeight,
+          child: Center(
+            child: Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        );
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 72,
@@ -122,17 +132,71 @@ class LogListScreen extends ConsumerWidget {
             '便',
             'その他'
           ];
+          final totalBreastRight =
+              list.where((e) => e.type == EntryType.breastRight).length;
+          final totalBreastLeft =
+              list.where((e) => e.type == EntryType.breastLeft).length;
+          final totalFormulaMl = list
+              .where((e) => e.type == EntryType.formula)
+              .fold<double>(0, (sum, e) => sum + (e.amount ?? 0));
+          final totalPumpMl = list
+              .where((e) => e.type == EntryType.pump)
+              .fold<double>(0, (sum, e) => sum + (e.amount ?? 0));
+          final totalPeeCount =
+              list.where((e) => e.type == EntryType.pee).length;
+          final totalPoopCount =
+              list.where((e) => e.type == EntryType.poop).length;
           const columnWidths = <int, TableColumnWidth>{
-            0: FlexColumnWidth(0.8), // 時間 さらに狭める
+            0: FlexColumnWidth(0.8),
             1: FlexColumnWidth(1.0),
             2: FlexColumnWidth(1.0),
-            3: FlexColumnWidth(1.0), // ミルク
-            4: FlexColumnWidth(1.0), // 搾乳
+            3: FlexColumnWidth(1.0),
+            4: FlexColumnWidth(1.0),
             5: FlexColumnWidth(1.0),
             6: FlexColumnWidth(1.0),
             7: FlexColumnWidth(2.0), // その他 少し広め
           };
           final borderSide = BorderSide(color: Colors.grey.shade400);
+
+          final totalsRow = SizedBox(
+            width: double.infinity,
+            child: Table(
+              columnWidths: columnWidths,
+              border: TableBorder(
+                top: borderSide,
+                left: borderSide,
+                right: borderSide,
+                bottom: borderSide,
+                verticalInside: borderSide,
+              ),
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              children: [
+                TableRow(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                  ),
+                  children: [
+                    SizedBox(
+                      height: bodyRowHeight,
+                      child: const Center(
+                        child: Text(
+                          '合計',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    buildTotalValueCell('$totalBreastRight'),
+                    buildTotalValueCell('$totalBreastLeft'),
+                    buildTotalValueCell(totalFormulaMl.toStringAsFixed(0)),
+                    buildTotalValueCell(totalPumpMl.toStringAsFixed(0)),
+                    buildTotalValueCell('$totalPeeCount'),
+                    buildTotalValueCell('$totalPoopCount'),
+                    buildTotalValueCell(''),
+                  ],
+                ),
+              ],
+            ),
+          );
 
           return Column(
             children: [
@@ -183,62 +247,77 @@ class LogListScreen extends ConsumerWidget {
                       ),
                     ),
                     Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              width: double.infinity,
-                              child: Table(
-                                columnWidths: columnWidths,
-                                border: TableBorder(
-                                  top: BorderSide.none,
-                                  left: borderSide,
-                                  right: borderSide,
-                                  bottom: borderSide,
-                                  horizontalInside: borderSide,
-                                  verticalInside: borderSide,
-                                ),
-                                defaultVerticalAlignment:
-                                    TableCellVerticalAlignment.middle,
-                                children: [
-                                  for (int h = 0; h < 24; h++)
-                                    TableRow(
-                                      decoration: BoxDecoration(
-                                        color: h.isEven
-                                            ? Colors.white
-                                            : Colors.pink.shade50,
-                                      ),
-                                      children: [
-                                        SizedBox(
-                                          height: bodyRowHeight,
-                                          child: Center(
-                                            child: Text('$h'),
-                                          ),
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: bodyRowHeight,
+                              ),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: Table(
+                                        columnWidths: columnWidths,
+                                        border: TableBorder(
+                                          top: BorderSide.none,
+                                          left: borderSide,
+                                          right: borderSide,
+                                          bottom: BorderSide.none,
+                                          horizontalInside: borderSide,
+                                          verticalInside: borderSide,
                                         ),
-                                        buildCell(context, ref, list, h,
-                                            EntryType.breastRight),
-                                        buildCell(context, ref, list, h,
-                                            EntryType.breastLeft),
-                                        buildCell(context, ref, list, h,
-                                            EntryType.formula),
-                                        buildCell(context, ref, list, h,
-                                            EntryType.pump),
-                                        buildCell(context, ref, list, h,
-                                            EntryType.pee),
-                                        buildCell(context, ref, list, h,
-                                            EntryType.poop),
-                                        buildCell(context, ref, list, h,
-                                            EntryType.other),
-                                      ],
+                                        defaultVerticalAlignment:
+                                            TableCellVerticalAlignment.middle,
+                                        children: [
+                                          for (int h = 0; h < 24; h++)
+                                            TableRow(
+                                              decoration: BoxDecoration(
+                                                color: h.isEven
+                                                    ? Colors.white
+                                                    : Colors.pink.shade50,
+                                              ),
+                                              children: [
+                                                SizedBox(
+                                                  height: bodyRowHeight,
+                                                  child: Center(
+                                                    child: Text('$h'),
+                                                  ),
+                                                ),
+                                                buildCell(context, ref, list, h,
+                                                    EntryType.breastRight),
+                                                buildCell(context, ref, list, h,
+                                                    EntryType.breastLeft),
+                                                buildCell(context, ref, list, h,
+                                                    EntryType.formula),
+                                                buildCell(context, ref, list, h,
+                                                    EntryType.pump),
+                                                buildCell(context, ref, list, h,
+                                                    EntryType.pee),
+                                                buildCell(context, ref, list, h,
+                                                    EntryType.poop),
+                                                buildCell(context, ref, list, h,
+                                                    EntryType.other),
+                                              ],
+                                            ),
+                                        ],
+                                      ),
                                     ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                            // Optional: recent entries list for quick glance
-                            ...list.take(5).map((e) => EntryTile(entry: e)),
-                          ],
-                        ),
+                          ),
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            child: totalsRow,
+                          ),
+                        ],
                       ),
                     ),
                   ],
