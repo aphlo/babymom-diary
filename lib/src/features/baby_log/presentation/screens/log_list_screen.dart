@@ -16,7 +16,7 @@ class LogListScreen extends ConsumerWidget {
     final state = ref.watch(logControllerProvider);
 
     const headerRowHeight = 44.0;
-    const bodyRowHeight = 52.0;
+    const bodyRowHeight = 32.0;
 
     Widget buildCell(
       BuildContext context,
@@ -47,11 +47,6 @@ class LogListScreen extends ConsumerWidget {
             break;
           case EntryType.pee || EntryType.poop || EntryType.other:
             text = '${filtered.length}';
-            break;
-          case EntryType.sleep:
-            final hours =
-                filtered.fold<double>(0, (p, e) => p + (e.amount ?? 0));
-            text = hours == 0 ? '${filtered.length}' : hours.toStringAsFixed(1);
             break;
           case null:
             text = '${filtered.length}';
@@ -135,7 +130,7 @@ class LogListScreen extends ConsumerWidget {
             4: FlexColumnWidth(1.0), // 搾乳
             5: FlexColumnWidth(1.0),
             6: FlexColumnWidth(1.0),
-            7: FlexColumnWidth(1.0), // その他 少し広め
+            7: FlexColumnWidth(2.0), // その他 少し広め
           };
           final borderSide = BorderSide(color: Colors.grey.shade400);
 
@@ -209,6 +204,11 @@ class LogListScreen extends ConsumerWidget {
                                 children: [
                                   for (int h = 0; h < 24; h++)
                                     TableRow(
+                                      decoration: BoxDecoration(
+                                        color: h.isEven
+                                            ? Colors.white
+                                            : Colors.pink.shade50,
+                                      ),
                                       children: [
                                         SizedBox(
                                           height: bodyRowHeight,
@@ -270,7 +270,6 @@ void _openSlotSheet(
       EntryType.formula => 100.0,
       EntryType.pump => 100.0,
       EntryType.breastLeft || EntryType.breastRight => 10.0,
-      EntryType.sleep => 1.0,
       EntryType.pee || EntryType.poop || EntryType.other => null,
     };
     final entry = Entry(type: t, at: slot, amount: defaultAmount);
@@ -364,7 +363,6 @@ IconData _iconFor(EntryType t) => switch (t) {
       EntryType.pee => Icons.water_drop,
       EntryType.poop => Icons.delete_outline,
       EntryType.other => Icons.more_horiz,
-      EntryType.sleep => Icons.bedtime,
     };
 
 String _quickLabelFor(EntryType t) => switch (t) {
@@ -375,5 +373,4 @@ String _quickLabelFor(EntryType t) => switch (t) {
       EntryType.pee => '尿',
       EntryType.poop => '便',
       EntryType.other => 'その他',
-      EntryType.sleep => '睡眠 1h',
     };

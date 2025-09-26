@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 
 ThemeData buildTheme() {
-  final base = ThemeData(useMaterial3: true);
-  final scheme = ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 199, 43, 111));
+  const fontFamily = 'MPLUSRounded1c';
+  const primaryColor = Color(0xFFE54F80);
+  final base = ThemeData(useMaterial3: true, fontFamily: fontFamily);
+  final scheme = ColorScheme.fromSeed(seedColor: primaryColor).copyWith(
+    primary: primaryColor,
+  );
+  final textTheme = base.textTheme.apply(fontFamily: fontFamily);
+  final primaryTextTheme =
+      base.primaryTextTheme.apply(fontFamily: fontFamily);
 
   return base.copyWith(
     colorScheme: scheme,
+    textTheme: textTheme,
+    primaryTextTheme: primaryTextTheme,
     radioTheme: RadioThemeData(
       fillColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) return scheme.primary;
@@ -16,7 +25,7 @@ ThemeData buildTheme() {
       }),
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: scheme.primary,
+      backgroundColor: primaryColor,
       foregroundColor: scheme.onPrimary, // text & icons
       surfaceTintColor: Colors.transparent,
       elevation: 8,
@@ -27,7 +36,7 @@ ThemeData buildTheme() {
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: scheme.primary,
+      backgroundColor: primaryColor,
       surfaceTintColor: Colors.transparent,
       indicatorColor: scheme.onPrimary.withOpacity(0.20),
       iconTheme: WidgetStateProperty.resolveWith(

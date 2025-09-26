@@ -23,7 +23,6 @@ class EntryTile extends StatelessWidget {
       EntryType.pee => '尿',
       EntryType.poop => '便',
       EntryType.other => 'その他',
-      EntryType.sleep => entry.amount != null ? '睡眠 ${entry.amount} h' : '睡眠',
     };
 
     return ListTile(
@@ -35,7 +34,6 @@ class EntryTile extends StatelessWidget {
         EntryType.pee => Icons.water_drop,
         EntryType.poop => Icons.delete_outline,
         EntryType.other => Icons.more_horiz,
-        EntryType.sleep => Icons.bedtime,
       }),
       title: Text(subtitle),
       subtitle: Text(entry.at.toLocal().toString()),
