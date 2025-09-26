@@ -124,8 +124,8 @@ class LogListScreen extends ConsumerWidget {
         data: (list) {
           final headers = <String>[
             '時間',
-            '右',
-            '左',
+            '授乳\n(右)',
+            '授乳\n(左)',
             'ミルク',
             '搾乳',
             '尿',
@@ -176,9 +176,9 @@ class LogListScreen extends ConsumerWidget {
                     color: Colors.grey.shade200,
                   ),
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       height: bodyRowHeight,
-                      child: const Center(
+                      child: Center(
                         child: Text(
                           '合計',
                           style: TextStyle(fontWeight: FontWeight.bold),
