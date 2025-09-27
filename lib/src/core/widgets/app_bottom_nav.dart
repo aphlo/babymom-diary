@@ -5,9 +5,9 @@ class AppBottomNav extends StatelessWidget {
   const AppBottomNav({super.key});
 
   static final _tabs = <_Tab>[
-    const _Tab('/baby', 'ベビーの記録', Icons.child_friendly),
+    const _Tab('/baby', 'ベビーの記録', Icons.child_care),
     const _Tab('/vaccines', '予防接種', Icons.vaccines),
-    const _Tab('/mom', 'ママの記録', Icons.pregnant_woman),
+    const _Tab('/mom', 'ママの記録', Icons.face_4),
     const _Tab('/calendar', 'カレンダー', Icons.calendar_today),
     const _Tab('/menu', 'メニュー', Icons.menu),
   ];

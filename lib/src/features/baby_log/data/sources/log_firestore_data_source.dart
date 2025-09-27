@@ -8,10 +8,8 @@ class LogFirestoreDataSource {
 
   static const collectionName = 'entries';
 
-  CollectionReference<Map<String, dynamic>> get _col => db
-      .collection('households')
-      .doc(householdId)
-      .collection(collectionName);
+  CollectionReference<Map<String, dynamic>> get _col =>
+      db.collection('households').doc(householdId).collection(collectionName);
 
   Future<List<Entry>> getForDay(DateTime day) async {
     final start = DateTime(day.year, day.month, day.day);
@@ -40,12 +38,28 @@ class LogFirestoreDataSource {
             type = EntryType.other;
         }
       }
+      ExcretionVolume? excretionVolume;
+      final rawVolume = data['excretionVolume'] as String?;
+      if (rawVolume != null) {
+        try {
+          excretionVolume = ExcretionVolume.values.byName(rawVolume);
+        } catch (_) {
+          excretionVolume = null;
+        }
+      }
+      final tags = (data['tags'] as List?)
+              ?.whereType<String>()
+              .toList(growable: false) ??
+          const [];
       return Entry(
         id: d.id,
         type: type,
         at: (data['at'] as Timestamp).toDate(),
         amount: (data['amount'] as num?)?.toDouble(),
         note: data['note'] as String?,
+        durationSeconds: (data['durationSeconds'] as num?)?.toInt(),
+        excretionVolume: excretionVolume,
+        tags: tags,
       );
     }).toList();
   }
@@ -56,6 +70,9 @@ class LogFirestoreDataSource {
       'at': Timestamp.fromDate(entry.at),
       'amount': entry.amount,
       'note': entry.note,
+      'durationSeconds': entry.durationSeconds,
+      'excretionVolume': entry.excretionVolume?.name,
+      'tags': entry.tags,
     }, SetOptions(merge: true));
   }
 

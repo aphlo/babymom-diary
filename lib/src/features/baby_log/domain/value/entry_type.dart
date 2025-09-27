@@ -13,7 +13,7 @@ extension EntryTypeLabel on EntryType {
         EntryType.breastRight => '母乳(右)',
         EntryType.breastLeft => '母乳(左)',
         EntryType.formula => 'ミルク',
-        EntryType.pump => '搾乳',
+        EntryType.pump => '搾母乳',
         EntryType.pee => '尿',
         EntryType.poop => '便',
         EntryType.other => 'その他',

@@ -7,6 +7,7 @@ import '../../baby_log.dart';
 import '../widgets/app_bar_child_info.dart';
 import '../widgets/app_bar_date_switcher.dart';
 import '../controllers/selected_log_date_provider.dart';
+import '../widgets/add_entry_sheet.dart';
 
 class LogListScreen extends ConsumerWidget {
   const LogListScreen({super.key});
@@ -29,6 +30,35 @@ class LogListScreen extends ConsumerWidget {
       final filtered =
           type == null ? inHour : inHour.where((e) => e.type == type).toList();
 
+      if (type == EntryType.other) {
+        final tags = filtered
+            .expand((entry) => entry.tags)
+            .map((tag) => tag.trim())
+            .where((tag) => tag.isNotEmpty)
+            .toList(growable: false);
+        final fallbackText = filtered.isEmpty ? '' : '${filtered.length}';
+
+        return InkWell(
+          onTap: () => _openSlotSheet(context, ref, hour, type, inHour),
+          child: SizedBox(
+            height: bodyRowHeight,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: tags.isEmpty
+                  ? (fallbackText.isEmpty
+                      ? const SizedBox.shrink()
+                      : Center(
+                          child: Text(
+                            fallbackText,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ))
+                  : _OtherTagsPreview(tags: tags),
+            ),
+          ),
+        );
+      }
+
       String text = '';
       if (filtered.isNotEmpty) {
         switch (type) {
@@ -41,11 +71,15 @@ class LogListScreen extends ConsumerWidget {
             text = sum == 0 ? '${filtered.length}' : sum.toStringAsFixed(0);
             break;
           case EntryType.breastLeft || EntryType.breastRight:
-            final mins =
-                filtered.fold<double>(0, (p, e) => p + (e.amount ?? 0));
-            text = mins == 0 ? '${filtered.length}' : mins.toStringAsFixed(0);
+            final seconds = _sumDurationSeconds(filtered);
+            text = seconds == 0
+                ? '${filtered.length}'
+                : _formatDurationShort(seconds);
             break;
-          case EntryType.pee || EntryType.poop || EntryType.other:
+          case EntryType.pee || EntryType.poop:
+            text = '${filtered.length}';
+            break;
+          case EntryType.other:
             text = '${filtered.length}';
             break;
           case null:
@@ -127,15 +161,24 @@ class LogListScreen extends ConsumerWidget {
             '授乳\n(右)',
             '授乳\n(左)',
             'ミルク',
-            '搾乳',
+            '搾母乳',
             '尿',
             '便',
             'その他'
           ];
-          final totalBreastRight =
-              list.where((e) => e.type == EntryType.breastRight).length;
-          final totalBreastLeft =
-              list.where((e) => e.type == EntryType.breastLeft).length;
+          final breastRightEntries =
+              list.where((e) => e.type == EntryType.breastRight).toList();
+          final breastLeftEntries =
+              list.where((e) => e.type == EntryType.breastLeft).toList();
+          final totalBreastRightSeconds =
+              _sumDurationSeconds(breastRightEntries);
+          final totalBreastLeftSeconds = _sumDurationSeconds(breastLeftEntries);
+          final totalBreastRight = totalBreastRightSeconds == 0
+              ? '${breastRightEntries.length}'
+              : _formatDurationShort(totalBreastRightSeconds);
+          final totalBreastLeft = totalBreastLeftSeconds == 0
+              ? '${breastLeftEntries.length}'
+              : _formatDurationShort(totalBreastLeftSeconds);
           final totalFormulaMl = list
               .where((e) => e.type == EntryType.formula)
               .fold<double>(0, (sum, e) => sum + (e.amount ?? 0));
@@ -185,8 +228,8 @@ class LogListScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    buildTotalValueCell('$totalBreastRight'),
-                    buildTotalValueCell('$totalBreastLeft'),
+                    buildTotalValueCell(totalBreastRight),
+                    buildTotalValueCell(totalBreastLeft),
                     buildTotalValueCell(totalFormulaMl.toStringAsFixed(0)),
                     buildTotalValueCell(totalPumpMl.toStringAsFixed(0)),
                     buildTotalValueCell('$totalPeeCount'),
@@ -334,6 +377,117 @@ class LogListScreen extends ConsumerWidget {
   }
 }
 
+class _OtherTagsPreview extends StatelessWidget {
+  const _OtherTagsPreview({required this.tags});
+
+  final List<String> tags;
+
+  static const double _iconSize = 22;
+  static const double _spacing = 4;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : double.infinity;
+        var capacity = tags.length;
+        if (availableWidth.isFinite) {
+          capacity =
+              ((availableWidth + _spacing) / (_iconSize + _spacing)).floor();
+          if (capacity <= 0) {
+            capacity = 1;
+          }
+        }
+
+        var needsOverflowIndicator = tags.length > capacity;
+        var visibleCount = needsOverflowIndicator ? capacity - 1 : tags.length;
+        if (visibleCount < 0) {
+          visibleCount = 0;
+          needsOverflowIndicator = true;
+        }
+
+        final visibleTags = tags.take(visibleCount).toList(growable: false);
+        final children = <Widget>[];
+
+        for (final tag in visibleTags) {
+          if (children.isNotEmpty) {
+            children.add(const SizedBox(width: _spacing));
+          }
+          children.add(_TagCircle(character: tag.characters.first));
+        }
+
+        if (needsOverflowIndicator) {
+          if (children.isNotEmpty) {
+            children.add(const SizedBox(width: _spacing));
+          }
+          children.add(const _OverflowCircle());
+        }
+
+        return Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: children,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _TagCircle extends StatelessWidget {
+  const _TagCircle({required this.character});
+
+  final String character;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      width: _OtherTagsPreview._iconSize,
+      height: _OtherTagsPreview._iconSize,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondaryContainer,
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        character,
+        style: theme.textTheme.labelSmall?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: theme.colorScheme.onSecondaryContainer,
+        ),
+      ),
+    );
+  }
+}
+
+class _OverflowCircle extends StatelessWidget {
+  const _OverflowCircle();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      width: _OtherTagsPreview._iconSize,
+      height: _OtherTagsPreview._iconSize,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        '...',
+        style: theme.textTheme.labelSmall?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: theme.colorScheme.onSurface,
+        ),
+      ),
+    );
+  }
+}
+
 void _openSlotSheet(
   BuildContext context,
   WidgetRef ref,
@@ -351,12 +505,48 @@ void _openSlotSheet(
       EntryType.breastLeft || EntryType.breastRight => 10.0,
       EntryType.pee || EntryType.poop || EntryType.other => null,
     };
-    final entry = Entry(type: t, at: slot, amount: defaultAmount);
+    final durationSeconds = switch (t) {
+      EntryType.breastLeft ||
+      EntryType.breastRight =>
+        defaultAmount != null ? (defaultAmount * 60).round() : null,
+      _ => null,
+    };
+    final entry = Entry(
+      type: t,
+      at: slot,
+      amount: defaultAmount,
+      durationSeconds: durationSeconds,
+    );
     await ref.read(logControllerProvider.notifier).add(entry);
     if (context.mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('記録しました')));
       Navigator.of(context).maybePop();
+    }
+  }
+
+  Future<void> detailedAdd(EntryType t) async {
+    final created = await showDialog<Entry>(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: AddEntrySheet(
+            type: t,
+            initialDateTime: slot,
+          ),
+        ),
+      ),
+    );
+    if (created != null) {
+      await ref.read(logControllerProvider.notifier).add(created);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('記録しました')));
+        Navigator.of(context).maybePop();
+      }
     }
   }
 
@@ -418,12 +608,13 @@ void _openSlotSheet(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    for (final t in actions)
-                      FilledButton.tonalIcon(
-                        onPressed: () => quickAdd(t),
+                    for (final t in actions) ...[
+                      OutlinedButton.icon(
+                        onPressed: () => detailedAdd(t),
                         icon: Icon(_iconFor(t)),
-                        label: Text(_quickLabelFor(t)),
+                        label: const Text('記録を追加'),
                       ),
+                    ],
                   ],
                 ),
               ],
@@ -444,12 +635,26 @@ IconData _iconFor(EntryType t) => switch (t) {
       EntryType.other => Icons.more_horiz,
     };
 
-String _quickLabelFor(EntryType t) => switch (t) {
-      EntryType.formula => 'ミルク 100ml',
-      EntryType.pump => '搾乳 100ml',
-      EntryType.breastRight => '右 10分',
-      EntryType.breastLeft => '左 10分',
-      EntryType.pee => '尿',
-      EntryType.poop => '便',
-      EntryType.other => 'その他',
-    };
+int _sumDurationSeconds(Iterable<Entry> entries) {
+  var total = 0;
+  for (final entry in entries) {
+    final seconds = entry.durationSeconds ?? ((entry.amount ?? 0) * 60).round();
+    total += seconds;
+  }
+  return total;
+}
+
+String _formatDurationShort(int seconds) {
+  if (seconds <= 0) {
+    return '0分';
+  }
+  final minutes = seconds ~/ 60;
+  final remainingSeconds = seconds % 60;
+  if (remainingSeconds == 0) {
+    return '$minutes分';
+  }
+  if (minutes == 0) {
+    return '$remainingSeconds秒';
+  }
+  return '$minutes分$remainingSeconds秒';
+}
