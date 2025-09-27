@@ -81,10 +81,13 @@ class _AddEntrySheetState extends ConsumerState<AddEntrySheet> {
         EntryType.other => _buildOtherFields(),
       },
       const SizedBox(height: 24),
-      FilledButton.icon(
-        onPressed: _handleSubmit,
-        icon: const Icon(Icons.save),
-        label: const Text('記録を保存'),
+      SizedBox(
+        width: double.infinity,
+        child: FilledButton.icon(
+          onPressed: _handleSubmit,
+          icon: const Icon(Icons.save),
+          label: const Text('保存'),
+        ),
       ),
     ];
 
