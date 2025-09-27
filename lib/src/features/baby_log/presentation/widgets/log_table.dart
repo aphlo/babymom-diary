@@ -63,10 +63,9 @@ class LogTable extends StatelessWidget {
     final totalsRow = _TotalsRow(
       borderSide: borderSide,
       values: [
-        _formatDurationOrCount(
+        _formatMinutesOrCount(
             totalBreastRightSeconds, breastRightEntries.length),
-        _formatDurationOrCount(
-            totalBreastLeftSeconds, breastLeftEntries.length),
+        _formatMinutesOrCount(totalBreastLeftSeconds, breastLeftEntries.length),
         totalFormulaMl.toStringAsFixed(0),
         totalPumpMl.toStringAsFixed(0),
         '$totalPeeCount',
@@ -248,9 +247,7 @@ class LogTableCell extends StatelessWidget {
           break;
         case EntryType.breastLeft || EntryType.breastRight:
           final seconds = _sumDurationSeconds(filtered);
-          text = seconds == 0
-              ? '${filtered.length}'
-              : _formatDurationShort(seconds);
+          text = _formatMinutesOrCount(seconds, filtered.length);
           break;
         case EntryType.pee || EntryType.poop:
         case EntryType.other:
@@ -356,24 +353,19 @@ int _sumDurationSeconds(Iterable<Entry> entries) {
   return total;
 }
 
-String _formatDurationOrCount(int seconds, int fallbackCount) {
+String _formatMinutesOrCount(int seconds, int fallbackCount) {
   if (seconds == 0) {
     return '$fallbackCount';
   }
-  return _formatDurationShort(seconds);
+  return _formatMinutesWithoutUnit(seconds);
 }
 
-String _formatDurationShort(int seconds) {
+String _formatMinutesWithoutUnit(int seconds) {
   if (seconds <= 0) {
-    return '0分';
+    return '0';
   }
-  final minutes = seconds ~/ 60;
-  final remainingSeconds = seconds % 60;
-  if (remainingSeconds == 0) {
-    return '$minutes分';
+  if (seconds % 60 == 0) {
+    return '${seconds ~/ 60}';
   }
-  if (minutes == 0) {
-    return '$remainingSeconds秒';
-  }
-  return '$minutes分$remainingSeconds秒';
+  return (seconds / 60).toStringAsFixed(1);
 }

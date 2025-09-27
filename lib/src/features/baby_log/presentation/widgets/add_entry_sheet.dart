@@ -23,7 +23,6 @@ class _AddEntrySheetState extends ConsumerState<AddEntrySheet> {
   late TimeOfDay _timeOfDay;
 
   final _minutesController = TextEditingController(text: '0');
-  final _secondsController = TextEditingController(text: '0');
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
 
@@ -43,7 +42,6 @@ class _AddEntrySheetState extends ConsumerState<AddEntrySheet> {
   @override
   void dispose() {
     _minutesController.dispose();
-    _secondsController.dispose();
     _amountController.dispose();
     _noteController.dispose();
     super.dispose();
@@ -120,32 +118,14 @@ class _AddEntrySheetState extends ConsumerState<AddEntrySheet> {
         style: Theme.of(context).textTheme.titleMedium,
       ),
       const SizedBox(height: 8),
-      Row(
-        children: [
-          Expanded(
-            child: TextFormField(
-              controller: _minutesController,
-              decoration: const InputDecoration(
-                labelText: '分',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextFormField(
-              controller: _secondsController,
-              decoration: const InputDecoration(
-                labelText: '秒',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            ),
-          ),
-        ],
+      TextFormField(
+        controller: _minutesController,
+        decoration: const InputDecoration(
+          labelText: '分',
+          border: OutlineInputBorder(),
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       ),
       if (_durationError != null) ...[
         const SizedBox(height: 4),
@@ -367,21 +347,14 @@ class _AddEntrySheetState extends ConsumerState<AddEntrySheet> {
       case EntryType.breastLeft:
       case EntryType.breastRight:
         final minutes = int.tryParse(_minutesController.text) ?? 0;
-        final seconds = int.tryParse(_secondsController.text) ?? 0;
-        if (minutes == 0 && seconds == 0) {
+        if (minutes <= 0) {
           setState(() {
-            _durationError = '0分0秒以外で入力してください';
+            _durationError = '1分以上の値を入力してください';
           });
           return;
         }
-        if (seconds >= 60) {
-          setState(() {
-            _durationError = '秒は0〜59の範囲で入力してください';
-          });
-          return;
-        }
-        final totalSeconds = minutes * 60 + seconds;
-        final totalMinutes = totalSeconds / 60.0;
+        final totalSeconds = minutes * 60;
+        final totalMinutes = minutes.toDouble();
         entry = Entry(
           type: widget.type,
           at: at,
