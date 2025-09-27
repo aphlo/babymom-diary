@@ -110,6 +110,7 @@ void showLogSlotSheet({
                       ),
                   ],
                 ),
+                const SizedBox(height: 24),
               ],
             ),
           );
