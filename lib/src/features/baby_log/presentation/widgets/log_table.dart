@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../baby_log.dart';
-import 'other_tags_preview.dart';
-
-typedef LogSlotTapCallback = void Function(
-  BuildContext context,
-  int hour,
-  EntryType? type,
-  List<Entry> inHour,
-);
+import 'dashed_table_border.dart';
+import 'log_table_cell.dart';
 
 class LogTable extends StatelessWidget {
   const LogTable({
@@ -45,6 +39,8 @@ class LogTable extends StatelessWidget {
     7: FlexColumnWidth(2.0),
   };
 
+  static const _borderDashPattern = <double>[1.5, 2.5];
+
   @override
   Widget build(BuildContext context) {
     final borderSide = BorderSide(color: Colors.grey.shade400);
@@ -52,8 +48,8 @@ class LogTable extends StatelessWidget {
         entries.where((e) => e.type == EntryType.breastRight).toList();
     final breastLeftEntries =
         entries.where((e) => e.type == EntryType.breastLeft).toList();
-    final totalBreastRightSeconds = _sumDurationSeconds(breastRightEntries);
-    final totalBreastLeftSeconds = _sumDurationSeconds(breastLeftEntries);
+    final totalBreastRightSeconds = sumDurationSeconds(breastRightEntries);
+    final totalBreastLeftSeconds = sumDurationSeconds(breastLeftEntries);
     final totalFormulaMl = _sumAmount(entries, EntryType.formula);
     final totalPumpMl = _sumAmount(entries, EntryType.pump);
     final totalPeeCount = entries.where((e) => e.type == EntryType.pee).length;
@@ -63,9 +59,9 @@ class LogTable extends StatelessWidget {
     final totalsRow = _TotalsRow(
       borderSide: borderSide,
       values: [
-        _formatMinutesOrCount(
+        formatMinutesOrCount(
             totalBreastRightSeconds, breastRightEntries.length),
-        _formatMinutesOrCount(totalBreastLeftSeconds, breastLeftEntries.length),
+        formatMinutesOrCount(totalBreastLeftSeconds, breastLeftEntries.length),
         totalFormulaMl.toStringAsFixed(0),
         totalPumpMl.toStringAsFixed(0),
         '$totalPeeCount',
@@ -80,12 +76,13 @@ class LogTable extends StatelessWidget {
           width: double.infinity,
           child: Table(
             columnWidths: _columnWidths,
-            border: TableBorder(
+            border: DashedTableBorder(
               top: borderSide,
               left: borderSide,
               right: borderSide,
               bottom: borderSide,
               verticalInside: borderSide,
+              dashPattern: _borderDashPattern,
             ),
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: [
@@ -126,13 +123,14 @@ class LogTable extends StatelessWidget {
                       width: double.infinity,
                       child: Table(
                         columnWidths: _columnWidths,
-                        border: TableBorder(
+                        border: DashedTableBorder(
                           top: BorderSide.none,
                           left: borderSide,
                           right: borderSide,
                           bottom: BorderSide.none,
                           horizontalInside: borderSide,
                           verticalInside: borderSide,
+                          dashPattern: _borderDashPattern,
                         ),
                         defaultVerticalAlignment:
                             TableCellVerticalAlignment.middle,
@@ -155,6 +153,7 @@ class LogTable extends StatelessWidget {
                                     hour: hour,
                                     type: type,
                                     onTap: onSlotTap,
+                                    rowHeight: bodyRowHeight,
                                   ),
                               ],
                             ),
@@ -188,90 +187,6 @@ const _slotTypes = <EntryType>[
   EntryType.other,
 ];
 
-class LogTableCell extends StatelessWidget {
-  const LogTableCell({
-    super.key,
-    required this.entries,
-    required this.hour,
-    required this.type,
-    required this.onTap,
-  });
-
-  final List<Entry> entries;
-  final int hour;
-  final EntryType? type;
-  final LogSlotTapCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final inHour = entries.where((e) => e.at.hour == hour).toList();
-    final filtered =
-        type == null ? inHour : inHour.where((e) => e.type == type).toList();
-
-    if (type == EntryType.other) {
-      final tags = filtered
-          .expand((entry) => entry.tags)
-          .map((tag) => tag.trim())
-          .where((tag) => tag.isNotEmpty)
-          .toList(growable: false);
-      final fallbackText = filtered.isEmpty ? '' : '${filtered.length}';
-
-      return InkWell(
-        onTap: () => onTap(context, hour, type, inHour),
-        child: SizedBox(
-          height: LogTable.bodyRowHeight,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: tags.isEmpty
-                ? (fallbackText.isEmpty
-                    ? const SizedBox.shrink()
-                    : Center(
-                        child: Text(
-                          fallbackText,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ))
-                : OtherTagsPreview(tags: tags),
-          ),
-        ),
-      );
-    }
-
-    var text = '';
-    if (filtered.isNotEmpty) {
-      switch (type) {
-        case EntryType.formula:
-        case EntryType.pump:
-          final sum = filtered.fold<double>(0, (p, e) => p + (e.amount ?? 0));
-          text = sum == 0 ? '${filtered.length}' : sum.toStringAsFixed(0);
-          break;
-        case EntryType.breastLeft || EntryType.breastRight:
-          final seconds = _sumDurationSeconds(filtered);
-          text = _formatMinutesOrCount(seconds, filtered.length);
-          break;
-        case EntryType.pee || EntryType.poop:
-        case EntryType.other:
-        case null:
-          text = '${filtered.length}';
-          break;
-      }
-    }
-
-    return InkWell(
-      onTap: () => onTap(context, hour, type, inHour),
-      child: SizedBox(
-        height: LogTable.bodyRowHeight,
-        child: Center(
-          child: Text(
-            text,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _TotalsRow extends StatelessWidget {
   const _TotalsRow({
     required this.borderSide,
@@ -287,12 +202,13 @@ class _TotalsRow extends StatelessWidget {
       width: double.infinity,
       child: Table(
         columnWidths: LogTable._columnWidths,
-        border: TableBorder(
+        border: DashedTableBorder(
           top: borderSide,
           left: borderSide,
           right: borderSide,
           bottom: borderSide,
           verticalInside: borderSide,
+          dashPattern: LogTable._borderDashPattern,
         ),
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         children: [
@@ -342,30 +258,4 @@ double _sumAmount(List<Entry> entries, EntryType type) {
   return entries
       .where((e) => e.type == type)
       .fold<double>(0, (sum, e) => sum + (e.amount ?? 0));
-}
-
-int _sumDurationSeconds(Iterable<Entry> entries) {
-  var total = 0;
-  for (final entry in entries) {
-    final seconds = entry.durationSeconds ?? ((entry.amount ?? 0) * 60).round();
-    total += seconds;
-  }
-  return total;
-}
-
-String _formatMinutesOrCount(int seconds, int fallbackCount) {
-  if (seconds == 0) {
-    return '$fallbackCount';
-  }
-  return _formatMinutesWithoutUnit(seconds);
-}
-
-String _formatMinutesWithoutUnit(int seconds) {
-  if (seconds <= 0) {
-    return '0';
-  }
-  if (seconds % 60 == 0) {
-    return '${seconds ~/ 60}';
-  }
-  return (seconds / 60).toStringAsFixed(1);
 }
