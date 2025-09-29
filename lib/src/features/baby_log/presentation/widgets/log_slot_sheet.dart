@@ -33,11 +33,22 @@ void showLogSlotSheet({
       ),
     );
     if (created != null) {
-      await ref.read(logControllerProvider.notifier).addRecord(created);
-      if (context.mounted) {
+      try {
+        await ref.read(logControllerProvider.notifier).addRecord(created);
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('記録しました')));
         Navigator.of(context).maybePop();
+      } on StateError catch (e) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      } catch (e) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('記録に失敗しました: $e')),
+        );
       }
     }
   }

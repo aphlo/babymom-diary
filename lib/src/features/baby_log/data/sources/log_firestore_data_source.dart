@@ -8,13 +8,17 @@ class LogFirestoreDataSource {
 
   static const collectionName = 'records';
 
-  CollectionReference<Map<String, dynamic>> get _col =>
-      db.collection('households').doc(householdId).collection(collectionName);
+  CollectionReference<Map<String, dynamic>> _col(String childId) => db
+      .collection('households')
+      .doc(householdId)
+      .collection('children')
+      .doc(childId)
+      .collection(collectionName);
 
-  Future<List<Record>> getForDay(DateTime day) async {
+  Future<List<Record>> getForDay(String childId, DateTime day) async {
     final start = DateTime(day.year, day.month, day.day);
     final end = start.add(const Duration(days: 1));
-    final snap = await _col
+    final snap = await _col(childId)
         .where('at', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
         .where('at', isLessThan: Timestamp.fromDate(end))
         .orderBy('at', descending: true)
@@ -64,8 +68,8 @@ class LogFirestoreDataSource {
     }).toList();
   }
 
-  Future<void> upsert(Record record) async {
-    await _col.doc(record.id).set({
+  Future<void> upsert(String childId, Record record) async {
+    await _col(childId).doc(record.id).set({
       'type': record.type.name,
       'at': Timestamp.fromDate(record.at),
       'amount': record.amount,
@@ -76,5 +80,6 @@ class LogFirestoreDataSource {
     }, SetOptions(merge: true));
   }
 
-  Future<void> delete(String id) => _col.doc(id).delete();
+  Future<void> delete(String childId, String id) =>
+      _col(childId).doc(id).delete();
 }
