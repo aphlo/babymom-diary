@@ -4,21 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../baby_log.dart';
 import '../controllers/other_tags_controller.dart';
 
-class AddEntrySheet extends ConsumerStatefulWidget {
-  const AddEntrySheet({
+class AddRecordSheet extends ConsumerStatefulWidget {
+  const AddRecordSheet({
     super.key,
     required this.type,
     required this.initialDateTime,
   });
 
-  final EntryType type;
+  final RecordType type;
   final DateTime initialDateTime;
 
   @override
-  ConsumerState<AddEntrySheet> createState() => _AddEntrySheetState();
+  ConsumerState<AddRecordSheet> createState() => _AddRecordSheetState();
 }
 
-class _AddEntrySheetState extends ConsumerState<AddEntrySheet> {
+class _AddRecordSheetState extends ConsumerState<AddRecordSheet> {
   final _formKey = GlobalKey<FormState>();
   late TimeOfDay _timeOfDay;
 
@@ -72,11 +72,11 @@ class _AddEntrySheetState extends ConsumerState<AddEntrySheet> {
       ),
       const SizedBox(height: 16),
       ...switch (widget.type) {
-        EntryType.breastLeft || EntryType.breastRight => _buildBreastFields(),
-        EntryType.formula => _buildFormulaFields(),
-        EntryType.pump => _buildPumpFields(),
-        EntryType.pee || EntryType.poop => _buildExcretionFields(),
-        EntryType.other => _buildOtherFields(),
+        RecordType.breastLeft || RecordType.breastRight => _buildBreastFields(),
+        RecordType.formula => _buildFormulaFields(),
+        RecordType.pump => _buildPumpFields(),
+        RecordType.pee || RecordType.poop => _buildExcretionFields(),
+        RecordType.other => _buildOtherFields(),
       },
       const SizedBox(height: 24),
       SizedBox(
@@ -342,10 +342,10 @@ class _AddEntrySheetState extends ConsumerState<AddEntrySheet> {
       _timeOfDay.minute,
     );
 
-    Entry? entry;
+    Record? record;
     switch (widget.type) {
-      case EntryType.breastLeft:
-      case EntryType.breastRight:
+      case RecordType.breastLeft:
+      case RecordType.breastRight:
         final minutes = int.tryParse(_minutesController.text) ?? 0;
         if (minutes <= 0) {
           setState(() {
@@ -355,31 +355,31 @@ class _AddEntrySheetState extends ConsumerState<AddEntrySheet> {
         }
         final totalSeconds = minutes * 60;
         final totalMinutes = minutes.toDouble();
-        entry = Entry(
+        record = Record(
           type: widget.type,
           at: at,
           amount: totalMinutes,
           durationSeconds: totalSeconds,
         );
         break;
-      case EntryType.formula:
-      case EntryType.pump:
+      case RecordType.formula:
+      case RecordType.pump:
         final amount = double.tryParse(_amountController.text) ?? 0;
-        entry = Entry(
+        record = Record(
           type: widget.type,
           at: at,
           amount: amount,
         );
         break;
-      case EntryType.pee:
-      case EntryType.poop:
+      case RecordType.pee:
+      case RecordType.poop:
         if (_selectedVolume == null) {
           setState(() {
             _volumeError = '量の目安を選択してください';
           });
           return;
         }
-        entry = Entry(
+        record = Record(
           type: widget.type,
           at: at,
           excretionVolume: _selectedVolume,
@@ -388,7 +388,7 @@ class _AddEntrySheetState extends ConsumerState<AddEntrySheet> {
               : _noteController.text.trim(),
         );
         break;
-      case EntryType.other:
+      case RecordType.other:
         final tagState = ref.read(otherTagsControllerProvider);
         final availableTags = tagState.valueOrNull;
         final selectedTags = availableTags == null
@@ -396,7 +396,7 @@ class _AddEntrySheetState extends ConsumerState<AddEntrySheet> {
             : _selectedTags
                 .where((tag) => availableTags.contains(tag))
                 .toList(growable: false);
-        entry = Entry(
+        record = Record(
           type: widget.type,
           at: at,
           tags: selectedTags,
@@ -407,7 +407,7 @@ class _AddEntrySheetState extends ConsumerState<AddEntrySheet> {
         break;
     }
 
-    Navigator.of(context).pop(entry);
+    Navigator.of(context).pop(record);
   }
 }
 

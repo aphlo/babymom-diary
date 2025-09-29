@@ -1,7 +1,7 @@
-import '../entities/entry.dart';
+import '../entities/record.dart';
 
 abstract class LogRepository {
-  Future<List<Entry>> getEntriesForDay(DateTime day);
-  Future<void> addEntry(Entry entry);
-  Future<void> deleteEntry(String id);
+  Future<List<Record>> getRecordsForDay(DateTime day);
+  Future<void> addRecord(Record record);
+  Future<void> deleteRecord(String id);
 }

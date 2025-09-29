@@ -2,30 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../baby_log.dart';
-import '../components/entry_tile.dart';
+import '../components/record_tile.dart';
 import '../controllers/log_controller.dart';
 import '../controllers/selected_log_date_provider.dart';
-import 'add_entry_sheet.dart';
+import 'add_record_sheet.dart';
 
 void showLogSlotSheet({
   required BuildContext context,
   required WidgetRef ref,
   required int hour,
-  EntryType? onlyType,
-  required List<Entry> inHour,
+  RecordType? onlyType,
+  required List<Record> inHour,
 }) {
   final base = ref.read(selectedLogDateProvider);
   final slot = DateTime(base.year, base.month, base.day, hour);
 
-  Future<void> detailedAdd(EntryType t) async {
-    final created = await showDialog<Entry>(
+  Future<void> detailedAdd(RecordType t) async {
+    final created = await showDialog<Record>(
       context: context,
       barrierDismissible: true,
       builder: (_) => Dialog(
         insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
-          child: AddEntrySheet(
+          child: AddRecordSheet(
             type: t,
             initialDateTime: slot,
           ),
@@ -33,7 +33,7 @@ void showLogSlotSheet({
       ),
     );
     if (created != null) {
-      await ref.read(logControllerProvider.notifier).add(created);
+      await ref.read(logControllerProvider.notifier).addRecord(created);
       if (context.mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('記録しました')));
@@ -46,20 +46,20 @@ void showLogSlotSheet({
     context: context,
     isScrollControlled: true,
     builder: (ctx) {
-      final entries = onlyType == null
+      final records = onlyType == null
           ? inHour
           : inHour.where((e) => e.type == onlyType).toList();
       final actions = onlyType == null
-          ? <EntryType>[
-              EntryType.breastRight,
-              EntryType.breastLeft,
-              EntryType.formula,
-              EntryType.pump,
-              EntryType.pee,
-              EntryType.poop,
-              EntryType.other,
+          ? <RecordType>[
+              RecordType.breastRight,
+              RecordType.breastLeft,
+              RecordType.formula,
+              RecordType.pump,
+              RecordType.pee,
+              RecordType.poop,
+              RecordType.other,
             ]
-          : <EntryType>[onlyType];
+          : <RecordType>[onlyType];
       return DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.6,
@@ -88,13 +88,13 @@ void showLogSlotSheet({
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text('合計: ${entries.length}件'),
+                Text('合計: ${records.length}件'),
                 const SizedBox(height: 8),
                 Expanded(
                   child: ListView.builder(
                     controller: controller,
-                    itemCount: entries.length,
-                    itemBuilder: (_, i) => EntryTile(entry: entries[i]),
+                    itemCount: records.length,
+                    itemBuilder: (_, i) => RecordTile(record: records[i]),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -120,11 +120,11 @@ void showLogSlotSheet({
   );
 }
 
-IconData _iconFor(EntryType t) => switch (t) {
-      EntryType.formula => Icons.local_drink,
-      EntryType.pump => Icons.local_drink_outlined,
-      EntryType.breastRight || EntryType.breastLeft => Icons.child_care,
-      EntryType.pee => Icons.water_drop,
-      EntryType.poop => Icons.delete_outline,
-      EntryType.other => Icons.more_horiz,
+IconData _iconFor(RecordType t) => switch (t) {
+      RecordType.formula => Icons.local_drink,
+      RecordType.pump => Icons.local_drink_outlined,
+      RecordType.breastRight || RecordType.breastLeft => Icons.child_care,
+      RecordType.pee => Icons.water_drop,
+      RecordType.poop => Icons.delete_outline,
+      RecordType.other => Icons.more_horiz,
     };

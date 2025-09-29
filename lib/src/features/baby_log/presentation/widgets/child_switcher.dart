@@ -22,16 +22,19 @@ class ChildSwitcher extends ConsumerWidget {
     final selectedId = ref.watch(selectedChildControllerProvider).value;
 
     return asyncHid.when(
-      loading: () => const SizedBox(height: 40, child: Center(child: CircularProgressIndicator(strokeWidth: 2))),
+      loading: () => const SizedBox(
+          height: 40,
+          child: Center(child: CircularProgressIndicator(strokeWidth: 2))),
       error: (e, __) => Text('error: $e'),
       data: (hid) {
-        final ds = ChildFirestoreDataSource(ref.watch(firebaseFirestoreProvider), hid);
+        final ds =
+            ChildFirestoreDataSource(ref.watch(firebaseFirestoreProvider), hid);
         return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
           stream: ds.childrenQuery().snapshots(),
           builder: (context, snap) {
             final items = snap.data?.docs ?? const [];
             return DropdownButtonHideUnderline(
-              child: DropdownButton<String? >(
+              child: DropdownButton<String?>(
                 value: items.any((d) => d.id == selectedId) ? selectedId : null,
                 hint: const Text('子どもを選択'),
                 items: [
@@ -50,7 +53,9 @@ class ChildSwitcher extends ConsumerWidget {
                       ),
                     ),
                 ],
-                onChanged: (v) => ref.read(selectedChildControllerProvider.notifier).select(v),
+                onChanged: (v) => ref
+                    .read(selectedChildControllerProvider.notifier)
+                    .select(v),
                 icon: const Icon(Icons.expand_more),
               ),
             );
@@ -60,4 +65,3 @@ class ChildSwitcher extends ConsumerWidget {
     );
   }
 }
-

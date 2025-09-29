@@ -6,12 +6,12 @@ class LogFirestoreDataSource {
   final FirebaseFirestore db;
   final String householdId;
 
-  static const collectionName = 'entries';
+  static const collectionName = 'records';
 
   CollectionReference<Map<String, dynamic>> get _col =>
       db.collection('households').doc(householdId).collection(collectionName);
 
-  Future<List<Entry>> getForDay(DateTime day) async {
+  Future<List<Record>> getForDay(DateTime day) async {
     final start = DateTime(day.year, day.month, day.day);
     final end = start.add(const Duration(days: 1));
     final snap = await _col
@@ -22,20 +22,20 @@ class LogFirestoreDataSource {
 
     return snap.docs.map((d) {
       final data = d.data();
-      EntryType type;
+      RecordType type;
       final rawType = data['type'] as String?;
       try {
         type = rawType != null
-            ? EntryType.values.byName(rawType)
-            : EntryType.other;
+            ? RecordType.values.byName(rawType)
+            : RecordType.other;
       } catch (_) {
         // Backward compatibility: map old types to new ones
         switch (rawType) {
           case 'feeding':
-            type = EntryType.formula;
+            type = RecordType.formula;
             break;
           default:
-            type = EntryType.other;
+            type = RecordType.other;
         }
       }
       ExcretionVolume? excretionVolume;
@@ -51,7 +51,7 @@ class LogFirestoreDataSource {
               ?.whereType<String>()
               .toList(growable: false) ??
           const [];
-      return Entry(
+      return Record(
         id: d.id,
         type: type,
         at: (data['at'] as Timestamp).toDate(),
@@ -64,15 +64,15 @@ class LogFirestoreDataSource {
     }).toList();
   }
 
-  Future<void> upsert(Entry entry) async {
-    await _col.doc(entry.id).set({
-      'type': entry.type.name,
-      'at': Timestamp.fromDate(entry.at),
-      'amount': entry.amount,
-      'note': entry.note,
-      'durationSeconds': entry.durationSeconds,
-      'excretionVolume': entry.excretionVolume?.name,
-      'tags': entry.tags,
+  Future<void> upsert(Record record) async {
+    await _col.doc(record.id).set({
+      'type': record.type.name,
+      'at': Timestamp.fromDate(record.at),
+      'amount': record.amount,
+      'note': record.note,
+      'durationSeconds': record.durationSeconds,
+      'excretionVolume': record.excretionVolume?.name,
+      'tags': record.tags,
     }, SetOptions(merge: true));
   }
 

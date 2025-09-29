@@ -7,12 +7,12 @@ class LogRepositoryImpl implements LogRepository {
   LogRepositoryImpl({required this.remote});
 
   @override
-  Future<void> addEntry(Entry entry) async => remote.upsert(entry);
+  Future<void> addRecord(Record record) async => remote.upsert(record);
 
   @override
-  Future<void> deleteEntry(String id) async => remote.delete(id);
+  Future<void> deleteRecord(String id) async => remote.delete(id);
 
   @override
-  Future<List<Entry>> getEntriesForDay(DateTime day) async =>
+  Future<List<Record>> getRecordsForDay(DateTime day) async =>
       remote.getForDay(day);
 }

@@ -11,7 +11,8 @@ class DateSwitcher extends ConsumerWidget {
     final formatted = '${date.year}/${date.month}/${date.day}';
 
     void setDate(DateTime d) {
-      ref.read(selectedLogDateProvider.notifier).state = DateTime(d.year, d.month, d.day);
+      ref.read(selectedLogDateProvider.notifier).state =
+          DateTime(d.year, d.month, d.day);
     }
 
     return Row(
@@ -49,4 +50,3 @@ class DateSwitcher extends ConsumerWidget {
     );
   }
 }
-

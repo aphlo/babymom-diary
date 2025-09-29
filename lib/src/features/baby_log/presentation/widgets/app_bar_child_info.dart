@@ -12,7 +12,8 @@ class AppBarChildInfo extends ConsumerWidget {
   String _ageString(DateTime birthday, DateTime on) {
     if (on.isBefore(birthday)) return '--';
     int months = (on.year - birthday.year) * 12 + (on.month - birthday.month);
-    DateTime anchor = DateTime(birthday.year, birthday.month + months, birthday.day);
+    DateTime anchor =
+        DateTime(birthday.year, birthday.month + months, birthday.day);
     if (on.isBefore(anchor)) {
       months -= 1;
       anchor = DateTime(birthday.year, birthday.month + months, birthday.day);
@@ -31,7 +32,8 @@ class AppBarChildInfo extends ConsumerWidget {
       loading: () => const SizedBox.shrink(),
       error: (e, __) => const SizedBox.shrink(),
       data: (hid) {
-        final ds = ChildFirestoreDataSource(ref.watch(firebaseFirestoreProvider), hid);
+        final ds =
+            ChildFirestoreDataSource(ref.watch(firebaseFirestoreProvider), hid);
         return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
           stream: ds.childrenQuery().snapshots(),
           builder: (context, snap) {
@@ -45,12 +47,15 @@ class AppBarChildInfo extends ConsumerWidget {
             final name = (d['name'] as String?) ?? '未設定';
             final birthdayTs = d['birthday'] as Timestamp?;
             final birthday = birthdayTs?.toDate();
-            final age = birthday == null ? '' : _ageString(birthday, selectedDate);
+            final age =
+                birthday == null ? '' : _ageString(birthday, selectedDate);
 
             void toNext() {
               if (children.isEmpty) return;
               final next = (index + 1) % children.length;
-              ref.read(selectedChildControllerProvider.notifier).select(children[next].id);
+              ref
+                  .read(selectedChildControllerProvider.notifier)
+                  .select(children[next].id);
             }
 
             return InkWell(

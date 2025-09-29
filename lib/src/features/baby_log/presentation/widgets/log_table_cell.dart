@@ -6,35 +6,35 @@ import 'other_tags_preview.dart';
 typedef LogSlotTapCallback = void Function(
   BuildContext context,
   int hour,
-  EntryType? type,
-  List<Entry> inHour,
+  RecordType? type,
+  List<Record> inHour,
 );
 
 class LogTableCell extends StatelessWidget {
   const LogTableCell({
     super.key,
-    required this.entries,
+    required this.records,
     required this.hour,
     required this.type,
     required this.onTap,
     required this.rowHeight,
   });
 
-  final List<Entry> entries;
+  final List<Record> records;
   final int hour;
-  final EntryType? type;
+  final RecordType? type;
   final LogSlotTapCallback onTap;
   final double rowHeight;
 
   @override
   Widget build(BuildContext context) {
-    final inHour = entries.where((e) => e.at.hour == hour).toList();
+    final inHour = records.where((e) => e.at.hour == hour).toList();
     final filtered =
         type == null ? inHour : inHour.where((e) => e.type == type).toList();
 
-    if (type == EntryType.other) {
+    if (type == RecordType.other) {
       final tags = filtered
-          .expand((entry) => entry.tags)
+          .expand((record) => record.tags)
           .map((tag) => tag.trim())
           .where((tag) => tag.isNotEmpty)
           .toList(growable: false);
@@ -65,16 +65,16 @@ class LogTableCell extends StatelessWidget {
     var text = '';
     if (filtered.isNotEmpty) {
       switch (type) {
-        case EntryType.formula:
-        case EntryType.pump:
+        case RecordType.formula:
+        case RecordType.pump:
           final sum = filtered.fold<double>(0, (p, e) => p + (e.amount ?? 0));
           text = sum == 0 ? '${filtered.length}' : sum.toStringAsFixed(0);
           break;
-        case EntryType.breastLeft || EntryType.breastRight:
+        case RecordType.breastLeft || RecordType.breastRight:
           text = '${filtered.length}';
           break;
-        case EntryType.pee || EntryType.poop:
-        case EntryType.other:
+        case RecordType.pee || RecordType.poop:
+        case RecordType.other:
         case null:
           text = '${filtered.length}';
           break;
@@ -95,7 +95,7 @@ class LogTableCell extends StatelessWidget {
 
 Widget _buildCountBadge(
   BuildContext context,
-  EntryType? type,
+  RecordType? type,
   String text,
 ) {
   if (text.isEmpty) {
@@ -103,7 +103,7 @@ Widget _buildCountBadge(
   }
 
   final scheme = Theme.of(context).colorScheme;
-  final colors = _badgeColorsForEntryType(type, scheme);
+  final colors = _badgeColorsForRecordType(type, scheme);
 
   return FittedBox(
     fit: BoxFit.scaleDown,
@@ -116,39 +116,39 @@ Widget _buildCountBadge(
   );
 }
 
-_BadgeColors _badgeColorsForEntryType(EntryType? type, ColorScheme scheme) {
+_BadgeColors _badgeColorsForRecordType(RecordType? type, ColorScheme scheme) {
   switch (type) {
-    case EntryType.breastLeft:
+    case RecordType.breastLeft:
       return _BadgeColors(
         background: scheme.primaryContainer,
         foreground: scheme.onPrimaryContainer,
       );
-    case EntryType.breastRight:
+    case RecordType.breastRight:
       return _BadgeColors(
         background: scheme.secondaryContainer,
         foreground: scheme.onSecondaryContainer,
       );
-    case EntryType.formula:
+    case RecordType.formula:
       return _BadgeColors(
         background: scheme.tertiaryContainer,
         foreground: scheme.onTertiaryContainer,
       );
-    case EntryType.pump:
+    case RecordType.pump:
       return _BadgeColors(
         background: scheme.primary,
         foreground: scheme.onPrimary,
       );
-    case EntryType.pee:
+    case RecordType.pee:
       return _BadgeColors(
         background: Colors.amber.shade200,
         foreground: scheme.onPrimaryContainer,
       );
-    case EntryType.poop:
+    case RecordType.poop:
       return _BadgeColors(
         background: scheme.secondary,
         foreground: scheme.onSecondary,
       );
-    case EntryType.other:
+    case RecordType.other:
       return _BadgeColors(
         background: scheme.surfaceContainerHighest,
         foreground: scheme.onSurfaceVariant,
@@ -174,8 +174,8 @@ class _CountBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final baseTextStyle = Theme.of(context).textTheme.labelSmall ??
-        const TextStyle(fontSize: 12);
+    final baseTextStyle =
+        Theme.of(context).textTheme.labelSmall ?? const TextStyle(fontSize: 12);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

@@ -7,11 +7,11 @@ import 'log_table_cell.dart';
 class LogTable extends StatelessWidget {
   const LogTable({
     super.key,
-    required this.entries,
+    required this.records,
     required this.onSlotTap,
   });
 
-  final List<Entry> entries;
+  final List<Record> records;
   final LogSlotTapCallback onSlotTap;
 
   static const double headerRowHeight = 44.0;
@@ -44,17 +44,17 @@ class LogTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderSide = BorderSide(color: Colors.grey.shade400);
-    final breastRightEntries =
-        entries.where((e) => e.type == EntryType.breastRight).toList();
-    final breastLeftEntries =
-        entries.where((e) => e.type == EntryType.breastLeft).toList();
-    final totalBreastRightCount = breastRightEntries.length;
-    final totalBreastLeftCount = breastLeftEntries.length;
-    final totalFormulaMl = _sumAmount(entries, EntryType.formula);
-    final totalPumpMl = _sumAmount(entries, EntryType.pump);
-    final totalPeeCount = entries.where((e) => e.type == EntryType.pee).length;
+    final breastRightRecords =
+        records.where((e) => e.type == RecordType.breastRight).toList();
+    final breastLeftRecords =
+        records.where((e) => e.type == RecordType.breastLeft).toList();
+    final totalBreastRightCount = breastRightRecords.length;
+    final totalBreastLeftCount = breastLeftRecords.length;
+    final totalFormulaMl = _sumAmount(records, RecordType.formula);
+    final totalPumpMl = _sumAmount(records, RecordType.pump);
+    final totalPeeCount = records.where((e) => e.type == RecordType.pee).length;
     final totalPoopCount =
-        entries.where((e) => e.type == EntryType.poop).length;
+        records.where((e) => e.type == RecordType.poop).length;
 
     final totalsRow = _TotalsRow(
       borderSide: borderSide,
@@ -170,7 +170,7 @@ class LogTable extends StatelessWidget {
                                 ),
                                 for (final type in _slotTypes)
                                   LogTableCell(
-                                    entries: entries,
+                                    records: records,
                                     hour: hour,
                                     type: type,
                                     onTap: onSlotTap,
@@ -198,14 +198,14 @@ class LogTable extends StatelessWidget {
   }
 }
 
-const _slotTypes = <EntryType>[
-  EntryType.breastLeft,
-  EntryType.breastRight,
-  EntryType.formula,
-  EntryType.pump,
-  EntryType.pee,
-  EntryType.poop,
-  EntryType.other,
+const _slotTypes = <RecordType>[
+  RecordType.breastLeft,
+  RecordType.breastRight,
+  RecordType.formula,
+  RecordType.pump,
+  RecordType.pee,
+  RecordType.poop,
+  RecordType.other,
 ];
 
 class _TotalsRow extends StatelessWidget {
@@ -310,8 +310,8 @@ class _TotalValueCell extends StatelessWidget {
   }
 }
 
-double _sumAmount(List<Entry> entries, EntryType type) {
-  return entries
+double _sumAmount(List<Record> records, RecordType type) {
+  return records
       .where((e) => e.type == type)
       .fold<double>(0, (sum, e) => sum + (e.amount ?? 0));
 }

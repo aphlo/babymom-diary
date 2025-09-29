@@ -39,8 +39,8 @@ class LogListScreen extends ConsumerWidget {
     void handleSlotTap(
       BuildContext _,
       int hour,
-      EntryType? type,
-      List<Entry> inHour,
+      RecordType? type,
+      List<Record> inHour,
     ) {
       showLogSlotSheet(
         context: context,
@@ -88,8 +88,8 @@ class LogListScreen extends ConsumerWidget {
         ),
       ),
       body: state.when(
-        data: (entries) => LogTable(
-          entries: entries,
+        data: (records) => LogTable(
+          records: records,
           onSlotTap: handleSlotTap,
         ),
         loading: () => const Center(child: CircularProgressIndicator()),

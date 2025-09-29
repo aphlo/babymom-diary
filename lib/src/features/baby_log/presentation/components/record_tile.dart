@@ -2,27 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../baby_log.dart';
 
-class EntryTile extends StatelessWidget {
-  const EntryTile({super.key, required this.entry});
-  final Entry entry;
+class RecordTile extends StatelessWidget {
+  const RecordTile({super.key, required this.record});
+  final Record record;
 
   @override
   Widget build(BuildContext context) {
-    final title = _buildTitle(entry);
-    final hasNote = entry.note != null && entry.note!.trim().isNotEmpty;
-    final timeText = DateFormat('HH:mm').format(entry.at.toLocal());
+    final title = _buildTitle(record);
+    final hasNote = record.note != null && record.note!.trim().isNotEmpty;
+    final timeText = DateFormat('HH:mm').format(record.at.toLocal());
     final subtitleWidgets = <Widget>[
       Text(timeText),
     ];
 
-    if (entry.type == EntryType.other && entry.tags.isNotEmpty) {
-      subtitleWidgets.add(Text(entry.tags.join(' / ')));
+    if (record.type == RecordType.other && record.tags.isNotEmpty) {
+      subtitleWidgets.add(Text(record.tags.join(' / ')));
     }
 
     if (hasNote) {
       subtitleWidgets.add(
         Text(
-          entry.note!.trim(),
+          record.note!.trim(),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
@@ -30,14 +30,14 @@ class EntryTile extends StatelessWidget {
     }
 
     return ListTile(
-      leading: Icon(switch (entry.type) {
-        EntryType.formula => Icons.local_drink,
-        EntryType.pump => Icons.local_drink_outlined,
-        EntryType.breastRight => Icons.child_care,
-        EntryType.breastLeft => Icons.child_care,
-        EntryType.pee => Icons.water_drop,
-        EntryType.poop => Icons.delete_outline,
-        EntryType.other => Icons.more_horiz,
+      leading: Icon(switch (record.type) {
+        RecordType.formula => Icons.local_drink,
+        RecordType.pump => Icons.local_drink_outlined,
+        RecordType.breastRight => Icons.child_care,
+        RecordType.breastLeft => Icons.child_care,
+        RecordType.pee => Icons.water_drop,
+        RecordType.poop => Icons.delete_outline,
+        RecordType.other => Icons.more_horiz,
       }),
       title: Text(title),
       subtitle: Column(
@@ -51,34 +51,34 @@ class EntryTile extends StatelessWidget {
   }
 }
 
-String _buildTitle(Entry entry) {
-  switch (entry.type) {
-    case EntryType.formula:
-      final amount = entry.amount;
+String _buildTitle(Record record) {
+  switch (record.type) {
+    case RecordType.formula:
+      final amount = record.amount;
       return amount != null ? 'ミルク ${amount.toStringAsFixed(0)} ml' : 'ミルク';
-    case EntryType.pump:
-      final amount = entry.amount;
+    case RecordType.pump:
+      final amount = record.amount;
       return amount != null ? '搾母乳 ${amount.toStringAsFixed(0)} ml' : '搾母乳';
-    case EntryType.breastRight:
-      final duration = _formatBreastDuration(entry);
+    case RecordType.breastRight:
+      final duration = _formatBreastDuration(record);
       return duration.isEmpty ? '母乳(右)' : '母乳(右) $duration';
-    case EntryType.breastLeft:
-      final duration = _formatBreastDuration(entry);
+    case RecordType.breastLeft:
+      final duration = _formatBreastDuration(record);
       return duration.isEmpty ? '母乳(左)' : '母乳(左) $duration';
-    case EntryType.pee:
-      final label = entry.excretionVolume?.label;
+    case RecordType.pee:
+      final label = record.excretionVolume?.label;
       return label == null ? '尿' : '尿 ($label)';
-    case EntryType.poop:
-      final label = entry.excretionVolume?.label;
+    case RecordType.poop:
+      final label = record.excretionVolume?.label;
       return label == null ? '便' : '便 ($label)';
-    case EntryType.other:
+    case RecordType.other:
       return 'その他';
   }
 }
 
-String _formatBreastDuration(Entry entry) {
+String _formatBreastDuration(Record record) {
   final totalSeconds =
-      entry.durationSeconds ?? ((entry.amount ?? 0) * 60).round();
+      record.durationSeconds ?? ((record.amount ?? 0) * 60).round();
   if (totalSeconds <= 0) {
     return '';
   }

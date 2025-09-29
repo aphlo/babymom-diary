@@ -1,18 +1,18 @@
 import 'package:uuid/uuid.dart';
-import '../value/entry_type.dart';
+import '../value/record_type.dart';
 import '../value/excretion_volume.dart';
 
-class Entry {
+class Record {
   final String id;
-  final EntryType type;
+  final RecordType type;
   final DateTime at; // When the event happened
   final double? amount; // ml for feeding, hours for sleep (optional)
   final String? note;
   final int? durationSeconds; // Extra resolution for breastfeeding duration
   final ExcretionVolume? excretionVolume; // Pee/poop intensity
-  final List<String> tags; // Misc tags for "other" entries
+  final List<String> tags; // Misc tags for "other" records
 
-  Entry({
+  Record({
     String? id,
     required this.type,
     required this.at,
@@ -24,8 +24,8 @@ class Entry {
   })  : id = id ?? const Uuid().v4(),
         tags = List.unmodifiable(tags ?? const []);
 
-  Entry copyWith({
-    EntryType? type,
+  Record copyWith({
+    RecordType? type,
     DateTime? at,
     double? amount,
     String? note,
@@ -33,7 +33,7 @@ class Entry {
     ExcretionVolume? excretionVolume,
     List<String>? tags,
   }) {
-    return Entry(
+    return Record(
       id: id,
       type: type ?? this.type,
       at: at ?? this.at,
