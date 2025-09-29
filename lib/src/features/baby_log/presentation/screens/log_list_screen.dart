@@ -17,6 +17,24 @@ class LogListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(logControllerProvider);
+    final selectedDate = ref.watch(selectedLogDateProvider);
+
+    final today = DateTime.now();
+    final today0 = DateTime(today.year, today.month, today.day);
+    final isToday = selectedDate.isAtSameMomentAs(today0);
+
+    void goToPreviousDate() {
+      final d = ref.read(selectedLogDateProvider);
+      ref.read(selectedLogDateProvider.notifier).state =
+          DateTime(d.year, d.month, d.day).subtract(const Duration(days: 1));
+    }
+
+    void goToNextDate() {
+      final d = ref.read(selectedLogDateProvider);
+      final nd = d.add(const Duration(days: 1));
+      ref.read(selectedLogDateProvider.notifier).state =
+          DateTime(nd.year, nd.month, nd.day);
+    }
 
     void handleSlotTap(
       BuildContext _,
@@ -35,45 +53,37 @@ class LogListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 72,
+        automaticallyImplyLeading: false,
+        toolbarHeight: 80,
         centerTitle: true,
-        leading: IconButton(
-          tooltip: '前日',
-          icon: const Icon(Icons.chevron_left),
-          onPressed: () {
-            final d = ref.read(selectedLogDateProvider);
-            ref.read(selectedLogDateProvider.notifier).state =
-                DateTime(d.year, d.month, d.day)
-                    .subtract(const Duration(days: 1));
-          },
-        ),
-        actions: [
-          Consumer(
-            builder: (context, ref, _) {
-              final d = ref.watch(selectedLogDateProvider);
-              final today = DateTime.now();
-              final today0 = DateTime(today.year, today.month, today.day);
-              final isToday = d.isAtSameMomentAs(today0);
-              return IconButton(
-                tooltip: '翌日',
-                icon: const Icon(Icons.chevron_right),
-                onPressed: isToday
-                    ? null
-                    : () {
-                        final nd = d.add(const Duration(days: 1));
-                        ref.read(selectedLogDateProvider.notifier).state =
-                            DateTime(nd.year, nd.month, nd.day);
-                      },
-              );
-            },
-          ),
-        ],
-        title: const Column(
+        title: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            AppBarChildInfo(),
-            SizedBox(height: 2),
-            AppBarDateSwitcher(),
+            const AppBarChildInfo(),
+            const SizedBox(height: 6),
+            SizedBox(
+              width: double.infinity,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _AppBarIconButton(
+                    icon: Icons.chevron_left,
+                    tooltip: '前日',
+                    onPressed: goToPreviousDate,
+                  ),
+                  const Expanded(
+                    child: Center(child: AppBarDateSwitcher()),
+                  ),
+                  _AppBarIconButton(
+                    icon: Icons.chevron_right,
+                    tooltip: '翌日',
+                    onPressed: isToday ? null : goToNextDate,
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -86,6 +96,30 @@ class LogListScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('Error: $e')),
       ),
       bottomNavigationBar: const AppBottomNav(),
+    );
+  }
+}
+
+class _AppBarIconButton extends StatelessWidget {
+  const _AppBarIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(icon),
+      tooltip: tooltip,
+      onPressed: onPressed,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(width: 40, height: 40),
+      splashRadius: 22,
     );
   }
 }
