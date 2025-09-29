@@ -19,13 +19,13 @@ class LogListScreen extends ConsumerWidget {
     final state = ref.watch(logControllerProvider);
 
     void handleSlotTap(
-      BuildContext cellContext,
+      BuildContext _,
       int hour,
       EntryType? type,
       List<Entry> inHour,
     ) {
       showLogSlotSheet(
-        context: cellContext,
+        context: context,
         ref: ref,
         hour: hour,
         onlyType: type,

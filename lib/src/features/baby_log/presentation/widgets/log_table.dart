@@ -19,8 +19,8 @@ class LogTable extends StatelessWidget {
 
   static const _headers = <String>[
     '時間',
-    '授乳\n(右)',
     '授乳\n(左)',
+    '授乳\n(右)',
     'ミルク',
     '搾母乳',
     '尿',
@@ -48,8 +48,8 @@ class LogTable extends StatelessWidget {
         entries.where((e) => e.type == EntryType.breastRight).toList();
     final breastLeftEntries =
         entries.where((e) => e.type == EntryType.breastLeft).toList();
-    final totalBreastRightSeconds = sumDurationSeconds(breastRightEntries);
-    final totalBreastLeftSeconds = sumDurationSeconds(breastLeftEntries);
+    final totalBreastRightCount = breastRightEntries.length;
+    final totalBreastLeftCount = breastLeftEntries.length;
     final totalFormulaMl = _sumAmount(entries, EntryType.formula);
     final totalPumpMl = _sumAmount(entries, EntryType.pump);
     final totalPeeCount = entries.where((e) => e.type == EntryType.pee).length;
@@ -59,14 +59,31 @@ class LogTable extends StatelessWidget {
     final totalsRow = _TotalsRow(
       borderSide: borderSide,
       values: [
-        formatMinutesOrCount(
-            totalBreastRightSeconds, breastRightEntries.length),
-        formatMinutesOrCount(totalBreastLeftSeconds, breastLeftEntries.length),
-        totalFormulaMl.toStringAsFixed(0),
-        totalPumpMl.toStringAsFixed(0),
-        '$totalPeeCount',
-        '$totalPoopCount',
-        '',
+        _TotalValue(
+          value: '$totalBreastLeftCount',
+          unit: '回',
+        ),
+        _TotalValue(
+          value: '$totalBreastRightCount',
+          unit: '回',
+        ),
+        _TotalValue(
+          value: totalFormulaMl.toStringAsFixed(0),
+          unit: 'ml',
+        ),
+        _TotalValue(
+          value: totalPumpMl.toStringAsFixed(0),
+          unit: 'ml',
+        ),
+        _TotalValue(
+          value: '$totalPeeCount',
+          unit: '回',
+        ),
+        _TotalValue(
+          value: '$totalPoopCount',
+          unit: '回',
+        ),
+        const _TotalValue(value: '', unit: ''),
       ],
     );
 
@@ -95,13 +112,17 @@ class LogTable extends StatelessWidget {
                       child: Center(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: Text(
-                            header,
-                            softWrap: false,
-                            overflow: TextOverflow.fade,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.center,
+                            child: Text(
+                              header,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                         ),
@@ -178,8 +199,8 @@ class LogTable extends StatelessWidget {
 }
 
 const _slotTypes = <EntryType>[
-  EntryType.breastRight,
   EntryType.breastLeft,
+  EntryType.breastRight,
   EntryType.formula,
   EntryType.pump,
   EntryType.pee,
@@ -194,7 +215,7 @@ class _TotalsRow extends StatelessWidget {
   });
 
   final BorderSide borderSide;
-  final List<String> values;
+  final List<_TotalValue> values;
 
   @override
   Widget build(BuildContext context) {
@@ -220,9 +241,13 @@ class _TotalsRow extends StatelessWidget {
               const SizedBox(
                 height: LogTable.bodyRowHeight,
                 child: Center(
-                  child: Text(
-                    '合計',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.center,
+                    child: Text(
+                      '合計',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ),
               ),
@@ -235,19 +260,50 @@ class _TotalsRow extends StatelessWidget {
   }
 }
 
+class _TotalValue {
+  const _TotalValue({required this.value, required this.unit});
+
+  final String value;
+  final String unit;
+}
+
 class _TotalValueCell extends StatelessWidget {
   const _TotalValueCell({required this.value});
 
-  final String value;
+  final _TotalValue value;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: LogTable.bodyRowHeight,
-      child: Center(
-        child: Text(
-          value,
-          style: const TextStyle(fontWeight: FontWeight.w600),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Stack(
+          children: [
+            if (value.value.isNotEmpty)
+              Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.center,
+                  child: Text(
+                    value.value,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            if (value.unit.isNotEmpty)
+              Positioned(
+                bottom: 2,
+                right: 0,
+                child: Text(
+                  value.unit,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: Colors.black54,
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

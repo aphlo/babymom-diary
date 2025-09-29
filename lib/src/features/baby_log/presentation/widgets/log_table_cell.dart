@@ -50,9 +50,10 @@ class LogTableCell extends StatelessWidget {
                 ? (fallbackText.isEmpty
                     ? const SizedBox.shrink()
                     : Center(
-                        child: Text(
+                        child: _buildCountBadge(
+                          context,
+                          type,
                           fallbackText,
-                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ))
                 : OtherTagsPreview(tags: tags),
@@ -70,8 +71,7 @@ class LogTableCell extends StatelessWidget {
           text = sum == 0 ? '${filtered.length}' : sum.toStringAsFixed(0);
           break;
         case EntryType.breastLeft || EntryType.breastRight:
-          final seconds = sumDurationSeconds(filtered);
-          text = formatMinutesOrCount(seconds, filtered.length);
+          text = '${filtered.length}';
           break;
         case EntryType.pee || EntryType.poop:
         case EntryType.other:
@@ -86,38 +86,120 @@ class LogTableCell extends StatelessWidget {
       child: SizedBox(
         height: rowHeight,
         child: Center(
-          child: Text(
-            text,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          child: _buildCountBadge(context, type, text),
         ),
       ),
     );
   }
 }
 
-String formatMinutesOrCount(int seconds, int fallbackCount) {
-  if (seconds == 0) {
-    return '$fallbackCount';
+Widget _buildCountBadge(
+  BuildContext context,
+  EntryType? type,
+  String text,
+) {
+  if (text.isEmpty) {
+    return const SizedBox.shrink();
   }
-  return _formatMinutesWithoutUnit(seconds);
+
+  final scheme = Theme.of(context).colorScheme;
+  final colors = _badgeColorsForEntryType(type, scheme);
+
+  return FittedBox(
+    fit: BoxFit.scaleDown,
+    alignment: Alignment.center,
+    child: _CountBadge(
+      label: text,
+      background: colors.background,
+      foreground: colors.foreground,
+    ),
+  );
 }
 
-int sumDurationSeconds(Iterable<Entry> entries) {
-  var total = 0;
-  for (final entry in entries) {
-    final seconds = entry.durationSeconds ?? ((entry.amount ?? 0) * 60).round();
-    total += seconds;
+_BadgeColors _badgeColorsForEntryType(EntryType? type, ColorScheme scheme) {
+  switch (type) {
+    case EntryType.breastLeft:
+      return _BadgeColors(
+        background: scheme.primaryContainer,
+        foreground: scheme.onPrimaryContainer,
+      );
+    case EntryType.breastRight:
+      return _BadgeColors(
+        background: scheme.secondaryContainer,
+        foreground: scheme.onSecondaryContainer,
+      );
+    case EntryType.formula:
+      return _BadgeColors(
+        background: scheme.tertiaryContainer,
+        foreground: scheme.onTertiaryContainer,
+      );
+    case EntryType.pump:
+      return _BadgeColors(
+        background: scheme.primary,
+        foreground: scheme.onPrimary,
+      );
+    case EntryType.pee:
+      return _BadgeColors(
+        background: Colors.amber.shade200,
+        foreground: scheme.onPrimaryContainer,
+      );
+    case EntryType.poop:
+      return _BadgeColors(
+        background: scheme.secondary,
+        foreground: scheme.onSecondary,
+      );
+    case EntryType.other:
+      return _BadgeColors(
+        background: scheme.surfaceContainerHighest,
+        foreground: scheme.onSurfaceVariant,
+      );
+    case null:
+      return _BadgeColors(
+        background: scheme.surfaceContainerHighest,
+        foreground: scheme.onSurfaceVariant,
+      );
   }
-  return total;
 }
 
-String _formatMinutesWithoutUnit(int seconds) {
-  if (seconds <= 0) {
-    return '0';
+class _CountBadge extends StatelessWidget {
+  const _CountBadge({
+    required this.label,
+    required this.background,
+    required this.foreground,
+  });
+
+  final String label;
+  final Color background;
+  final Color foreground;
+
+  @override
+  Widget build(BuildContext context) {
+    final baseTextStyle = Theme.of(context).textTheme.labelSmall ??
+        const TextStyle(fontSize: 12);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: baseTextStyle.copyWith(
+          fontWeight: FontWeight.w700,
+          color: foreground,
+        ),
+      ),
+    );
   }
-  if (seconds % 60 == 0) {
-    return '${seconds ~/ 60}';
-  }
-  return (seconds / 60).toStringAsFixed(1);
+}
+
+class _BadgeColors {
+  const _BadgeColors({
+    required this.background,
+    required this.foreground,
+  });
+
+  final Color background;
+  final Color foreground;
 }
