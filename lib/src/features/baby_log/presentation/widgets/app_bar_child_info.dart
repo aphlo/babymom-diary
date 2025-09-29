@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/firebase/household_service.dart';
@@ -42,9 +43,11 @@ class AppBarChildInfo extends ConsumerWidget {
             ref.read(selectedChildSnapshotProvider(hid).notifier);
 
         streamChildren.whenData((children) {
-          ref
-              .read(childrenLocalProvider(hid).notifier)
-              .replaceChildren(children);
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            ref
+                .read(childrenLocalProvider(hid).notifier)
+                .replaceChildren(children);
+          });
         });
 
         Widget buildWithChildren(List<ChildSummary> children) {
@@ -59,7 +62,14 @@ class AppBarChildInfo extends ConsumerWidget {
           final age =
               birthday == null ? '' : _ageString(birthday, selectedDate);
 
-          snapshotNotifier.save(d);
+          final snapshotValue = snapshotState.value;
+          final shouldSaveSnapshot =
+              snapshotValue == null || !snapshotValue.isSameAs(d);
+          if (shouldSaveSnapshot) {
+            SchedulerBinding.instance.addPostFrameCallback((_) {
+              snapshotNotifier.save(d);
+            });
+          }
 
           void toNext() {
             if (children.isEmpty) return;

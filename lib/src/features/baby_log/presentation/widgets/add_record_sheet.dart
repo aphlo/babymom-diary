@@ -457,8 +457,6 @@ class _ManageOtherTagsDialogState
       await ref.read(otherTagsControllerProvider.notifier).addTag(raw);
       if (!mounted) return;
       _controller.clear();
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('タグを追加しました')));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)

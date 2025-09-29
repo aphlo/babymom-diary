@@ -5,7 +5,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/firebase/household_service.dart';
 import '../../../../core/types/gender.dart';
+import '../../application/children_local_provider.dart';
+import '../../application/selected_child_provider.dart';
+import '../../application/selected_child_snapshot_provider.dart';
 import '../../data/sources/child_firestore_data_source.dart';
+import '../../domain/entities/child_summary.dart';
 import '../widgets/child_form.dart';
 
 class EditChildScreen extends ConsumerStatefulWidget {
@@ -19,7 +23,8 @@ class EditChildScreen extends ConsumerStatefulWidget {
 class _EditChildScreenState extends ConsumerState<EditChildScreen> {
   bool _loading = true;
   ChildFormData? _initial;
-  String _toHex(Color c) => '#${c.value.toRadixString(16).padLeft(8, '0').substring(2)}';
+  String _toHex(Color c) =>
+      '#${c.value.toRadixString(16).padLeft(8, '0').substring(2)}';
   Color _parseColor(String? hex) {
     if (hex == null || hex.isEmpty) return Colors.blueAccent;
     final cleaned = hex.replaceFirst('#', '');
@@ -31,7 +36,8 @@ class _EditChildScreenState extends ConsumerState<EditChildScreen> {
   Future<void> _load() async {
     final hid = await ref.read(currentHouseholdIdProvider.future);
     if (!mounted) return;
-    final ds = ChildFirestoreDataSource(ref.read(firebaseFirestoreProvider), hid);
+    final ds =
+        ChildFirestoreDataSource(ref.read(firebaseFirestoreProvider), hid);
     final doc = await ds.getChild(widget.childId);
     if (!mounted) return;
     final data = doc.data();
@@ -71,21 +77,39 @@ class _EditChildScreenState extends ConsumerState<EditChildScreen> {
                 child: ChildForm(
                   initial: _initial,
                   onSubmit: (form) async {
-                    final hid = await ref.read(currentHouseholdIdProvider.future);
-                    final ds = ChildFirestoreDataSource(ref.read(firebaseFirestoreProvider), hid);
+                    final hid =
+                        await ref.read(currentHouseholdIdProvider.future);
+                    final ds = ChildFirestoreDataSource(
+                        ref.read(firebaseFirestoreProvider), hid);
                     try {
+                      final colorHex = _toHex(form.color);
                       await ds.updateChild(
                         id: widget.childId,
                         name: form.name,
                         gender: form.gender,
                         birthday: form.birthday!,
                         dueDate: form.dueDate,
-                        color: _toHex(form.color),
+                        color: colorHex,
                       );
+
+                      final summary = ChildSummary(
+                        id: widget.childId,
+                        name: form.name,
+                        birthday: form.birthday,
+                        color: colorHex,
+                      );
+                      await ref
+                          .read(childrenLocalProvider(hid).notifier)
+                          .upsertChild(summary);
+                      final selectedId =
+                          ref.read(selectedChildControllerProvider).value;
+                      if (selectedId == widget.childId) {
+                        await ref
+                            .read(selectedChildSnapshotProvider(hid).notifier)
+                            .save(summary);
+                      }
+
                       if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('更新しました')),
-                      );
                       context.pop();
                     } on FirebaseException catch (e) {
                       if (!context.mounted) return;

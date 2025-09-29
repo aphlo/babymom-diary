@@ -11,15 +11,20 @@ class ChildrenLocalNotifier
     _restore();
   }
 
+  ChildrenLocalNotifier.withInitial(
+    this._householdId,
+    List<ChildSummary> initial,
+  ) : super(AsyncValue.data(initial));
+
   final String _householdId;
 
-  static String _prefsKey(String householdId) => 'cachedChildren/$householdId';
+  static String prefsKey(String householdId) => 'cachedChildren/$householdId';
 
   Future<void> _restore() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_prefsKey(_householdId));
-      final stored = raw == null ? const <ChildSummary>[] : _decodeList(raw);
+      final raw = prefs.getString(prefsKey(_householdId));
+      final stored = raw == null ? const <ChildSummary>[] : decodeList(raw);
       if (!mounted) return;
       state = AsyncValue.data(stored);
     } catch (e, stack) {
@@ -37,13 +42,24 @@ class ChildrenLocalNotifier
     try {
       final prefs = await SharedPreferences.getInstance();
       final encoded = jsonEncode(children.map((e) => e.toJson()).toList());
-      await prefs.setString(_prefsKey(_householdId), encoded);
+      await prefs.setString(prefsKey(_householdId), encoded);
     } catch (_) {
       // 永続化に失敗しても UI 表示は維持したいので握りつぶす。
     }
   }
 
-  static List<ChildSummary> _decodeList(String raw) {
+  Future<void> upsertChild(ChildSummary child) async {
+    final current = List<ChildSummary>.from(state.value ?? <ChildSummary>[]);
+    final index = current.indexWhere((c) => c.id == child.id);
+    if (index >= 0) {
+      current[index] = child;
+    } else {
+      current.add(child);
+    }
+    await replaceChildren(current);
+  }
+
+  static List<ChildSummary> decodeList(String raw) {
     final decoded = jsonDecode(raw);
     if (decoded is! List) return const <ChildSummary>[];
     return decoded

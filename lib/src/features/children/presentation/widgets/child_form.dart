@@ -49,7 +49,6 @@ class _ChildFormState extends State<ChildForm> {
     Colors.pinkAccent,
     Colors.orangeAccent,
     Colors.amber,
-    Colors.greenAccent,
     Colors.lightBlueAccent,
     Colors.purpleAccent,
     Colors.teal,

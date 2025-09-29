@@ -12,26 +12,26 @@ class SelectedChildSnapshotNotifier
     _restore();
   }
 
+  SelectedChildSnapshotNotifier.withInitial(
+    this._householdId,
+    ChildSummary? initial,
+  ) : super(AsyncValue.data(initial));
+
   final String _householdId;
 
-  static String _prefsKey(String householdId) =>
+  static String prefsKey(String householdId) =>
       'selectedChildSnapshot/$householdId';
 
   Future<void> _restore() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_prefsKey(_householdId));
+      final raw = prefs.getString(prefsKey(_householdId));
       if (!mounted) return;
       if (raw == null) {
         state = const AsyncValue.data(null);
         return;
       }
-      final json = jsonDecode(raw);
-      if (json is Map<String, dynamic>) {
-        state = AsyncValue.data(ChildSummary.fromJson(json));
-      } else {
-        state = const AsyncValue.data(null);
-      }
+      state = AsyncValue.data(decodeSelectedChildSnapshot(raw));
     } catch (e, stack) {
       if (!mounted) return;
       state = AsyncValue.error(e, stack);
@@ -46,7 +46,7 @@ class SelectedChildSnapshotNotifier
     state = AsyncValue.data(summary);
     try {
       final prefs = await SharedPreferences.getInstance();
-      final key = _prefsKey(_householdId);
+      final key = prefsKey(_householdId);
       if (summary == null) {
         await prefs.remove(key);
       } else {
@@ -56,6 +56,14 @@ class SelectedChildSnapshotNotifier
       // 永続化に失敗してもアプリの表示を止めない
     }
   }
+}
+
+ChildSummary? decodeSelectedChildSnapshot(String raw) {
+  final json = jsonDecode(raw);
+  if (json is Map) {
+    return ChildSummary.fromJson(Map<String, dynamic>.from(json));
+  }
+  return null;
 }
 
 final selectedChildSnapshotProvider = StateNotifierProvider.family<

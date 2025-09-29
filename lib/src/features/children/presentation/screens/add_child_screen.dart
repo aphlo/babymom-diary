@@ -15,7 +15,8 @@ class AddChildScreen extends ConsumerStatefulWidget {
 }
 
 class _AddChildScreenState extends ConsumerState<AddChildScreen> {
-  String _toHex(Color c) => '#${c.value.toRadixString(16).padLeft(8, '0').substring(2)}';
+  String _toHex(Color c) =>
+      '#${c.value.toRadixString(16).padLeft(8, '0').substring(2)}';
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,8 @@ class _AddChildScreenState extends ConsumerState<AddChildScreen> {
           padding: const EdgeInsets.all(16),
           child: ChildForm(
             onSubmit: (data) async {
-              final householdId = await ref.read(currentHouseholdIdProvider.future);
+              final householdId =
+                  await ref.read(currentHouseholdIdProvider.future);
               final db = ref.read(firebaseFirestoreProvider);
               final ds = ChildFirestoreDataSource(db, householdId);
 
@@ -41,20 +43,20 @@ class _AddChildScreenState extends ConsumerState<AddChildScreen> {
                   dueDate: data.dueDate,
                   color: _toHex(data.color),
                 );
+              } on FirebaseException catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('子供を追加しました')),
+                    SnackBar(content: Text('保存に失敗しました: ${e.message}')),
                   );
                   context.pop();
                 }
-              } on FirebaseException catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('保存に失敗しました: ${e.message}')),
-                );
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('保存に失敗しました: $e')),
-                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('保存に失敗しました: $e')),
+                  );
+                  context.pop();
+                }
               }
             },
           ),

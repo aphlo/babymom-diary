@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
-ThemeData buildTheme() {
+const Color defaultPrimaryColor = Color(0xFFE54F80);
+
+ThemeData buildTheme({Color? primaryColor}) {
   const fontFamily = 'MPLUSRounded1c';
-  const primaryColor = Color(0xFFE54F80);
+  final effectivePrimary = primaryColor ?? defaultPrimaryColor;
   final base = ThemeData(useMaterial3: true, fontFamily: fontFamily);
-  final scheme = ColorScheme.fromSeed(seedColor: primaryColor).copyWith(
-    primary: primaryColor,
+  final scheme = ColorScheme.fromSeed(seedColor: effectivePrimary).copyWith(
+    primary: effectivePrimary,
   );
   final textTheme = base.textTheme.apply(fontFamily: fontFamily);
-  final primaryTextTheme =
-      base.primaryTextTheme.apply(fontFamily: fontFamily);
+  final primaryTextTheme = base.primaryTextTheme.apply(fontFamily: fontFamily);
 
   return base.copyWith(
     colorScheme: scheme,
@@ -25,7 +26,7 @@ ThemeData buildTheme() {
       }),
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: primaryColor,
+      backgroundColor: effectivePrimary,
       foregroundColor: scheme.onPrimary, // text & icons
       surfaceTintColor: Colors.transparent,
       elevation: 8,
@@ -36,18 +37,22 @@ ThemeData buildTheme() {
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: primaryColor,
+      backgroundColor: effectivePrimary,
       surfaceTintColor: Colors.transparent,
       indicatorColor: scheme.onPrimary.withOpacity(0.20),
       iconTheme: WidgetStateProperty.resolveWith(
         (states) => IconThemeData(
-          color: scheme.onPrimary.withOpacity(states.contains(WidgetState.selected) ? 1.0 : 0.85),
+          color: scheme.onPrimary
+              .withOpacity(states.contains(WidgetState.selected) ? 1.0 : 0.85),
         ),
       ),
       labelTextStyle: WidgetStateProperty.resolveWith(
         (states) => TextStyle(
-          color: scheme.onPrimary.withOpacity(states.contains(WidgetState.selected) ? 1.0 : 0.85),
-          fontWeight: states.contains(WidgetState.selected) ? FontWeight.w600 : FontWeight.w500,
+          color: scheme.onPrimary
+              .withOpacity(states.contains(WidgetState.selected) ? 1.0 : 0.85),
+          fontWeight: states.contains(WidgetState.selected)
+              ? FontWeight.w600
+              : FontWeight.w500,
           fontSize: 11, // slightly smaller labels
         ),
       ),
