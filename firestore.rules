@@ -42,6 +42,16 @@ service cloud.firestore {
         allow write: if isMember(hid);
       }
 
+      match /children/{childId}/events/{eventId} {
+        allow read: if isMember(hid);
+        allow create, update: if isMember(hid)
+          && request.resource.data.householdId is string
+          && request.resource.data.childId is string
+          && request.resource.data.householdId == hid
+          && request.resource.data.childId == childId;
+        allow delete: if isMember(hid);
+      }
+
       // households 配下はメンバーであれば全て読み書き可能（包括ルール）
       match /{document=**} {
         allow read, write: if isMember(hid);
@@ -58,6 +68,12 @@ service cloud.firestore {
     // → クライアントは必ず where('uid', '==', request.auth.uid) を付与する必要がある
     match /{path=**}/members/{uid} {
       allow read: if authed() && resource.data.uid == request.auth.uid;
+    }
+
+    // カレンダーイベントを collectionGroup クエリで取得できるようにする
+    match /{path=**}/events/{eventId} {
+      allow read: if authed() && resource.data.householdId is string
+        && isMember(resource.data.householdId);
     }
   }
 }

@@ -21,6 +21,7 @@ dependencies:
   intl: ^0.19.0
   uuid: ^4.5.1
   widgetbook: ^3.7.0
+  table_calendar: ^3.1.2
 
 dev_dependencies:
   flutter_test:
@@ -32,6 +33,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/fonts/
+    - assets/icons/
   fonts:
     - family: MPLUSRounded1c
       fonts:
