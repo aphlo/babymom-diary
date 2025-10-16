@@ -29,16 +29,21 @@ class _HouseholdShareScreenState extends ConsumerState<HouseholdShareScreen> {
       final hid = await ref.read(currentHouseholdIdProvider.future);
       final svc = ref.read(householdServiceProvider);
       final res = await svc.createJoinToken(householdId: hid);
+      if (!mounted) return;
       setState(() {
         _code = res.code;
         _expireAt = res.expireAt;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('招待コードの発行に失敗しました: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('招待コードの発行に失敗しました: $e')),
+        );
+      }
     } finally {
-      setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 
@@ -55,11 +60,15 @@ class _HouseholdShareScreenState extends ConsumerState<HouseholdShareScreen> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('参加に失敗しました: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('参加に失敗しました: $e')),
+        );
+      }
     } finally {
-      setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 
