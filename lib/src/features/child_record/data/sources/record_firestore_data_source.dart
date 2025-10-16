@@ -26,22 +26,7 @@ class RecordFirestoreDataSource {
 
     return snap.docs.map((d) {
       final data = d.data();
-      RecordType type;
-      final rawType = data['type'] as String?;
-      try {
-        type = rawType != null
-            ? RecordType.values.byName(rawType)
-            : RecordType.other;
-      } catch (_) {
-        // Backward compatibility: map old types to new ones
-        switch (rawType) {
-          case 'feeding':
-            type = RecordType.formula;
-            break;
-          default:
-            type = RecordType.other;
-        }
-      }
+      final type = _parseRecordType(data);
       ExcretionVolume? excretionVolume;
       final rawVolume = data['excretionVolume'] as String?;
       if (rawVolume != null) {
@@ -82,4 +67,21 @@ class RecordFirestoreDataSource {
 
   Future<void> delete(String childId, String id) =>
       _col(childId).doc(id).delete();
+
+  RecordType _parseRecordType(Map<String, dynamic> data) {
+    final rawType = data['type'] as String?;
+    if (rawType == null) {
+      return RecordType.other;
+    }
+
+    return _legacyRecordTypeMapping[rawType] ??
+        RecordType.values.firstWhere(
+          (value) => value.name == rawType,
+          orElse: () => RecordType.other,
+        );
+  }
+
+  static const Map<String, RecordType> _legacyRecordTypeMapping = {
+    'feeding': RecordType.formula,
+  };
 }
