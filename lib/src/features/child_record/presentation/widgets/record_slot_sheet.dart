@@ -71,6 +71,16 @@ void showRecordSlotSheet({
               children: [
                 Row(
                   children: [
+                    Icon(_iconFor(onlyType)),
+                    const SizedBox(width: 8),
+                    Text(
+                      onlyType.label,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     Text(
                       '${hour.toString().padLeft(2, '0')}:00 の記録',
                       style: const TextStyle(

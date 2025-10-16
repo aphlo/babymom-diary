@@ -10,8 +10,8 @@ enum RecordType {
 
 extension RecordTypeLabel on RecordType {
   String get label => switch (this) {
-        RecordType.breastRight => '母乳(右)',
-        RecordType.breastLeft => '母乳(左)',
+        RecordType.breastRight => '授乳(右)',
+        RecordType.breastLeft => '授乳(左)',
         RecordType.formula => 'ミルク',
         RecordType.pump => '搾母乳',
         RecordType.pee => '尿',
