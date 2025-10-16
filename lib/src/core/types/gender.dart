@@ -24,7 +24,6 @@ extension GenderX on Gender {
         return '';
     }
   }
-
 }
 
 Gender genderFromKey(String? key) {

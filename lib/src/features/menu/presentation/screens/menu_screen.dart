@@ -35,7 +35,8 @@ class MenuScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, __) => Center(child: Text('読み込みに失敗しました\n$e')),
         data: (hid) {
-          final ds = ChildFirestoreDataSource(ref.watch(firebaseFirestoreProvider), hid);
+          final ds = ChildFirestoreDataSource(
+              ref.watch(firebaseFirestoreProvider), hid);
           return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream: ds.childrenQuery().snapshots(),
             builder: (context, snap) {
@@ -54,7 +55,8 @@ class MenuScreen extends ConsumerWidget {
                       id: d.id,
                       name: (d.data()['name'] as String?) ?? '未設定',
                       color: _parseColor(d.data()['color'] as String?),
-                      subtitle: _formatBirthday(d.data()['birthday'] as Timestamp?),
+                      subtitle:
+                          _formatBirthday(d.data()['birthday'] as Timestamp?),
                     ),
                     const Divider(height: 0),
                   ],
@@ -62,7 +64,8 @@ class MenuScreen extends ConsumerWidget {
                     tileColor: Colors.white,
                     leading: const Icon(Icons.edit),
                     title: const Text('子どもの追加・編集'),
-                    onTap: () => context.push('/children/manage', extra: 'slide'),
+                    onTap: () =>
+                        context.push('/children/manage', extra: 'slide'),
                     trailing: const Icon(Icons.chevron_right),
                   ),
 
@@ -88,7 +91,11 @@ class MenuScreen extends ConsumerWidget {
 }
 
 class _ChildListTile extends ConsumerWidget {
-  const _ChildListTile({required this.id, required this.name, required this.color, required this.subtitle});
+  const _ChildListTile(
+      {required this.id,
+      required this.name,
+      required this.color,
+      required this.subtitle});
   final String id;
   final String name;
   final Color color;
@@ -110,7 +117,8 @@ class _ChildListTile extends ConsumerWidget {
             value: id,
             groupValue: isSelected ? id : null,
             activeColor: Theme.of(context).colorScheme.primary,
-            onChanged: (v) => ref.read(selectedChildControllerProvider.notifier).select(v),
+            onChanged: (v) =>
+                ref.read(selectedChildControllerProvider.notifier).select(v),
           ),
           const SizedBox(width: 8),
           CircleAvatar(
@@ -121,7 +129,8 @@ class _ChildListTile extends ConsumerWidget {
       ),
       title: Text(name),
       subtitle: Text(subtitle),
-      onTap: () => ref.read(selectedChildControllerProvider.notifier).select(id),
+      onTap: () =>
+          ref.read(selectedChildControllerProvider.notifier).select(id),
     );
   }
 }

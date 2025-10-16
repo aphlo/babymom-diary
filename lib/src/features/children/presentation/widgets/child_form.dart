@@ -71,11 +71,13 @@ class _ChildFormState extends State<ChildForm> {
     _gender = i.gender;
     _birthday = i.birthday;
     if (_birthday != null) {
-      _birthdayCtrl.text = '${_birthday!.year}/${_birthday!.month}/${_birthday!.day}';
+      _birthdayCtrl.text =
+          '${_birthday!.year}/${_birthday!.month}/${_birthday!.day}';
     }
     _dueDate = i.dueDate;
     if (_dueDate != null) {
-      _dueDateCtrl.text = '${_dueDate!.year}/${_dueDate!.month}/${_dueDate!.day}';
+      _dueDateCtrl.text =
+          '${_dueDate!.year}/${_dueDate!.month}/${_dueDate!.day}';
     }
     // no measurement fields
     if (widget.initial == null) {
@@ -164,9 +166,8 @@ class _ChildFormState extends State<ChildForm> {
             decoration: const InputDecoration(
               labelText: '名前',
             ),
-            validator: (v) => (v == null || v.trim().isEmpty)
-                ? '名前を入力してください'
-                : null,
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? '名前を入力してください' : null,
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<Gender>(

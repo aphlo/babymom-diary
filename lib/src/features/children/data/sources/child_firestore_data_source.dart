@@ -9,10 +9,8 @@ class ChildFirestoreDataSource {
 
   static const collectionName = 'children';
 
-  CollectionReference<Map<String, dynamic>> get _col => db
-      .collection('households')
-      .doc(householdId)
-      .collection(collectionName);
+  CollectionReference<Map<String, dynamic>> get _col =>
+      db.collection('households').doc(householdId).collection(collectionName);
 
   Query<Map<String, dynamic>> childrenQuery() => _col.orderBy('birthday');
 
@@ -33,7 +31,8 @@ class ChildFirestoreDataSource {
     });
   }
 
-  Future<DocumentSnapshot<Map<String, dynamic>>> getChild(String id) => _col.doc(id).get();
+  Future<DocumentSnapshot<Map<String, dynamic>>> getChild(String id) =>
+      _col.doc(id).get();
 
   Future<void> updateChild({
     required String id,

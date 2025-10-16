@@ -7,4 +7,3 @@ class AppColors {
   // Surfaces / backgrounds
   static const Color pageBackground = Color(0xFFF5F5F5);
 }
-

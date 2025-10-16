@@ -24,7 +24,8 @@ class HouseholdService {
   Future<String?> findExistingHouseholdForCurrentUser() async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return null;
-    final snap = await _db.collectionGroup('members')
+    final snap = await _db
+        .collectionGroup('members')
         .where('uid', isEqualTo: uid)
         .limit(1)
         .get()
@@ -50,7 +51,8 @@ class HouseholdService {
         'createdAt': FieldValue.serverTimestamp(),
       });
     } on FirebaseException catch (e) {
-      throw Exception('Failed to create ${hRef.path}: [${e.code}] ${e.message}');
+      throw Exception(
+          'Failed to create ${hRef.path}: [${e.code}] ${e.message}');
     } catch (e) {
       throw Exception('Failed to create ${hRef.path}: $e');
     }
@@ -64,7 +66,8 @@ class HouseholdService {
         'uid': uid,
       });
     } on FirebaseException catch (e) {
-      throw Exception('Failed to create ${mRef.path}: [${e.code}] ${e.message}');
+      throw Exception(
+          'Failed to create ${mRef.path}: [${e.code}] ${e.message}');
     } catch (e) {
       throw Exception('Failed to create ${mRef.path}: $e');
     }

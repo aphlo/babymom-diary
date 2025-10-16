@@ -32,7 +32,8 @@ class ManageChildrenScreen extends ConsumerWidget {
     final asyncHid = ref.watch(currentHouseholdIdProvider);
     return asyncHid.when(
       data: (hid) {
-        final ds = ChildFirestoreDataSource(ref.watch(firebaseFirestoreProvider), hid);
+        final ds =
+            ChildFirestoreDataSource(ref.watch(firebaseFirestoreProvider), hid);
         return Scaffold(
           backgroundColor: AppColors.pageBackground,
           appBar: AppBar(
@@ -63,9 +64,13 @@ class ManageChildrenScreen extends ConsumerWidget {
                   final color = _parseColor(data['color'] as String?);
                   return ListTile(
                     tileColor: Colors.white,
-                    leading: CircleAvatar(backgroundColor: color, child: const Icon(Icons.child_care, color: Colors.white)),
+                    leading: CircleAvatar(
+                        backgroundColor: color,
+                        child:
+                            const Icon(Icons.child_care, color: Colors.white)),
                     title: Text((data['name'] as String?) ?? '未設定'),
-                    subtitle: Text('${_formatBirthday(data['birthday'] as Timestamp?)} ${_formatGender(data['gender'] as String?)}'),
+                    subtitle: Text(
+                        '${_formatBirthday(data['birthday'] as Timestamp?)} ${_formatGender(data['gender'] as String?)}'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/children/edit/${d.id}'),
                   );
@@ -75,7 +80,8 @@ class ManageChildrenScreen extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (e, __) => Scaffold(body: Center(child: Text('読み込みに失敗しました\n$e'))),
     );
   }

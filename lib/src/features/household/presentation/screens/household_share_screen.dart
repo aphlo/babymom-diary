@@ -7,7 +7,8 @@ class HouseholdShareScreen extends ConsumerStatefulWidget {
   const HouseholdShareScreen({super.key});
 
   @override
-  ConsumerState<HouseholdShareScreen> createState() => _HouseholdShareScreenState();
+  ConsumerState<HouseholdShareScreen> createState() =>
+      _HouseholdShareScreenState();
 }
 
 class _HouseholdShareScreenState extends ConsumerState<HouseholdShareScreen> {
@@ -101,8 +102,7 @@ class _HouseholdShareScreenState extends ConsumerState<HouseholdShareScreen> {
               const SizedBox(height: 8),
               if (_code != null) ...[
                 SelectableText('コード: $_code'),
-                if (_expireAt != null)
-                  Text('有効期限: ${_expireAt!.toLocal()}'),
+                if (_expireAt != null) Text('有効期限: ${_expireAt!.toLocal()}'),
               ],
               const Divider(height: 32),
               Text('招待コードで参加', style: Theme.of(context).textTheme.titleMedium),
