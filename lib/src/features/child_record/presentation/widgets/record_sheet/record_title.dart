@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../child_record.dart';
 
-class RecordTile extends StatelessWidget {
-  const RecordTile({super.key, required this.record});
+class RecordTitle extends StatelessWidget {
+  const RecordTitle({super.key, required this.record});
   final Record record;
 
   @override
@@ -173,7 +173,8 @@ class _TagStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final baseStyle = theme.textTheme.labelSmall ?? const TextStyle(fontSize: 12);
+    final baseStyle =
+        theme.textTheme.labelSmall ?? const TextStyle(fontSize: 12);
     final textStyle = baseStyle.copyWith(
       color: theme.colorScheme.onSecondaryContainer,
       fontWeight: FontWeight.w600,
