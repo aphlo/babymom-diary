@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../child_record.dart';
 import '../../application/usecases/add_record.dart';
 import '../../application/usecases/get_records_for_day.dart';
+import '../../application/usecases/delete_record.dart';
 import '../../data/repositories/child_record_repository_impl.dart';
 import '../../data/sources/record_firestore_data_source.dart';
 import '../../../children/application/selected_child_provider.dart';
@@ -33,6 +34,8 @@ final addRecordUseCaseProvider = Provider.family<AddRecord, String>(
 final getRecordsForDayUseCaseProvider =
     Provider.family<GetRecordsForDay, String>((ref, hid) =>
         GetRecordsForDay(ref.watch(childRecordRepositoryProvider(hid))));
+final deleteRecordUseCaseProvider = Provider.family<DeleteRecord, String>(
+    (ref, hid) => DeleteRecord(ref.watch(childRecordRepositoryProvider(hid))));
 
 class RecordController extends AsyncNotifier<List<Record>> {
   Future<String?> _ensureActiveChildId({
@@ -91,7 +94,7 @@ class RecordController extends AsyncNotifier<List<Record>> {
     });
   }
 
-  Future<void> addRecord(Record record) async {
+  Future<void> _upsertRecord(Record record) async {
     final hid = await ref.read(fbcore.currentHouseholdIdProvider.future);
     final childId = await _ensureActiveChildId(
       householdId: hid,
@@ -102,6 +105,24 @@ class RecordController extends AsyncNotifier<List<Record>> {
     }
     final add = ref.read(addRecordUseCaseProvider(hid));
     await add(childId, record);
+    await refreshSelected();
+  }
+
+  Future<void> addRecord(Record record) => _upsertRecord(record);
+
+  Future<void> updateRecord(Record record) => _upsertRecord(record);
+
+  Future<void> deleteRecord(String id) async {
+    final hid = await ref.read(fbcore.currentHouseholdIdProvider.future);
+    final childId = await _ensureActiveChildId(
+      householdId: hid,
+      watchSelected: false,
+    );
+    if (childId == null) {
+      throw StateError('子どもが登録されていません');
+    }
+    final delete = ref.read(deleteRecordUseCaseProvider(hid));
+    await delete(childId, id);
     await refreshSelected();
   }
 }

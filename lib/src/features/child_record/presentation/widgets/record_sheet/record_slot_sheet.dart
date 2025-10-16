@@ -5,7 +5,7 @@ import '../../../child_record.dart';
 import 'record_title.dart';
 import '../../controllers/record_controller.dart';
 import '../../controllers/selected_record_date_provider.dart';
-import 'add_record_sheet.dart';
+import 'editable_record_sheet.dart';
 
 void showRecordSlotSheet({
   required BuildContext context,
@@ -25,7 +25,7 @@ void showRecordSlotSheet({
         insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
-          child: AddRecordSheet(
+          child: EditableRecordSheet(
             type: t,
             initialDateTime: slot,
           ),
@@ -48,6 +48,80 @@ void showRecordSlotSheet({
           SnackBar(content: Text('記録に失敗しました: $e')),
         );
       }
+    }
+  }
+
+  Future<void> detailedEdit(Record record) async {
+    final updated = await showDialog<Record>(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: EditableRecordSheet(
+            type: record.type,
+            initialDateTime: record.at,
+            initialRecord: record,
+          ),
+        ),
+      ),
+    );
+    if (updated != null) {
+      try {
+        await ref.read(recordControllerProvider.notifier).updateRecord(updated);
+        if (!context.mounted) return;
+        Navigator.of(context).maybePop();
+      } on StateError catch (e) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      } catch (e) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('記録の更新に失敗しました: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> confirmDelete(Record record) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('記録を削除'),
+        content: const Text('この記録を削除してもよろしいですか？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('キャンセル'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('削除'),
+          ),
+        ],
+      ),
+    );
+    if (shouldDelete != true) {
+      return;
+    }
+    try {
+      await ref.read(recordControllerProvider.notifier).deleteRecord(record.id);
+      if (!context.mounted) return;
+      Navigator.of(context).maybePop();
+    } on StateError catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('記録の削除に失敗しました: $e')),
+      );
     }
   }
 
@@ -102,7 +176,14 @@ void showRecordSlotSheet({
                   child: ListView.builder(
                     controller: controller,
                     itemCount: records.length,
-                    itemBuilder: (_, i) => RecordTitle(record: records[i]),
+                    itemBuilder: (_, i) {
+                      final record = records[i];
+                      return RecordTitle(
+                        record: record,
+                        onEdit: () => detailedEdit(record),
+                        onDelete: () => confirmDelete(record),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 8),

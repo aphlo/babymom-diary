@@ -3,8 +3,15 @@ import 'package:intl/intl.dart';
 import '../../../child_record.dart';
 
 class RecordTitle extends StatelessWidget {
-  const RecordTitle({super.key, required this.record});
+  const RecordTitle({
+    super.key,
+    required this.record,
+    this.onEdit,
+    this.onDelete,
+  });
   final Record record;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +52,37 @@ class RecordTitle extends StatelessWidget {
       );
     }
 
+    Widget? trailing;
+    final actionButtons = <Widget>[];
+    if (onEdit != null) {
+      actionButtons.add(
+        IconButton(
+          onPressed: onEdit,
+          tooltip: '編集',
+          icon: const Icon(Icons.edit_outlined),
+          visualDensity: VisualDensity.compact,
+        ),
+      );
+    }
+    if (onDelete != null) {
+      actionButtons.add(
+        IconButton(
+          onPressed: onDelete,
+          tooltip: '削除',
+          icon: const Icon(Icons.delete_outline),
+          visualDensity: VisualDensity.compact,
+        ),
+      );
+    }
+    if (actionButtons.isNotEmpty) {
+      trailing = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ...actionButtons,
+        ],
+      );
+    }
+
     return ListTile(
       leading: Icon(switch (record.type) {
         RecordType.formula => Icons.local_drink,
@@ -64,7 +102,7 @@ class RecordTitle extends StatelessWidget {
               children: subtitleWidgets,
             ),
       isThreeLine: subtitleWidgets.length > 1,
-      trailing: hasNote ? const Icon(Icons.sticky_note_2_outlined) : null,
+      trailing: trailing,
     );
   }
 }

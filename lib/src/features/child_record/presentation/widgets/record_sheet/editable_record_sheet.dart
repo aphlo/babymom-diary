@@ -6,21 +6,24 @@ import '../../controllers/other_tags_controller.dart';
 import 'manage_other_tags_dialog.dart';
 import 'record_fields_sections.dart';
 
-class AddRecordSheet extends ConsumerStatefulWidget {
-  const AddRecordSheet({
+class EditableRecordSheet extends ConsumerStatefulWidget {
+  const EditableRecordSheet({
     super.key,
     required this.type,
     required this.initialDateTime,
+    this.initialRecord,
   });
 
   final RecordType type;
   final DateTime initialDateTime;
+  final Record? initialRecord;
 
   @override
-  ConsumerState<AddRecordSheet> createState() => _AddRecordSheetState();
+  ConsumerState<EditableRecordSheet> createState() =>
+      _EditableRecordSheetState();
 }
 
-class _AddRecordSheetState extends ConsumerState<AddRecordSheet> {
+class _EditableRecordSheetState extends ConsumerState<EditableRecordSheet> {
   final _formKey = GlobalKey<FormState>();
   late TimeOfDay _timeOfDay;
 
@@ -34,12 +37,51 @@ class _AddRecordSheetState extends ConsumerState<AddRecordSheet> {
   String? _durationError;
   String? _volumeError;
 
+  bool get _isEditing => widget.initialRecord != null;
+
   @override
   void initState() {
     super.initState();
-    final initial = widget.initialDateTime.toLocal();
-    final now = DateTime.now();
-    _timeOfDay = TimeOfDay(hour: initial.hour, minute: now.minute);
+    final initial =
+        widget.initialRecord?.at.toLocal() ?? widget.initialDateTime.toLocal();
+    _timeOfDay = TimeOfDay(hour: initial.hour, minute: initial.minute);
+
+    final record = widget.initialRecord;
+    if (record == null) {
+      return;
+    }
+
+    switch (record.type) {
+      case RecordType.breastLeft:
+      case RecordType.breastRight:
+        final minutes = (record.durationSeconds ?? 0) ~/ 60;
+        _minutesController.text = minutes.toString();
+        break;
+      case RecordType.formula:
+      case RecordType.pump:
+        final amount = record.amount;
+        if (amount != null) {
+          _amountController.text = amount == amount.roundToDouble()
+              ? amount.toStringAsFixed(0)
+              : '$amount';
+        }
+        break;
+      case RecordType.pee:
+      case RecordType.poop:
+        _selectedVolume = record.excretionVolume;
+        final note = record.note;
+        if (note != null) {
+          _noteController.text = note;
+        }
+        break;
+      case RecordType.other:
+        _selectedTags.addAll(record.tags);
+        final note = record.note;
+        if (note != null) {
+          _noteController.text = note;
+        }
+        break;
+    }
   }
 
   @override
@@ -217,6 +259,13 @@ class _AddRecordSheetState extends ConsumerState<AddRecordSheet> {
     }
     final totalSeconds = minutes * 60;
     final totalMinutes = minutes.toDouble();
+    if (_isEditing) {
+      return widget.initialRecord!.copyWith(
+        at: at,
+        amount: totalMinutes,
+        durationSeconds: totalSeconds,
+      );
+    }
     return Record(
       type: widget.type,
       at: at,
@@ -229,6 +278,12 @@ class _AddRecordSheetState extends ConsumerState<AddRecordSheet> {
     final amount = double.tryParse(_amountController.text);
     if (amount == null || amount <= 0) {
       return null;
+    }
+    if (_isEditing) {
+      return widget.initialRecord!.copyWith(
+        at: at,
+        amount: amount,
+      );
     }
     return Record(
       type: widget.type,
@@ -245,11 +300,19 @@ class _AddRecordSheetState extends ConsumerState<AddRecordSheet> {
       });
       return null;
     }
+    final note = _noteOrNull();
+    if (_isEditing) {
+      return widget.initialRecord!.copyWith(
+        at: at,
+        excretionVolume: volume,
+        note: note,
+      );
+    }
     return Record(
       type: widget.type,
       at: at,
       excretionVolume: volume,
-      note: _noteOrNull(),
+      note: note,
     );
   }
 
@@ -261,11 +324,19 @@ class _AddRecordSheetState extends ConsumerState<AddRecordSheet> {
         : _selectedTags
             .where((tag) => availableTags.contains(tag))
             .toList(growable: false);
+    final note = _noteOrNull();
+    if (_isEditing) {
+      return widget.initialRecord!.copyWith(
+        at: at,
+        tags: selectedTags,
+        note: note,
+      );
+    }
     return Record(
       type: widget.type,
       at: at,
       tags: selectedTags,
-      note: _noteOrNull(),
+      note: note,
     );
   }
 
