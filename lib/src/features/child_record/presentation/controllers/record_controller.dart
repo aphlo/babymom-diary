@@ -31,9 +31,8 @@ final childRecordRepositoryProvider =
 final addRecordUseCaseProvider = Provider.family<AddRecord, String>(
     (ref, hid) => AddRecord(ref.watch(childRecordRepositoryProvider(hid))));
 final getRecordsForDayUseCaseProvider =
-    Provider.family<GetRecordsForDay, String>(
-        (ref, hid) =>
-            GetRecordsForDay(ref.watch(childRecordRepositoryProvider(hid))));
+    Provider.family<GetRecordsForDay, String>((ref, hid) =>
+        GetRecordsForDay(ref.watch(childRecordRepositoryProvider(hid))));
 
 class RecordController extends AsyncNotifier<List<Record>> {
   Future<String?> _ensureActiveChildId({

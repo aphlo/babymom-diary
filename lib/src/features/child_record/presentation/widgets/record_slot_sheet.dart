@@ -11,7 +11,7 @@ void showRecordSlotSheet({
   required BuildContext context,
   required WidgetRef ref,
   required int hour,
-  RecordType? onlyType,
+  required RecordType onlyType,
   required List<Record> inHour,
 }) {
   final base = ref.read(selectedRecordDateProvider);
@@ -55,20 +55,9 @@ void showRecordSlotSheet({
     context: context,
     isScrollControlled: true,
     builder: (ctx) {
-      final records = onlyType == null
-          ? inHour
-          : inHour.where((e) => e.type == onlyType).toList();
-      final actions = onlyType == null
-          ? <RecordType>[
-              RecordType.breastRight,
-              RecordType.breastLeft,
-              RecordType.formula,
-              RecordType.pump,
-              RecordType.pee,
-              RecordType.poop,
-              RecordType.other,
-            ]
-          : <RecordType>[onlyType];
+      final records =
+          inHour.where((e) => e.type == onlyType).toList(growable: false);
+      final actions = <RecordType>[onlyType];
       return DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.6,

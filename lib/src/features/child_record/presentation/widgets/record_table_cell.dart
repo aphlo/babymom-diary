@@ -6,7 +6,7 @@ import 'other_tags_preview.dart';
 typedef RecordSlotTapCallback = void Function(
   BuildContext context,
   int hour,
-  RecordType? type,
+  RecordType type,
   List<Record> inHour,
 );
 
@@ -22,15 +22,14 @@ class RecordTableCell extends StatelessWidget {
 
   final List<Record> records;
   final int hour;
-  final RecordType? type;
+  final RecordType type;
   final RecordSlotTapCallback onTap;
   final double rowHeight;
 
   @override
   Widget build(BuildContext context) {
     final inHour = records.where((e) => e.at.hour == hour).toList();
-    final filtered =
-        type == null ? inHour : inHour.where((e) => e.type == type).toList();
+    final filtered = inHour.where((e) => e.type == type).toList();
 
     if (type == RecordType.other) {
       final tags = filtered
@@ -75,7 +74,6 @@ class RecordTableCell extends StatelessWidget {
           break;
         case RecordType.pee || RecordType.poop:
         case RecordType.other:
-        case null:
           text = '${filtered.length}';
           break;
       }
@@ -95,7 +93,7 @@ class RecordTableCell extends StatelessWidget {
 
 Widget _buildCountBadge(
   BuildContext context,
-  RecordType? type,
+  RecordType type,
   String text,
 ) {
   if (text.isEmpty) {
@@ -116,7 +114,7 @@ Widget _buildCountBadge(
   );
 }
 
-_BadgeColors _badgeColorsForRecordType(RecordType? type, ColorScheme scheme) {
+_BadgeColors _badgeColorsForRecordType(RecordType type, ColorScheme scheme) {
   switch (type) {
     case RecordType.breastLeft:
       return _BadgeColors(
@@ -149,11 +147,6 @@ _BadgeColors _badgeColorsForRecordType(RecordType? type, ColorScheme scheme) {
         foreground: scheme.onSecondary,
       );
     case RecordType.other:
-      return _BadgeColors(
-        background: scheme.surfaceContainerHighest,
-        foreground: scheme.onSurfaceVariant,
-      );
-    case null:
       return _BadgeColors(
         background: scheme.surfaceContainerHighest,
         foreground: scheme.onSurfaceVariant,

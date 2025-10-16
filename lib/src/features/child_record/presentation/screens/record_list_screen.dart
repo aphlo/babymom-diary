@@ -39,7 +39,7 @@ class RecordListScreen extends ConsumerWidget {
     void handleSlotTap(
       BuildContext _,
       int hour,
-      RecordType? type,
+      RecordType type,
       List<Record> inHour,
     ) {
       showRecordSlotSheet(
