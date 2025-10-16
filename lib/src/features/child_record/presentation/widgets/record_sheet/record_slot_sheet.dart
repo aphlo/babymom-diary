@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../child_record.dart';
-import '../components/record_tile.dart';
-import '../controllers/record_controller.dart';
-import '../controllers/selected_record_date_provider.dart';
+import '../../../child_record.dart';
+import 'record_tile.dart';
+import '../../controllers/record_controller.dart';
+import '../../controllers/selected_record_date_provider.dart';
 import 'add_record_sheet.dart';
 
 void showRecordSlotSheet({

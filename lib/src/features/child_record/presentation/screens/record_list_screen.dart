@@ -8,7 +8,7 @@ import '../controllers/record_controller.dart';
 import '../controllers/selected_record_date_provider.dart';
 import '../widgets/app_bar_child_info.dart';
 import '../widgets/app_bar_date_switcher.dart';
-import '../widgets/record_slot_sheet.dart';
+import '../widgets/record_sheet/record_slot_sheet.dart';
 import '../widgets/record_table.dart';
 
 class RecordListScreen extends ConsumerWidget {

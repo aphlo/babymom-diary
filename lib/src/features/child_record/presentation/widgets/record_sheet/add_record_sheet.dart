@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../child_record.dart';
-import '../controllers/other_tags_controller.dart';
+import '../../../child_record.dart';
+import '../../controllers/other_tags_controller.dart';
 
 class AddRecordSheet extends ConsumerStatefulWidget {
   const AddRecordSheet({
