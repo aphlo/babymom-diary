@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../controllers/selected_log_date_provider.dart';
+import '../controllers/selected_record_date_provider.dart';
 
 class DateSwitcher extends ConsumerWidget {
   const DateSwitcher({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final date = ref.watch(selectedLogDateProvider);
+    final date = ref.watch(selectedRecordDateProvider);
     final formatted = '${date.year}/${date.month}/${date.day}';
 
     void setDate(DateTime d) {
-      ref.read(selectedLogDateProvider.notifier).state =
+      ref.read(selectedRecordDateProvider.notifier).state =
           DateTime(d.year, d.month, d.day);
     }
 

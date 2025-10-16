@@ -3,36 +3,36 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 
-import '../../baby_log.dart';
-import '../controllers/log_controller.dart';
-import '../controllers/selected_log_date_provider.dart';
+import '../../child_record.dart';
+import '../controllers/record_controller.dart';
+import '../controllers/selected_record_date_provider.dart';
 import '../widgets/app_bar_child_info.dart';
 import '../widgets/app_bar_date_switcher.dart';
-import '../widgets/log_slot_sheet.dart';
-import '../widgets/log_table.dart';
+import '../widgets/record_slot_sheet.dart';
+import '../widgets/record_table.dart';
 
-class LogListScreen extends ConsumerWidget {
-  const LogListScreen({super.key});
+class RecordListScreen extends ConsumerWidget {
+  const RecordListScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(logControllerProvider);
-    final selectedDate = ref.watch(selectedLogDateProvider);
+    final state = ref.watch(recordControllerProvider);
+    final selectedDate = ref.watch(selectedRecordDateProvider);
 
     final today = DateTime.now();
     final today0 = DateTime(today.year, today.month, today.day);
     final isToday = selectedDate.isAtSameMomentAs(today0);
 
     void goToPreviousDate() {
-      final d = ref.read(selectedLogDateProvider);
-      ref.read(selectedLogDateProvider.notifier).state =
+      final d = ref.read(selectedRecordDateProvider);
+      ref.read(selectedRecordDateProvider.notifier).state =
           DateTime(d.year, d.month, d.day).subtract(const Duration(days: 1));
     }
 
     void goToNextDate() {
-      final d = ref.read(selectedLogDateProvider);
+      final d = ref.read(selectedRecordDateProvider);
       final nd = d.add(const Duration(days: 1));
-      ref.read(selectedLogDateProvider.notifier).state =
+      ref.read(selectedRecordDateProvider.notifier).state =
           DateTime(nd.year, nd.month, nd.day);
     }
 
@@ -42,7 +42,7 @@ class LogListScreen extends ConsumerWidget {
       RecordType? type,
       List<Record> inHour,
     ) {
-      showLogSlotSheet(
+      showRecordSlotSheet(
         context: context,
         ref: ref,
         hour: hour,
@@ -88,7 +88,7 @@ class LogListScreen extends ConsumerWidget {
         ),
       ),
       body: state.when(
-        data: (records) => LogTable(
+        data: (records) => RecordTable(
           records: records,
           onSlotTap: handleSlotTap,
         ),

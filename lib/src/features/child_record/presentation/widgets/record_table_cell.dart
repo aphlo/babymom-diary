@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-import '../../baby_log.dart';
+import '../../child_record.dart';
 import 'other_tags_preview.dart';
 
-typedef LogSlotTapCallback = void Function(
+typedef RecordSlotTapCallback = void Function(
   BuildContext context,
   int hour,
   RecordType? type,
   List<Record> inHour,
 );
 
-class LogTableCell extends StatelessWidget {
-  const LogTableCell({
+class RecordTableCell extends StatelessWidget {
+  const RecordTableCell({
     super.key,
     required this.records,
     required this.hour,
@@ -23,7 +23,7 @@ class LogTableCell extends StatelessWidget {
   final List<Record> records;
   final int hour;
   final RecordType? type;
-  final LogSlotTapCallback onTap;
+  final RecordSlotTapCallback onTap;
   final double rowHeight;
 
   @override

@@ -1,7 +1,7 @@
-import '../../baby_log.dart';
+import '../../child_record.dart';
 
 class GetRecordsForDay {
-  final LogRepository repo;
+  final ChildRecordRepository repo;
   GetRecordsForDay(this.repo);
   Future<List<Record>> call(String childId, DateTime day) =>
       repo.getRecordsForDay(childId, day);

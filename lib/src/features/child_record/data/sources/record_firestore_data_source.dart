@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../baby_log.dart';
+import '../../child_record.dart';
 
-class LogFirestoreDataSource {
-  LogFirestoreDataSource(this.db, this.householdId);
+class RecordFirestoreDataSource {
+  RecordFirestoreDataSource(this.db, this.householdId);
   final FirebaseFirestore db;
   final String householdId;
 

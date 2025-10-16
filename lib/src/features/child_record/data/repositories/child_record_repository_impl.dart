@@ -1,10 +1,10 @@
-import '../../baby_log.dart';
-import '../sources/log_firestore_data_source.dart';
+import '../../child_record.dart';
+import '../sources/record_firestore_data_source.dart';
 
-class LogRepositoryImpl implements LogRepository {
-  final LogFirestoreDataSource remote;
+class ChildRecordRepositoryImpl implements ChildRecordRepository {
+  final RecordFirestoreDataSource remote;
 
-  LogRepositoryImpl({required this.remote});
+  ChildRecordRepositoryImpl({required this.remote});
 
   @override
   Future<void> addRecord(String childId, Record record) async =>

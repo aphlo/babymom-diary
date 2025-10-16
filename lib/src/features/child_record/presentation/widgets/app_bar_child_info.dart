@@ -8,7 +8,7 @@ import '../../../children/application/children_stream_provider.dart';
 import '../../../children/application/selected_child_provider.dart';
 import '../../../children/application/selected_child_snapshot_provider.dart';
 import '../../../children/domain/entities/child_summary.dart';
-import '../controllers/selected_log_date_provider.dart';
+import '../controllers/selected_record_date_provider.dart';
 
 class AppBarChildInfo extends ConsumerWidget {
   const AppBarChildInfo({super.key});
@@ -30,7 +30,7 @@ class AppBarChildInfo extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncHid = ref.watch(currentHouseholdIdProvider);
     final selectedId = ref.watch(selectedChildControllerProvider).value;
-    final selectedDate = ref.watch(selectedLogDateProvider);
+    final selectedDate = ref.watch(selectedRecordDateProvider);
 
     return asyncHid.when(
       loading: () => const SizedBox.shrink(),

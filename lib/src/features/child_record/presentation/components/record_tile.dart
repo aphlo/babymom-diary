@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../baby_log.dart';
+import '../../child_record.dart';
 
 class RecordTile extends StatelessWidget {
   const RecordTile({super.key, required this.record});

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../../baby_log.dart';
+import '../../child_record.dart';
 import 'dashed_table_border.dart';
-import 'log_table_cell.dart';
+import 'record_table_cell.dart';
 
-class LogTable extends StatelessWidget {
-  const LogTable({
+class RecordTable extends StatelessWidget {
+  const RecordTable({
     super.key,
     required this.records,
     required this.onSlotTap,
   });
 
   final List<Record> records;
-  final LogSlotTapCallback onSlotTap;
+  final RecordSlotTapCallback onSlotTap;
 
   static const double headerRowHeight = 44.0;
   static const double bodyRowHeight = 32.0;
@@ -169,7 +169,7 @@ class LogTable extends StatelessWidget {
                                   child: Center(child: Text('$hour')),
                                 ),
                                 for (final type in _slotTypes)
-                                  LogTableCell(
+                                  RecordTableCell(
                                     records: records,
                                     hour: hour,
                                     type: type,
@@ -222,14 +222,14 @@ class _TotalsRow extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: Table(
-        columnWidths: LogTable._columnWidths,
+        columnWidths: RecordTable._columnWidths,
         border: DashedTableBorder(
           top: borderSide,
           left: borderSide,
           right: borderSide,
           bottom: borderSide,
           verticalInside: borderSide,
-          dashPattern: LogTable._borderDashPattern,
+          dashPattern: RecordTable._borderDashPattern,
         ),
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         children: [
@@ -239,7 +239,7 @@ class _TotalsRow extends StatelessWidget {
             ),
             children: [
               const SizedBox(
-                height: LogTable.bodyRowHeight,
+                height: RecordTable.bodyRowHeight,
                 child: Center(
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
@@ -275,7 +275,7 @@ class _TotalValueCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: LogTable.bodyRowHeight,
+      height: RecordTable.bodyRowHeight,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
         child: Stack(

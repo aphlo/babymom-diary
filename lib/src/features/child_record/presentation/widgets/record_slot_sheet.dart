@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../baby_log.dart';
+import '../../child_record.dart';
 import '../components/record_tile.dart';
-import '../controllers/log_controller.dart';
-import '../controllers/selected_log_date_provider.dart';
+import '../controllers/record_controller.dart';
+import '../controllers/selected_record_date_provider.dart';
 import 'add_record_sheet.dart';
 
-void showLogSlotSheet({
+void showRecordSlotSheet({
   required BuildContext context,
   required WidgetRef ref,
   required int hour,
   RecordType? onlyType,
   required List<Record> inHour,
 }) {
-  final base = ref.read(selectedLogDateProvider);
+  final base = ref.read(selectedRecordDateProvider);
   final slot = DateTime(base.year, base.month, base.day, hour);
 
   Future<void> detailedAdd(RecordType t) async {
@@ -34,7 +34,7 @@ void showLogSlotSheet({
     );
     if (created != null) {
       try {
-        await ref.read(logControllerProvider.notifier).addRecord(created);
+        await ref.read(recordControllerProvider.notifier).addRecord(created);
         if (!context.mounted) return;
         Navigator.of(context).maybePop();
       } on StateError catch (e) {

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../features/baby_log/presentation/screens/log_list_screen.dart';
+import '../../features/child_record/presentation/screens/record_list_screen.dart';
 import '../../features/vaccines/presentation/screens/vaccines_screen.dart';
 import '../../features/mom/presentation/screens/mom_screen.dart';
 import '../../features/calendar/presentation/screens/calendar_screen.dart';
@@ -23,7 +23,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/baby',
         name: 'baby',
         pageBuilder: (context, state) =>
-            const NoTransitionPage(child: LogListScreen()),
+            const NoTransitionPage(child: RecordListScreen()),
       ),
       GoRoute(
         path: '/vaccines',
