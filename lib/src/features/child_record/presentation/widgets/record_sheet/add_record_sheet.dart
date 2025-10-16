@@ -347,9 +347,9 @@ class _AddRecordSheetState extends ConsumerState<AddRecordSheet> {
       case RecordType.breastLeft:
       case RecordType.breastRight:
         final minutes = int.tryParse(_minutesController.text) ?? 0;
-        if (minutes <= 0) {
+        if (minutes < 0) {
           setState(() {
-            _durationError = '1分以上の値を入力してください';
+            _durationError = '0以上の値を入力してください';
           });
           return;
         }
