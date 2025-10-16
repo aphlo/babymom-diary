@@ -55,8 +55,8 @@ void showRecordSlotSheet({
     context: context,
     isScrollControlled: true,
     builder: (ctx) {
-      final records =
-          inHour.where((e) => e.type == onlyType).toList(growable: false);
+      final records = inHour.where((e) => e.type == onlyType).toList()
+        ..sort((a, b) => a.at.compareTo(b.at));
       final actions = <RecordType>[onlyType];
       return DraggableScrollableSheet(
         expand: false,
