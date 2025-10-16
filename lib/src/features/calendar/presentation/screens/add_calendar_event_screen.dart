@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
+import 'package:intl/intl.dart';
 
 class AddCalendarEventResult {
   const AddCalendarEventResult({
@@ -49,6 +51,8 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
   final _titleController = TextEditingController();
   final _memoController = TextEditingController();
   bool _allDay = false;
+  late DateTime _startDate;
+  late DateTime _endDate;
   TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay _endTime = const TimeOfDay(hour: 10, minute: 0);
   late String _selectedIconPath;
@@ -56,6 +60,13 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
   @override
   void initState() {
     super.initState();
+    final initialDate = DateTime(
+      widget.initialDate.year,
+      widget.initialDate.month,
+      widget.initialDate.day,
+    );
+    _startDate = initialDate;
+    _endDate = initialDate;
     _selectedIconPath = _availableIconPaths.first;
   }
 
@@ -66,32 +77,108 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
     super.dispose();
   }
 
-  Future<void> _pickTime({required bool isStart}) async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: isStart ? _startTime : _endTime,
+  Future<void> _pickDate({required bool isStart}) async {
+    final current = isStart ? _startDate : _endDate;
+    final pickedDate = await DatePicker.showDatePicker(
+      context,
+      showTitleActions: true,
+      currentTime: current,
+      locale: LocaleType.jp,
     );
-    if (picked == null) return;
+    if (pickedDate == null) {
+      return;
+    }
+    final normalizedDate = DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+    );
 
     setState(() {
       if (isStart) {
-        _startTime = picked;
-        if (!_allDay && !_isEndAfterStart(_startTime, _endTime)) {
-          _endTime = TimeOfDay(
-            hour: (_startTime.hour + 1) % 24,
-            minute: _startTime.minute,
-          );
+        _startDate = normalizedDate;
+        if (_allDay) {
+          _endDate = normalizedDate;
+          return;
         }
+        _ensureEndAfterStart(_combine(_startDate, _startTime));
       } else {
-        _endTime = picked;
+        _endDate = normalizedDate;
+        if (_allDay) {
+          return;
+        }
+        if (!_isEndAfterStart(
+          _combine(_startDate, _startTime),
+          _combine(_endDate, _endTime),
+        )) {
+          _ensureEndAfterStart(_combine(_startDate, _startTime));
+        }
       }
     });
   }
 
-  bool _isEndAfterStart(TimeOfDay start, TimeOfDay end) {
-    final startMinutes = start.hour * 60 + start.minute;
-    final endMinutes = end.hour * 60 + end.minute;
-    return endMinutes > startMinutes;
+  Future<void> _pickTime({required bool isStart}) async {
+    if (_allDay) return;
+
+    final referenceDate = isStart ? _startDate : _endDate;
+    final referenceTime = isStart ? _startTime : _endTime;
+    final current = DateTime(
+      referenceDate.year,
+      referenceDate.month,
+      referenceDate.day,
+      referenceTime.hour,
+      referenceTime.minute,
+    );
+
+    final picked = await DatePicker.showTimePicker(
+      context,
+      currentTime: current,
+      showTitleActions: true,
+      showSecondsColumn: false,
+      locale: LocaleType.jp,
+    );
+    if (picked == null) return;
+
+    final selectedTime = TimeOfDay(
+      hour: picked.hour,
+      minute: picked.minute,
+    );
+
+    setState(() {
+      if (isStart) {
+        _startTime = selectedTime;
+        _ensureEndAfterStart(_combine(_startDate, _startTime));
+      } else {
+        _endTime = selectedTime;
+        if (!_isEndAfterStart(
+          _combine(_startDate, _startTime),
+          _combine(_endDate, _endTime),
+        )) {
+          _ensureEndAfterStart(_combine(_startDate, _startTime));
+        }
+      }
+    });
+  }
+
+  DateTime _combine(DateTime date, TimeOfDay time) {
+    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
+  }
+
+  void _ensureEndAfterStart(DateTime newStart) {
+    final currentEnd = _combine(_endDate, _endTime);
+    if (!currentEnd.isAfter(newStart)) {
+      final fallback = newStart.add(const Duration(hours: 1));
+      _endDate = DateTime(fallback.year, fallback.month, fallback.day);
+      _endTime = TimeOfDay(hour: fallback.hour, minute: fallback.minute);
+    }
+  }
+
+  bool _isEndAfterStart(DateTime start, DateTime end) {
+    return end.isAfter(start);
+  }
+
+  String _formatDate(DateTime date) {
+    return DateFormat('yyyy/MM/dd').format(date);
   }
 
   void _submit() {
@@ -99,37 +186,29 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
       return;
     }
 
-    final date = DateTime(widget.initialDate.year, widget.initialDate.month,
-        widget.initialDate.day);
-
     DateTime start;
     DateTime end;
 
     if (_allDay) {
-      start = date;
-      end = date.add(const Duration(hours: 23, minutes: 59));
+      start = DateTime(
+        _startDate.year,
+        _startDate.month,
+        _startDate.day,
+      );
+      end = start.add(const Duration(hours: 23, minutes: 59));
     } else {
-      if (!_isEndAfterStart(_startTime, _endTime)) {
+      final startDateTime = _combine(_startDate, _startTime);
+      final endDateTime = _combine(_endDate, _endTime);
+
+      if (!_isEndAfterStart(startDateTime, endDateTime)) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('終了時間は開始時間より後にしてください。')),
         );
         return;
       }
 
-      start = DateTime(
-        date.year,
-        date.month,
-        date.day,
-        _startTime.hour,
-        _startTime.minute,
-      );
-      end = DateTime(
-        date.year,
-        date.month,
-        date.day,
-        _endTime.hour,
-        _endTime.minute,
-      );
+      start = startDateTime;
+      end = endDateTime;
     }
 
     final result = AddCalendarEventResult(
@@ -165,12 +244,12 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(
-                  labelText: 'タイトル',
+                  labelText: '予定',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'タイトルを入力してください';
+                    return '予定を入力してください';
                   }
                   return null;
                 },
@@ -191,21 +270,30 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
                 onChanged: (value) {
                   setState(() {
                     _allDay = value;
+                    if (value) {
+                      _endDate = _startDate;
+                    } else {
+                      _ensureEndAfterStart(_combine(_startDate, _startTime));
+                    }
                   });
                 },
               ),
+              const SizedBox(height: 12),
+              _DateTimeSelectorRow(
+                label: '開始時間',
+                dateLabel: _formatDate(_startDate),
+                onDateTap: () => _pickDate(isStart: true),
+                timeLabel: _allDay ? null : _startTime.format(context),
+                onTimeTap: _allDay ? null : () => _pickTime(isStart: true),
+              ),
               if (!_allDay) ...[
-                const SizedBox(height: 12),
-                _TimeSelectorTile(
-                  label: '開始時間',
-                  time: _startTime,
-                  onTap: () => _pickTime(isStart: true),
-                ),
                 const SizedBox(height: 8),
-                _TimeSelectorTile(
+                _DateTimeSelectorRow(
                   label: '終了時間',
-                  time: _endTime,
-                  onTap: () => _pickTime(isStart: false),
+                  dateLabel: _formatDate(_endDate),
+                  onDateTap: () => _pickDate(isStart: false),
+                  timeLabel: _endTime.format(context),
+                  onTimeTap: () => _pickTime(isStart: false),
                 ),
               ],
               const SizedBox(height: 24),
@@ -251,28 +339,90 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
   }
 }
 
-class _TimeSelectorTile extends StatelessWidget {
-  const _TimeSelectorTile({
+class _DateTimeSelectorRow extends StatelessWidget {
+  const _DateTimeSelectorRow({
     required this.label,
-    required this.time,
+    required this.dateLabel,
+    required this.onDateTap,
+    this.timeLabel,
+    this.onTimeTap,
+  });
+
+  final String label;
+  final String dateLabel;
+  final VoidCallback onDateTap;
+  final String? timeLabel;
+  final VoidCallback? onTimeTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final showTime = timeLabel != null && onTimeTap != null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: theme.textTheme.bodyLarge),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _PickerButton(
+                label: dateLabel,
+                icon: Icons.event,
+                onTap: onDateTap,
+              ),
+            ),
+            if (showTime) ...[
+              const SizedBox(width: 12),
+              Expanded(
+                child: _PickerButton(
+                  label: timeLabel!,
+                  icon: Icons.timer,
+                  onTap: onTimeTap!,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _PickerButton extends StatelessWidget {
+  const _PickerButton({
+    required this.label,
+    required this.icon,
     required this.onTap,
   });
 
   final String label;
-  final TimeOfDay time;
+  final IconData icon;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(label),
-      subtitle: Text(time.format(context)),
-      trailing: const Icon(Icons.timer),
-      onTap: onTap,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Theme.of(context).dividerColor),
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        alignment: Alignment.centerLeft,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      onPressed: onTap,
+      child: Row(
+        children: [
+          Icon(icon, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -294,8 +444,6 @@ class _IconChoice extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        // width: 88,
-        // height: 88,
         decoration: BoxDecoration(
           border: Border.all(
             color: selected
