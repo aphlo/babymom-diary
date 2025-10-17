@@ -56,7 +56,7 @@ class _EditableRecordSheetState extends ConsumerState<EditableRecordSheet> {
     switch (record.type) {
       case RecordType.breastLeft:
       case RecordType.breastRight:
-        final minutes = (record.durationSeconds ?? 0) ~/ 60;
+        final minutes = record.amount ?? 0;
         _minutesController.text = minutes.toString();
         break;
       case RecordType.formula:
@@ -259,20 +259,17 @@ class _EditableRecordSheetState extends ConsumerState<EditableRecordSheet> {
       });
       return null;
     }
-    final totalSeconds = minutes * 60;
     final totalMinutes = minutes.toDouble();
     if (_isEditing) {
       return widget.initialRecord!.copyWith(
         at: at,
         amount: totalMinutes,
-        durationSeconds: totalSeconds,
       );
     }
     return Record(
       type: widget.type,
       at: at,
       amount: totalMinutes,
-      durationSeconds: totalSeconds,
     );
   }
 

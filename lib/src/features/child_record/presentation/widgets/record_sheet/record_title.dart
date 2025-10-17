@@ -15,6 +15,7 @@ class RecordTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final timeText = DateFormat('HH:mm').format(record.at.toLocal());
     final noteText = record.note?.trim() ?? '';
     final hasNote = noteText.isNotEmpty;
@@ -27,12 +28,21 @@ class RecordTitle extends StatelessWidget {
       noteText: noteText,
       tags: tags,
     );
+    final timeTextStyle = theme.textTheme.bodySmall
+            ?.copyWith(color: theme.colorScheme.onSurfaceVariant) ??
+        const TextStyle(fontSize: 12, color: Colors.black54);
+    final detailStyle = theme.textTheme.bodyMedium;
     final titleWidget = record.type == RecordType.other && titleDetail.usesTags
-        ? _OtherRecordTitle(timeText: timeText, tags: tags)
-        : Text(
-            _composeTitleText(timeText, titleDetail.detail),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+        ? _OtherRecordTitle(
+            timeText: timeText,
+            tags: tags,
+            timeStyle: timeTextStyle,
+          )
+        : _RecordTitleRow(
+            timeText: timeText,
+            detail: titleDetail.detail,
+            timeStyle: timeTextStyle,
+            detailStyle: detailStyle,
           );
     final subtitleWidgets = <Widget>[];
 
@@ -107,12 +117,48 @@ class RecordTitle extends StatelessWidget {
   }
 }
 
-String _composeTitleText(String timeText, String detail) {
-  final trimmedDetail = detail.trim();
-  if (trimmedDetail.isEmpty) {
-    return timeText;
+class _RecordTitleRow extends StatelessWidget {
+  const _RecordTitleRow({
+    required this.timeText,
+    required this.detail,
+    required this.timeStyle,
+    required this.detailStyle,
+  });
+
+  final String timeText;
+  final String detail;
+  final TextStyle timeStyle;
+  final TextStyle? detailStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    final trimmedDetail = detail.trim();
+    if (trimmedDetail.isEmpty) {
+      return Text(
+        timeText,
+        style: timeStyle,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+    return Row(
+      children: [
+        Text(
+          timeText,
+          style: timeStyle,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            trimmedDetail,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: detailStyle,
+          ),
+        ),
+      ],
+    );
   }
-  return '$timeText $trimmedDetail';
 }
 
 _TitleDetail _buildTitleDetail(
@@ -122,35 +168,21 @@ _TitleDetail _buildTitleDetail(
 }) {
   switch (record.type) {
     case RecordType.formula:
+    case RecordType.pump:
       final amount = record.amount;
       return amount != null
           ? _TitleDetail(detail: '${amount.toStringAsFixed(0)} ml')
           : const _TitleDetail(detail: '量未入力');
-    case RecordType.pump:
-      final amount = record.amount;
-      return amount != null
-          ? _TitleDetail(detail: '搾母乳 ${amount.toStringAsFixed(0)} ml')
-          : const _TitleDetail(detail: '搾母乳');
     case RecordType.breastRight:
-      final duration = _formatBreastDuration(record);
-      return duration.isEmpty
-          ? const _TitleDetail(detail: '母乳(右)')
-          : _TitleDetail(detail: '母乳(右) $duration');
     case RecordType.breastLeft:
       final duration = _formatBreastDuration(record);
-      return duration.isEmpty
-          ? const _TitleDetail(detail: '母乳(左)')
-          : _TitleDetail(detail: '母乳(左) $duration');
+      return _TitleDetail(detail: duration);
     case RecordType.pee:
       final label = record.excretionVolume?.label;
-      return label == null
-          ? const _TitleDetail(detail: '尿')
-          : _TitleDetail(detail: '尿 ($label)');
+      return _TitleDetail(detail: '尿 ($label)');
     case RecordType.poop:
       final label = record.excretionVolume?.label;
-      return label == null
-          ? const _TitleDetail(detail: '便')
-          : _TitleDetail(detail: '便 ($label)');
+      return _TitleDetail(detail: '便 ($label)');
     case RecordType.other:
       if (tags.isNotEmpty) {
         return const _TitleDetail(
@@ -184,17 +216,22 @@ class _OtherRecordTitle extends StatelessWidget {
   const _OtherRecordTitle({
     required this.timeText,
     required this.tags,
+    required this.timeStyle,
   });
 
   final String timeText;
   final List<String> tags;
+  final TextStyle timeStyle;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(timeText),
-        const SizedBox(width: 8),
+        Text(
+          timeText,
+          style: timeStyle,
+        ),
+        const SizedBox(width: 12),
         Expanded(
           child: _TagStrip(tags: tags),
         ),
@@ -263,19 +300,13 @@ class _TagChip extends StatelessWidget {
 }
 
 String _formatBreastDuration(Record record) {
-  final totalSeconds =
-      record.durationSeconds ?? ((record.amount ?? 0) * 60).round();
-  if (totalSeconds <= 0) {
-    return '';
+  final amount = record.amount;
+
+  if (amount != null) {
+    if (amount <= 0) return '';
+    if (amount > 0) {
+      return '$amount分';
+    }
   }
-  final minutes = totalSeconds ~/ 60;
-  final seconds = totalSeconds % 60;
-  final buffer = <String>[];
-  if (minutes > 0) {
-    buffer.add('$minutes分');
-  }
-  if (seconds > 0) {
-    buffer.add('$seconds秒');
-  }
-  return buffer.join();
+  return '';
 }
