@@ -9,10 +9,12 @@ class RecordTable extends StatelessWidget {
     super.key,
     required this.records,
     required this.onSlotTap,
+    required this.scrollStorageKey,
   });
 
   final List<Record> records;
   final RecordSlotTapCallback onSlotTap;
+  final PageStorageKey<String> scrollStorageKey;
 
   static const double headerRowHeight = 44.0;
   static const double bodyRowHeight = 32.0;
@@ -140,6 +142,7 @@ class RecordTable extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: bodyRowHeight),
                   child: SingleChildScrollView(
+                    key: scrollStorageKey,
                     child: SizedBox(
                       width: double.infinity,
                       child: Table(

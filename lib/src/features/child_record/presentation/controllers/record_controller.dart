@@ -78,7 +78,7 @@ class RecordController extends AsyncNotifier<List<Record>> {
   }
 
   Future<void> refreshSelected() async {
-    state = const AsyncLoading();
+    state = const AsyncLoading<List<Record>>().copyWithPrevious(state);
     state = await AsyncValue.guard(() async {
       final date = ref.read(selectedRecordDateProvider);
       final hid = await ref.read(fbcore.currentHouseholdIdProvider.future);

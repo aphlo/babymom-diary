@@ -51,6 +51,32 @@ class RecordListScreen extends ConsumerWidget {
       );
     }
 
+    final scrollStorageKey = PageStorageKey<String>(
+      'record_table_scroll_${selectedDate.toIso8601String()}',
+    );
+
+    Widget buildRecordTable(List<Record> records) {
+      return Stack(
+        children: [
+          RecordTable(
+            records: records,
+            onSlotTap: handleSlotTap,
+            scrollStorageKey: scrollStorageKey,
+          ),
+          if (state.isLoading)
+            const Positioned(
+              right: 16,
+              bottom: 16,
+              child: SizedBox(
+                height: 36,
+                width: 36,
+                child: CircularProgressIndicator(strokeWidth: 3),
+              ),
+            ),
+        ],
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -88,11 +114,14 @@ class RecordListScreen extends ConsumerWidget {
         ),
       ),
       body: state.when(
-        data: (records) => RecordTable(
-          records: records,
-          onSlotTap: handleSlotTap,
-        ),
-        loading: () => const Center(child: CircularProgressIndicator()),
+        data: buildRecordTable,
+        loading: () {
+          final records = state.value;
+          if (records != null) {
+            return buildRecordTable(records);
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
         error: (e, _) => Center(child: Text('Error: $e')),
       ),
       bottomNavigationBar: const AppBottomNav(),
