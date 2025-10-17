@@ -46,7 +46,6 @@ class RecordFirestoreDataSource {
         at: (data['at'] as Timestamp).toDate(),
         amount: (data['amount'] as num?)?.toDouble(),
         note: data['note'] as String?,
-        durationSeconds: (data['durationSeconds'] as num?)?.toInt(),
         excretionVolume: excretionVolume,
         tags: tags,
       );
@@ -59,7 +58,6 @@ class RecordFirestoreDataSource {
       'at': Timestamp.fromDate(record.at),
       'amount': record.amount,
       'note': record.note,
-      'durationSeconds': record.durationSeconds,
       'excretionVolume': record.excretionVolume?.name,
       'tags': record.tags,
     }, SetOptions(merge: true));
