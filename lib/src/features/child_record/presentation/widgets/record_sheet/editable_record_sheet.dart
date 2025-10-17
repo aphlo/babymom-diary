@@ -44,7 +44,9 @@ class _EditableRecordSheetState extends ConsumerState<EditableRecordSheet> {
     super.initState();
     final initial =
         widget.initialRecord?.at.toLocal() ?? widget.initialDateTime.toLocal();
-    _timeOfDay = TimeOfDay(hour: initial.hour, minute: initial.minute);
+    final initialMinute =
+        widget.initialRecord != null ? initial.minute : DateTime.now().minute;
+    _timeOfDay = TimeOfDay(hour: initial.hour, minute: initialMinute);
 
     final record = widget.initialRecord;
     if (record == null) {
