@@ -234,6 +234,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               calendarStyle: const CalendarStyle(
                 outsideDaysVisible: true,
                 canMarkersOverflow: true,
+                markersMaxCount: 0,
                 isTodayHighlighted: false,
               ),
               onDaySelected: onDaySelected,
@@ -595,8 +596,6 @@ class _CalendarDayCell extends StatelessWidget {
   final bool isSelected;
   final bool isOutside;
 
-  static const _iconSpacing = 2.0;
-
   Color _borderColor(BuildContext context) {
     if (isSelected) {
       return Theme.of(context).colorScheme.primary;
@@ -644,37 +643,52 @@ class _CalendarDayCell extends StatelessWidget {
       builder: (context, constraints) {
         final size = constraints.biggest;
         final dayFontSize = size.shortestSide * 0.28;
-        final iconSize = size.shortestSide * 0.24;
         final padding = EdgeInsets.all(size.shortestSide * 0.12);
-        final maxIcons = _estimateMaxIcons(size, iconSize);
-        final visibleEvents = events.take(maxIcons).toList();
-        final overflowCount = events.length - visibleEvents.length;
+        final CalendarEvent? primaryEvent =
+            events.isEmpty ? null : events.first;
+        final borderRadius = BorderRadius.circular(size.shortestSide * 0.2);
+        final dayReservedHeight = dayFontSize + padding.top * 0.6;
+        final iconAreaPadding = EdgeInsets.only(
+          top: dayReservedHeight,
+          left: size.shortestSide * 0.06,
+          right: size.shortestSide * 0.06,
+          bottom: size.shortestSide * 0.06,
+        );
 
         Widget buildEventIcon(CalendarEvent event) {
+          final paddingValue = size.shortestSide * 0.04;
+          Widget child;
           if (event.iconPath.isEmpty) {
-            final icon = Icon(
-              event.allDay ? Icons.event_available : Icons.schedule,
-              size: iconSize,
-              color: Theme.of(context).iconTheme.color,
+            child = ColoredBox(
+              color: Theme.of(context).colorScheme.surfaceVariant,
+              child: Center(
+                child: Icon(
+                  event.allDay ? Icons.event_available : Icons.schedule,
+                  size: size.shortestSide * 0.5,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+              ),
             );
-            return isOutside ? Opacity(opacity: 0.35, child: icon) : icon;
+          } else {
+            child = Image.asset(
+              event.iconPath,
+              fit: BoxFit.cover,
+            );
           }
 
-          Widget image = ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: Image.asset(
-              event.iconPath,
-              width: iconSize,
-              height: iconSize,
-              fit: BoxFit.cover,
+          Widget icon = Padding(
+            padding: EdgeInsets.all(paddingValue),
+            child: ClipRRect(
+              borderRadius: borderRadius,
+              child: SizedBox.expand(child: child),
             ),
           );
 
           if (isOutside) {
-            image = Opacity(opacity: 0.35, child: image);
+            icon = Opacity(opacity: 0.35, child: icon);
           }
 
-          return image;
+          return icon;
         }
 
         const dashLength = 4.0;
@@ -697,6 +711,13 @@ class _CalendarDayCell extends StatelessWidget {
             ),
             child: Stack(
               children: [
+                if (primaryEvent != null)
+                  Positioned.fill(
+                    child: Padding(
+                      padding: iconAreaPadding,
+                      child: buildEventIcon(primaryEvent),
+                    ),
+                  ),
                 Positioned(
                   top: padding.top - 2,
                   left: padding.left - 2,
@@ -709,87 +730,11 @@ class _CalendarDayCell extends StatelessWidget {
                     ),
                   ),
                 ),
-                Positioned.fill(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      top: dayFontSize + padding.top * 0.5,
-                      left: padding.left,
-                      right: padding.right,
-                      bottom: padding.bottom,
-                    ),
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: Wrap(
-                        spacing: _iconSpacing,
-                        runSpacing: _iconSpacing,
-                        children: [
-                          for (final event in visibleEvents)
-                            SizedBox(
-                              width: iconSize,
-                              height: iconSize,
-                              child: buildEventIcon(event),
-                            ),
-                          if (overflowCount > 0)
-                            _MoreBadge(
-                              overflow: overflowCount,
-                              height: iconSize,
-                              muted: isOutside,
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
         );
       },
-    );
-  }
-
-  int _estimateMaxIcons(Size cell, double iconSize) {
-    final usableWidth = cell.width * 0.82;
-    final usableHeight = cell.height * 0.58;
-    final perRow = usableWidth ~/ (iconSize + _iconSpacing);
-    final rows = usableHeight ~/ (iconSize + _iconSpacing);
-    final capacity = (perRow.clamp(1, 6)) * (rows.clamp(1, 3));
-    return capacity.clamp(0, 12);
-  }
-}
-
-class _MoreBadge extends StatelessWidget {
-  const _MoreBadge({
-    required this.overflow,
-    required this.height,
-    this.muted = false,
-  });
-
-  final int overflow;
-  final double height;
-  final bool muted;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final baseColor = colors.surfaceContainerHighest;
-    final onBase = colors.onSurfaceVariant;
-
-    return Container(
-      height: height,
-      constraints: BoxConstraints(minWidth: height),
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      decoration: BoxDecoration(
-        color: muted ? baseColor.withOpacity(0.4) : baseColor,
-      ),
-      child: Text(
-        '+$overflow',
-        style: TextStyle(
-          fontSize: 12,
-          color: muted ? onBase.withOpacity(0.5) : onBase,
-        ),
-      ),
     );
   }
 }
