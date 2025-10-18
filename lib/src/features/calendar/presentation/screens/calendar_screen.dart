@@ -7,6 +7,10 @@ import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 import 'package:babymom_diary/src/features/calendar/application/calendar_event_controller.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/screens/add_calendar_event_screen.dart';
+import 'package:babymom_diary/src/features/calendar/presentation/widgets/calendar_day_cell.dart';
+import 'package:babymom_diary/src/features/calendar/presentation/widgets/calendar_error_banner.dart';
+import 'package:babymom_diary/src/features/calendar/presentation/widgets/calendar_error_view.dart';
+import 'package:babymom_diary/src/features/calendar/presentation/widgets/selected_day_event_list.dart';
 import 'package:babymom_diary/src/features/children/application/children_local_provider.dart';
 import 'package:babymom_diary/src/features/children/application/selected_child_provider.dart';
 import 'package:babymom_diary/src/features/children/application/selected_child_snapshot_provider.dart';
@@ -254,7 +258,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               calendarBuilders: CalendarBuilders<CalendarEvent>(
                 defaultBuilder: (context, day, focusedDay) {
                   final events = dayEvents(day);
-                  return _CalendarDayCell(
+                  return CalendarDayCell(
                     day: day,
                     events: events,
                     isToday: isSameDay(day, DateTime.now()),
@@ -264,7 +268,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 },
                 todayBuilder: (context, day, focusedDay) {
                   final events = dayEvents(day);
-                  return _CalendarDayCell(
+                  return CalendarDayCell(
                     day: day,
                     events: events,
                     isToday: true,
@@ -274,7 +278,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 },
                 selectedBuilder: (context, day, focusedDay) {
                   final events = dayEvents(day);
-                  return _CalendarDayCell(
+                  return CalendarDayCell(
                     day: day,
                     events: events,
                     isToday: isSameDay(day, DateTime.now()),
@@ -284,7 +288,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 },
                 outsideBuilder: (context, day, focusedDay) {
                   final events = dayEvents(day);
-                  return _CalendarDayCell(
+                  return CalendarDayCell(
                     day: day,
                     events: events,
                     isToday: isSameDay(day, DateTime.now()),
@@ -313,12 +317,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           if (hasError && loadError != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _CalendarErrorBanner(error: loadError),
+              child: CalendarErrorBanner(error: loadError),
             ),
           Expanded(
             child: hasError && loadError != null
-                ? _CalendarErrorView(error: loadError)
-                : _SelectedDayEventList(events: eventsForSelectedDate),
+                ? CalendarErrorView(error: loadError)
+                : SelectedDayEventList(events: eventsForSelectedDate),
           ),
         ],
       ),
@@ -328,459 +332,5 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       ),
       bottomNavigationBar: const AppBottomNav(),
     );
-  }
-}
-
-class _EmptyEventsView extends StatelessWidget {
-  const _EmptyEventsView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.event_available,
-            size: 48,
-            color: Theme.of(context).disabledColor,
-          ),
-          const SizedBox(height: 12),
-          const Text('この日の予定はまだありません'),
-        ],
-      ),
-    );
-  }
-}
-
-class _CalendarErrorBanner extends StatelessWidget {
-  const _CalendarErrorBanner({required this.error});
-
-  final Object error;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: colors.error.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colors.error.withOpacity(0.4)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.error_outline, color: colors.error),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              '予定の取得に失敗しました',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: colors.error),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CalendarErrorView extends StatelessWidget {
-  const _CalendarErrorView({required this.error});
-
-  final Object error;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: colors.error),
-            const SizedBox(height: 12),
-            Text(
-              '予定の取得に失敗しました',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: colors.error),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '$error',
-              textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: colors.onSurfaceVariant),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SelectedDayEventList extends StatelessWidget {
-  const _SelectedDayEventList({required this.events});
-
-  final List<CalendarEvent> events;
-
-  static const _scrollPhysics = BouncingScrollPhysics(
-    parent: AlwaysScrollableScrollPhysics(),
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    if (events.isEmpty) {
-      return ListView(
-        physics: _scrollPhysics,
-        padding: const EdgeInsets.fromLTRB(16, 40, 16, 24),
-        children: const [
-          _EmptyEventsView(),
-        ],
-      );
-    }
-
-    return ListView.separated(
-      physics: _scrollPhysics,
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-      itemBuilder: (context, index) {
-        final event = events[index];
-        return _CalendarEventTile(event: event);
-      },
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemCount: events.length,
-    );
-  }
-}
-
-class _CalendarEventTile extends StatelessWidget {
-  const _CalendarEventTile({required this.event});
-
-  final CalendarEvent event;
-
-  @override
-  Widget build(BuildContext context) {
-    final timeFormatter = DateFormat('HH:mm');
-    final subtitle = event.allDay
-        ? '終日'
-        : '${timeFormatter.format(event.start)} - ${timeFormatter.format(event.end)}';
-
-    Widget? icon;
-    if (event.iconPath.isNotEmpty) {
-      icon = ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.asset(
-          event.iconPath,
-          width: 40,
-          height: 40,
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-
-    Widget? childBadge;
-    final childName = event.childName;
-    if (childName != null && childName.isNotEmpty) {
-      childBadge = _buildChildBadge(
-        context,
-        childName,
-        event.childColorHex,
-      );
-    }
-
-    return Card(
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                if (icon != null) ...[
-                  icon,
-                  const SizedBox(width: 12),
-                ],
-                Expanded(
-                  child: Text(
-                    event.title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  subtitle,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-            if (childBadge != null) ...[
-              const SizedBox(height: 8),
-              childBadge,
-            ],
-            if (event.memo.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                event.memo,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildChildBadge(
-    BuildContext context,
-    String childName,
-    String? colorHex,
-  ) {
-    final theme = Theme.of(context);
-    final baseColor = _parseColor(colorHex) ?? theme.colorScheme.primary;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: baseColor.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: baseColor.withOpacity(0.4)),
-      ),
-      child: Text(
-        childName,
-        style: theme.textTheme.bodySmall?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: theme.colorScheme.onSurface,
-        ),
-      ),
-    );
-  }
-
-  Color? _parseColor(String? hex) {
-    if (hex == null || hex.isEmpty) {
-      return null;
-    }
-    final cleaned = hex.replaceAll('#', '').padLeft(6, '0');
-    final value = int.tryParse(cleaned, radix: 16);
-    if (value == null) {
-      return null;
-    }
-    return Color(0xFF000000 | value);
-  }
-}
-
-class _CalendarDayCell extends StatelessWidget {
-  const _CalendarDayCell({
-    required this.day,
-    required this.events,
-    required this.isToday,
-    required this.isSelected,
-    required this.isOutside,
-  });
-
-  final DateTime day;
-  final List<CalendarEvent> events;
-  final bool isToday;
-  final bool isSelected;
-  final bool isOutside;
-
-  Color _borderColor(BuildContext context) {
-    if (isSelected) {
-      return Theme.of(context).colorScheme.primary;
-    }
-    if (isToday) {
-      return Theme.of(context).colorScheme.secondary;
-    }
-    return Theme.of(context).dividerColor.withOpacity(isOutside ? 0.3 : 0.6);
-  }
-
-  Color? _backgroundColor(BuildContext context) {
-    if (isSelected) {
-      return Theme.of(context).colorScheme.primary.withOpacity(0.12);
-    }
-    if (isToday) {
-      return Theme.of(context).colorScheme.secondary.withOpacity(0.08);
-    }
-    return null;
-  }
-
-  Color _dayNumberColor(BuildContext context) {
-    final base = Theme.of(context).textTheme.bodyLarge?.color ??
-        Theme.of(context).colorScheme.onSurface;
-    Color color;
-    switch (day.weekday) {
-      case DateTime.sunday:
-        color = Colors.red;
-        break;
-      case DateTime.saturday:
-        color = Colors.blue;
-        break;
-      default:
-        color = base;
-        break;
-    }
-    if (isOutside) {
-      return color.withOpacity(0.35);
-    }
-    return color;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final size = constraints.biggest;
-        final dayFontSize = size.shortestSide * 0.28;
-        final padding = EdgeInsets.all(size.shortestSide * 0.12);
-        final CalendarEvent? primaryEvent =
-            events.isEmpty ? null : events.first;
-        final borderRadius = BorderRadius.circular(size.shortestSide * 0.2);
-        final dayReservedHeight = dayFontSize + padding.top * 0.6;
-        final iconAreaPadding = EdgeInsets.only(
-          top: dayReservedHeight,
-          left: size.shortestSide * 0.06,
-          right: size.shortestSide * 0.06,
-          bottom: size.shortestSide * 0.06,
-        );
-
-        Widget buildEventIcon(CalendarEvent event) {
-          final paddingValue = size.shortestSide * 0.04;
-          Widget child;
-          if (event.iconPath.isEmpty) {
-            child = ColoredBox(
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              child: Center(
-                child: Icon(
-                  event.allDay ? Icons.event_available : Icons.schedule,
-                  size: size.shortestSide * 0.5,
-                  color: Theme.of(context).iconTheme.color,
-                ),
-              ),
-            );
-          } else {
-            child = Image.asset(
-              event.iconPath,
-              fit: BoxFit.cover,
-            );
-          }
-
-          Widget icon = Padding(
-            padding: EdgeInsets.all(paddingValue),
-            child: ClipRRect(
-              borderRadius: borderRadius,
-              child: SizedBox.expand(child: child),
-            ),
-          );
-
-          if (isOutside) {
-            icon = Opacity(opacity: 0.35, child: icon);
-          }
-
-          return icon;
-        }
-
-        const dashLength = 4.0;
-        const dashGap = 2.0;
-        const strokeWidth = 1.0;
-
-        final background = _backgroundColor(context);
-        final borderColor = _borderColor(context);
-
-        return CustomPaint(
-          painter: _DashedBorderPainter(
-            borderColor: borderColor,
-            dashLength: dashLength,
-            dashGap: dashGap,
-            strokeWidth: strokeWidth,
-          ),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: background ?? Colors.transparent,
-            ),
-            child: Stack(
-              children: [
-                if (primaryEvent != null)
-                  Positioned.fill(
-                    child: Padding(
-                      padding: iconAreaPadding,
-                      child: buildEventIcon(primaryEvent),
-                    ),
-                  ),
-                Positioned(
-                  top: padding.top - 2,
-                  left: padding.left - 2,
-                  child: Text(
-                    '${day.day}',
-                    style: TextStyle(
-                      fontSize: dayFontSize,
-                      fontWeight: FontWeight.w600,
-                      color: _dayNumberColor(context),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  const _DashedBorderPainter({
-    required this.borderColor,
-    required this.dashLength,
-    required this.dashGap,
-    required this.strokeWidth,
-  });
-
-  final Color borderColor;
-  final double dashLength;
-  final double dashGap;
-  final double strokeWidth;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (size.isEmpty) return;
-
-    final rect = Offset.zero & size;
-    final path = Path()..addRect(rect);
-    final paint = Paint()
-      ..color = borderColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..isAntiAlias = true;
-
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      while (distance < metric.length) {
-        final next =
-            (distance + dashLength).clamp(0.0, metric.length).toDouble();
-        final dashPath = metric.extractPath(distance, next);
-        canvas.drawPath(dashPath, paint);
-        distance = next + dashGap;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedBorderPainter oldDelegate) {
-    return borderColor != oldDelegate.borderColor ||
-        dashLength != oldDelegate.dashLength ||
-        dashGap != oldDelegate.dashGap ||
-        strokeWidth != oldDelegate.strokeWidth;
   }
 }

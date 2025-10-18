@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:intl/intl.dart';
 
+import 'package:babymom_diary/src/features/calendar/presentation/widgets/add_event_date_time_row.dart';
+import 'package:babymom_diary/src/features/calendar/presentation/widgets/add_event_icon_picker.dart';
+
 class AddCalendarEventResult {
   const AddCalendarEventResult({
     required this.title,
@@ -279,7 +282,7 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
                 },
               ),
               const SizedBox(height: 12),
-              _DateTimeSelectorRow(
+              AddEventDateTimeRow(
                 label: '開始時間',
                 dateLabel: _formatDate(_startDate),
                 onDateTap: () => _pickDate(isStart: true),
@@ -288,7 +291,7 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
               ),
               if (!_allDay) ...[
                 const SizedBox(height: 8),
-                _DateTimeSelectorRow(
+                AddEventDateTimeRow(
                   label: '終了時間',
                   dateLabel: _formatDate(_endDate),
                   onDateTap: () => _pickDate(isStart: false),
@@ -302,28 +305,14 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              SizedBox(
-                height: 112,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(
-                    parent: AlwaysScrollableScrollPhysics(),
-                  ),
-                  itemBuilder: (context, index) {
-                    final path = _availableIconPaths[index];
-                    return _IconChoice(
-                      path: path,
-                      selected: _selectedIconPath == path,
-                      onTap: () {
-                        setState(() {
-                          _selectedIconPath = path;
-                        });
-                      },
-                    );
-                  },
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemCount: _availableIconPaths.length,
-                ),
+              AddEventIconPicker(
+                iconPaths: _availableIconPaths,
+                selectedPath: _selectedIconPath,
+                onChanged: (path) {
+                  setState(() {
+                    _selectedIconPath = path;
+                  });
+                },
               ),
               const SizedBox(height: 32),
               FilledButton.icon(
@@ -333,129 +322,6 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DateTimeSelectorRow extends StatelessWidget {
-  const _DateTimeSelectorRow({
-    required this.label,
-    required this.dateLabel,
-    required this.onDateTap,
-    this.timeLabel,
-    this.onTimeTap,
-  });
-
-  final String label;
-  final String dateLabel;
-  final VoidCallback onDateTap;
-  final String? timeLabel;
-  final VoidCallback? onTimeTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final showTime = timeLabel != null && onTimeTap != null;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: theme.textTheme.bodyLarge),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: _PickerButton(
-                label: dateLabel,
-                icon: Icons.event,
-                onTap: onDateTap,
-              ),
-            ),
-            if (showTime) ...[
-              const SizedBox(width: 12),
-              Expanded(
-                child: _PickerButton(
-                  label: timeLabel!,
-                  icon: Icons.timer,
-                  onTap: onTimeTap!,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _PickerButton extends StatelessWidget {
-  const _PickerButton({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton(
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        alignment: Alignment.centerLeft,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      onPressed: onTap,
-      child: Row(
-        children: [
-          Icon(icon, size: 20),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _IconChoice extends StatelessWidget {
-  const _IconChoice({
-    required this.path,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String path;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: selected
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).dividerColor,
-            width: selected ? 2 : 1,
-          ),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Image.asset(
-          path,
-          fit: BoxFit.contain,
         ),
       ),
     );
