@@ -6,6 +6,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 import 'package:babymom_diary/src/features/calendar/application/calendar_event_controller.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
+import 'package:babymom_diary/src/features/calendar/presentation/models/calendar_event_model.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/screens/add_calendar_event_screen.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/calendar_day_cell.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/calendar_error_banner.dart';
@@ -106,29 +107,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           ..sort((a, b) => a.start.compareTo(b.start));
 
     Future<void> openAddEventScreen() async {
-      final result = await Navigator.of(context).push<AddCalendarEventResult>(
-        MaterialPageRoute(
-          builder: (_) => AddCalendarEventScreen(initialDate: selectedDate),
-        ),
-      );
-
-      if (result == null) {
-        return;
-      }
-
-      if (!mounted || !context.mounted) {
-        return;
-      }
-
       final messenger = ScaffoldMessenger.of(context);
-      final selectedChildId = ref.read(selectedChildControllerProvider).value;
-      if (selectedChildId == null || selectedChildId.isEmpty) {
-        messenger.showSnackBar(
-          const SnackBar(content: Text('予定を追加する子どもを先に選択してください')),
-        );
-        return;
-      }
-
       late final String householdId;
       try {
         householdId = await ref.read(fbcore.currentHouseholdIdProvider.future);
@@ -143,14 +122,53 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         return;
       }
 
-      ChildSummary? findChild(String id) {
+      List<ChildSummary> collectChildren() {
         final localState = ref.read(childrenLocalProvider(householdId));
-        final localChildren = localState.value;
-        if (localChildren != null) {
-          for (final child in localChildren) {
-            if (child.id == id) {
-              return child;
-            }
+        final localChildren = localState.value ?? const <ChildSummary>[];
+        final snapshotState =
+            ref.read(selectedChildSnapshotProvider(householdId));
+        final snapshot = snapshotState.value;
+        if (snapshot == null ||
+            localChildren.any((child) => child.id == snapshot.id)) {
+          return List<ChildSummary>.from(localChildren);
+        }
+        return List<ChildSummary>.from(localChildren)..add(snapshot);
+      }
+
+      final selectedChildId = ref.read(selectedChildControllerProvider).value;
+      final initialChildren = collectChildren();
+
+      if (initialChildren.isEmpty) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('先に子どもを登録してください')),
+        );
+        return;
+      }
+
+      final result = await Navigator.of(context).push<CalendarEventModel>(
+        MaterialPageRoute(
+          builder: (_) => AddCalendarEventScreen(
+            initialDate: selectedDate,
+            children: initialChildren,
+            initialChildId: selectedChildId,
+          ),
+        ),
+      );
+
+      if (result == null) {
+        return;
+      }
+
+      if (!mounted || !context.mounted) {
+        return;
+      }
+
+      final availableChildren = collectChildren();
+
+      ChildSummary? findChild(String id) {
+        for (final child in availableChildren) {
+          if (child.id == id) {
+            return child;
           }
         }
 
@@ -163,14 +181,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         return null;
       }
 
-      final childSummary = findChild(selectedChildId);
+      final childSummary = findChild(result.childId);
 
       final addEvent = ref.read(addCalendarEventUseCaseProvider);
 
       try {
         await addEvent(
           householdId: householdId,
-          childId: selectedChildId,
+          childId: result.childId,
           title: result.title,
           memo: result.memo,
           allDay: result.allDay,

@@ -1,76 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/add_calendar_event_state.dart';
+import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/add_calendar_event_view_model.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/add_event_date_time_row.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/add_event_icon_picker.dart';
+import 'package:babymom_diary/src/features/children/domain/entities/child_summary.dart';
 
-class AddCalendarEventResult {
-  const AddCalendarEventResult({
-    required this.title,
-    required this.memo,
-    required this.allDay,
-    required this.start,
-    required this.end,
-    required this.iconPath,
-  });
-
-  final String title;
-  final String memo;
-  final bool allDay;
-  final DateTime start;
-  final DateTime end;
-  final String iconPath;
-}
-
-class AddCalendarEventScreen extends StatefulWidget {
+class AddCalendarEventScreen extends ConsumerStatefulWidget {
   const AddCalendarEventScreen({
     required this.initialDate,
+    required this.children,
+    this.initialChildId,
     super.key,
   });
 
   final DateTime initialDate;
+  final List<ChildSummary> children;
+  final String? initialChildId;
 
   @override
-  State<AddCalendarEventScreen> createState() => _AddCalendarEventScreenState();
+  ConsumerState<AddCalendarEventScreen> createState() =>
+      _AddCalendarEventScreenState();
 }
 
-const _availableIconPaths = <String>[
-  'assets/icons/birthday.png',
-  'assets/icons/seven_nights.png',
-  'assets/icons/k2_syrup.png',
-  'assets/icons/health_check.png',
-  'assets/icons/vaccination.png',
-  'assets/icons/omiyamairi.png',
-  'assets/icons/okuizome.png',
-  'assets/icons/medical_consultation.png',
-  'assets/icons/half_birthday.png',
-  'assets/icons/first_boy_festival.png',
-  'assets/icons/first_girl_festival.png',
-];
-
-class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _memoController = TextEditingController();
-  bool _allDay = false;
-  late DateTime _startDate;
-  late DateTime _endDate;
-  TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
-  TimeOfDay _endTime = const TimeOfDay(hour: 10, minute: 0);
-  late String _selectedIconPath;
+class _AddCalendarEventScreenState
+    extends ConsumerState<AddCalendarEventScreen> {
+  late final GlobalKey<FormState> _formKey;
+  late final TextEditingController _titleController;
+  late final TextEditingController _memoController;
+  late final AddCalendarEventViewModelArgs _args;
 
   @override
   void initState() {
     super.initState();
-    final initialDate = DateTime(
-      widget.initialDate.year,
-      widget.initialDate.month,
-      widget.initialDate.day,
+    _formKey = GlobalKey<FormState>();
+    _args = AddCalendarEventViewModelArgs(
+      initialDate: widget.initialDate,
+      children: widget.children,
+      initialChildId: widget.initialChildId,
     );
-    _startDate = initialDate;
-    _endDate = initialDate;
-    _selectedIconPath = _availableIconPaths.first;
+    final initialState = ref.read(addCalendarEventViewModelProvider(_args));
+    _titleController = TextEditingController(text: initialState.title);
+    _memoController = TextEditingController(text: initialState.memo);
   }
 
   @override
@@ -80,105 +53,8 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
     super.dispose();
   }
 
-  Future<void> _pickDate({required bool isStart}) async {
-    final current = isStart ? _startDate : _endDate;
-    final pickedDate = await DatePicker.showDatePicker(
-      context,
-      showTitleActions: true,
-      currentTime: current,
-      locale: LocaleType.jp,
-    );
-    if (pickedDate == null) {
-      return;
-    }
-    final normalizedDate = DateTime(
-      pickedDate.year,
-      pickedDate.month,
-      pickedDate.day,
-    );
-
-    setState(() {
-      if (isStart) {
-        _startDate = normalizedDate;
-        if (_allDay) {
-          _endDate = normalizedDate;
-          return;
-        }
-        _ensureEndAfterStart(_combine(_startDate, _startTime));
-      } else {
-        _endDate = normalizedDate;
-        if (_allDay) {
-          return;
-        }
-        if (!_isEndAfterStart(
-          _combine(_startDate, _startTime),
-          _combine(_endDate, _endTime),
-        )) {
-          _ensureEndAfterStart(_combine(_startDate, _startTime));
-        }
-      }
-    });
-  }
-
-  Future<void> _pickTime({required bool isStart}) async {
-    if (_allDay) return;
-
-    final referenceDate = isStart ? _startDate : _endDate;
-    final referenceTime = isStart ? _startTime : _endTime;
-    final current = DateTime(
-      referenceDate.year,
-      referenceDate.month,
-      referenceDate.day,
-      referenceTime.hour,
-      referenceTime.minute,
-    );
-
-    final picked = await DatePicker.showTimePicker(
-      context,
-      currentTime: current,
-      showTitleActions: true,
-      showSecondsColumn: false,
-      locale: LocaleType.jp,
-    );
-    if (picked == null) return;
-
-    final selectedTime = TimeOfDay(
-      hour: picked.hour,
-      minute: picked.minute,
-    );
-
-    setState(() {
-      if (isStart) {
-        _startTime = selectedTime;
-        _ensureEndAfterStart(_combine(_startDate, _startTime));
-      } else {
-        _endTime = selectedTime;
-        if (!_isEndAfterStart(
-          _combine(_startDate, _startTime),
-          _combine(_endDate, _endTime),
-        )) {
-          _ensureEndAfterStart(_combine(_startDate, _startTime));
-        }
-      }
-    });
-  }
-
-  DateTime _combine(DateTime date, TimeOfDay time) {
-    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
-  }
-
-  void _ensureEndAfterStart(DateTime newStart) {
-    final currentEnd = _combine(_endDate, _endTime);
-    if (!currentEnd.isAfter(newStart)) {
-      final fallback = newStart.add(const Duration(hours: 1));
-      _endDate = DateTime(fallback.year, fallback.month, fallback.day);
-      _endTime = TimeOfDay(hour: fallback.hour, minute: fallback.minute);
-    }
-  }
-
-  bool _isEndAfterStart(DateTime start, DateTime end) {
-    return end.isAfter(start);
-  }
+  AddCalendarEventViewModel get _viewModel =>
+      ref.read(addCalendarEventViewModelProvider(_args).notifier);
 
   String _formatDate(DateTime date) {
     return DateFormat('yyyy/MM/dd').format(date);
@@ -191,56 +67,44 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
     );
   }
 
-  void _submit() {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    DateTime start;
-    DateTime end;
-
-    if (_allDay) {
-      start = DateTime(
-        _startDate.year,
-        _startDate.month,
-        _startDate.day,
-      );
-      end = start.add(const Duration(hours: 23, minutes: 59));
-    } else {
-      final startDateTime = _combine(_startDate, _startTime);
-      final endDateTime = _combine(_endDate, _endTime);
-
-      if (!_isEndAfterStart(startDateTime, endDateTime)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('終了時間は開始時間より後にしてください。')),
-        );
-        return;
-      }
-
-      start = startDateTime;
-      end = endDateTime;
-    }
-
-    final result = AddCalendarEventResult(
-      title: _titleController.text.trim(),
-      memo: _memoController.text.trim(),
-      allDay: _allDay,
-      start: start,
-      end: end,
-      iconPath: _selectedIconPath,
-    );
-
-    Navigator.of(context).pop(result);
-  }
-
   @override
   Widget build(BuildContext context) {
+    ref.listen<AddCalendarEventState>(
+      addCalendarEventViewModelProvider(_args),
+      (previous, next) {
+        final message = next.validationMessage;
+        if (message == null || message == previous?.validationMessage) {
+          return;
+        }
+        if (!mounted) {
+          return;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+      },
+    );
+
+    final state = ref.watch(addCalendarEventViewModelProvider(_args));
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('予定を追加'),
         actions: [
           TextButton(
-            onPressed: _submit,
+            onPressed: state.hasChildren && !state.isSubmitting
+                ? () {
+                    final result = _viewModel.handleSubmit(
+                      formKey: _formKey,
+                      titleValue: _titleController.text,
+                      memoValue: _memoController.text,
+                    );
+                    if (result == null || !mounted) {
+                      return;
+                    }
+                    Navigator.of(context).pop(result);
+                  }
+                : null,
             child: const Text('保存'),
           ),
         ],
@@ -250,6 +114,43 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
         child: ListView(
           padding: const EdgeInsets.symmetric(vertical: 16),
           children: [
+            if (!state.hasChildren)
+              _horizontalPadding(
+                const Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text('子どもが登録されていないため、予定を追加できません。'),
+                  ),
+                ),
+              )
+            else
+              _horizontalPadding(
+                DropdownButtonFormField<String>(
+                  value: state.selectedChildId,
+                  decoration: const InputDecoration(
+                    labelText: '対象の子ども',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: state.children
+                      .map(
+                        (child) => DropdownMenuItem<String>(
+                          value: child.id,
+                          child: Text(child.name),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: state.isSubmitting
+                      ? null
+                      : (value) => _viewModel.selectChild(value),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '子どもを選択してください';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+            if (state.hasChildren) const SizedBox(height: 16),
             _horizontalPadding(
               TextFormField(
                 controller: _titleController,
@@ -257,6 +158,7 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
                   labelText: '予定',
                   border: OutlineInputBorder(),
                 ),
+                onChanged: _viewModel.setTitle,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return '予定を入力してください';
@@ -274,44 +176,47 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
+                onChanged: _viewModel.setMemo,
               ),
             ),
             const SizedBox(height: 16),
             _horizontalPadding(
               SwitchListTile.adaptive(
                 title: const Text('終日'),
-                value: _allDay,
-                onChanged: (value) {
-                  setState(() {
-                    _allDay = value;
-                    if (value) {
-                      _endDate = _startDate;
-                    } else {
-                      _ensureEndAfterStart(_combine(_startDate, _startTime));
-                    }
-                  });
-                },
+                value: state.allDay,
+                onChanged: state.isSubmitting
+                    ? null
+                    : (value) => _viewModel.toggleAllDay(value),
               ),
             ),
             const SizedBox(height: 12),
             _horizontalPadding(
               AddEventDateTimeRow(
                 label: '開始時間',
-                dateLabel: _formatDate(_startDate),
-                onDateTap: () => _pickDate(isStart: true),
-                timeLabel: _allDay ? null : _startTime.format(context),
-                onTimeTap: _allDay ? null : () => _pickTime(isStart: true),
+                dateLabel: _formatDate(state.startDate),
+                onDateTap: () =>
+                    _viewModel.pickDate(context: context, isStart: true),
+                timeLabel:
+                    state.allDay ? null : state.startTime.format(context),
+                onTimeTap: state.allDay
+                    ? null
+                    : () => _viewModel.pickTime(
+                          context: context,
+                          isStart: true,
+                        ),
               ),
             ),
-            if (!_allDay) ...[
+            if (!state.allDay) ...[
               const SizedBox(height: 8),
               _horizontalPadding(
                 AddEventDateTimeRow(
                   label: '終了時間',
-                  dateLabel: _formatDate(_endDate),
-                  onDateTap: () => _pickDate(isStart: false),
-                  timeLabel: _endTime.format(context),
-                  onTimeTap: () => _pickTime(isStart: false),
+                  dateLabel: _formatDate(state.endDate),
+                  onDateTap: () =>
+                      _viewModel.pickDate(context: context, isStart: false),
+                  timeLabel: state.endTime.format(context),
+                  onTimeTap: () =>
+                      _viewModel.pickTime(context: context, isStart: false),
                 ),
               ),
             ],
@@ -324,18 +229,33 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
             ),
             const SizedBox(height: 12),
             AddEventIconPicker(
-              iconPaths: _availableIconPaths,
-              selectedPath: _selectedIconPath,
+              iconPaths: state.availableIconPaths,
+              selectedPath: state.selectedIconPath,
               onChanged: (path) {
-                setState(() {
-                  _selectedIconPath = path;
-                });
+                final latestState =
+                    ref.read(addCalendarEventViewModelProvider(_args));
+                if (latestState.isSubmitting) {
+                  return;
+                }
+                _viewModel.selectIcon(path);
               },
             ),
             const SizedBox(height: 32),
             _horizontalPadding(
               FilledButton.icon(
-                onPressed: _submit,
+                onPressed: state.hasChildren && !state.isSubmitting
+                    ? () {
+                        final result = _viewModel.handleSubmit(
+                          formKey: _formKey,
+                          titleValue: _titleController.text,
+                          memoValue: _memoController.text,
+                        );
+                        if (result == null || !mounted) {
+                          return;
+                        }
+                        Navigator.of(context).pop(result);
+                      }
+                    : null,
                 icon: const Icon(Icons.save),
                 label: const Text('保存'),
               ),

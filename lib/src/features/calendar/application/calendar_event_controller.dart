@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:babymom_diary/src/features/calendar/application/usecases/add_calendar_event.dart';
-import 'package:babymom_diary/src/features/calendar/data/repositories/calendar_event_repository_impl.dart';
-import 'package:babymom_diary/src/features/calendar/data/sources/calendar_event_firestore_data_source.dart';
+import 'package:babymom_diary/src/features/calendar/infrastructure/repositories/calendar_event_repository_impl.dart';
+import 'package:babymom_diary/src/features/calendar/infrastructure/sources/calendar_event_firestore_data_source.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
 import 'package:babymom_diary/src/features/calendar/domain/repositories/calendar_event_repository.dart';
 
