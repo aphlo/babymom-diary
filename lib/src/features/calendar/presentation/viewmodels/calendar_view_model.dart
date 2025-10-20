@@ -1,0 +1,316 @@
+import 'dart:async';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:babymom_diary/src/features/calendar/application/calendar_event_controller.dart';
+import 'package:babymom_diary/src/features/calendar/application/usecases/add_calendar_event.dart';
+import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
+import 'package:babymom_diary/src/features/calendar/domain/repositories/calendar_event_repository.dart';
+import 'package:babymom_diary/src/features/calendar/presentation/models/calendar_event_model.dart';
+import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/calendar_state.dart';
+import 'package:babymom_diary/src/features/children/application/children_local_provider.dart';
+import 'package:babymom_diary/src/features/children/application/selected_child_provider.dart';
+import 'package:babymom_diary/src/features/children/application/selected_child_snapshot_provider.dart';
+import 'package:babymom_diary/src/features/children/domain/entities/child_summary.dart';
+import 'package:babymom_diary/src/core/firebase/household_service.dart'
+    as fbcore;
+
+const ChildSummary _emptyChildSummary = ChildSummary(
+  id: '',
+  name: '',
+);
+
+final calendarViewModelProvider =
+    AutoDisposeStateNotifierProvider<CalendarViewModel, CalendarState>(
+  (ref) {
+    final repository = ref.watch(calendarEventRepositoryProvider);
+    final addEvent = ref.watch(addCalendarEventUseCaseProvider);
+    return CalendarViewModel(ref, repository, addEvent);
+  },
+);
+
+class CalendarViewModel extends StateNotifier<CalendarState> {
+  CalendarViewModel(
+    this._ref,
+    this._repository,
+    this._addCalendarEvent,
+  ) : super(CalendarState.initial()) {
+    _initialize();
+    _ref.onDispose(() {
+      _eventsSubscription?.cancel();
+      _eventsSubscription = null;
+    });
+  }
+
+  final Ref _ref;
+  final CalendarEventRepository _repository;
+  final AddCalendarEvent _addCalendarEvent;
+
+  StreamSubscription<List<CalendarEvent>>? _eventsSubscription;
+  List<CalendarEvent> _latestEvents = const <CalendarEvent>[];
+  List<ChildSummary> _localChildren = const <ChildSummary>[];
+  ChildSummary? _snapshotChild;
+
+  void _initialize() {
+    _listenToSelectedChild();
+    _loadHouseholdId();
+  }
+
+  Future<void> _loadHouseholdId() async {
+    try {
+      final householdId =
+          await _ref.read(fbcore.currentHouseholdIdProvider.future);
+      state = state.copyWith(householdId: householdId);
+      _subscribeToChildren(householdId);
+      _refreshEventsSubscription();
+    } catch (error, stackTrace) {
+      state = state.copyWith(
+        pendingUiEvent: const CalendarUiEvent.showMessage('世帯情報の取得に失敗しました'),
+      );
+      state = state.copyWith(
+        eventsAsync: AsyncValue.error(error, stackTrace),
+      );
+    }
+  }
+
+  void _listenToSelectedChild() {
+    _ref.listen<AsyncValue<String?>>(
+      selectedChildControllerProvider,
+      (previous, next) {
+        final value = next.valueOrNull;
+        if (state.selectedChildId == value) {
+          return;
+        }
+        state = state.copyWith(selectedChildId: value, pendingUiEvent: null);
+      },
+      fireImmediately: true,
+    );
+  }
+
+  void _subscribeToChildren(String householdId) {
+    _ref.listen<AsyncValue<List<ChildSummary>>>(
+      childrenLocalProvider(householdId),
+      (previous, next) {
+        final value = next.valueOrNull ?? const <ChildSummary>[];
+        _localChildren = value;
+        _rebuildAvailableChildren();
+      },
+      fireImmediately: true,
+    );
+
+    _ref.listen<AsyncValue<ChildSummary?>>(
+      selectedChildSnapshotProvider(householdId),
+      (previous, next) {
+        _snapshotChild = next.valueOrNull;
+        _rebuildAvailableChildren();
+      },
+      fireImmediately: true,
+    );
+  }
+
+  void _rebuildAvailableChildren() {
+    final List<ChildSummary> available =
+        List<ChildSummary>.from(_localChildren);
+    final snapshot = _snapshotChild;
+    if (snapshot != null &&
+        snapshot.id.isNotEmpty &&
+        !available.any((child) => child.id == snapshot.id)) {
+      available.add(snapshot);
+    }
+    state = state.copyWith(
+      availableChildren: available,
+      pendingUiEvent: null,
+    );
+    _updateEventsWithChildren(_latestEvents);
+  }
+
+  void _refreshEventsSubscription() {
+    _eventsSubscription?.cancel();
+    final householdId = state.householdId;
+    if (householdId == null) {
+      return;
+    }
+    final range = _visibleRangeForMonth(state.focusedDay);
+    state = state.copyWith(eventsAsync: const AsyncValue.loading());
+    _eventsSubscription = _repository
+        .watchEvents(
+      householdId: householdId,
+      start: range.start,
+      end: range.end,
+    )
+        .listen(
+      (events) {
+        _latestEvents = events;
+        _updateEventsWithChildren(events);
+      },
+      onError: (error, stackTrace) {
+        state = state.copyWith(
+          eventsAsync: AsyncValue.error(error, stackTrace),
+          pendingUiEvent: const CalendarUiEvent.showMessage(
+            '予定の取得に失敗しました',
+          ),
+        );
+      },
+    );
+  }
+
+  void _updateEventsWithChildren(List<CalendarEvent> events) {
+    final childMap = {
+      for (final child in state.availableChildren) child.id: child,
+    };
+    final adjustedEvents = childMap.isEmpty
+        ? events
+        : events.map((event) {
+            final child = childMap[event.childId];
+            if (child == null) {
+              return event;
+            }
+            return event.copyWith(
+              childName: child.name,
+              childColorHex: child.color,
+            );
+          }).toList(growable: false);
+    final eventsByDay = _groupEventsByDay(adjustedEvents);
+    state = state.copyWith(
+      eventsAsync: AsyncValue.data(adjustedEvents),
+      eventsByDay: eventsByDay,
+      pendingUiEvent: null,
+    );
+  }
+
+  void onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+    final normalizedSelected = _normalizeDate(selectedDay);
+    final normalizedFocused = _normalizeDate(focusedDay);
+    final requiresRefresh = normalizedFocused.year != state.focusedDay.year ||
+        normalizedFocused.month != state.focusedDay.month;
+    state = state.copyWith(
+      selectedDay: normalizedSelected,
+      focusedDay: normalizedFocused,
+      pendingUiEvent: null,
+    );
+    if (requiresRefresh) {
+      _refreshEventsSubscription();
+    }
+  }
+
+  void onPageChanged(DateTime focusedDay) {
+    final normalizedFocused = _normalizeDate(
+      DateTime(focusedDay.year, focusedDay.month),
+    );
+    final requiresRefresh = normalizedFocused.year != state.focusedDay.year ||
+        normalizedFocused.month != state.focusedDay.month;
+    if (!requiresRefresh) {
+      return;
+    }
+    state = state.copyWith(
+      focusedDay: normalizedFocused,
+      pendingUiEvent: null,
+    );
+    _refreshEventsSubscription();
+  }
+
+  void clearUiEvent() {
+    if (state.pendingUiEvent == null) {
+      return;
+    }
+    state = state.copyWith(pendingUiEvent: null);
+  }
+
+  void requestAddEvent() {
+    final householdId = state.householdId;
+    if (householdId == null) {
+      state = state.copyWith(
+        pendingUiEvent: const CalendarUiEvent.showMessage('世帯情報を取得できませんでした'),
+      );
+      return;
+    }
+    final children = state.availableChildren;
+    if (children.isEmpty) {
+      state = state.copyWith(
+        pendingUiEvent: const CalendarUiEvent.showMessage('先に子どもを登録してください'),
+      );
+      return;
+    }
+    final request = AddEventRequest(
+      initialDate: state.selectedDay,
+      children: children,
+      initialChildId: state.selectedChildId,
+    );
+    state = state.copyWith(
+      pendingUiEvent: CalendarUiEvent.openAddEvent(request),
+    );
+  }
+
+  Future<void> handleAddEventResult(CalendarEventModel result) async {
+    final householdId = state.householdId;
+    if (householdId == null) {
+      state = state.copyWith(
+        pendingUiEvent: const CalendarUiEvent.showMessage('世帯情報が存在しません'),
+      );
+      return;
+    }
+
+    final childSummary = state.availableChildren.firstWhere(
+      (child) => child.id == result.childId,
+      orElse: () => _snapshotChild ?? _emptyChildSummary,
+    );
+
+    try {
+      await _addCalendarEvent(
+        householdId: householdId,
+        childId: result.childId,
+        title: result.title,
+        memo: result.memo,
+        allDay: result.allDay,
+        start: result.start,
+        end: result.end,
+        iconKey: result.iconPath,
+        childName: childSummary.id.isEmpty ? null : childSummary.name,
+        childColorHex: childSummary.id.isEmpty ? null : childSummary.color,
+      );
+      state = state.copyWith(
+        pendingUiEvent: const CalendarUiEvent.showMessage('予定を保存しました'),
+      );
+    } catch (error) {
+      state = state.copyWith(
+        pendingUiEvent: CalendarUiEvent.showMessage(
+          '予定の保存に失敗しました: $error',
+        ),
+      );
+    }
+  }
+
+  static Map<DateTime, List<CalendarEvent>> _groupEventsByDay(
+    List<CalendarEvent> events,
+  ) {
+    final map = <DateTime, List<CalendarEvent>>{};
+    for (final event in events) {
+      var cursor = DateTime(
+        event.start.year,
+        event.start.month,
+        event.start.day,
+      );
+      final end = DateTime(event.end.year, event.end.month, event.end.day);
+      while (!cursor.isAfter(end)) {
+        final key = DateTime(cursor.year, cursor.month, cursor.day);
+        map.putIfAbsent(key, () => <CalendarEvent>[]).add(event);
+        cursor = cursor.add(const Duration(days: 1));
+      }
+    }
+    for (final entry in map.entries) {
+      entry.value.sort((a, b) => a.start.compareTo(b.start));
+    }
+    return map;
+  }
+
+  static DateTime _normalizeDate(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
+
+  static ({DateTime start, DateTime end}) _visibleRangeForMonth(DateTime day) {
+    final firstOfMonth = DateTime(day.year, day.month, 1);
+    final weekday = (firstOfMonth.weekday + 6) % 7;
+    final start = firstOfMonth.subtract(Duration(days: weekday));
+    final end = start.add(const Duration(days: 42));
+    return (start: start, end: end);
+  }
+}

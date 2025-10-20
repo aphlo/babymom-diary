@@ -8,8 +8,8 @@ import 'package:babymom_diary/src/features/calendar/presentation/widgets/add_eve
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/add_event_icon_picker.dart';
 import 'package:babymom_diary/src/features/children/domain/entities/child_summary.dart';
 
-class AddCalendarEventScreen extends ConsumerStatefulWidget {
-  const AddCalendarEventScreen({
+class AddCalendarEventPage extends ConsumerStatefulWidget {
+  const AddCalendarEventPage({
     required this.initialDate,
     required this.children,
     this.initialChildId,
@@ -21,12 +21,11 @@ class AddCalendarEventScreen extends ConsumerStatefulWidget {
   final String? initialChildId;
 
   @override
-  ConsumerState<AddCalendarEventScreen> createState() =>
-      _AddCalendarEventScreenState();
+  ConsumerState<AddCalendarEventPage> createState() =>
+      _AddCalendarEventPageState();
 }
 
-class _AddCalendarEventScreenState
-    extends ConsumerState<AddCalendarEventScreen> {
+class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
   late final GlobalKey<FormState> _formKey;
   late final TextEditingController _titleController;
   late final TextEditingController _memoController;

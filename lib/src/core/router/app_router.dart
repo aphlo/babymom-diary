@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/child_record/presentation/screens/record_list_screen.dart';
 import '../../features/vaccines/presentation/screens/vaccines_screen.dart';
 import '../../features/mom/presentation/screens/mom_screen.dart';
-import '../../features/calendar/presentation/screens/calendar_screen.dart';
+import '../../features/calendar/presentation/pages/calendar_page.dart';
 import '../../features/menu/presentation/screens/menu_screen.dart';
 import '../../features/children/presentation/screens/add_child_screen.dart';
 import '../../features/children/presentation/screens/manage_children_screen.dart';
@@ -41,7 +41,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/calendar',
         name: 'calendar',
         pageBuilder: (context, state) =>
-            const NoTransitionPage(child: CalendarScreen()),
+            const NoTransitionPage(child: CalendarPage()),
       ),
       GoRoute(
         path: '/menu',
