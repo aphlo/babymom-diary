@@ -184,6 +184,13 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
     return DateFormat('yyyy/MM/dd').format(date);
   }
 
+  Widget _horizontalPadding(Widget child) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: child,
+    );
+  }
+
   void _submit() {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -241,67 +248,79 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 16),
           children: [
-            TextFormField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: '予定',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return '予定を入力してください';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _memoController,
-              decoration: const InputDecoration(
-                labelText: 'メモ',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 16),
-            SwitchListTile.adaptive(
-              title: const Text('終日'),
-              value: _allDay,
-              onChanged: (value) {
-                setState(() {
-                  _allDay = value;
-                  if (value) {
-                    _endDate = _startDate;
-                  } else {
-                    _ensureEndAfterStart(_combine(_startDate, _startTime));
+            _horizontalPadding(
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: '予定',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return '予定を入力してください';
                   }
-                });
-              },
+                  return null;
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            _horizontalPadding(
+              TextFormField(
+                controller: _memoController,
+                decoration: const InputDecoration(
+                  labelText: 'メモ',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _horizontalPadding(
+              SwitchListTile.adaptive(
+                title: const Text('終日'),
+                value: _allDay,
+                onChanged: (value) {
+                  setState(() {
+                    _allDay = value;
+                    if (value) {
+                      _endDate = _startDate;
+                    } else {
+                      _ensureEndAfterStart(_combine(_startDate, _startTime));
+                    }
+                  });
+                },
+              ),
             ),
             const SizedBox(height: 12),
-            AddEventDateTimeRow(
-              label: '開始時間',
-              dateLabel: _formatDate(_startDate),
-              onDateTap: () => _pickDate(isStart: true),
-              timeLabel: _allDay ? null : _startTime.format(context),
-              onTimeTap: _allDay ? null : () => _pickTime(isStart: true),
+            _horizontalPadding(
+              AddEventDateTimeRow(
+                label: '開始時間',
+                dateLabel: _formatDate(_startDate),
+                onDateTap: () => _pickDate(isStart: true),
+                timeLabel: _allDay ? null : _startTime.format(context),
+                onTimeTap: _allDay ? null : () => _pickTime(isStart: true),
+              ),
             ),
             if (!_allDay) ...[
               const SizedBox(height: 8),
-              AddEventDateTimeRow(
-                label: '終了時間',
-                dateLabel: _formatDate(_endDate),
-                onDateTap: () => _pickDate(isStart: false),
-                timeLabel: _endTime.format(context),
-                onTimeTap: () => _pickTime(isStart: false),
+              _horizontalPadding(
+                AddEventDateTimeRow(
+                  label: '終了時間',
+                  dateLabel: _formatDate(_endDate),
+                  onDateTap: () => _pickDate(isStart: false),
+                  timeLabel: _endTime.format(context),
+                  onTimeTap: () => _pickTime(isStart: false),
+                ),
               ),
             ],
             const SizedBox(height: 24),
-            const Text(
-              'アイコンを選択',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            _horizontalPadding(
+              const Text(
+                'アイコンを選択',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
             const SizedBox(height: 12),
             AddEventIconPicker(
@@ -314,10 +333,12 @@ class _AddCalendarEventScreenState extends State<AddCalendarEventScreen> {
               },
             ),
             const SizedBox(height: 32),
-            FilledButton.icon(
-              onPressed: _submit,
-              icon: const Icon(Icons.save),
-              label: const Text('保存'),
+            _horizontalPadding(
+              FilledButton.icon(
+                onPressed: _submit,
+                icon: const Icon(Icons.save),
+                label: const Text('保存'),
+              ),
             ),
           ],
         ),
