@@ -11,8 +11,8 @@ import '../widgets/app_bar_date_switcher.dart';
 import '../widgets/record_sheet/record_slot_sheet.dart';
 import '../widgets/record_table.dart';
 
-class RecordListScreen extends ConsumerWidget {
-  const RecordListScreen({super.key});
+class RecordTablePage extends ConsumerWidget {
+  const RecordTablePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
