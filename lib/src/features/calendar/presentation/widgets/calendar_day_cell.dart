@@ -84,10 +84,11 @@ class CalendarDayCell extends StatelessWidget {
             child = ColoredBox(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               child: Center(
-                child: Icon(
-                  event.allDay ? Icons.event_available : Icons.schedule,
-                  size: size.shortestSide * 0.5,
-                  color: Theme.of(context).iconTheme.color,
+                child: Text(
+                  '✅',
+                  style: TextStyle(
+                    fontSize: size.shortestSide * 0.5,
+                  ),
                 ),
               ),
             );

@@ -55,7 +55,10 @@ class AddCalendarEventViewModel extends StateNotifier<AddCalendarEventState> {
           ),
         );
 
+  static const String _noIconPath = '';
+
   static const List<String> _availableIconPaths = <String>[
+    _noIconPath,
     'assets/icons/birthday.png',
     'assets/icons/seven_nights.png',
     'assets/icons/k2_syrup.png',
@@ -88,7 +91,7 @@ class AddCalendarEventViewModel extends StateNotifier<AddCalendarEventState> {
       endDate: normalizedDate,
       startTime: const TimeOfDay(hour: 9, minute: 0),
       endTime: const TimeOfDay(hour: 10, minute: 0),
-      selectedIconPath: _availableIconPaths.first,
+      selectedIconPath: _noIconPath,
       isSubmitting: false,
       validationMessage: null,
       availableIconPaths: _availableIconPaths,
