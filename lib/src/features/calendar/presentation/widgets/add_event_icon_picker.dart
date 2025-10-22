@@ -54,12 +54,12 @@ class _IconChoice extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(
-            color: selected
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).dividerColor,
-            width: selected ? 2 : 1,
-          ),
+          border: selected
+              ? Border.all(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 2,
+                )
+              : null,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Image.asset(
