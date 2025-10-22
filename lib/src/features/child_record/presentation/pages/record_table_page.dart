@@ -4,58 +4,119 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 
 import '../../child_record.dart';
-import '../controllers/record_controller.dart';
-import '../controllers/selected_record_date_provider.dart';
+import '../models/record_draft.dart';
+import '../models/record_item_model.dart';
+import '../viewmodels/record_state.dart';
+import '../viewmodels/record_view_model.dart';
 import '../widgets/app_bar_child_info.dart';
 import '../widgets/app_bar_date_switcher.dart';
+import '../widgets/record_sheet/editable_record_sheet.dart';
 import '../widgets/record_sheet/record_slot_sheet.dart';
 import '../widgets/record_table.dart';
 
-class RecordTablePage extends ConsumerWidget {
+class RecordTablePage extends ConsumerStatefulWidget {
   const RecordTablePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(recordControllerProvider);
-    final selectedDate = ref.watch(selectedRecordDateProvider);
+  ConsumerState<RecordTablePage> createState() => _RecordTablePageState();
+}
+
+class _RecordTablePageState extends ConsumerState<RecordTablePage> {
+  late final ProviderSubscription<RecordPageState> _stateSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _stateSub = ref.listenManual<RecordPageState>(
+      recordViewModelProvider,
+      _handleStateEvent,
+    );
+  }
+
+  @override
+  void dispose() {
+    _stateSub.close();
+    super.dispose();
+  }
+
+  void _handleStateEvent(RecordPageState? previous, RecordPageState next) {
+    final event = next.pendingUiEvent;
+    if (event == null) {
+      return;
+    }
+    final notifier = ref.read(recordViewModelProvider.notifier);
+    if (!mounted) return;
+
+    if (event.message != null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(event.message!)));
+    }
+    if (event.openSlot != null) {
+      showRecordSlotSheet(
+        context: context,
+        ref: ref,
+        request: event.openSlot!,
+      );
+    }
+    if (event.openEditor != null) {
+      _openEditor(event.openEditor!);
+    }
+    notifier.clearUiEvent();
+  }
+
+  Future<void> _openEditor(RecordEditorRequest request) async {
+    final notifier = ref.read(recordViewModelProvider.notifier);
+    final result = await showDialog<RecordDraft>(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: EditableRecordSheet(
+            initialDraft: request.draft,
+            isNew: request.isNew,
+          ),
+        ),
+      ),
+    );
+    if (result != null && mounted) {
+      await notifier.addOrUpdateRecord(result);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(recordViewModelProvider);
+    final notifier = ref.read(recordViewModelProvider.notifier);
+    final selectedDate = state.selectedDate;
 
     final today = DateTime.now();
     final today0 = DateTime(today.year, today.month, today.day);
     final isToday = selectedDate.isAtSameMomentAs(today0);
 
-    void goToPreviousDate() {
-      final d = ref.read(selectedRecordDateProvider);
-      ref.read(selectedRecordDateProvider.notifier).state =
+    Future<void> goToPreviousDate() async {
+      final d = state.selectedDate;
+      final prev =
           DateTime(d.year, d.month, d.day).subtract(const Duration(days: 1));
+      await notifier.onSelectDate(prev);
     }
 
-    void goToNextDate() {
-      final d = ref.read(selectedRecordDateProvider);
-      final nd = d.add(const Duration(days: 1));
-      ref.read(selectedRecordDateProvider.notifier).state =
-          DateTime(nd.year, nd.month, nd.day);
+    Future<void> goToNextDate() async {
+      final d = state.selectedDate;
+      final nd = DateTime(d.year, d.month, d.day).add(const Duration(days: 1));
+      await notifier.onSelectDate(nd);
     }
 
-    void handleSlotTap(
-      BuildContext _,
-      int hour,
-      RecordType type,
-      List<Record> inHour,
-    ) {
-      showRecordSlotSheet(
-        context: context,
-        ref: ref,
-        hour: hour,
-        onlyType: type,
-        inHour: inHour,
-      );
+    void handleSlotTap(int hour, RecordType type) {
+      notifier.openSlotDetails(hour: hour, type: type);
     }
 
     final scrollStorageKey = PageStorageKey<String>(
       'record_table_scroll_${selectedDate.toIso8601String()}',
     );
 
-    Widget buildRecordTable(List<Record> records) {
+    Widget buildRecordTable(List<RecordItemModel> records) {
       return Stack(
         children: [
           RecordTable(
@@ -63,7 +124,7 @@ class RecordTablePage extends ConsumerWidget {
             onSlotTap: handleSlotTap,
             scrollStorageKey: scrollStorageKey,
           ),
-          if (state.isLoading)
+          if (state.recordsAsync.isLoading || state.isProcessing)
             const Positioned(
               right: 16,
               bottom: 16,
@@ -113,10 +174,10 @@ class RecordTablePage extends ConsumerWidget {
           ],
         ),
       ),
-      body: state.when(
+      body: state.recordsAsync.when(
         data: buildRecordTable,
         loading: () {
-          final records = state.value;
+          final records = state.recordsAsync.value;
           if (records != null) {
             return buildRecordTable(records);
           }

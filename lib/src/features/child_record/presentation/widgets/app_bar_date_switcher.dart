@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../controllers/selected_record_date_provider.dart';
+import '../viewmodels/record_view_model.dart';
 
 class AppBarDateSwitcher extends ConsumerWidget {
   const AppBarDateSwitcher({super.key});
@@ -13,13 +13,14 @@ class AppBarDateSwitcher extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final date = ref.watch(selectedRecordDateProvider);
+    final state = ref.watch(recordViewModelProvider);
+    final notifier = ref.read(recordViewModelProvider.notifier);
+    final date = state.selectedDate;
     final today = DateTime.now();
     final today0 = DateTime(today.year, today.month, today.day);
 
-    void setDate(DateTime d) {
-      ref.read(selectedRecordDateProvider.notifier).state =
-          DateTime(d.year, d.month, d.day);
+    Future<void> setDate(DateTime d) async {
+      await notifier.onSelectDate(DateTime(d.year, d.month, d.day));
     }
 
     Future<void> pickDate() async {

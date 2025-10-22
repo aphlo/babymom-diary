@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../child_record.dart';
+import '../../models/record_item_model.dart';
 
 class RecordTitle extends StatelessWidget {
   const RecordTitle({
@@ -9,7 +10,7 @@ class RecordTitle extends StatelessWidget {
     this.onEdit,
     this.onDelete,
   });
-  final Record record;
+  final RecordItemModel record;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
@@ -162,7 +163,7 @@ class _RecordTitleRow extends StatelessWidget {
 }
 
 _TitleDetail _buildTitleDetail(
-  Record record, {
+  RecordItemModel record, {
   required String noteText,
   required List<String> tags,
 }) {
@@ -299,7 +300,7 @@ class _TagChip extends StatelessWidget {
   }
 }
 
-String _formatBreastDuration(Record record) {
+String _formatBreastDuration(RecordItemModel record) {
   final amount = record.amount;
 
   if (amount != null) {

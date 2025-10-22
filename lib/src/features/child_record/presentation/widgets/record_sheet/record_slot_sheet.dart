@@ -2,91 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../child_record.dart';
+import '../../models/record_item_model.dart';
 import 'record_title.dart';
-import '../../controllers/record_controller.dart';
-import '../../controllers/selected_record_date_provider.dart';
-import 'editable_record_sheet.dart';
+import '../../viewmodels/record_view_model.dart';
+import '../../viewmodels/record_state.dart';
 
 void showRecordSlotSheet({
   required BuildContext context,
   required WidgetRef ref,
-  required int hour,
-  required RecordType onlyType,
-  required List<Record> inHour,
+  required RecordSlotRequest request,
 }) {
-  final base = ref.read(selectedRecordDateProvider);
-  final slot = DateTime(base.year, base.month, base.day, hour);
+  final notifier = ref.read(recordViewModelProvider.notifier);
+  final slot = DateTime(
+    request.date.year,
+    request.date.month,
+    request.date.day,
+    request.hour,
+  );
 
   Future<void> detailedAdd(RecordType t) async {
-    final created = await showDialog<Record>(
-      context: context,
-      barrierDismissible: true,
-      builder: (_) => Dialog(
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: EditableRecordSheet(
-            type: t,
-            initialDateTime: slot,
-          ),
-        ),
-      ),
-    );
-    if (created != null) {
-      try {
-        await ref.read(recordControllerProvider.notifier).addRecord(created);
-        if (!context.mounted) return;
-        Navigator.of(context).maybePop();
-      } on StateError catch (e) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message)),
-        );
-      } catch (e) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('記録に失敗しました: $e')),
-        );
-      }
+    await Navigator.of(context).maybePop();
+    if (!context.mounted) {
+      return;
     }
+    notifier.openCreateRecord(
+      type: t,
+      initialDateTime: slot,
+    );
   }
 
-  Future<void> detailedEdit(Record record) async {
-    final updated = await showDialog<Record>(
-      context: context,
-      barrierDismissible: true,
-      builder: (_) => Dialog(
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: EditableRecordSheet(
-            type: record.type,
-            initialDateTime: record.at,
-            initialRecord: record,
-          ),
-        ),
-      ),
-    );
-    if (updated != null) {
-      try {
-        await ref.read(recordControllerProvider.notifier).updateRecord(updated);
-        if (!context.mounted) return;
-        Navigator.of(context).maybePop();
-      } on StateError catch (e) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message)),
-        );
-      } catch (e) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('記録の更新に失敗しました: $e')),
-        );
-      }
+  Future<void> detailedEdit(RecordItemModel record) async {
+    await Navigator.of(context).maybePop();
+    if (!context.mounted) {
+      return;
     }
+    notifier.openEditRecord(record);
   }
 
-  Future<void> confirmDelete(Record record) async {
+  Future<void> confirmDelete(RecordItemModel record) async {
     final shouldDelete = await showDialog<bool>(
       context: context,
       barrierDismissible: true,
@@ -108,20 +61,9 @@ void showRecordSlotSheet({
     if (shouldDelete != true) {
       return;
     }
-    try {
-      await ref.read(recordControllerProvider.notifier).deleteRecord(record.id);
-      if (!context.mounted) return;
+    await notifier.deleteRecord(record.id);
+    if (context.mounted) {
       Navigator.of(context).maybePop();
-    } on StateError catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('記録の削除に失敗しました: $e')),
-      );
     }
   }
 
@@ -129,9 +71,11 @@ void showRecordSlotSheet({
     context: context,
     isScrollControlled: true,
     builder: (ctx) {
-      final records = inHour.where((e) => e.type == onlyType).toList()
+      final records = request.records
+          .where((e) => e.type == request.type)
+          .toList()
         ..sort((a, b) => a.at.compareTo(b.at));
-      final actions = <RecordType>[onlyType];
+      final actions = <RecordType>[request.type];
       return DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.6,
@@ -145,10 +89,10 @@ void showRecordSlotSheet({
               children: [
                 Row(
                   children: [
-                    Icon(_iconFor(onlyType)),
+                    Icon(_iconFor(request.type)),
                     const SizedBox(width: 8),
                     Text(
-                      onlyType.label,
+                      request.type.label,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -156,7 +100,7 @@ void showRecordSlotSheet({
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '${hour.toString().padLeft(2, '0')}:00 の記録',
+                      '${request.hour.toString().padLeft(2, '0')}:00 の記録',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,

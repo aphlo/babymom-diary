@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../child_record.dart';
-import '../../controllers/other_tags_controller.dart';
+import '../../models/record_draft.dart';
+import '../../viewmodels/record_sheet/editable_record_sheet_view_model.dart';
+import '../../viewmodels/record_view_model.dart';
 import 'manage_other_tags_dialog.dart';
 import 'record_fields_sections.dart';
 
 class EditableRecordSheet extends ConsumerStatefulWidget {
   const EditableRecordSheet({
     super.key,
-    required this.type,
-    required this.initialDateTime,
-    this.initialRecord,
+    required this.initialDraft,
+    required this.isNew,
   });
 
-  final RecordType type;
-  final DateTime initialDateTime;
-  final Record? initialRecord;
+  final RecordDraft initialDraft;
+  final bool isNew;
 
   @override
   ConsumerState<EditableRecordSheet> createState() =>
@@ -25,120 +25,111 @@ class EditableRecordSheet extends ConsumerStatefulWidget {
 
 class _EditableRecordSheetState extends ConsumerState<EditableRecordSheet> {
   final _formKey = GlobalKey<FormState>();
-  late TimeOfDay _timeOfDay;
-
-  final _minutesController = TextEditingController(text: '0');
-  final _amountController = TextEditingController();
-  final _noteController = TextEditingController();
-
-  ExcretionVolume? _selectedVolume;
-  final Set<String> _selectedTags = {};
-
-  String? _durationError;
-  String? _volumeError;
-
-  bool get _isEditing => widget.initialRecord != null;
+  late final AutoDisposeStateNotifierProvider<EditableRecordSheetViewModel,
+      EditableRecordSheetState> _viewModelProvider;
+  late final ProviderSubscription<EditableRecordSheetState> _stateSub;
+  late final TextEditingController _minutesController;
+  late final TextEditingController _amountController;
+  late final TextEditingController _noteController;
 
   @override
   void initState() {
     super.initState();
-    final initial =
-        widget.initialRecord?.at.toLocal() ?? widget.initialDateTime.toLocal();
-    final initialMinute =
-        widget.initialRecord != null ? initial.minute : DateTime.now().minute;
-    _timeOfDay = TimeOfDay(hour: initial.hour, minute: initialMinute);
-
-    final record = widget.initialRecord;
-    if (record == null) {
-      return;
-    }
-
-    switch (record.type) {
-      case RecordType.breastLeft:
-      case RecordType.breastRight:
-        final minutes = record.amount ?? 0;
-        _minutesController.text = minutes.toString();
-        break;
-      case RecordType.formula:
-      case RecordType.pump:
-        final amount = record.amount;
-        if (amount != null) {
-          _amountController.text = amount == amount.roundToDouble()
-              ? amount.toStringAsFixed(0)
-              : '$amount';
-        }
-        break;
-      case RecordType.pee:
-      case RecordType.poop:
-        _selectedVolume = record.excretionVolume;
-        final note = record.note;
-        if (note != null) {
-          _noteController.text = note;
-        }
-        break;
-      case RecordType.other:
-        _selectedTags.addAll(record.tags);
-        final note = record.note;
-        if (note != null) {
-          _noteController.text = note;
-        }
-        break;
-    }
+    _viewModelProvider = editableRecordSheetViewModelProvider(
+      EditableRecordSheetViewModelArgs(
+        initialDraft: widget.initialDraft,
+        isNew: widget.isNew,
+      ),
+    );
+    final initialState = ref.read(_viewModelProvider);
+    _minutesController = TextEditingController(text: initialState.minutesInput);
+    _amountController = TextEditingController(text: initialState.amountInput);
+    _noteController = TextEditingController(text: initialState.noteInput);
+    _minutesController.addListener(_onMinutesChanged);
+    _amountController.addListener(_onAmountChanged);
+    _noteController.addListener(_onNoteChanged);
+    _stateSub = ref.listenManual<EditableRecordSheetState>(
+      _viewModelProvider,
+      (previous, next) {
+        _syncController(_minutesController, next.minutesInput);
+        _syncController(_amountController, next.amountInput);
+        _syncController(_noteController, next.noteInput);
+      },
+    );
   }
 
   @override
   void dispose() {
-    _minutesController.dispose();
-    _amountController.dispose();
-    _noteController.dispose();
+    _stateSub.close();
+    _minutesController
+      ..removeListener(_onMinutesChanged)
+      ..dispose();
+    _amountController
+      ..removeListener(_onAmountChanged)
+      ..dispose();
+    _noteController
+      ..removeListener(_onNoteChanged)
+      ..dispose();
     super.dispose();
+  }
+
+  void _syncController(TextEditingController controller, String value) {
+    if (controller.text == value) {
+      return;
+    }
+    controller.text = value;
+  }
+
+  void _onMinutesChanged() {
+    ref
+        .read(_viewModelProvider.notifier)
+        .updateMinutesInput(_minutesController.text);
+  }
+
+  void _onAmountChanged() {
+    ref
+        .read(_viewModelProvider.notifier)
+        .updateAmountInput(_amountController.text);
+  }
+
+  void _onNoteChanged() {
+    ref.read(_viewModelProvider.notifier).updateNoteInput(_noteController.text);
   }
 
   @override
   Widget build(BuildContext context) {
-    final typeLabel = widget.type.label;
-    final tagState = ref.watch(otherTagsControllerProvider);
-    final typeSpecificFields = switch (widget.type) {
+    final state = ref.watch(_viewModelProvider);
+    final viewModel = ref.read(_viewModelProvider.notifier);
+    final tagsAsync = ref.watch(recordViewModelProvider).otherTagsAsync;
+    final type = state.type;
+    final typeLabel = type.label;
+
+    final typeSpecificFields = switch (type) {
       RecordType.breastLeft || RecordType.breastRight => BreastRecordFields(
           controller: _minutesController,
-          errorText: _durationError,
+          errorText: state.durationError,
         ),
-      RecordType.formula => AmountRecordFields(
-          controller: _amountController,
-        ),
-      RecordType.pump => AmountRecordFields(
+      RecordType.formula || RecordType.pump => AmountRecordFields(
           controller: _amountController,
         ),
       RecordType.pee || RecordType.poop => ExcretionRecordFields(
-          selectedVolume: _selectedVolume,
-          errorText: _volumeError,
+          selectedVolume: state.selectedVolume,
+          errorText: state.volumeError,
           noteController: _noteController,
-          onVolumeChanged: (volume) {
-            setState(() {
-              _selectedVolume = volume;
-              _volumeError = null;
-            });
-          },
+          onVolumeChanged: viewModel.selectVolume,
         ),
       RecordType.other => OtherRecordFields(
-          isLoading: tagState.isLoading,
-          hasError: tagState.hasError,
-          tags: tagState.valueOrNull ?? const <String>[],
-          selectedTags: _selectedTags,
-          onTagToggled: (tag, selected) {
-            setState(() {
-              if (selected) {
-                _selectedTags.add(tag);
-              } else {
-                _selectedTags.remove(tag);
-              }
-            });
-          },
+          isLoading: tagsAsync.isLoading,
+          hasError: tagsAsync.hasError,
+          tags: tagsAsync.valueOrNull ?? const <String>[],
+          selectedTags: state.selectedTags,
+          onTagToggled: (tag, selected) => viewModel.toggleTag(tag, selected),
           onManageTagsPressed:
-              tagState.isLoading ? null : _openManageTagsDialog,
+              tagsAsync.isLoading ? null : _openManageTagsDialog,
           noteController: _noteController,
         ),
     };
+
     final children = <Widget>[
       Row(
         children: [
@@ -156,8 +147,8 @@ class _EditableRecordSheetState extends ConsumerState<EditableRecordSheet> {
       const SizedBox(height: 12),
       _TimePickerField(
         label: '記録時間',
-        value: _timeOfDay,
-        onChanged: (value) => setState(() => _timeOfDay = value),
+        value: state.timeOfDay,
+        onChanged: viewModel.setTimeOfDay,
       ),
       const SizedBox(height: 16),
       typeSpecificFields,
@@ -200,148 +191,22 @@ class _EditableRecordSheetState extends ConsumerState<EditableRecordSheet> {
       builder: (_) => const ManageOtherTagsDialog(),
     );
     if (!mounted) return;
-    final tagState = ref.read(otherTagsControllerProvider);
-    final availableTags = tagState.valueOrNull;
-    if (availableTags != null) {
-      setState(() {
-        _selectedTags.removeWhere((tag) => !availableTags.contains(tag));
-      });
-    }
+    final availableTags =
+        ref.read(recordViewModelProvider).otherTagsAsync.valueOrNull;
+    ref.read(_viewModelProvider.notifier).syncSelectedTags(availableTags);
   }
 
   void _handleSubmit() {
-    setState(() {
-      _durationError = null;
-      _volumeError = null;
-    });
-
+    final viewModel = ref.read(_viewModelProvider.notifier);
+    viewModel.resetValidationErrors();
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
-    final selectedDate = widget.initialDateTime;
-    final at = DateTime(
-      selectedDate.year,
-      selectedDate.month,
-      selectedDate.day,
-      _timeOfDay.hour,
-      _timeOfDay.minute,
-    );
-
-    final record = _buildRecord(at);
-    if (record == null) {
+    final draft = viewModel.submit();
+    if (draft == null) {
       return;
     }
-    Navigator.of(context).pop(record);
-  }
-
-  Record? _buildRecord(DateTime at) {
-    switch (widget.type) {
-      case RecordType.breastLeft:
-      case RecordType.breastRight:
-        return _buildBreastRecord(at);
-      case RecordType.formula:
-      case RecordType.pump:
-        return _buildAmountRecord(at);
-      case RecordType.pee:
-      case RecordType.poop:
-        return _buildExcretionRecord(at);
-      case RecordType.other:
-        return _buildOtherRecord(at);
-    }
-  }
-
-  Record? _buildBreastRecord(DateTime at) {
-    final minutes = int.tryParse(_minutesController.text) ?? 0;
-    if (minutes < 0) {
-      setState(() {
-        _durationError = '0以上の値を入力してください';
-      });
-      return null;
-    }
-    final totalMinutes = minutes.toDouble();
-    if (_isEditing) {
-      return widget.initialRecord!.copyWith(
-        at: at,
-        amount: totalMinutes,
-      );
-    }
-    return Record(
-      type: widget.type,
-      at: at,
-      amount: totalMinutes,
-    );
-  }
-
-  Record? _buildAmountRecord(DateTime at) {
-    final amount = double.tryParse(_amountController.text);
-    if (amount == null || amount <= 0) {
-      return null;
-    }
-    if (_isEditing) {
-      return widget.initialRecord!.copyWith(
-        at: at,
-        amount: amount,
-      );
-    }
-    return Record(
-      type: widget.type,
-      at: at,
-      amount: amount,
-    );
-  }
-
-  Record? _buildExcretionRecord(DateTime at) {
-    final volume = _selectedVolume;
-    if (volume == null) {
-      setState(() {
-        _volumeError = '量の目安を選択してください';
-      });
-      return null;
-    }
-    final note = _noteOrNull();
-    if (_isEditing) {
-      return widget.initialRecord!.copyWith(
-        at: at,
-        excretionVolume: volume,
-        note: note,
-      );
-    }
-    return Record(
-      type: widget.type,
-      at: at,
-      excretionVolume: volume,
-      note: note,
-    );
-  }
-
-  Record _buildOtherRecord(DateTime at) {
-    final tagState = ref.read(otherTagsControllerProvider);
-    final availableTags = tagState.valueOrNull;
-    final selectedTags = availableTags == null
-        ? _selectedTags.toList(growable: false)
-        : _selectedTags
-            .where((tag) => availableTags.contains(tag))
-            .toList(growable: false);
-    final note = _noteOrNull();
-    if (_isEditing) {
-      return widget.initialRecord!.copyWith(
-        at: at,
-        tags: selectedTags,
-        note: note,
-      );
-    }
-    return Record(
-      type: widget.type,
-      at: at,
-      tags: selectedTags,
-      note: note,
-    );
-  }
-
-  String? _noteOrNull() {
-    final note = _noteController.text.trim();
-    return note.isEmpty ? null : note;
+    Navigator.of(context).pop(draft);
   }
 }
 

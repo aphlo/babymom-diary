@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../child_record.dart';
+import '../models/record_item_model.dart';
 import 'other_tags_preview.dart';
 
 typedef RecordSlotTapCallback = void Function(
-  BuildContext context,
   int hour,
   RecordType type,
-  List<Record> inHour,
 );
 
 class RecordTableCell extends StatelessWidget {
@@ -20,7 +19,7 @@ class RecordTableCell extends StatelessWidget {
     required this.rowHeight,
   });
 
-  final List<Record> records;
+  final List<RecordItemModel> records;
   final int hour;
   final RecordType type;
   final RecordSlotTapCallback onTap;
@@ -28,8 +27,8 @@ class RecordTableCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final inHour = records.where((e) => e.at.hour == hour).toList();
-    final filtered = inHour.where((e) => e.type == type).toList();
+    final filtered =
+        records.where((e) => e.at.hour == hour && e.type == type).toList();
 
     if (type == RecordType.other) {
       final tags = filtered
@@ -40,7 +39,7 @@ class RecordTableCell extends StatelessWidget {
       final fallbackText = filtered.isEmpty ? '' : '${filtered.length}';
 
       return InkWell(
-        onTap: () => onTap(context, hour, type, inHour),
+        onTap: () => onTap(hour, type),
         child: SizedBox(
           height: rowHeight,
           child: Padding(
@@ -80,7 +79,7 @@ class RecordTableCell extends StatelessWidget {
     }
 
     return InkWell(
-      onTap: () => onTap(context, hour, type, inHour),
+      onTap: () => onTap(hour, type),
       child: SizedBox(
         height: rowHeight,
         child: Center(

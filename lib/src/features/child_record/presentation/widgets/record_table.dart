@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../child_record.dart';
+import '../models/record_item_model.dart';
 import 'dashed_table_border.dart';
 import 'record_table_cell.dart';
 
@@ -12,7 +13,7 @@ class RecordTable extends StatelessWidget {
     required this.scrollStorageKey,
   });
 
-  final List<Record> records;
+  final List<RecordItemModel> records;
   final RecordSlotTapCallback onSlotTap;
   final PageStorageKey<String> scrollStorageKey;
 
@@ -313,7 +314,7 @@ class _TotalValueCell extends StatelessWidget {
   }
 }
 
-double _sumAmount(List<Record> records, RecordType type) {
+double _sumAmount(List<RecordItemModel> records, RecordType type) {
   return records
       .where((e) => e.type == type)
       .fold<double>(0, (sum, e) => sum + (e.amount ?? 0));

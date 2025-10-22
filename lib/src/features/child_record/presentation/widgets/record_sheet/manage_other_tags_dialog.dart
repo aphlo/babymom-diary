@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../controllers/other_tags_controller.dart';
+import '../../viewmodels/record_sheet/manage_other_tags_view_model.dart';
+import '../../viewmodels/record_view_model.dart';
 
 class ManageOtherTagsDialog extends ConsumerStatefulWidget {
   const ManageOtherTagsDialog({super.key});
@@ -12,79 +13,47 @@ class ManageOtherTagsDialog extends ConsumerStatefulWidget {
 }
 
 class _ManageOtherTagsDialogState extends ConsumerState<ManageOtherTagsDialog> {
-  final TextEditingController _controller = TextEditingController();
-  bool _isSubmitting = false;
-  String? _inputError;
+  late final TextEditingController _controller;
+  late final ProviderSubscription<ManageOtherTagsState> _stateSub;
 
   @override
   void dispose() {
+    _stateSub.close();
     _controller.dispose();
     super.dispose();
   }
 
+  @override
+  void initState() {
+    super.initState();
+    final initialState = ref.read(manageOtherTagsViewModelProvider);
+    _controller = TextEditingController(text: initialState.input);
+    _stateSub = ref.listenManual<ManageOtherTagsState>(
+      manageOtherTagsViewModelProvider,
+      (previous, next) {
+        if (_controller.text == next.input) {
+          return;
+        }
+        _controller.text = next.input;
+      },
+    );
+  }
+
   Future<void> _handleAdd() async {
-    if (_isSubmitting) {
-      return;
-    }
-    final raw = _controller.text.trim();
-    if (raw.isEmpty) {
-      setState(() => _inputError = '文字を入力してください');
-      return;
-    }
-
-    final existing =
-        ref.read(otherTagsControllerProvider).valueOrNull ?? const <String>[];
-    if (existing.contains(raw)) {
-      setState(() => _inputError = '既に登録されています');
-      return;
-    }
-
-    setState(() {
-      _isSubmitting = true;
-      _inputError = null;
-    });
-
-    try {
-      await ref.read(otherTagsControllerProvider.notifier).addTag(raw);
-      if (!mounted) return;
-      _controller.clear();
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('タグの追加に失敗しました')));
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
-      }
-    }
+    await ref.read(manageOtherTagsViewModelProvider.notifier).addTag();
   }
 
   Future<void> _handleRemove(String tag) async {
-    if (_isSubmitting) {
-      return;
-    }
-    setState(() => _isSubmitting = true);
-    try {
-      await ref.read(otherTagsControllerProvider.notifier).removeTag(tag);
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('タグの削除に失敗しました')));
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
-      }
-    }
+    await ref.read(manageOtherTagsViewModelProvider.notifier).removeTag(tag);
   }
 
   @override
   Widget build(BuildContext context) {
-    final tagState = ref.watch(otherTagsControllerProvider);
+    final viewState = ref.watch(manageOtherTagsViewModelProvider);
+    final tagState = ref.watch(recordViewModelProvider).otherTagsAsync;
     final tags = tagState.valueOrNull ?? const <String>[];
+    final isSubmitting = viewState.isSubmitting;
+    final errorText = viewState.errorMessage;
 
     return AlertDialog(
       title: const Text('タグを編集'),
@@ -95,12 +64,15 @@ class _ManageOtherTagsDialogState extends ConsumerState<ManageOtherTagsDialog> {
           children: [
             TextField(
               controller: _controller,
-              enabled: !_isSubmitting,
+              enabled: !isSubmitting,
               decoration: InputDecoration(
                 labelText: 'タグ名',
                 border: const OutlineInputBorder(),
-                errorText: _inputError,
+                errorText: errorText,
               ),
+              onChanged: (value) => ref
+                  .read(manageOtherTagsViewModelProvider.notifier)
+                  .updateInput(value),
               onSubmitted: (_) => _handleAdd(),
             ),
             const SizedBox(height: 12),
@@ -119,8 +91,7 @@ class _ManageOtherTagsDialogState extends ConsumerState<ManageOtherTagsDialog> {
                   for (final tag in tags)
                     InputChip(
                       label: Text(tag),
-                      onDeleted:
-                          _isSubmitting ? null : () => _handleRemove(tag),
+                      onDeleted: isSubmitting ? null : () => _handleRemove(tag),
                     ),
                 ],
               ),
@@ -130,11 +101,11 @@ class _ManageOtherTagsDialogState extends ConsumerState<ManageOtherTagsDialog> {
       actions: [
         TextButton(
           onPressed:
-              _isSubmitting ? null : () => Navigator.of(context).maybePop(),
+              isSubmitting ? null : () => Navigator.of(context).maybePop(),
           child: const Text('閉じる'),
         ),
         FilledButton.icon(
-          onPressed: _isSubmitting || tagState.isLoading ? null : _handleAdd,
+          onPressed: isSubmitting || tagState.isLoading ? null : _handleAdd,
           icon: const Icon(Icons.add),
           label: const Text('追加'),
         ),
