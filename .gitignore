@@ -7,8 +7,6 @@
 .buildlog/
 .history
 
-
-
 # Flutter repo-specific
 /bin/cache/
 /bin/internal/bootstrap.bat
@@ -126,3 +124,6 @@ app.*.symbols
 /ios/Runner.xcodeproj/project.pbxproj
 /ios/Runner/GoogleService-Info.plist
 firebase.json
+
+# FVM Version Cache
+.fvm/
