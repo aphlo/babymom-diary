@@ -437,8 +437,10 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     required DateTime date,
     bool keepPrevious = true,
   }) async {
+    if (!mounted) return;
     final previous = state.recordsAsync;
     const loading = AsyncValue<List<RecordItemModel>>.loading();
+    if (!mounted) return;
     state = state.copyWith(
       recordsAsync: keepPrevious ? loading.copyWithPrevious(previous) : loading,
     );
@@ -446,10 +448,12 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     try {
       final records = await getRecords(childId, date);
       final items = records.map(_mapper.toUiModel).toList(growable: false);
+      if (!mounted) return;
       state = state.copyWith(
         recordsAsync: AsyncValue.data(items),
       );
     } catch (error, stackTrace) {
+      if (!mounted) return;
       state = state.copyWith(
         recordsAsync: AsyncValue.error(error, stackTrace),
         pendingUiEvent: const RecordUiEvent.showMessage('記録の取得に失敗しました'),
@@ -458,7 +462,9 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
   }
 
   Future<void> _loadOtherTags(String householdId) async {
+    if (!mounted) return;
     final previous = state.otherTagsAsync;
+    if (!mounted) return;
     state = state.copyWith(
       otherTagsAsync:
           const AsyncValue<List<String>>.loading().copyWithPrevious(previous),
@@ -471,12 +477,14 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
           .where((name) => name.isNotEmpty)
           .toList(growable: true);
       tags.sort();
+      if (!mounted) return;
       state = state.copyWith(
         otherTagsAsync: AsyncValue.data(
           List.unmodifiable(tags),
         ),
       );
     } catch (error, stackTrace) {
+      if (!mounted) return;
       state = state.copyWith(
         otherTagsAsync: AsyncValue.error(error, stackTrace),
         pendingUiEvent: const RecordUiEvent.showMessage('タグの取得に失敗しました'),
