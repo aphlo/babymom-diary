@@ -6,8 +6,8 @@ import 'package:babymom_diary/src/features/mom_record/presentation/components/mo
 import 'package:babymom_diary/src/features/mom_record/presentation/components/mom_record_overview_tab.dart';
 import 'package:babymom_diary/src/features/mom_record/presentation/viewmodels/mom_record_view_model.dart';
 
-class MomScreen extends ConsumerWidget {
-  const MomScreen({super.key});
+class MomRecordPage extends ConsumerWidget {
+  const MomRecordPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

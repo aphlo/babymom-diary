@@ -94,6 +94,7 @@ class _HeaderCell extends StatelessWidget {
       child: Text(
         label,
         style: style,
+        textAlign: TextAlign.center,
       ),
     );
   }
@@ -110,9 +111,6 @@ class _TableRow extends StatelessWidget {
     final theme = Theme.of(context);
     final dateStyle = theme.textTheme.bodyMedium;
     final cellStyle = theme.textTheme.bodySmall;
-    final mutedStyle = cellStyle?.copyWith(
-      color: theme.textTheme.bodySmall?.color,
-    );
     final weekday = record.date.weekday;
     final isWeekend =
         weekday == DateTime.saturday || weekday == DateTime.sunday;
@@ -142,12 +140,13 @@ class _TableRow extends StatelessWidget {
               _DataCell(
                 text: record.lochiaSummary ?? '',
                 flex: 2,
-                style: mutedStyle,
+                style: cellStyle,
+                padding: const EdgeInsets.only(left: 8),
               ),
               _DataCell(
                 text: record.breastSummary ?? '',
                 flex: 2,
-                style: mutedStyle,
+                style: cellStyle,
               ),
               _DataCell(
                 text: record.memo ?? '',
@@ -167,20 +166,25 @@ class _DataCell extends StatelessWidget {
     required this.text,
     required this.flex,
     this.style,
+    this.padding,
   });
 
   final String text;
   final int flex;
   final TextStyle? style;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       flex: flex,
-      child: Text(
-        text,
-        style: style,
-        softWrap: true,
+      child: Padding(
+        padding: padding ?? EdgeInsets.zero,
+        child: Text(
+          text,
+          style: style,
+          softWrap: true,
+        ),
       ),
     );
   }
