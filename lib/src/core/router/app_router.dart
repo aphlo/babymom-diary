@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/child_record/presentation/pages/record_table_page.dart';
 import '../../features/vaccines/presentation/screens/vaccines_screen.dart';
-import '../../features/mom/presentation/screens/mom_screen.dart';
+import '../../features/mom_record/presentation/screens/mom_screen.dart';
 import '../../features/calendar/presentation/pages/calendar_page.dart';
 import '../../features/menu/presentation/screens/menu_screen.dart';
 import '../../features/children/presentation/screens/add_child_screen.dart';

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
-import 'package:babymom_diary/src/features/mom/presentation/components/mom_diary_overview_tab.dart';
-import 'package:babymom_diary/src/features/mom/presentation/components/mom_record_overview_tab.dart';
-import 'package:babymom_diary/src/features/mom/presentation/viewmodels/mom_record_view_model.dart';
+import 'package:babymom_diary/src/features/mom_record/presentation/components/mom_diary_overview_tab.dart';
+import 'package:babymom_diary/src/features/mom_record/presentation/components/mom_record_overview_tab.dart';
+import 'package:babymom_diary/src/features/mom_record/presentation/viewmodels/mom_record_view_model.dart';
 
 class MomScreen extends ConsumerWidget {
   const MomScreen({super.key});
