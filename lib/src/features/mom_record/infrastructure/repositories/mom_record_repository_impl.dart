@@ -41,11 +41,11 @@ class MomRecordRepositoryImpl implements MomRecordRepository {
     final dto = MomRecordDto(
       date: record.date,
       temperatureCelsius: record.temperatureCelsius,
-      lochiaAmount: record.lochia?.amount.code,
-      lochiaColor: record.lochia?.color.code,
-      breastFirmness: record.breast?.firmness.code,
-      breastPain: record.breast?.pain.code,
-      breastRedness: record.breast?.redness.code,
+      lochiaAmount: record.lochia?.amount?.code,
+      lochiaColor: record.lochia?.color?.code,
+      breastFirmness: record.breast?.firmness?.code,
+      breastPain: record.breast?.pain?.code,
+      breastRedness: record.breast?.redness?.code,
       memo: record.memo,
     );
     return _remote.upsertRecord(dto);
@@ -58,10 +58,10 @@ LochiaStatus? _toLochiaStatus(MomRecordDto? dto) {
   }
   final amount = LochiaAmount.fromCode(dto.lochiaAmount);
   final color = LochiaColor.fromCode(dto.lochiaColor);
-  if (amount != null && color != null) {
-    return LochiaStatus(amount: amount, color: color);
+  if (amount == null && color == null) {
+    return null;
   }
-  return null;
+  return LochiaStatus(amount: amount, color: color);
 }
 
 BreastCondition? _toBreastCondition(MomRecordDto? dto) {
@@ -71,12 +71,12 @@ BreastCondition? _toBreastCondition(MomRecordDto? dto) {
   final firmness = SymptomIntensity.fromCode(dto.breastFirmness);
   final pain = SymptomIntensity.fromCode(dto.breastPain);
   final redness = SymptomIntensity.fromCode(dto.breastRedness);
-  if (firmness != null && pain != null && redness != null) {
-    return BreastCondition(
-      firmness: firmness,
-      pain: pain,
-      redness: redness,
-    );
+  if (firmness == null && pain == null && redness == null) {
+    return null;
   }
-  return null;
+  return BreastCondition(
+    firmness: firmness,
+    pain: pain,
+    redness: redness,
+  );
 }

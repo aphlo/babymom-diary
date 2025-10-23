@@ -3,22 +3,31 @@ import 'package:flutter/foundation.dart';
 @immutable
 class LochiaStatus {
   const LochiaStatus({
-    required this.amount,
-    required this.color,
-  });
+    this.amount,
+    this.color,
+  }) : assert(
+          amount != null || color != null,
+          'LochiaStatus requires at least one value.',
+        );
 
-  final LochiaAmount amount;
-  final LochiaColor color;
+  final LochiaAmount? amount;
+  final LochiaColor? color;
+
+  static const Object _sentinel = Object();
 
   LochiaStatus copyWith({
-    LochiaAmount? amount,
-    LochiaColor? color,
+    Object? amount = _sentinel,
+    Object? color = _sentinel,
   }) {
-    return LochiaStatus(
-      amount: amount ?? this.amount,
-      color: color ?? this.color,
-    );
+    final nextAmount =
+        amount == _sentinel ? this.amount : amount as LochiaAmount?;
+    final nextColor = color == _sentinel ? this.color : color as LochiaColor?;
+    return LochiaStatus(amount: nextAmount, color: nextColor);
   }
+
+  bool get hasAmount => amount != null;
+  bool get hasColor => color != null;
+  bool get isComplete => hasAmount && hasColor;
 }
 
 enum LochiaAmount {

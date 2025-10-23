@@ -112,11 +112,11 @@ class _TableRow extends StatelessWidget {
     final dateStyle = theme.textTheme.bodyMedium;
     final cellStyle = theme.textTheme.bodySmall;
     final weekday = record.date.weekday;
-    final isWeekend =
-        weekday == DateTime.saturday || weekday == DateTime.sunday;
-    final rowColor = isWeekend
-        ? theme.colorScheme.primary.withOpacity(0.04)
-        : theme.colorScheme.surface;
+    final rowColor = weekday == DateTime.saturday
+        ? const Color(0xFFE3F2FD)
+        : weekday == DateTime.sunday
+            ? const Color(0xFFFFEBEE)
+            : theme.colorScheme.surface;
 
     return Material(
       color: rowColor,

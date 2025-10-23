@@ -88,24 +88,28 @@ class MomRecordDto {
   }
 
   Map<String, Object?>? _buildLochiaMap() {
-    if (lochiaAmount == null || lochiaColor == null) {
-      return null;
+    final map = <String, Object?>{};
+    if (lochiaAmount != null) {
+      map['amount'] = lochiaAmount;
     }
-    return <String, Object?>{
-      'amount': lochiaAmount,
-      'color': lochiaColor,
-    };
+    if (lochiaColor != null) {
+      map['color'] = lochiaColor;
+    }
+    return map.isEmpty ? null : map;
   }
 
   Map<String, Object?>? _buildBreastMap() {
-    if (breastFirmness == null || breastPain == null || breastRedness == null) {
-      return null;
+    final map = <String, Object?>{};
+    if (breastFirmness != null) {
+      map['firmness'] = breastFirmness;
     }
-    return <String, Object?>{
-      'firmness': breastFirmness,
-      'pain': breastPain,
-      'redness': breastRedness,
-    };
+    if (breastPain != null) {
+      map['pain'] = breastPain;
+    }
+    if (breastRedness != null) {
+      map['redness'] = breastRedness;
+    }
+    return map.isEmpty ? null : map;
   }
 }
 

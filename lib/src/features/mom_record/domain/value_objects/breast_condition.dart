@@ -3,26 +3,41 @@ import 'package:flutter/foundation.dart';
 @immutable
 class BreastCondition {
   const BreastCondition({
-    required this.firmness,
-    required this.pain,
-    required this.redness,
-  });
+    this.firmness,
+    this.pain,
+    this.redness,
+  }) : assert(
+          firmness != null || pain != null || redness != null,
+          'BreastCondition requires at least one value.',
+        );
 
-  final SymptomIntensity firmness;
-  final SymptomIntensity pain;
-  final SymptomIntensity redness;
+  final SymptomIntensity? firmness;
+  final SymptomIntensity? pain;
+  final SymptomIntensity? redness;
+
+  static const Object _sentinel = Object();
 
   BreastCondition copyWith({
-    SymptomIntensity? firmness,
-    SymptomIntensity? pain,
-    SymptomIntensity? redness,
+    Object? firmness = _sentinel,
+    Object? pain = _sentinel,
+    Object? redness = _sentinel,
   }) {
+    final nextFirmness =
+        firmness == _sentinel ? this.firmness : firmness as SymptomIntensity?;
+    final nextPain = pain == _sentinel ? this.pain : pain as SymptomIntensity?;
+    final nextRedness =
+        redness == _sentinel ? this.redness : redness as SymptomIntensity?;
     return BreastCondition(
-      firmness: firmness ?? this.firmness,
-      pain: pain ?? this.pain,
-      redness: redness ?? this.redness,
+      firmness: nextFirmness,
+      pain: nextPain,
+      redness: nextRedness,
     );
   }
+
+  bool get hasFirmness => firmness != null;
+  bool get hasPain => pain != null;
+  bool get hasRedness => redness != null;
+  bool get isComplete => hasFirmness && hasPain && hasRedness;
 }
 
 enum SymptomIntensity {

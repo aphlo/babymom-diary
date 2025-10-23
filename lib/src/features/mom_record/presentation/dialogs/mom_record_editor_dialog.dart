@@ -255,19 +255,19 @@ class _MomRecordEditorDialogState extends ConsumerState<MomRecordEditorDialog> {
         widget.record.date.day,
       ),
       temperatureCelsius: temperature,
-      lochia: _selectedLochiaAmount != null && _selectedLochiaColor != null
+      lochia: _selectedLochiaAmount != null || _selectedLochiaColor != null
           ? LochiaStatus(
-              amount: _selectedLochiaAmount!,
-              color: _selectedLochiaColor!,
+              amount: _selectedLochiaAmount,
+              color: _selectedLochiaColor,
             )
           : null,
-      breast: _selectedBreastFirmness != null &&
-              _selectedBreastPain != null &&
+      breast: _selectedBreastFirmness != null ||
+              _selectedBreastPain != null ||
               _selectedBreastRedness != null
           ? BreastCondition(
-              firmness: _selectedBreastFirmness!,
-              pain: _selectedBreastPain!,
-              redness: _selectedBreastRedness!,
+              firmness: _selectedBreastFirmness,
+              pain: _selectedBreastPain,
+              redness: _selectedBreastRedness,
             )
           : null,
       memo: memoText.isEmpty ? null : memoText,
