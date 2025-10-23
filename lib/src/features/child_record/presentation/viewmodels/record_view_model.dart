@@ -201,9 +201,17 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     }
     state = state.copyWith(isProcessing: true, pendingUiEvent: null);
     final upsert = _ref.read(addRecordUseCaseProvider(householdId));
+    final previousId = draft.id;
     final record = _mapper.toDomain(draft);
+    final shouldDeletePrevious = previousId != null && previousId != record.id;
+    final deleteUseCase = shouldDeletePrevious
+        ? _ref.read(deleteRecordUseCaseProvider(householdId))
+        : null;
     try {
       await upsert(childId, record);
+      if (shouldDeletePrevious && deleteUseCase != null) {
+        await deleteUseCase(childId, previousId);
+      }
       await _fetchRecords(
         householdId: householdId,
         childId: childId,

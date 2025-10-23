@@ -71,11 +71,9 @@ void showRecordSlotSheet({
     context: context,
     isScrollControlled: true,
     builder: (ctx) {
-      final records = request.records
-          .where((e) => e.type == request.type)
-          .toList()
+      final records = request.records.toList()
         ..sort((a, b) => a.at.compareTo(b.at));
-      final actions = <RecordType>[request.type];
+      final hasRecord = records.isNotEmpty;
       return DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.6,
@@ -117,30 +115,39 @@ void showRecordSlotSheet({
                 Text('合計: ${records.length}件'),
                 const SizedBox(height: 8),
                 Expanded(
-                  child: ListView.builder(
-                    controller: controller,
-                    itemCount: records.length,
-                    itemBuilder: (_, i) {
-                      final record = records[i];
-                      return RecordTitle(
-                        record: record,
-                        onEdit: () => detailedEdit(record),
-                        onDelete: () => confirmDelete(record),
-                      );
-                    },
-                  ),
+                  child: hasRecord
+                      ? ListView.builder(
+                          controller: controller,
+                          itemCount: records.length,
+                          itemBuilder: (_, i) {
+                            final record = records[i];
+                            return RecordTitle(
+                              record: record,
+                              onEdit: () => detailedEdit(record),
+                              onDelete: () => confirmDelete(record),
+                            );
+                          },
+                        )
+                      : Center(
+                          child: Text(
+                            '${request.hour.toString().padLeft(2, '0')}:00 の記録はありません',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(color: Colors.black54),
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    for (final t in actions)
-                      OutlinedButton.icon(
-                        onPressed: () => detailedAdd(t),
-                        icon: Icon(_iconFor(t)),
-                        label: const Text('記録を追加'),
-                      ),
+                    OutlinedButton.icon(
+                      onPressed: () => detailedAdd(request.type),
+                      icon: const Icon(Icons.add),
+                      label: const Text('記録を追加'),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 24),

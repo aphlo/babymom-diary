@@ -1,4 +1,3 @@
-import 'package:uuid/uuid.dart';
 import '../value/record_type.dart';
 import '../value/excretion_volume.dart';
 
@@ -19,7 +18,7 @@ class Record {
     this.note,
     this.excretionVolume,
     List<String>? tags,
-  })  : id = id ?? const Uuid().v4(),
+  })  : id = id ?? _generateId(type, at),
         tags = List.unmodifiable(tags ?? const []);
 
   Record copyWith({
@@ -40,4 +39,15 @@ class Record {
       tags: tags ?? this.tags,
     );
   }
+}
+
+String _formatTwoDigits(int value) => value.toString().padLeft(2, '0');
+
+String _generateId(RecordType type, DateTime at) {
+  final datePart =
+      '${at.year.toString().padLeft(4, '0')}-${_formatTwoDigits(at.month)}-${_formatTwoDigits(at.day)}';
+  final hourPart = _formatTwoDigits(at.hour);
+  final unique =
+      DateTime.now().microsecondsSinceEpoch.toRadixString(36).padLeft(8, '0');
+  return '$datePart-$hourPart-${type.name}-$unique';
 }
