@@ -158,8 +158,6 @@ String? _formatSymptomIntensity(SymptomIntensity? intensity) {
     return null;
   }
   switch (intensity) {
-    case SymptomIntensity.none:
-      return 'なし';
     case SymptomIntensity.slight:
       return 'すこし';
     case SymptomIntensity.normal:

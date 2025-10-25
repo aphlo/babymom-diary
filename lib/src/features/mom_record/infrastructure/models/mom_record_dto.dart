@@ -72,10 +72,10 @@ class MomRecordDto {
     }
 
     final lochiaMap = _buildLochiaMap();
-    payload['lochia'] = lochiaMap ?? FieldValue.delete();
+    payload['lochia'] = lochiaMap;
 
     final breastMap = _buildBreastMap();
-    payload['breast'] = breastMap ?? FieldValue.delete();
+    payload['breast'] = breastMap;
 
     final trimmedMemo = memo?.trim();
     if (trimmedMemo != null && trimmedMemo.isNotEmpty) {
@@ -89,27 +89,46 @@ class MomRecordDto {
 
   Map<String, Object?>? _buildLochiaMap() {
     final map = <String, Object?>{};
+
+    // 明示的にnullの場合はFieldValue.delete()を設定
     if (lochiaAmount != null) {
       map['amount'] = lochiaAmount;
+    } else {
+      map['amount'] = FieldValue.delete();
     }
+
     if (lochiaColor != null) {
       map['color'] = lochiaColor;
+    } else {
+      map['color'] = FieldValue.delete();
     }
-    return map.isEmpty ? null : map;
+
+    return map;
   }
 
   Map<String, Object?>? _buildBreastMap() {
     final map = <String, Object?>{};
+
+    // 明示的にnullの場合はFieldValue.delete()を設定
     if (breastFirmness != null) {
       map['firmness'] = breastFirmness;
+    } else {
+      map['firmness'] = FieldValue.delete();
     }
+
     if (breastPain != null) {
       map['pain'] = breastPain;
+    } else {
+      map['pain'] = FieldValue.delete();
     }
+
     if (breastRedness != null) {
       map['redness'] = breastRedness;
+    } else {
+      map['redness'] = FieldValue.delete();
     }
-    return map.isEmpty ? null : map;
+
+    return map;
   }
 }
 

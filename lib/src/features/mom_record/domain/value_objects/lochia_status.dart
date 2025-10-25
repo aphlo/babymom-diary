@@ -5,10 +5,7 @@ class LochiaStatus {
   const LochiaStatus({
     this.amount,
     this.color,
-  }) : assert(
-          amount != null || color != null,
-          'LochiaStatus requires at least one value.',
-        );
+  });
 
   final LochiaAmount? amount;
   final LochiaColor? color;

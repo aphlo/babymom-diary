@@ -6,10 +6,7 @@ class BreastCondition {
     this.firmness,
     this.pain,
     this.redness,
-  }) : assert(
-          firmness != null || pain != null || redness != null,
-          'BreastCondition requires at least one value.',
-        );
+  });
 
   final SymptomIntensity? firmness;
   final SymptomIntensity? pain;
@@ -41,7 +38,6 @@ class BreastCondition {
 }
 
 enum SymptomIntensity {
-  none('none'),
   slight('slight'),
   normal('normal'),
   strong('strong');

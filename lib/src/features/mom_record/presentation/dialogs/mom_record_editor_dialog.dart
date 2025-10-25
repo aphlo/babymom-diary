@@ -67,96 +67,129 @@ class _MomRecordEditorDialogState extends ConsumerState<MomRecordEditorDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isNew = !widget.record.hasData;
-    return AlertDialog(
-      title: Text(isNew ? '記録を追加' : '記録を編集'),
-      content: SingleChildScrollView(
+    return Dialog(
+      insetPadding:
+          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              widget.record.dateLabel,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: theme.colorScheme.primary),
-            ),
-            const SizedBox(height: 16),
-            _buildTemperatureField(),
-            const SizedBox(height: 16),
-            _SectionLabel('悪露（量）'),
-            const SizedBox(height: 8),
-            _buildLochiaAmountChips(),
-            const SizedBox(height: 16),
-            _SectionLabel('悪露（色）'),
-            const SizedBox(height: 8),
-            _buildLochiaColorChips(),
-            const SizedBox(height: 16),
-            _SectionLabel('胸（張り）'),
-            const SizedBox(height: 8),
-            _buildBreastChips(
-              selected: _selectedBreastFirmness,
-              onSelected: (value) {
-                setState(() => _selectedBreastFirmness = value);
-              },
-            ),
-            const SizedBox(height: 16),
-            _SectionLabel('胸（痛み）'),
-            const SizedBox(height: 8),
-            _buildBreastChips(
-              selected: _selectedBreastPain,
-              onSelected: (value) {
-                setState(() => _selectedBreastPain = value);
-              },
-            ),
-            const SizedBox(height: 16),
-            _SectionLabel('胸（赤み）'),
-            const SizedBox(height: 8),
-            _buildBreastChips(
-              selected: _selectedBreastRedness,
-              onSelected: (value) {
-                setState(() => _selectedBreastRedness = value);
-              },
-            ),
-            const SizedBox(height: 16),
-            _SectionLabel('メモ'),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _memoController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'メモを入力（任意）',
+            Container(
+              padding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 16.0),
+              child: Text(
+                isNew
+                    ? '記録を追加  ${widget.record.dateLabel.replaceAll('\n', '')}'
+                    : '記録を編集  ${widget.record.dateLabel.replaceAll('\n', '')}',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 4,
             ),
-            if (_errorMessage != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                _errorMessage!,
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(color: theme.colorScheme.error),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24.0, 16.0, 24.0, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _SectionLabel('体温'),
+                    const SizedBox(height: 8),
+                    _buildTemperatureField(),
+                    const SizedBox(height: 16),
+                    _SectionLabel('悪露'),
+                    const SizedBox(height: 8),
+                    _buildLabeledChips('量：', _buildLochiaAmountChips()),
+                    const SizedBox(height: 8),
+                    _buildLabeledChips('色：', _buildLochiaColorChips()),
+                    const SizedBox(height: 16),
+                    _SectionLabel('胸'),
+                    const SizedBox(height: 8),
+                    _buildLabeledChips(
+                        '張り：',
+                        _buildBreastChips(
+                          selected: _selectedBreastFirmness,
+                          onSelected: (value) {
+                            setState(() => _selectedBreastFirmness = value);
+                          },
+                        )),
+                    const SizedBox(height: 8),
+                    _buildLabeledChips(
+                        '痛み：',
+                        _buildBreastChips(
+                          selected: _selectedBreastPain,
+                          onSelected: (value) {
+                            setState(() => _selectedBreastPain = value);
+                          },
+                        )),
+                    const SizedBox(height: 8),
+                    _buildLabeledChips(
+                        '赤み：',
+                        _buildBreastChips(
+                          selected: _selectedBreastRedness,
+                          onSelected: (value) {
+                            setState(() => _selectedBreastRedness = value);
+                          },
+                        )),
+                    const SizedBox(height: 16),
+                    _SectionLabel('メモ'),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _memoController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'メモを入力（任意）',
+                      ),
+                      maxLines: 4,
+                    ),
+                    if (_errorMessage != null) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        _errorMessage!,
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: theme.colorScheme.error),
+                      ),
+                    ],
+                  ],
+                ),
               ),
-            ],
+            ),
+            Container(
+              padding: const EdgeInsets.fromLTRB(24.0, 16.0, 24.0, 24.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: _isSaving
+                        ? null
+                        : () => Navigator.of(context).pop(false),
+                    child: const Text('キャンセル'),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: _isSaving ? null : _handleSave,
+                    child: _isSaving
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Text('保存'),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: _isSaving ? null : () => Navigator.of(context).pop(false),
-          child: const Text('キャンセル'),
-        ),
-        FilledButton(
-          onPressed: _isSaving ? null : _handleSave,
-          child: _isSaving
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-              : const Text('保存'),
-        ),
-      ],
     );
   }
 
@@ -165,8 +198,6 @@ class _MomRecordEditorDialogState extends ConsumerState<MomRecordEditorDialog> {
       controller: _temperatureController,
       decoration: const InputDecoration(
         labelText: '体温 (℃)',
-        hintText: '36.8',
-        helperText: '小数第1位まで入力できます（任意）',
       ),
       keyboardType:
           const TextInputType.numberWithOptions(decimal: true, signed: false),
@@ -185,10 +216,17 @@ class _MomRecordEditorDialogState extends ConsumerState<MomRecordEditorDialog> {
         return ChoiceChip(
           label: Text(_lochiaAmountLabel(value)),
           selected: selected,
+          showCheckmark: false,
           onSelected: (isSelected) {
-            setState(
-              () => _selectedLochiaAmount = isSelected ? value : null,
-            );
+            setState(() {
+              if (_selectedLochiaAmount == value) {
+                // 既に選択されている場合は未選択にする
+                _selectedLochiaAmount = null;
+              } else {
+                // 未選択または他の値が選択されている場合は、この値を選択
+                _selectedLochiaAmount = value;
+              }
+            });
           },
         );
       }).toList(growable: false),
@@ -204,10 +242,17 @@ class _MomRecordEditorDialogState extends ConsumerState<MomRecordEditorDialog> {
         return ChoiceChip(
           label: Text(_lochiaColorLabel(value)),
           selected: selected,
+          showCheckmark: false,
           onSelected: (isSelected) {
-            setState(
-              () => _selectedLochiaColor = isSelected ? value : null,
-            );
+            setState(() {
+              if (_selectedLochiaColor == value) {
+                // 既に選択されている場合は未選択にする
+                _selectedLochiaColor = null;
+              } else {
+                // 未選択または他の値が選択されている場合は、この値を選択
+                _selectedLochiaColor = value;
+              }
+            });
           },
         );
       }).toList(growable: false),
@@ -226,8 +271,15 @@ class _MomRecordEditorDialogState extends ConsumerState<MomRecordEditorDialog> {
         return ChoiceChip(
           label: Text(_intensityLabel(value)),
           selected: isSelected,
+          showCheckmark: false,
           onSelected: (selected) {
-            onSelected(selected ? value : null);
+            if (isSelected) {
+              // 既に選択されている場合は未選択にする
+              onSelected(null);
+            } else {
+              // 未選択または他の値が選択されている場合は、この値を選択
+              onSelected(value);
+            }
           },
         );
       }).toList(growable: false),
@@ -255,21 +307,15 @@ class _MomRecordEditorDialogState extends ConsumerState<MomRecordEditorDialog> {
         widget.record.date.day,
       ),
       temperatureCelsius: temperature,
-      lochia: _selectedLochiaAmount != null || _selectedLochiaColor != null
-          ? LochiaStatus(
-              amount: _selectedLochiaAmount,
-              color: _selectedLochiaColor,
-            )
-          : null,
-      breast: _selectedBreastFirmness != null ||
-              _selectedBreastPain != null ||
-              _selectedBreastRedness != null
-          ? BreastCondition(
-              firmness: _selectedBreastFirmness,
-              pain: _selectedBreastPain,
-              redness: _selectedBreastRedness,
-            )
-          : null,
+      lochia: LochiaStatus(
+        amount: _selectedLochiaAmount,
+        color: _selectedLochiaColor,
+      ),
+      breast: BreastCondition(
+        firmness: _selectedBreastFirmness,
+        pain: _selectedBreastPain,
+        redness: _selectedBreastRedness,
+      ),
       memo: memoText.isEmpty ? null : memoText,
     );
 
@@ -304,6 +350,24 @@ class _MomRecordEditorDialogState extends ConsumerState<MomRecordEditorDialog> {
     }
   }
 
+  Widget _buildLabeledChips(String label, Widget chips) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 50,
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
+        ),
+        Expanded(child: chips),
+      ],
+    );
+  }
+
   String _lochiaColorLabel(LochiaColor value) {
     switch (value) {
       case LochiaColor.yellow:
@@ -319,8 +383,6 @@ class _MomRecordEditorDialogState extends ConsumerState<MomRecordEditorDialog> {
 
   String _intensityLabel(SymptomIntensity value) {
     switch (value) {
-      case SymptomIntensity.none:
-        return 'なし';
       case SymptomIntensity.slight:
         return 'すこし';
       case SymptomIntensity.normal:
