@@ -21,7 +21,7 @@ class MomRecordPage extends ConsumerWidget {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           centerTitle: true,
-          toolbarHeight: 52,
+          toolbarHeight: 44,
           titleSpacing: 0,
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -46,9 +46,9 @@ class MomRecordPage extends ConsumerWidget {
             ],
           ),
           bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(36),
+            preferredSize: const Size.fromHeight(32),
             child: SizedBox(
-              height: 36,
+              height: 32,
               child: TabBar(
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.white70,
@@ -95,8 +95,8 @@ class _AppBarIconButton extends StatelessWidget {
       tooltip: tooltip,
       onPressed: onPressed,
       padding: EdgeInsets.zero,
-      constraints: const BoxConstraints.tightFor(width: 32, height: 32),
-      splashRadius: 18,
+      constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+      splashRadius: 16,
     );
   }
 }

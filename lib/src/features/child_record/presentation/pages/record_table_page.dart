@@ -42,14 +42,14 @@ class RecordTablePage extends ConsumerWidget {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           centerTitle: true,
-          toolbarHeight: 80,
+          toolbarHeight: 64,
           titleSpacing: 0,
           title: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const AppBarChildInfo(),
-              const SizedBox(height: 6),
+              const SizedBox(height: 3),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -72,9 +72,9 @@ class RecordTablePage extends ConsumerWidget {
             ],
           ),
           bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(36),
+            preferredSize: const Size.fromHeight(32),
             child: SizedBox(
-              height: 36,
+              height: 32,
               child: TabBar(
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.white70,

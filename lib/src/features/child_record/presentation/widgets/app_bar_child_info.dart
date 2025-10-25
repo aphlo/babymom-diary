@@ -83,7 +83,7 @@ class AppBarChildInfo extends ConsumerWidget {
             onTap: toNext,
             borderRadius: BorderRadius.circular(8),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               child: Text(
                 '$name  $age',
                 overflow: TextOverflow.ellipsis,
