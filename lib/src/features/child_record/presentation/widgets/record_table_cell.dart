@@ -127,34 +127,34 @@ Widget _buildCountBadge(
 _BadgeColors _badgeColorsForRecordType(RecordType type, ColorScheme scheme) {
   switch (type) {
     case RecordType.breastLeft:
-      return _BadgeColors(
-        background: scheme.primaryContainer,
-        foreground: scheme.onPrimaryContainer,
+      return const _BadgeColors(
+        background: Color(0xFFffa600),
+        foreground: Colors.white,
       );
     case RecordType.breastRight:
-      return _BadgeColors(
-        background: scheme.secondaryContainer,
-        foreground: scheme.onSecondaryContainer,
+      return const _BadgeColors(
+        background: Color(0xFFffa600),
+        foreground: Colors.white,
       );
     case RecordType.formula:
-      return _BadgeColors(
-        background: scheme.tertiaryContainer,
-        foreground: scheme.onTertiaryContainer,
+      return const _BadgeColors(
+        background: Color(0xFF00c3ff),
+        foreground: Colors.white,
       );
     case RecordType.pump:
-      return _BadgeColors(
-        background: scheme.primary,
-        foreground: scheme.onPrimary,
+      return const _BadgeColors(
+        background: Color(0xFF4fb186),
+        foreground: Colors.white,
       );
     case RecordType.pee:
-      return _BadgeColors(
-        background: Colors.amber.shade200,
-        foreground: scheme.onPrimaryContainer,
+      return const _BadgeColors(
+        background: Color(0xFFb6a000),
+        foreground: Colors.white,
       );
     case RecordType.poop:
-      return _BadgeColors(
-        background: scheme.secondary,
-        foreground: scheme.onSecondary,
+      return const _BadgeColors(
+        background: Color(0xFF194e01),
+        foreground: Colors.white,
       );
     case RecordType.temperature:
       return _BadgeColors(
@@ -162,9 +162,9 @@ _BadgeColors _badgeColorsForRecordType(RecordType type, ColorScheme scheme) {
         foreground: Colors.red.shade800,
       );
     case RecordType.other:
-      return _BadgeColors(
-        background: scheme.surfaceContainerHighest,
-        foreground: scheme.onSurfaceVariant,
+      return const _BadgeColors(
+        background: Color(0xFF8f60ac),
+        foreground: Colors.white,
       );
   }
 }

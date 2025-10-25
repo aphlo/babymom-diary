@@ -70,8 +70,8 @@ class _TagCircle extends StatelessWidget {
     return Container(
       width: OtherTagsPreview._iconSize,
       height: OtherTagsPreview._iconSize,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.secondaryContainer,
+      decoration: const BoxDecoration(
+        color: Color(0xFF8f60ac),
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
@@ -79,7 +79,7 @@ class _TagCircle extends StatelessWidget {
         character,
         style: theme.textTheme.labelSmall?.copyWith(
           fontWeight: FontWeight.w600,
-          color: theme.colorScheme.onSecondaryContainer,
+          color: Colors.white,
         ),
       ),
     );
@@ -95,8 +95,8 @@ class _OverflowCircle extends StatelessWidget {
     return Container(
       width: OtherTagsPreview._iconSize,
       height: OtherTagsPreview._iconSize,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+      decoration: const BoxDecoration(
+        color: Color(0xFF8f60ac),
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
@@ -104,7 +104,7 @@ class _OverflowCircle extends StatelessWidget {
         '...',
         style: theme.textTheme.labelSmall?.copyWith(
           fontWeight: FontWeight.w600,
-          color: theme.colorScheme.onSurface,
+          color: Colors.white,
         ),
       ),
     );
