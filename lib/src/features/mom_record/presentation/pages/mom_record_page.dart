@@ -21,44 +21,34 @@ class MomRecordPage extends ConsumerWidget {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           centerTitle: true,
-          toolbarHeight: 72,
+          toolbarHeight: 52,
           titleSpacing: 0,
-          title: Column(
-            mainAxisSize: MainAxisSize.min,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(
-                width: double.infinity,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _AppBarIconButton(
-                      icon: Icons.chevron_left,
-                      tooltip: '前の月',
-                      onPressed: () => notifier.goToPreviousMonth(),
-                    ),
-                    Flexible(
-                      child: Center(
-                        child: Text(
-                          state.monthLabel,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ),
-                    _AppBarIconButton(
-                      icon: Icons.chevron_right,
-                      tooltip: '次の月',
-                      onPressed: () => notifier.goToNextMonth(),
-                    ),
-                  ],
+              _AppBarIconButton(
+                icon: Icons.chevron_left,
+                tooltip: '前の月',
+                onPressed: () => notifier.goToPreviousMonth(),
+              ),
+              Flexible(
+                child: Text(
+                  state.monthLabel,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
+              ),
+              _AppBarIconButton(
+                icon: Icons.chevron_right,
+                tooltip: '次の月',
+                onPressed: () => notifier.goToNextMonth(),
               ),
             ],
           ),
           bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(44),
+            preferredSize: const Size.fromHeight(36),
             child: SizedBox(
-              height: 44,
+              height: 36,
               child: TabBar(
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.white70,
@@ -105,8 +95,8 @@ class _AppBarIconButton extends StatelessWidget {
       tooltip: tooltip,
       onPressed: onPressed,
       padding: EdgeInsets.zero,
-      constraints: const BoxConstraints.tightFor(width: 40, height: 40),
-      splashRadius: 22,
+      constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+      splashRadius: 18,
     );
   }
 }
