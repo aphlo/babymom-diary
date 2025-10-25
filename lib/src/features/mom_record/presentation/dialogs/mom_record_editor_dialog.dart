@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/mom_daily_record.dart';
@@ -7,6 +6,11 @@ import '../../domain/value_objects/breast_condition.dart';
 import '../../domain/value_objects/lochia_status.dart';
 import '../models/mom_record_ui_model.dart';
 import '../viewmodels/mom_record_view_model.dart';
+import '../widgets/breast_condition_chips.dart';
+import '../widgets/labeled_chips_row.dart';
+import '../widgets/lochia_chips.dart';
+import '../widgets/section_label.dart';
+import '../widgets/temperature_field.dart';
 
 class MomRecordEditorDialog extends ConsumerStatefulWidget {
   const MomRecordEditorDialog({super.key, required this.record});
@@ -97,46 +101,65 @@ class _MomRecordEditorDialogState extends ConsumerState<MomRecordEditorDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _SectionLabel('体温'),
+                    const SectionLabel('体温'),
                     const SizedBox(height: 8),
-                    _buildTemperatureField(),
+                    TemperatureField(controller: _temperatureController),
                     const SizedBox(height: 16),
-                    _SectionLabel('悪露'),
+                    const SectionLabel('悪露'),
                     const SizedBox(height: 8),
-                    _buildLabeledChips('量：', _buildLochiaAmountChips()),
+                    LabeledChipsRow(
+                      label: '量：',
+                      chips: LochiaAmountChips(
+                        selectedAmount: _selectedLochiaAmount,
+                        onAmountChanged: (value) {
+                          setState(() => _selectedLochiaAmount = value);
+                        },
+                      ),
+                    ),
                     const SizedBox(height: 8),
-                    _buildLabeledChips('色：', _buildLochiaColorChips()),
+                    LabeledChipsRow(
+                      label: '色：',
+                      chips: LochiaColorChips(
+                        selectedColor: _selectedLochiaColor,
+                        onColorChanged: (value) {
+                          setState(() => _selectedLochiaColor = value);
+                        },
+                      ),
+                    ),
                     const SizedBox(height: 16),
-                    _SectionLabel('胸'),
+                    const SectionLabel('胸'),
                     const SizedBox(height: 8),
-                    _buildLabeledChips(
-                        '張り：',
-                        _buildBreastChips(
-                          selected: _selectedBreastFirmness,
-                          onSelected: (value) {
-                            setState(() => _selectedBreastFirmness = value);
-                          },
-                        )),
+                    LabeledChipsRow(
+                      label: '張り：',
+                      chips: BreastConditionChips(
+                        selected: _selectedBreastFirmness,
+                        onSelected: (value) {
+                          setState(() => _selectedBreastFirmness = value);
+                        },
+                      ),
+                    ),
                     const SizedBox(height: 8),
-                    _buildLabeledChips(
-                        '痛み：',
-                        _buildBreastChips(
-                          selected: _selectedBreastPain,
-                          onSelected: (value) {
-                            setState(() => _selectedBreastPain = value);
-                          },
-                        )),
+                    LabeledChipsRow(
+                      label: '痛み：',
+                      chips: BreastConditionChips(
+                        selected: _selectedBreastPain,
+                        onSelected: (value) {
+                          setState(() => _selectedBreastPain = value);
+                        },
+                      ),
+                    ),
                     const SizedBox(height: 8),
-                    _buildLabeledChips(
-                        '赤み：',
-                        _buildBreastChips(
-                          selected: _selectedBreastRedness,
-                          onSelected: (value) {
-                            setState(() => _selectedBreastRedness = value);
-                          },
-                        )),
+                    LabeledChipsRow(
+                      label: '赤み：',
+                      chips: BreastConditionChips(
+                        selected: _selectedBreastRedness,
+                        onSelected: (value) {
+                          setState(() => _selectedBreastRedness = value);
+                        },
+                      ),
+                    ),
                     const SizedBox(height: 16),
-                    _SectionLabel('メモ'),
+                    const SectionLabel('メモ'),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _memoController,
@@ -193,99 +216,6 @@ class _MomRecordEditorDialogState extends ConsumerState<MomRecordEditorDialog> {
     );
   }
 
-  Widget _buildTemperatureField() {
-    return TextField(
-      controller: _temperatureController,
-      decoration: const InputDecoration(
-        labelText: '体温 (℃)',
-      ),
-      keyboardType:
-          const TextInputType.numberWithOptions(decimal: true, signed: false),
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-      ],
-    );
-  }
-
-  Widget _buildLochiaAmountChips() {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: LochiaAmount.values.map((value) {
-        final selected = _selectedLochiaAmount == value;
-        return ChoiceChip(
-          label: Text(_lochiaAmountLabel(value)),
-          selected: selected,
-          showCheckmark: false,
-          onSelected: (isSelected) {
-            setState(() {
-              if (_selectedLochiaAmount == value) {
-                // 既に選択されている場合は未選択にする
-                _selectedLochiaAmount = null;
-              } else {
-                // 未選択または他の値が選択されている場合は、この値を選択
-                _selectedLochiaAmount = value;
-              }
-            });
-          },
-        );
-      }).toList(growable: false),
-    );
-  }
-
-  Widget _buildLochiaColorChips() {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: LochiaColor.values.map((value) {
-        final selected = _selectedLochiaColor == value;
-        return ChoiceChip(
-          label: Text(_lochiaColorLabel(value)),
-          selected: selected,
-          showCheckmark: false,
-          onSelected: (isSelected) {
-            setState(() {
-              if (_selectedLochiaColor == value) {
-                // 既に選択されている場合は未選択にする
-                _selectedLochiaColor = null;
-              } else {
-                // 未選択または他の値が選択されている場合は、この値を選択
-                _selectedLochiaColor = value;
-              }
-            });
-          },
-        );
-      }).toList(growable: false),
-    );
-  }
-
-  Widget _buildBreastChips({
-    required SymptomIntensity? selected,
-    required ValueChanged<SymptomIntensity?> onSelected,
-  }) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: SymptomIntensity.values.map((value) {
-        final isSelected = selected == value;
-        return ChoiceChip(
-          label: Text(_intensityLabel(value)),
-          selected: isSelected,
-          showCheckmark: false,
-          onSelected: (selected) {
-            if (isSelected) {
-              // 既に選択されている場合は未選択にする
-              onSelected(null);
-            } else {
-              // 未選択または他の値が選択されている場合は、この値を選択
-              onSelected(value);
-            }
-          },
-        );
-      }).toList(growable: false),
-    );
-  }
-
   Future<void> _handleSave() async {
     FocusScope.of(context).unfocus();
     final temperatureText = _temperatureController.text.trim();
@@ -337,76 +267,5 @@ class _MomRecordEditorDialogState extends ConsumerState<MomRecordEditorDialog> {
         _errorMessage = '保存に失敗しました';
       });
     }
-  }
-
-  String _lochiaAmountLabel(LochiaAmount value) {
-    switch (value) {
-      case LochiaAmount.low:
-        return '少';
-      case LochiaAmount.medium:
-        return '中';
-      case LochiaAmount.high:
-        return '多';
-    }
-  }
-
-  Widget _buildLabeledChips(String label, Widget chips) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 50,
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-          ),
-        ),
-        Expanded(child: chips),
-      ],
-    );
-  }
-
-  String _lochiaColorLabel(LochiaColor value) {
-    switch (value) {
-      case LochiaColor.yellow:
-        return '黄';
-      case LochiaColor.brown:
-        return '茶';
-      case LochiaColor.pink:
-        return 'ピンク';
-      case LochiaColor.red:
-        return '赤';
-    }
-  }
-
-  String _intensityLabel(SymptomIntensity value) {
-    switch (value) {
-      case SymptomIntensity.slight:
-        return 'すこし';
-      case SymptomIntensity.normal:
-        return 'ふつう';
-      case SymptomIntensity.strong:
-        return 'つよい';
-    }
-  }
-}
-
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Text(
-      text,
-      style: theme.textTheme.titleSmall?.copyWith(
-        fontWeight: FontWeight.w600,
-        color: theme.colorScheme.primary,
-      ),
-    );
   }
 }
