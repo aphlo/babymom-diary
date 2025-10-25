@@ -65,7 +65,7 @@ class _TableHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Row(
         children: const [
-          _HeaderCell(label: '日付', flex: 1),
+          _HeaderCell(label: '日付', flex: 1, textAlign: TextAlign.left),
           _HeaderCell(label: '体温', flex: 1),
           _HeaderCell(label: '悪露', flex: 2),
           _HeaderCell(label: '胸', flex: 2),
@@ -77,10 +77,15 @@ class _TableHeader extends StatelessWidget {
 }
 
 class _HeaderCell extends StatelessWidget {
-  const _HeaderCell({required this.label, required this.flex});
+  const _HeaderCell({
+    required this.label,
+    required this.flex,
+    this.textAlign = TextAlign.center,
+  });
 
   final String label;
   final int flex;
+  final TextAlign textAlign;
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +99,7 @@ class _HeaderCell extends StatelessWidget {
       child: Text(
         label,
         style: style,
-        textAlign: TextAlign.center,
+        textAlign: textAlign,
       ),
     );
   }
