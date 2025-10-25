@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:babymom_diary/src/features/calendar/application/calendar_event_controller.dart';
-import 'package:babymom_diary/src/features/calendar/application/usecases/add_calendar_event.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
 import 'package:babymom_diary/src/features/calendar/domain/repositories/calendar_event_repository.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/models/calendar_event_model.dart';
@@ -15,17 +14,11 @@ import 'package:babymom_diary/src/features/children/domain/entities/child_summar
 import 'package:babymom_diary/src/core/firebase/household_service.dart'
     as fbcore;
 
-const ChildSummary _emptyChildSummary = ChildSummary(
-  id: '',
-  name: '',
-);
-
 final calendarViewModelProvider =
     AutoDisposeStateNotifierProvider<CalendarViewModel, CalendarState>(
   (ref) {
     final repository = ref.watch(calendarEventRepositoryProvider);
-    final addEvent = ref.watch(addCalendarEventUseCaseProvider);
-    return CalendarViewModel(ref, repository, addEvent);
+    return CalendarViewModel(ref, repository);
   },
 );
 
@@ -33,7 +26,6 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
   CalendarViewModel(
     this._ref,
     this._repository,
-    this._addCalendarEvent,
   ) : super(CalendarState.initial()) {
     _initialize();
     _ref.onDispose(() {
@@ -44,7 +36,6 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
 
   final Ref _ref;
   final CalendarEventRepository _repository;
-  final AddCalendarEvent _addCalendarEvent;
 
   StreamSubscription<List<CalendarEvent>>? _eventsSubscription;
   List<CalendarEvent> _latestEvents = const <CalendarEvent>[];
@@ -132,12 +123,15 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     }
     final range = _visibleRangeForMonth(state.focusedDay);
     state = state.copyWith(eventsAsync: const AsyncValue.loading());
+
+    // ストリームにデバウンス機能を追加してパフォーマンスを向上
     _eventsSubscription = _repository
         .watchEvents(
-      householdId: householdId,
-      start: range.start,
-      end: range.end,
-    )
+          householdId: householdId,
+          start: range.start,
+          end: range.end,
+        )
+        .distinct() // 重複する更新を除去
         .listen(
       (events) {
         _latestEvents = events;
@@ -155,27 +149,27 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
   }
 
   void _updateEventsWithChildren(List<CalendarEvent> events) {
-    final childMap = {
-      for (final child in state.availableChildren) child.id: child,
-    };
-    final adjustedEvents = childMap.isEmpty
-        ? events
-        : events.map((event) {
-            final child = childMap[event.childId];
-            if (child == null) {
-              return event;
-            }
-            return event.copyWith(
-              childName: child.name,
-              childColorHex: child.color,
-            );
-          }).toList(growable: false);
-    final eventsByDay = _groupEventsByDay(adjustedEvents);
-    state = state.copyWith(
-      eventsAsync: AsyncValue.data(adjustedEvents),
-      eventsByDay: eventsByDay,
-      pendingUiEvent: null,
-    );
+    final eventsByDay = _groupEventsByDay(events);
+
+    // 状態が実際に変更された場合のみ更新
+    final currentEvents = state.eventsAsync.valueOrNull ?? [];
+    final hasChanged = events.length != currentEvents.length ||
+        !_eventsEqual(events, currentEvents);
+
+    if (hasChanged) {
+      state = state.copyWith(
+        eventsAsync: AsyncValue.data(events),
+        eventsByDay: eventsByDay,
+        pendingUiEvent: null,
+      );
+    }
+  }
+
+  bool _eventsEqual(List<CalendarEvent> a, List<CalendarEvent> b) {
+    if (a.length != b.length) return false;
+    final aIds = a.map((e) => e.id).toSet();
+    final bIds = b.map((e) => e.id).toSet();
+    return aIds.difference(bIds).isEmpty && bIds.difference(aIds).isEmpty;
   }
 
   void onDaySelected(DateTime selectedDay, DateTime focusedDay) {
@@ -250,23 +244,15 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
       return;
     }
 
-    final childSummary = state.availableChildren.firstWhere(
-      (child) => child.id == result.childId,
-      orElse: () => _snapshotChild ?? _emptyChildSummary,
-    );
-
     try {
-      await _addCalendarEvent(
+      await _repository.createEvent(
         householdId: householdId,
-        childId: result.childId,
         title: result.title,
         memo: result.memo,
         allDay: result.allDay,
         start: result.start,
         end: result.end,
         iconKey: result.iconPath,
-        childName: childSummary.id.isEmpty ? null : childSummary.name,
-        childColorHex: childSummary.id.isEmpty ? null : childSummary.color,
       );
       state = state.copyWith(
         pendingUiEvent: const CalendarUiEvent.showMessage('予定を保存しました'),

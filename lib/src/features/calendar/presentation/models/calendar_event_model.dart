@@ -1,6 +1,5 @@
 class CalendarEventModel {
   const CalendarEventModel({
-    required this.childId,
     required this.title,
     required this.memo,
     required this.allDay,
@@ -9,7 +8,6 @@ class CalendarEventModel {
     required this.iconPath,
   });
 
-  final String childId;
   final String title;
   final String memo;
   final bool allDay;

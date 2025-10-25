@@ -10,10 +10,7 @@ class CalendarEvent {
     required this.start,
     required this.end,
     required this.iconPath,
-    required this.childId,
     this.householdId,
-    this.childName,
-    this.childColorHex,
   });
 
   final String id;
@@ -23,10 +20,7 @@ class CalendarEvent {
   final DateTime start;
   final DateTime end;
   final String iconPath;
-  final String childId;
   final String? householdId;
-  final String? childName;
-  final String? childColorHex;
 
   CalendarEvent copyWith({
     String? id,
@@ -36,10 +30,7 @@ class CalendarEvent {
     DateTime? start,
     DateTime? end,
     String? iconPath,
-    String? childId,
     String? householdId,
-    String? childName,
-    String? childColorHex,
   }) {
     return CalendarEvent(
       id: id ?? this.id,
@@ -49,10 +40,7 @@ class CalendarEvent {
       start: start ?? this.start,
       end: end ?? this.end,
       iconPath: iconPath ?? this.iconPath,
-      childId: childId ?? this.childId,
       householdId: householdId ?? this.householdId,
-      childName: childName ?? this.childName,
-      childColorHex: childColorHex ?? this.childColorHex,
     );
   }
 

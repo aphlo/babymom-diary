@@ -42,15 +42,7 @@ class CalendarEventTile extends StatelessWidget {
       );
     }
 
-    Widget? childBadge;
-    final childName = event.childName;
-    if (childName != null && childName.isNotEmpty) {
-      childBadge = _buildChildBadge(
-        context,
-        childName,
-        event.childColorHex,
-      );
-    }
+    // 新しいデータ構造では子どもの情報は表示しない
 
     return Card(
       elevation: 0,
@@ -81,10 +73,6 @@ class CalendarEventTile extends StatelessWidget {
                 ),
               ],
             ),
-            if (childBadge != null) ...[
-              const SizedBox(height: 8),
-              childBadge,
-            ],
             if (event.memo.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
@@ -96,41 +84,5 @@ class CalendarEventTile extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Widget _buildChildBadge(
-    BuildContext context,
-    String childName,
-    String? colorHex,
-  ) {
-    final theme = Theme.of(context);
-    final baseColor = _parseColor(colorHex) ?? theme.colorScheme.primary;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: baseColor.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: baseColor.withOpacity(0.4)),
-      ),
-      child: Text(
-        childName,
-        style: theme.textTheme.bodySmall?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: theme.colorScheme.onSurface,
-        ),
-      ),
-    );
-  }
-
-  Color? _parseColor(String? hex) {
-    if (hex == null || hex.isEmpty) {
-      return null;
-    }
-    final cleaned = hex.replaceAll('#', '').padLeft(6, '0');
-    final value = int.tryParse(cleaned, radix: 16);
-    if (value == null) {
-      return null;
-    }
-    return Color(0xFF000000 | value);
   }
 }

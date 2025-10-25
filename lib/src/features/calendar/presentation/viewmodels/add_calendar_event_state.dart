@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:babymom_diary/src/features/children/domain/entities/child_summary.dart';
-
 class AddCalendarEventState {
   AddCalendarEventState({
-    required List<ChildSummary> children,
-    required this.selectedChildId,
     required this.title,
     required this.memo,
     required this.allDay,
@@ -17,11 +13,8 @@ class AddCalendarEventState {
     required this.isSubmitting,
     required this.validationMessage,
     required List<String> availableIconPaths,
-  })  : children = List<ChildSummary>.unmodifiable(children),
-        availableIconPaths = List<String>.unmodifiable(availableIconPaths);
+  }) : availableIconPaths = List<String>.unmodifiable(availableIconPaths);
 
-  final List<ChildSummary> children;
-  final String? selectedChildId;
   final String title;
   final String memo;
   final bool allDay;
@@ -34,13 +27,18 @@ class AddCalendarEventState {
   final String? validationMessage;
   final List<String> availableIconPaths;
 
-  bool get hasChildren => children.isNotEmpty;
+  bool get canSubmit {
+    if (title.trim().isEmpty) return false;
 
-  bool get canSubmit =>
-      hasChildren &&
-      selectedChildId != null &&
-      selectedChildId!.isNotEmpty &&
-      title.trim().isNotEmpty;
+    // 終日でない場合は時間の整合性をチェック
+    if (!allDay) {
+      final start = effectiveStart;
+      final end = effectiveEnd;
+      if (!end.isAfter(start)) return false;
+    }
+
+    return true;
+  }
 
   DateTime get normalizedStartDate =>
       DateTime(startDate.year, startDate.month, startDate.day);
@@ -57,14 +55,12 @@ class AddCalendarEventState {
 
   DateTime get effectiveEnd {
     if (allDay) {
-      return normalizedStartDate.add(const Duration(hours: 23, minutes: 59));
+      return normalizedEndDate.add(const Duration(hours: 23, minutes: 59));
     }
     return _combine(normalizedEndDate, endTime);
   }
 
   AddCalendarEventState copyWith({
-    List<ChildSummary>? children,
-    String? selectedChildId,
     String? title,
     String? memo,
     bool? allDay,
@@ -78,8 +74,6 @@ class AddCalendarEventState {
     List<String>? availableIconPaths,
   }) {
     return AddCalendarEventState(
-      children: children ?? this.children,
-      selectedChildId: selectedChildId ?? this.selectedChildId,
       title: title ?? this.title,
       memo: memo ?? this.memo,
       allDay: allDay ?? this.allDay,

@@ -56,8 +56,6 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             MaterialPageRoute(
               builder: (_) => AddCalendarEventPage(
                 initialDate: request.initialDate,
-                children: request.children,
-                initialChildId: request.initialChildId,
               ),
             ),
           );
