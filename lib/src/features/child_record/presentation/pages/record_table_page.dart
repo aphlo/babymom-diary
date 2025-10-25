@@ -117,7 +117,10 @@ class _AppBarIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(icon, color: Colors.white),
+      icon: Icon(
+        icon,
+        color: onPressed == null ? Colors.white38 : Colors.white,
+      ),
       tooltip: tooltip,
       onPressed: onPressed,
       padding: EdgeInsets.zero,
