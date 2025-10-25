@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/mom_record_ui_model.dart';
+import 'shared_table_components.dart';
 
 class MomRecordTable extends StatelessWidget {
   const MomRecordTable({
@@ -57,50 +58,14 @@ class _TableHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final headerColor =
-        theme.colorScheme.surfaceContainerHighest.withOpacity(0.6);
-
-    return Container(
-      color: headerColor,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(
-        children: const [
-          _HeaderCell(label: '日付', flex: 1, textAlign: TextAlign.left),
-          _HeaderCell(label: '体温', flex: 1),
-          _HeaderCell(label: '悪露', flex: 2),
-          _HeaderCell(label: '胸', flex: 2),
-          _HeaderCell(label: 'メモ', flex: 2),
-        ],
-      ),
-    );
-  }
-}
-
-class _HeaderCell extends StatelessWidget {
-  const _HeaderCell({
-    required this.label,
-    required this.flex,
-    this.textAlign = TextAlign.center,
-  });
-
-  final String label;
-  final int flex;
-  final TextAlign textAlign;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = theme.textTheme.labelLarge?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-      fontWeight: FontWeight.w600,
-    );
-    return Expanded(
-      flex: flex,
-      child: Text(
-        label,
-        style: style,
-        textAlign: textAlign,
-      ),
+    return TableHeader(
+      children: const [
+        TableHeaderCell(label: '日付', flex: 1, textAlign: TextAlign.left),
+        TableHeaderCell(label: '体温', flex: 1),
+        TableHeaderCell(label: '悪露', flex: 2),
+        TableHeaderCell(label: '胸', flex: 2),
+        TableHeaderCell(label: 'メモ', flex: 2),
+      ],
     );
   }
 }
@@ -116,12 +81,7 @@ class _TableRow extends StatelessWidget {
     final theme = Theme.of(context);
     final dateStyle = theme.textTheme.bodyMedium;
     final cellStyle = theme.textTheme.bodySmall;
-    final weekday = record.date.weekday;
-    final rowColor = weekday == DateTime.saturday
-        ? const Color(0xFFE3F2FD)
-        : weekday == DateTime.sunday
-            ? const Color(0xFFFFEBEE)
-            : theme.colorScheme.surface;
+    final rowColor = getWeekendRowColor(record.date, theme);
 
     return Material(
       color: rowColor,
@@ -132,63 +92,34 @@ class _TableRow extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _DataCell(
+              TableDataCell(
                 text: record.dateLabel,
                 flex: 1,
                 style: dateStyle,
               ),
-              _DataCell(
+              TableDataCell(
                 text: record.temperatureLabel ?? '',
                 flex: 1,
                 style: cellStyle,
               ),
-              _DataCell(
+              TableDataCell(
                 text: record.lochiaSummary ?? '',
                 flex: 2,
                 style: cellStyle,
                 padding: const EdgeInsets.only(left: 8),
               ),
-              _DataCell(
+              TableDataCell(
                 text: record.breastSummary ?? '',
                 flex: 2,
                 style: cellStyle,
               ),
-              _DataCell(
+              TableDataCell(
                 text: record.memo ?? '',
                 flex: 2,
                 style: cellStyle,
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DataCell extends StatelessWidget {
-  const _DataCell({
-    required this.text,
-    required this.flex,
-    this.style,
-    this.padding,
-  });
-
-  final String text;
-  final int flex;
-  final TextStyle? style;
-  final EdgeInsetsGeometry? padding;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      flex: flex,
-      child: Padding(
-        padding: padding ?? EdgeInsets.zero,
-        child: Text(
-          text,
-          style: style,
-          softWrap: true,
         ),
       ),
     );

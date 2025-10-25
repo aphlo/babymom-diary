@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/mom_diary_ui_model.dart';
+import 'shared_table_components.dart';
 
 class MomDiaryTable extends StatelessWidget {
   const MomDiaryTable({
@@ -56,37 +57,11 @@ class _TableHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final headerColor =
-        theme.colorScheme.surfaceContainerHighest.withOpacity(0.6);
-    return Container(
-      color: headerColor,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(
-        children: const [
-          _HeaderCell(label: '日付', flex: 1),
-          _HeaderCell(label: '日記', flex: 3),
-        ],
-      ),
-    );
-  }
-}
-
-class _HeaderCell extends StatelessWidget {
-  const _HeaderCell({required this.label, required this.flex});
-
-  final String label;
-  final int flex;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = theme.textTheme.labelLarge?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-      fontWeight: FontWeight.w600,
-    );
-    return Expanded(
-      flex: flex,
-      child: Text(label, style: style),
+    return TableHeader(
+      children: const [
+        TableHeaderCell(label: '日付', flex: 1, textAlign: TextAlign.left),
+        TableHeaderCell(label: '', flex: 3),
+      ],
     );
   }
 }
@@ -102,12 +77,7 @@ class _TableRow extends StatelessWidget {
     final theme = Theme.of(context);
     final dateStyle = theme.textTheme.bodyMedium;
     final contentStyle = theme.textTheme.bodySmall;
-    final weekday = entry.date.weekday;
-    final isWeekend =
-        weekday == DateTime.saturday || weekday == DateTime.sunday;
-    final rowColor = isWeekend
-        ? theme.colorScheme.primary.withOpacity(0.04)
-        : theme.colorScheme.surface;
+    final rowColor = getWeekendRowColor(entry.date, theme);
 
     return Material(
       color: rowColor,
@@ -118,12 +88,12 @@ class _TableRow extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _DataCell(
+              TableDataCell(
                 text: entry.dateLabel,
                 flex: 1,
                 style: dateStyle,
               ),
-              _DataCell(
+              TableDataCell(
                 text: entry.content ?? '',
                 flex: 3,
                 style: contentStyle,
@@ -131,30 +101,6 @@ class _TableRow extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _DataCell extends StatelessWidget {
-  const _DataCell({
-    required this.text,
-    required this.flex,
-    this.style,
-  });
-
-  final String text;
-  final int flex;
-  final TextStyle? style;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      flex: flex,
-      child: Text(
-        text,
-        style: style,
-        softWrap: true,
       ),
     );
   }
