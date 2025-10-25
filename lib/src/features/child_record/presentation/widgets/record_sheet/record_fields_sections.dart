@@ -115,6 +115,7 @@ class ExcretionRecordFields extends StatelessWidget {
               ChoiceChip(
                 label: Text(volume.label),
                 selected: selectedVolume == volume,
+                showCheckmark: false,
                 onSelected: (selected) =>
                     onVolumeChanged(selected ? volume : null),
               ),
@@ -179,6 +180,7 @@ class OtherRecordFields extends StatelessWidget {
             FilterChip(
               label: Text(tag),
               selected: selectedTags.contains(tag),
+              showCheckmark: false,
               onSelected: (selected) => onTagToggled(tag, selected),
             ),
         ],

@@ -91,6 +91,7 @@ class _ManageOtherTagsDialogState extends ConsumerState<ManageOtherTagsDialog> {
                   for (final tag in tags)
                     InputChip(
                       label: Text(tag),
+                      showCheckmark: false,
                       onDeleted: isSubmitting ? null : () => _handleRemove(tag),
                     ),
                 ],
