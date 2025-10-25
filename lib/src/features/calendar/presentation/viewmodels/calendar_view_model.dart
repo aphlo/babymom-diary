@@ -112,7 +112,7 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
       availableChildren: available,
       pendingUiEvent: null,
     );
-    _updateEventsWithChildren(_latestEvents);
+    _updateEventsState(_latestEvents);
   }
 
   void _refreshEventsSubscription() {
@@ -135,7 +135,7 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
         .listen(
       (events) {
         _latestEvents = events;
-        _updateEventsWithChildren(events);
+        _updateEventsState(events);
       },
       onError: (error, stackTrace) {
         state = state.copyWith(
@@ -148,15 +148,17 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     );
   }
 
-  void _updateEventsWithChildren(List<CalendarEvent> events) {
+  void _updateEventsState(List<CalendarEvent> events) {
     final eventsByDay = _groupEventsByDay(events);
 
-    // 状態が実際に変更された場合のみ更新
+    // ローディング状態の場合は常に更新する
+    // または状態が実際に変更された場合のみ更新
     final currentEvents = state.eventsAsync.valueOrNull ?? [];
+    final isLoading = state.eventsAsync.isLoading;
     final hasChanged = events.length != currentEvents.length ||
         !_eventsEqual(events, currentEvents);
 
-    if (hasChanged) {
+    if (isLoading || hasChanged) {
       state = state.copyWith(
         eventsAsync: AsyncValue.data(events),
         eventsByDay: eventsByDay,
