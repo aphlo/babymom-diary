@@ -39,12 +39,10 @@ class CalendarEventTile extends StatelessWidget {
       );
     }
 
-    // 新しいデータ構造では子どもの情報は表示しない
-
     return Card(
       elevation: 0,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -71,10 +69,13 @@ class CalendarEventTile extends StatelessWidget {
               ],
             ),
             if (event.memo.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                event.memo,
-                style: Theme.of(context).textTheme.bodyMedium,
+              Padding(
+                padding: const EdgeInsets.only(
+                    left: 52), // 40 (icon width) + 12 (spacing)
+                child: Text(
+                  event.memo,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ),
             ],
           ],

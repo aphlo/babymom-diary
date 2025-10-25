@@ -111,6 +111,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             margin: EdgeInsets.zero,
             elevation: 0,
             clipBehavior: Clip.antiAlias,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+            ),
             child: TableCalendar<CalendarEvent>(
               firstDay: firstDate,
               lastDay: lastDate,
@@ -119,7 +122,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               startingDayOfWeek: StartingDayOfWeek.monday,
               locale: 'ja_JP',
               availableGestures: AvailableGestures.horizontalSwipe,
-              rowHeight: 60,
+              rowHeight: 54,
               eventLoader: (day) => state.eventsForDay(day),
               headerStyle: const HeaderStyle(
                 formatButtonVisible: false,
@@ -127,6 +130,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                 leftChevronVisible: false,
                 rightChevronVisible: false,
                 titleTextStyle: TextStyle(fontSize: 0),
+                headerMargin: EdgeInsets.zero,
+                headerPadding: EdgeInsets.zero,
               ),
               calendarStyle: const CalendarStyle(
                 outsideDaysVisible: true,
@@ -134,11 +139,55 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                 markersMaxCount: 0,
                 isTodayHighlighted: false,
               ),
+              daysOfWeekHeight: 32,
               onDaySelected: (selectedDay, focusedDay) =>
                   viewModel.onDaySelected(selectedDay, focusedDay),
               selectedDayPredicate: (day) => isSameDay(day, state.selectedDay),
               onPageChanged: viewModel.onPageChanged,
               calendarBuilders: CalendarBuilders<CalendarEvent>(
+                dowBuilder: (context, day) {
+                  final text = () {
+                    switch (day.weekday) {
+                      case DateTime.saturday:
+                        return '土';
+                      case DateTime.sunday:
+                        return '日';
+                      case DateTime.monday:
+                        return '月';
+                      case DateTime.tuesday:
+                        return '火';
+                      case DateTime.wednesday:
+                        return '水';
+                      case DateTime.thursday:
+                        return '木';
+                      case DateTime.friday:
+                        return '金';
+                      default:
+                        return '';
+                    }
+                  }();
+
+                  final color = () {
+                    switch (day.weekday) {
+                      case DateTime.saturday:
+                        return Colors.blue;
+                      case DateTime.sunday:
+                        return Colors.red;
+                      default:
+                        return Theme.of(context).textTheme.bodyLarge?.color;
+                    }
+                  }();
+
+                  return Center(
+                    child: Text(
+                      text,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: color,
+                      ),
+                    ),
+                  );
+                },
                 defaultBuilder: (context, day, focusedDay) {
                   final events = state.eventsForDay(day);
                   return CalendarDayCell(

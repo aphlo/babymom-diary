@@ -110,96 +110,42 @@ class CalendarDayCell extends StatelessWidget {
           return icon;
         }
 
-        const dashLength = 4.0;
-        const dashGap = 2.0;
-        const strokeWidth = 1.0;
-
         final background = _backgroundColor(context);
         final borderColor = _borderColor(context);
 
-        return CustomPaint(
-          painter: _DashedBorderPainter(
-            borderColor: borderColor,
-            dashLength: dashLength,
-            dashGap: dashGap,
-            strokeWidth: strokeWidth,
-          ),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: background ?? Colors.transparent,
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: background ?? Colors.transparent,
+            border: Border.all(
+              color: borderColor,
+              width: 0.5,
             ),
-            child: Stack(
-              children: [
-                if (primaryEvent != null)
-                  Positioned.fill(
-                    child: Padding(
-                      padding: iconAreaPadding,
-                      child: buildEventIcon(primaryEvent),
-                    ),
-                  ),
-                Positioned(
-                  top: padding.top - 2,
-                  left: padding.left - 2,
-                  child: Text(
-                    '${day.day}',
-                    style: TextStyle(
-                      fontSize: dayFontSize,
-                      fontWeight: FontWeight.w600,
-                      color: _dayNumberColor(context),
-                    ),
+          ),
+          child: Stack(
+            children: [
+              if (primaryEvent != null)
+                Positioned.fill(
+                  child: Padding(
+                    padding: iconAreaPadding,
+                    child: buildEventIcon(primaryEvent),
                   ),
                 ),
-              ],
-            ),
+              Positioned(
+                top: padding.top - 2,
+                left: padding.left - 2,
+                child: Text(
+                  '${day.day}',
+                  style: TextStyle(
+                    fontSize: dayFontSize,
+                    fontWeight: FontWeight.w600,
+                    color: _dayNumberColor(context),
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
     );
-  }
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  const _DashedBorderPainter({
-    required this.borderColor,
-    required this.dashLength,
-    required this.dashGap,
-    required this.strokeWidth,
-  });
-
-  final Color borderColor;
-  final double dashLength;
-  final double dashGap;
-  final double strokeWidth;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (size.isEmpty) return;
-
-    final rect = Offset.zero & size;
-    final path = Path()..addRect(rect);
-    final paint = Paint()
-      ..color = borderColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..isAntiAlias = true;
-
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      while (distance < metric.length) {
-        final next =
-            (distance + dashLength).clamp(0.0, metric.length).toDouble();
-        final dashPath = metric.extractPath(distance, next);
-        canvas.drawPath(dashPath, paint);
-        distance = next + dashGap;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedBorderPainter oldDelegate) {
-    return borderColor != oldDelegate.borderColor ||
-        dashLength != oldDelegate.dashLength ||
-        dashGap != oldDelegate.dashGap ||
-        strokeWidth != oldDelegate.strokeWidth;
   }
 }
