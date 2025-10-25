@@ -200,6 +200,7 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     }
     state = state.copyWith(
       focusedDay: normalizedFocused,
+      selectedDay: normalizedFocused,
       pendingUiEvent: null,
     );
     _refreshEventsSubscription();
