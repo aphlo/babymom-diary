@@ -57,7 +57,6 @@ enum LochiaAmount {
 }
 
 enum LochiaColor {
-  white('white'),
   yellow('yellow'),
   brown('brown'),
   pink('pink'),

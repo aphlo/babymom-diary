@@ -306,8 +306,6 @@ class _MomRecordEditorDialogState extends ConsumerState<MomRecordEditorDialog> {
 
   String _lochiaColorLabel(LochiaColor value) {
     switch (value) {
-      case LochiaColor.white:
-        return '白';
       case LochiaColor.yellow:
         return '黄';
       case LochiaColor.brown:

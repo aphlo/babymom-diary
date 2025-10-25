@@ -142,8 +142,6 @@ String? _formatLochiaColor(LochiaColor? color) {
     return null;
   }
   switch (color) {
-    case LochiaColor.white:
-      return '白';
     case LochiaColor.yellow:
       return '黄';
     case LochiaColor.brown:
