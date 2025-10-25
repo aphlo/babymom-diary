@@ -2,6 +2,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
 import 'package:babymom_diary/src/features/children/domain/entities/child_summary.dart';
@@ -65,6 +66,10 @@ class CalendarState {
   bool get hasError => eventsAsync.hasError;
 
   Object? get loadError => eventsAsync.whenOrNull(error: (error, __) => error);
+
+  String get monthLabel {
+    return DateFormat.yMMMM('ja').format(focusedDay);
+  }
 
   List<CalendarEvent> eventsForSelectedDay() {
     final key = DateTime(

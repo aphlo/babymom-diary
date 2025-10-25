@@ -203,6 +203,34 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     _refreshEventsSubscription();
   }
 
+  void goToPreviousMonth() {
+    final currentMonth =
+        DateTime(state.focusedDay.year, state.focusedDay.month);
+    final previousMonth = DateTime(currentMonth.year, currentMonth.month - 1);
+    final normalizedPrevious = _normalizeDate(previousMonth);
+
+    state = state.copyWith(
+      focusedDay: normalizedPrevious,
+      selectedDay: normalizedPrevious,
+      pendingUiEvent: null,
+    );
+    _refreshEventsSubscription();
+  }
+
+  void goToNextMonth() {
+    final currentMonth =
+        DateTime(state.focusedDay.year, state.focusedDay.month);
+    final nextMonth = DateTime(currentMonth.year, currentMonth.month + 1);
+    final normalizedNext = _normalizeDate(nextMonth);
+
+    state = state.copyWith(
+      focusedDay: normalizedNext,
+      selectedDay: normalizedNext,
+      pendingUiEvent: null,
+    );
+    _refreshEventsSubscription();
+  }
+
   void clearUiEvent() {
     if (state.pendingUiEvent == null) {
       return;

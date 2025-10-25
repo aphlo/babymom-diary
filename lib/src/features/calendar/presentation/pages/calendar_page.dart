@@ -78,7 +78,32 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('カレンダー'),
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        toolbarHeight: 44,
+        titleSpacing: 0,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _AppBarIconButton(
+              icon: Icons.chevron_left,
+              tooltip: '前の月',
+              onPressed: () => viewModel.goToPreviousMonth(),
+            ),
+            Flexible(
+              child: Text(
+                state.monthLabel,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+            _AppBarIconButton(
+              icon: Icons.chevron_right,
+              tooltip: '次の月',
+              onPressed: () => viewModel.goToNextMonth(),
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: [
@@ -96,13 +121,12 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               availableGestures: AvailableGestures.horizontalSwipe,
               rowHeight: 60,
               eventLoader: (day) => state.eventsForDay(day),
-              headerStyle: HeaderStyle(
+              headerStyle: const HeaderStyle(
                 formatButtonVisible: false,
                 titleCentered: true,
-                titleTextFormatter: (date, locale) =>
-                    DateFormat.yMMMM(locale).format(date),
-                leftChevronIcon: const Icon(Icons.chevron_left),
-                rightChevronIcon: const Icon(Icons.chevron_right),
+                leftChevronVisible: false,
+                rightChevronVisible: false,
+                titleTextStyle: TextStyle(fontSize: 0),
               ),
               calendarStyle: const CalendarStyle(
                 outsideDaysVisible: true,
@@ -192,6 +216,30 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         child: const Icon(Icons.add),
       ),
       bottomNavigationBar: const AppBottomNav(),
+    );
+  }
+}
+
+class _AppBarIconButton extends StatelessWidget {
+  const _AppBarIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(icon, color: Colors.white),
+      tooltip: tooltip,
+      onPressed: onPressed,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+      splashRadius: 16,
     );
   }
 }
