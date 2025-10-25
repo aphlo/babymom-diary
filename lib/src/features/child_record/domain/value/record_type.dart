@@ -5,6 +5,7 @@ enum RecordType {
   pump,
   pee,
   poop,
+  temperature,
   other,
 }
 
@@ -16,6 +17,7 @@ extension RecordTypeLabel on RecordType {
         RecordType.pump => '搾母乳',
         RecordType.pee => '尿',
         RecordType.poop => '便',
+        RecordType.temperature => '体温',
         RecordType.other => 'その他',
       };
 }
@@ -25,6 +27,7 @@ extension RecordTypeMeta on RecordType {
   bool get needsAmount => switch (this) {
         RecordType.breastRight || RecordType.breastLeft => true, // minutes
         RecordType.formula || RecordType.pump => true, // ml
+        RecordType.temperature => true, // celsius
         RecordType.pee || RecordType.poop || RecordType.other => false,
       };
 
@@ -34,6 +37,7 @@ extension RecordTypeMeta on RecordType {
   String get amountLabel => switch (this) {
         RecordType.breastRight || RecordType.breastLeft => '分',
         RecordType.formula || RecordType.pump => 'ml',
+        RecordType.temperature => '℃',
         RecordType.pee || RecordType.poop || RecordType.other => '数量',
       };
 }

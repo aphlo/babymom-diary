@@ -112,6 +112,9 @@ class _EditableRecordSheetState extends ConsumerState<EditableRecordSheet> {
       RecordType.formula || RecordType.pump => AmountRecordFields(
           controller: _amountController,
         ),
+      RecordType.temperature => TemperatureRecordFields(
+          controller: _amountController,
+        ),
       RecordType.pee || RecordType.poop => ExcretionRecordFields(
           selectedVolume: state.selectedVolume,
           errorText: state.volumeError,

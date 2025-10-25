@@ -68,6 +68,17 @@ class RecordTableCell extends StatelessWidget {
           final sum = filtered.fold<double>(0, (p, e) => p + (e.amount ?? 0));
           text = sum == 0 ? '${filtered.length}' : sum.toStringAsFixed(0);
           break;
+        case RecordType.temperature:
+          if (filtered.length > 1) {
+            final latest = filtered.last.amount;
+            text = latest != null
+                ? '${latest.toStringAsFixed(1)}..'
+                : '${filtered.length}';
+          } else {
+            final latest = filtered.isNotEmpty ? filtered.last.amount : null;
+            text = latest != null ? latest.toStringAsFixed(1) : '';
+          }
+          break;
         case RecordType.breastLeft || RecordType.breastRight:
           text = '${filtered.length}';
           break;
@@ -144,6 +155,11 @@ _BadgeColors _badgeColorsForRecordType(RecordType type, ColorScheme scheme) {
       return _BadgeColors(
         background: scheme.secondary,
         foreground: scheme.onSecondary,
+      );
+    case RecordType.temperature:
+      return _BadgeColors(
+        background: Colors.red.shade100,
+        foreground: Colors.red.shade800,
       );
     case RecordType.other:
       return _BadgeColors(

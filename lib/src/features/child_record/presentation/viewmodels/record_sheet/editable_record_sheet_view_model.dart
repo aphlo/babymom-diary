@@ -244,6 +244,7 @@ class EditableRecordSheetViewModel
       RecordType.breastRight =>
         _buildBreastRecord(base, at),
       RecordType.formula || RecordType.pump => _buildAmountRecord(base, at),
+      RecordType.temperature => _buildAmountRecord(base, at),
       RecordType.pee || RecordType.poop => _buildExcretionRecord(base, at),
       RecordType.other => _buildOtherRecord(base, at),
     };

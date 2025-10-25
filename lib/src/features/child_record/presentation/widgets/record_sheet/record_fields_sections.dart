@@ -211,6 +211,46 @@ class OtherRecordFields extends StatelessWidget {
   }
 }
 
+/// 体温に関する記録用のフォーム
+class TemperatureRecordFields extends StatelessWidget {
+  const TemperatureRecordFields({
+    super.key,
+    required this.controller,
+  });
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: '体温(℃)',
+            border: OutlineInputBorder(),
+          ),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+          ],
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return '体温を入力してください';
+            }
+            final parsed = double.tryParse(value);
+            if (parsed == null || parsed <= 0 || parsed > 50) {
+              return '正しい体温を入力してください';
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+}
+
 class NoteField extends StatelessWidget {
   const NoteField({super.key, required this.controller});
 

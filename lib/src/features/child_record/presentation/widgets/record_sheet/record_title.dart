@@ -102,6 +102,7 @@ class RecordTitle extends StatelessWidget {
         RecordType.breastLeft => Icons.child_care,
         RecordType.pee => Icons.water_drop,
         RecordType.poop => Icons.delete_outline,
+        RecordType.temperature => Icons.thermostat,
         RecordType.other => Icons.more_horiz,
       }),
       title: titleWidget,
@@ -184,6 +185,11 @@ _TitleDetail _buildTitleDetail(
     case RecordType.poop:
       final label = record.excretionVolume?.label;
       return _TitleDetail(detail: '便 ($label)');
+    case RecordType.temperature:
+      final temp = record.amount;
+      return temp != null
+          ? _TitleDetail(detail: '${temp.toStringAsFixed(1)}℃')
+          : const _TitleDetail(detail: '体温未入力');
     case RecordType.other:
       if (tags.isNotEmpty) {
         return const _TitleDetail(

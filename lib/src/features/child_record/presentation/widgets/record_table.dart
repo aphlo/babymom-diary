@@ -28,18 +28,20 @@ class RecordTable extends StatelessWidget {
     '搾母乳',
     '尿',
     '便',
+    '体温',
     'その他'
   ];
 
   static const _columnWidths = <int, TableColumnWidth>{
-    0: FlexColumnWidth(0.8),
+    0: FlexColumnWidth(0.7),
     1: FlexColumnWidth(1.0),
     2: FlexColumnWidth(1.0),
     3: FlexColumnWidth(1.0),
     4: FlexColumnWidth(1.0),
     5: FlexColumnWidth(1.0),
     6: FlexColumnWidth(1.0),
-    7: FlexColumnWidth(2.0),
+    7: FlexColumnWidth(1.0),
+    8: FlexColumnWidth(2.0),
   };
 
   static const _borderDashPattern = <double>[1.5, 2.5];
@@ -86,6 +88,7 @@ class RecordTable extends StatelessWidget {
           value: '$totalPoopCount',
           unit: '回',
         ),
+        const _TotalValue(value: '', unit: ''),
         const _TotalValue(value: '', unit: ''),
       ],
     );
@@ -209,6 +212,7 @@ const _slotTypes = <RecordType>[
   RecordType.pump,
   RecordType.pee,
   RecordType.poop,
+  RecordType.temperature,
   RecordType.other,
 ];
 

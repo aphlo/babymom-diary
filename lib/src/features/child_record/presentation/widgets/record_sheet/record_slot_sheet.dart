@@ -166,5 +166,6 @@ IconData _iconFor(RecordType t) => switch (t) {
       RecordType.breastRight || RecordType.breastLeft => Icons.child_care,
       RecordType.pee => Icons.water_drop,
       RecordType.poop => Icons.delete_outline,
+      RecordType.temperature => Icons.thermostat,
       RecordType.other => Icons.more_horiz,
     };
