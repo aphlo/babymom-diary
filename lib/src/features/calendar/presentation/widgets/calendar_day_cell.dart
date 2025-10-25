@@ -81,15 +81,11 @@ class CalendarDayCell extends StatelessWidget {
           final paddingValue = size.shortestSide * 0.04;
           Widget child;
           if (event.iconPath.isEmpty) {
-            child = ColoredBox(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              child: Center(
-                child: Text(
-                  '✅',
-                  style: TextStyle(
-                    fontSize: size.shortestSide * 0.5,
-                  ),
-                ),
+            child = Center(
+              child: Icon(
+                Icons.task_alt,
+                size: size.shortestSide * 0.5,
+                color: Colors.grey,
               ),
             );
           } else {

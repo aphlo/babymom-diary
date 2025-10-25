@@ -30,14 +30,11 @@ class CalendarEventTile extends StatelessWidget {
       icon = Container(
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(8),
-        ),
         alignment: Alignment.center,
-        child: const Text(
-          '✅',
-          style: TextStyle(fontSize: 24),
+        child: const Icon(
+          Icons.task_alt,
+          size: 24,
+          color: Colors.grey,
         ),
       );
     }
