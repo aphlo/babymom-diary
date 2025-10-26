@@ -4,9 +4,14 @@ import 'package:intl/intl.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
 
 class CalendarEventTile extends StatelessWidget {
-  const CalendarEventTile({required this.event, super.key});
+  const CalendarEventTile({
+    required this.event,
+    this.onTap,
+    super.key,
+  });
 
   final CalendarEvent event;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -41,44 +46,48 @@ class CalendarEventTile extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                ...[
-                  icon,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  ...[
+                    icon,
+                    const SizedBox(width: 12),
+                  ],
+                  Expanded(
+                    child: Text(
+                      event.title,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                   const SizedBox(width: 12),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
                 ],
-                Expanded(
+              ),
+              if (event.memo.isNotEmpty) ...[
+                Padding(
+                  padding: const EdgeInsets.only(
+                      left: 52), // 40 (icon width) + 12 (spacing)
                   child: Text(
-                    event.title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    event.memo,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  subtitle,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
               ],
-            ),
-            if (event.memo.isNotEmpty) ...[
-              Padding(
-                padding: const EdgeInsets.only(
-                    left: 52), // 40 (icon width) + 12 (spacing)
-                child: Text(
-                  event.memo,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
             ],
-          ],
+          ),
         ),
       ),
     );

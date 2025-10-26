@@ -141,6 +141,149 @@ class CalendarEventFirestoreDataSource {
     }
   }
 
+  Future<void> updateEvent({
+    required String eventId,
+    required String householdId,
+    required String title,
+    required String memo,
+    required bool allDay,
+    required DateTime start,
+    required DateTime end,
+    required String iconKey,
+  }) async {
+    try {
+      final nowUtc = DateTime.now().toUtc();
+      final startUtc = start.toUtc();
+      final endUtc = end.toUtc();
+
+      final dateKey = DateFormat('yyyy-MM-dd').format(start.toLocal());
+
+      final docRef = _firestore
+          .collection('households')
+          .doc(householdId)
+          .collection('events')
+          .doc(dateKey);
+
+      final trimmedMemo = memo.trim();
+
+      final eventData = <String, Object?>{
+        'title': title,
+        'memo': trimmedMemo.isEmpty ? null : trimmedMemo,
+        'allDay': allDay,
+        'startAt': Timestamp.fromDate(startUtc),
+        'endAt': Timestamp.fromDate(endUtc),
+        'iconKey': iconKey,
+        'updatedAt': Timestamp.fromDate(nowUtc),
+      };
+
+      eventData.removeWhere((_, value) => value == null);
+
+      await _executeWithRetry(() async {
+        await _firestore.runTransaction((transaction) async {
+          final doc = await transaction.get(docRef);
+
+          if (doc.exists) {
+            final currentData = doc.data() as Map<String, dynamic>;
+            final events =
+                Map<String, dynamic>.from(currentData['events'] ?? {});
+
+            if (events.containsKey(eventId)) {
+              events[eventId] = eventData;
+              transaction.update(docRef, {
+                'events': events,
+                'updatedAt': Timestamp.fromDate(nowUtc),
+              });
+            } else {
+              throw Exception('Event not found: $eventId');
+            }
+          } else {
+            throw Exception('Document not found for date: $dateKey');
+          }
+        });
+      });
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteEvent({
+    required String eventId,
+    required String householdId,
+  }) async {
+    try {
+      final nowUtc = DateTime.now().toUtc();
+
+      // 効率的な検索のため、現在の月を中心に前後3ヶ月の範囲で検索
+      final now = DateTime.now();
+      final startDate = DateTime(now.year, now.month - 3, 1);
+      final endDate = DateTime(now.year, now.month + 4, 0); // 3ヶ月後の月末
+
+      final dateKeys = <String>[];
+      var currentDate = startDate;
+      while (!currentDate.isAfter(endDate)) {
+        dateKeys.add(DateFormat('yyyy-MM-dd').format(currentDate));
+        currentDate = currentDate.add(const Duration(days: 1));
+      }
+
+      bool eventFound = false;
+
+      for (final dateKey in dateKeys) {
+        final docRef = _firestore
+            .collection('households')
+            .doc(householdId)
+            .collection('events')
+            .doc(dateKey);
+
+        try {
+          final doc = await docRef.get();
+          if (doc.exists) {
+            final currentData = doc.data() as Map<String, dynamic>;
+            final events =
+                Map<String, dynamic>.from(currentData['events'] ?? {});
+
+            if (events.containsKey(eventId)) {
+              eventFound = true;
+
+              // トランザクションで削除実行
+              await _executeWithRetry(() async {
+                await _firestore.runTransaction((transaction) async {
+                  final latestDoc = await transaction.get(docRef);
+                  if (latestDoc.exists) {
+                    final latestData = latestDoc.data() as Map<String, dynamic>;
+                    final latestEvents =
+                        Map<String, dynamic>.from(latestData['events'] ?? {});
+
+                    if (latestEvents.containsKey(eventId)) {
+                      latestEvents.remove(eventId);
+
+                      if (latestEvents.isEmpty) {
+                        transaction.delete(docRef);
+                      } else {
+                        transaction.update(docRef, {
+                          'events': latestEvents,
+                          'updatedAt': Timestamp.fromDate(nowUtc),
+                        });
+                      }
+                    }
+                  }
+                });
+              });
+              break;
+            }
+          }
+        } catch (e) {
+          // 個別のエラーは無視して続行
+        }
+      }
+
+      if (!eventFound) {
+        throw Exception('Event not found: $eventId');
+      }
+    } catch (error) {
+      rethrow;
+    }
+  }
+
   Future<T> _executeWithRetry<T>(Future<T> Function() operation,
       {int maxRetries = 3}) async {
     int attempts = 0;

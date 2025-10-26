@@ -279,6 +279,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                 ? CalendarErrorView(error: state.loadError!)
                 : SelectedDayEventList(
                     events: state.eventsForSelectedDay(),
+                    onEventTap: (event) => _handleEventTap(context, event),
                   ),
           ),
         ],
@@ -289,6 +290,23 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       ),
       bottomNavigationBar: const AppBottomNav(),
     );
+  }
+
+  void _handleEventTap(BuildContext context, CalendarEvent event) {
+    Navigator.of(context)
+        .push(
+      MaterialPageRoute(
+        builder: (_) => AddCalendarEventPage(
+          existingEvent: event,
+        ),
+      ),
+    )
+        .then((result) {
+      // 編集・削除が成功した場合はリフレッシュ
+      if (result == true) {
+        // ViewModelが自動的にリフレッシュするため、特別な処理は不要
+      }
+    });
   }
 }
 

@@ -39,6 +39,40 @@ class CalendarEventRepositoryImpl implements CalendarEventRepository {
   }
 
   @override
+  Future<void> updateEvent({
+    required String eventId,
+    required String householdId,
+    required String title,
+    String memo = '',
+    required bool allDay,
+    required DateTime start,
+    required DateTime end,
+    required String iconKey,
+  }) {
+    return _remote.updateEvent(
+      eventId: eventId,
+      householdId: householdId,
+      title: title,
+      memo: memo,
+      allDay: allDay,
+      start: start,
+      end: end,
+      iconKey: iconKey,
+    );
+  }
+
+  @override
+  Future<void> deleteEvent({
+    required String eventId,
+    required String householdId,
+  }) {
+    return _remote.deleteEvent(
+      eventId: eventId,
+      householdId: householdId,
+    );
+  }
+
+  @override
   Stream<List<CalendarEvent>> watchEvents({
     required String householdId,
     required DateTime start,

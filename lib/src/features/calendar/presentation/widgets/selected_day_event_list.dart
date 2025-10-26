@@ -6,9 +6,14 @@ import 'calendar_event_tile.dart';
 import 'empty_events_view.dart';
 
 class SelectedDayEventList extends StatelessWidget {
-  const SelectedDayEventList({required this.events, super.key});
+  const SelectedDayEventList({
+    required this.events,
+    this.onEventTap,
+    super.key,
+  });
 
   final List<CalendarEvent> events;
+  final void Function(CalendarEvent)? onEventTap;
 
   static const _scrollPhysics = BouncingScrollPhysics(
     parent: AlwaysScrollableScrollPhysics(),
@@ -31,7 +36,10 @@ class SelectedDayEventList extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       itemBuilder: (context, index) {
         final event = events[index];
-        return CalendarEventTile(event: event);
+        return CalendarEventTile(
+          event: event,
+          onTap: onEventTap != null ? () => onEventTap!(event) : null,
+        );
       },
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemCount: events.length,
