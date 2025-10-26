@@ -7,6 +7,7 @@ import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/models/calendar_event_model.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/pages/add_calendar_event_page.dart';
+import 'package:babymom_diary/src/features/calendar/presentation/pages/calendar_settings_page.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/calendar_state.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/calendar_view_model.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/calendar_day_cell.dart';
@@ -44,6 +45,15 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               SnackBar(content: Text(event.message!)),
             );
             viewModel.clearUiEvent();
+            return;
+          }
+          if (event.openSettings == true) {
+            viewModel.clearUiEvent();
+            await navigator.push(
+              MaterialPageRoute(
+                builder: (_) => const CalendarSettingsPage(),
+              ),
+            );
             return;
           }
           final request = event.openAddEvent;
@@ -119,7 +129,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               lastDay: lastDate,
               focusedDay: state.focusedDay,
               currentDay: DateTime.now(),
-              startingDayOfWeek: StartingDayOfWeek.monday,
+              startingDayOfWeek: state.calendarSettings.startingDayOfWeek
+                  ? StartingDayOfWeek.monday
+                  : StartingDayOfWeek.sunday,
               locale: 'ja_JP',
               availableGestures: AvailableGestures.horizontalSwipe,
               rowHeight: 54,
@@ -237,13 +249,24 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               child: LinearProgressIndicator(),
             ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                headerFormatter.format(state.selectedDay),
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  headerFormatter.format(state.selectedDay),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.settings),
+                  tooltip: 'カレンダー設定',
+                  onPressed: () => viewModel.openCalendarSettings(),
+                  padding: EdgeInsets.zero,
+                  constraints:
+                      const BoxConstraints.tightFor(width: 32, height: 32),
+                  splashRadius: 16,
+                ),
+              ],
             ),
           ),
           if (state.hasError && state.loadError != null)

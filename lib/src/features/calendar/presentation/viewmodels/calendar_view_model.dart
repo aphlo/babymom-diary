@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:babymom_diary/src/features/calendar/application/calendar_event_controller.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
+import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_settings.dart';
 import 'package:babymom_diary/src/features/calendar/domain/repositories/calendar_event_repository.dart';
+import 'package:babymom_diary/src/features/calendar/domain/repositories/calendar_settings_repository.dart';
+import 'package:babymom_diary/src/features/calendar/infrastructure/repositories/calendar_settings_repository_impl.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/models/calendar_event_model.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/calendar_state.dart';
 import 'package:babymom_diary/src/features/children/application/children_local_provider.dart';
@@ -18,7 +21,8 @@ final calendarViewModelProvider =
     AutoDisposeStateNotifierProvider<CalendarViewModel, CalendarState>(
   (ref) {
     final repository = ref.watch(calendarEventRepositoryProvider);
-    return CalendarViewModel(ref, repository);
+    final settingsRepository = ref.watch(calendarSettingsRepositoryProvider);
+    return CalendarViewModel(ref, repository, settingsRepository);
   },
 );
 
@@ -26,24 +30,30 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
   CalendarViewModel(
     this._ref,
     this._repository,
+    this._settingsRepository,
   ) : super(CalendarState.initial()) {
     _initialize();
     _ref.onDispose(() {
       _eventsSubscription?.cancel();
+      _settingsSubscription?.cancel();
       _eventsSubscription = null;
+      _settingsSubscription = null;
     });
   }
 
   final Ref _ref;
   final CalendarEventRepository _repository;
+  final CalendarSettingsRepository _settingsRepository;
 
   StreamSubscription<List<CalendarEvent>>? _eventsSubscription;
+  StreamSubscription<CalendarSettings>? _settingsSubscription;
   List<CalendarEvent> _latestEvents = const <CalendarEvent>[];
   List<ChildSummary> _localChildren = const <ChildSummary>[];
   ChildSummary? _snapshotChild;
 
   void _initialize() {
     _listenToSelectedChild();
+    _listenToCalendarSettings();
     _loadHouseholdId();
   }
 
@@ -75,6 +85,22 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
         state = state.copyWith(selectedChildId: value, pendingUiEvent: null);
       },
       fireImmediately: true,
+    );
+  }
+
+  void _listenToCalendarSettings() {
+    _settingsSubscription = _settingsRepository.watchSettings().listen(
+      (settings) {
+        state =
+            state.copyWith(calendarSettings: settings, pendingUiEvent: null);
+      },
+      onError: (error) {
+        // エラーが発生した場合はデフォルト設定を使用
+        state = state.copyWith(
+          calendarSettings: const CalendarSettings(startingDayOfWeek: false),
+          pendingUiEvent: null,
+        );
+      },
     );
   }
 
@@ -263,6 +289,12 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     );
     state = state.copyWith(
       pendingUiEvent: CalendarUiEvent.openAddEvent(request),
+    );
+  }
+
+  void openCalendarSettings() {
+    state = state.copyWith(
+      pendingUiEvent: const CalendarUiEvent.openSettings(),
     );
   }
 

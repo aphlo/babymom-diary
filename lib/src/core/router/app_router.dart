@@ -5,6 +5,7 @@ import '../../features/child_record/presentation/pages/record_table_page.dart';
 import '../../features/vaccines/presentation/screens/vaccines_screen.dart';
 import '../../features/mom_record/presentation/pages/mom_record_page.dart';
 import '../../features/calendar/presentation/pages/calendar_page.dart';
+import '../../features/calendar/presentation/pages/calendar_settings_page.dart';
 import '../../features/menu/presentation/screens/menu_screen.dart';
 import '../../features/children/presentation/screens/add_child_screen.dart';
 import '../../features/children/presentation/screens/manage_children_screen.dart';
@@ -42,6 +43,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'calendar',
         pageBuilder: (context, state) =>
             const NoTransitionPage(child: CalendarPage()),
+      ),
+      GoRoute(
+        path: '/calendar/settings',
+        name: 'calendar_settings',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: CalendarSettingsPage()),
       ),
       GoRoute(
         path: '/menu',

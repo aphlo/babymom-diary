@@ -5,20 +5,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
+import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_settings.dart';
 import 'package:babymom_diary/src/features/children/domain/entities/child_summary.dart';
 
 @immutable
 class CalendarUiEvent {
-  const CalendarUiEvent._({this.message, this.openAddEvent});
+  const CalendarUiEvent._({this.message, this.openAddEvent, this.openSettings});
 
   final String? message;
   final AddEventRequest? openAddEvent;
+  final bool? openSettings;
 
   const CalendarUiEvent.showMessage(String message)
-      : this._(message: message, openAddEvent: null);
+      : this._(message: message, openAddEvent: null, openSettings: null);
 
   const CalendarUiEvent.openAddEvent(AddEventRequest request)
-      : this._(message: null, openAddEvent: request);
+      : this._(message: null, openAddEvent: request, openSettings: null);
+
+  const CalendarUiEvent.openSettings()
+      : this._(message: null, openAddEvent: null, openSettings: true);
 }
 
 @immutable
@@ -44,6 +49,7 @@ class CalendarState {
     required this.householdId,
     required List<ChildSummary> availableChildren,
     required this.selectedChildId,
+    required this.calendarSettings,
     this.pendingUiEvent,
   })  : eventsByDay =
             Map<DateTime, List<CalendarEvent>>.unmodifiable(eventsByDay.map(
@@ -59,6 +65,7 @@ class CalendarState {
   final String? householdId;
   final List<ChildSummary> availableChildren;
   final String? selectedChildId;
+  final CalendarSettings calendarSettings;
   final CalendarUiEvent? pendingUiEvent;
 
   bool get isLoadingEvents => eventsAsync.isLoading;
@@ -94,6 +101,7 @@ class CalendarState {
     String? householdId,
     List<ChildSummary>? availableChildren,
     String? selectedChildId,
+    CalendarSettings? calendarSettings,
     CalendarUiEvent? pendingUiEvent,
   }) {
     return CalendarState(
@@ -104,6 +112,7 @@ class CalendarState {
       householdId: householdId ?? this.householdId,
       availableChildren: availableChildren ?? this.availableChildren,
       selectedChildId: selectedChildId ?? this.selectedChildId,
+      calendarSettings: calendarSettings ?? this.calendarSettings,
       pendingUiEvent: pendingUiEvent,
     );
   }
@@ -123,6 +132,8 @@ class CalendarState {
       householdId: null,
       availableChildren: children,
       selectedChildId: null,
+      calendarSettings:
+          const CalendarSettings(startingDayOfWeek: false), // デフォルトは日曜始まり
       pendingUiEvent: null,
     );
   }
