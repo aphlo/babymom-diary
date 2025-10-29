@@ -295,16 +295,16 @@ class GrowthChart extends StatelessWidget {
   LineChartBarData _measurementDots(List<FlSpot> spots, Color color) {
     return LineChartBarData(
       spots: spots,
-      color: Colors.transparent,
-      barWidth: 0,
-      isCurved: false,
+      color: color,
+      barWidth: 1.5,
+      isCurved: true,
       dotData: FlDotData(
         show: true,
         getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
-          radius: 2,
+          radius: 2.5,
           color: Colors.white,
           strokeColor: color,
-          strokeWidth: 1,
+          strokeWidth: 1.5,
         ),
       ),
     );
