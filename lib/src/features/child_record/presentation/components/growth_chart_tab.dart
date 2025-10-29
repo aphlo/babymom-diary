@@ -137,10 +137,11 @@ class _AgeRangeTabs extends StatelessWidget {
     const selectedColor = Color(0xFFE87086);
     final unselectedColor = Colors.white;
     final borderColor = selectedColor.withOpacity(0.35);
+    final borderRadius = BorderRadius.circular(12);
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: borderRadius,
         border: Border.all(color: borderColor, width: 1.1),
         boxShadow: [
           BoxShadow(
@@ -150,40 +151,42 @@ class _AgeRangeTabs extends StatelessWidget {
           ),
         ],
       ),
-      clipBehavior: Clip.hardEdge,
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        children: AgeRange.values.map((range) {
-          final isSelected = range == selected;
-          return Expanded(
-            child: InkWell(
-              onTap: () {
-                onSelect(range);
-              },
-              child: Container(
-                height: 26,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: isSelected ? selectedColor : unselectedColor,
-                ),
-                child: Text(
-                  range.label,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                        color: isSelected ? Colors.white : selectedColor,
-                        fontWeight:
-                            isSelected ? FontWeight.w600 : FontWeight.w500,
-                      ) ??
-                      TextStyle(
-                        color: isSelected ? Colors.white : selectedColor,
-                        fontWeight:
-                            isSelected ? FontWeight.w600 : FontWeight.w500,
-                        fontSize: 13,
-                      ),
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          children: AgeRange.values.map((range) {
+            final isSelected = range == selected;
+            return Expanded(
+              child: InkWell(
+                onTap: () {
+                  onSelect(range);
+                },
+                child: Container(
+                  height: 26,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isSelected ? selectedColor : unselectedColor,
+                  ),
+                  child: Text(
+                    range.label,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                          color: isSelected ? Colors.white : selectedColor,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
+                        ) ??
+                        TextStyle(
+                          color: isSelected ? Colors.white : selectedColor,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
+                          fontSize: 13,
+                        ),
+                  ),
                 ),
               ),
-            ),
-          );
-        }).toList(),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
