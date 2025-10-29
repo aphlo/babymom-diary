@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../models/growth_measurement_point.dart';
 import '../viewmodels/growth_chart_view_model.dart';
 
 Future<void> showHeightRecordSheet({
@@ -9,6 +10,7 @@ Future<void> showHeightRecordSheet({
   required DateTime initialDate,
   DateTime? minimumDate,
   DateTime? maximumDate,
+  GrowthMeasurementPoint? record,
 }) {
   return showModalBottomSheet<void>(
     context: context,
@@ -17,6 +19,7 @@ Future<void> showHeightRecordSheet({
       initialDate: initialDate,
       minimumDate: minimumDate,
       maximumDate: maximumDate,
+      record: record,
     ),
   );
 }
@@ -26,6 +29,7 @@ Future<void> showWeightRecordSheet({
   required DateTime initialDate,
   DateTime? minimumDate,
   DateTime? maximumDate,
+  GrowthMeasurementPoint? record,
 }) {
   return showModalBottomSheet<void>(
     context: context,
@@ -34,6 +38,7 @@ Future<void> showWeightRecordSheet({
       initialDate: initialDate,
       minimumDate: minimumDate,
       maximumDate: maximumDate,
+      record: record,
     ),
   );
 }
@@ -44,11 +49,13 @@ class HeightRecordSheet extends ConsumerStatefulWidget {
     required this.initialDate,
     this.minimumDate,
     this.maximumDate,
+    this.record,
   });
 
   final DateTime initialDate;
   final DateTime? minimumDate;
   final DateTime? maximumDate;
+  final GrowthMeasurementPoint? record;
 
   @override
   ConsumerState<HeightRecordSheet> createState() => _HeightRecordSheetState();
@@ -58,6 +65,15 @@ class _HeightRecordSheetState extends ConsumerState<HeightRecordSheet> {
   late DateTime _selectedDate = widget.initialDate;
   final TextEditingController _heightController = TextEditingController();
   bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = widget.record?.recordedAt ?? widget.initialDate;
+    if (widget.record?.height != null) {
+      _heightController.text = widget.record!.height!.toStringAsFixed(1);
+    }
+  }
 
   @override
   void dispose() {
@@ -119,9 +135,19 @@ class _HeightRecordSheetState extends ConsumerState<HeightRecordSheet> {
     });
     FocusScope.of(context).unfocus();
     try {
-      await ref
-          .read(growthChartViewModelProvider.notifier)
-          .addHeightRecord(recordedAt: _selectedDate, heightCm: height);
+      final notifier = ref.read(growthChartViewModelProvider.notifier);
+      if (widget.record != null) {
+        await notifier.updateHeightRecord(
+          recordId: widget.record!.id,
+          recordedAt: _selectedDate,
+          heightCm: height,
+          note: widget.record?.note,
+        );
+      } else {
+        await notifier.addHeightRecord(
+            recordedAt: _selectedDate, heightCm: height);
+      }
+
       if (mounted) {
         Navigator.of(context).maybePop();
       }
@@ -156,7 +182,7 @@ class _HeightRecordSheetState extends ConsumerState<HeightRecordSheet> {
             Row(
               children: [
                 Text(
-                  '身長を記録',
+                  widget.record == null ? '身長を記録' : '身長を編集',
                   style: theme.textTheme.titleMedium,
                 ),
                 const Spacer(),
@@ -229,11 +255,13 @@ class WeightRecordSheet extends ConsumerStatefulWidget {
     required this.initialDate,
     this.minimumDate,
     this.maximumDate,
+    this.record,
   });
 
   final DateTime initialDate;
   final DateTime? minimumDate;
   final DateTime? maximumDate;
+  final GrowthMeasurementPoint? record;
 
   @override
   ConsumerState<WeightRecordSheet> createState() => _WeightRecordSheetState();
@@ -244,6 +272,22 @@ class _WeightRecordSheetState extends ConsumerState<WeightRecordSheet> {
   final TextEditingController _weightController = TextEditingController();
   _WeightUnit _unit = _WeightUnit.kg;
   bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = widget.record?.recordedAt ?? widget.initialDate;
+    if (widget.record?.weight != null) {
+      final weight = widget.record!.weight!;
+      if (weight > 20) {
+        _weightController.text = (weight / 1000).toStringAsFixed(3);
+        _unit = _WeightUnit.kg;
+      } else {
+        _weightController.text = weight.toStringAsFixed(3);
+        _unit = _WeightUnit.kg;
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -310,9 +354,19 @@ class _WeightRecordSheetState extends ConsumerState<WeightRecordSheet> {
     });
     FocusScope.of(context).unfocus();
     try {
-      await ref
-          .read(growthChartViewModelProvider.notifier)
-          .addWeightRecord(recordedAt: _selectedDate, weightGrams: weight);
+      final notifier = ref.read(growthChartViewModelProvider.notifier);
+      if (widget.record != null) {
+        await notifier.updateWeightRecord(
+          recordId: widget.record!.id,
+          recordedAt: _selectedDate,
+          weightGrams: weight,
+          note: widget.record?.note,
+        );
+      } else {
+        await notifier.addWeightRecord(
+            recordedAt: _selectedDate, weightGrams: weight);
+      }
+
       if (mounted) {
         Navigator.of(context).maybePop();
       }
@@ -347,7 +401,7 @@ class _WeightRecordSheetState extends ConsumerState<WeightRecordSheet> {
             Row(
               children: [
                 Text(
-                  '体重を記録',
+                  widget.record == null ? '体重を記録' : '体重を編集',
                   style: theme.textTheme.titleMedium,
                 ),
                 const Spacer(),

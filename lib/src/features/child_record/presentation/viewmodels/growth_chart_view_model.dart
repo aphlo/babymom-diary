@@ -11,7 +11,9 @@ import '../../infrastructure/repositories/growth_record_repository_impl.dart';
 import '../../infrastructure/sources/asset_growth_curve_data_source.dart';
 import '../../infrastructure/sources/growth_record_firestore_data_source.dart';
 import '../../application/usecases/add_growth_record.dart';
+import '../../application/usecases/delete_growth_record.dart';
 import '../../application/usecases/get_growth_curves.dart';
+import '../../application/usecases/update_growth_record.dart';
 import '../../application/usecases/watch_growth_records.dart';
 import '../mappers/growth_chart_ui_mapper.dart';
 import '../models/growth_chart_data.dart';
@@ -59,6 +61,18 @@ final addGrowthRecordUseCaseProvider =
     Provider.family<AddGrowthRecord, String>((ref, hid) {
   final repo = ref.watch(growthRecordRepositoryProvider(hid));
   return AddGrowthRecord(repo);
+});
+
+final updateGrowthRecordUseCaseProvider =
+    Provider.family<UpdateGrowthRecord, String>((ref, hid) {
+  final repo = ref.watch(growthRecordRepositoryProvider(hid));
+  return UpdateGrowthRecord(repo);
+});
+
+final deleteGrowthRecordUseCaseProvider =
+    Provider.family<DeleteGrowthRecord, String>((ref, hid) {
+  final repo = ref.watch(growthRecordRepositoryProvider(hid));
+  return DeleteGrowthRecord(repo);
 });
 
 final growthChartViewModelProvider =
@@ -298,6 +312,66 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
     await addUseCase(record);
   }
 
+  Future<void> updateHeightRecord({
+    required String recordId,
+    required DateTime recordedAt,
+    required double heightCm,
+    String? note,
+  }) async {
+    final record = _requireRecord(recordId);
+    final householdId = _householdId;
+    if (householdId == null) {
+      throw StateError('Cannot update height record without household.');
+    }
+    final sanitizedNote = _sanitizeNote(note ?? record.note);
+    final updated = record.copyWith(
+      recordedAt: _normalizeDate(recordedAt),
+      height: heightCm,
+      note: sanitizedNote,
+      updatedAt: DateTime.now(),
+    );
+    final updateUseCase =
+        _ref.read(updateGrowthRecordUseCaseProvider(householdId));
+    await updateUseCase(updated);
+    _replaceLocalRecord(updated);
+  }
+
+  Future<void> updateWeightRecord({
+    required String recordId,
+    required DateTime recordedAt,
+    required double weightGrams,
+    String? note,
+  }) async {
+    final record = _requireRecord(recordId);
+    final householdId = _householdId;
+    if (householdId == null) {
+      throw StateError('Cannot update weight record without household.');
+    }
+    final sanitizedNote = _sanitizeNote(note ?? record.note);
+    final updated = record.copyWith(
+      recordedAt: _normalizeDate(recordedAt),
+      weight: weightGrams,
+      note: sanitizedNote,
+      updatedAt: DateTime.now(),
+    );
+    final updateUseCase =
+        _ref.read(updateGrowthRecordUseCaseProvider(householdId));
+    await updateUseCase(updated);
+    _replaceLocalRecord(updated);
+  }
+
+  Future<void> deleteGrowthRecord(String recordId) async {
+    final child = state.childSummary;
+    final householdId = _householdId;
+    if (child == null || householdId == null) {
+      throw StateError('Cannot delete record without household and child.');
+    }
+    final deleteUseCase =
+        _ref.read(deleteGrowthRecordUseCaseProvider(householdId));
+    await deleteUseCase(childId: child.id, recordId: recordId);
+    _removeLocalRecord(recordId);
+  }
+
   DateTime _normalizeDate(DateTime input) {
     return DateTime(input.year, input.month, input.day);
   }
@@ -308,6 +382,36 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
       return null;
     }
     return trimmed;
+  }
+
+  GrowthRecord _requireRecord(String recordId) {
+    try {
+      return _records.firstWhere((record) => record.id == recordId);
+    } catch (_) {
+      throw StateError('Growth record not found: $recordId');
+    }
+  }
+
+  void _replaceLocalRecord(GrowthRecord record) {
+    final index = _records.indexWhere((element) => element.id == record.id);
+    if (index == -1) {
+      return;
+    }
+    final updated = List<GrowthRecord>.from(_records);
+    updated[index] = record;
+    _records = updated;
+    _rebuildMeasurements();
+  }
+
+  void _removeLocalRecord(String recordId) {
+    final updated = _records
+        .where((record) => record.id != recordId)
+        .toList(growable: false);
+    if (updated.length == _records.length) {
+      return;
+    }
+    _records = updated;
+    _rebuildMeasurements();
   }
 
   @override
