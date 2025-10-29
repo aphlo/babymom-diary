@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../child_record.dart';
 import '../models/growth_chart_data.dart';
 import '../viewmodels/record_view_model.dart';
@@ -147,7 +148,7 @@ class _AgeRangeTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const selectedColor = Color(0xFFE87086);
+    const selectedColor = AppColors.primary;
     final unselectedColor = Colors.white;
     final borderColor = selectedColor.withOpacity(0.35);
     final borderRadius = BorderRadius.circular(12);
@@ -213,7 +214,7 @@ class _Legend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const items = [
-      _LegendItem(color: Color(0xFFE87086), label: '身長 (cm)'),
+      _LegendItem(color: AppColors.primary, label: '身長 (cm)'),
       _LegendItem(color: Color(0xFF2196F3), label: '体重 (kg)'),
     ];
     if (isInline) {
@@ -279,7 +280,7 @@ class _ChartActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const buttonColor = Color(0xFFE87086);
+    const buttonColor = AppColors.primary;
     final buttons = [
       _ActionButtonData(
         label: '身長を記録',

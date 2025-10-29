@@ -206,7 +206,7 @@ class _RecordListView extends ConsumerWidget {
                       theme.textTheme.bodyLarge?.fontSize ??
                       16) +
                   2,
-              color: theme.textTheme.titleMedium?.color,
+              color: AppColors.primary,
             );
 
             return Container(
@@ -222,7 +222,15 @@ class _RecordListView extends ConsumerWidget {
                       formattedDate,
                       style: theme.textTheme.bodyLarge,
                     ),
-                    subtitle: ageText == null ? null : Text(ageText),
+                    subtitle: ageText == null
+                        ? null
+                        : Text(
+                            ageText,
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
+                          ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [

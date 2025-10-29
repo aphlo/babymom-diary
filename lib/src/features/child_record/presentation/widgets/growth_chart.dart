@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../child_record.dart';
 import '../models/growth_chart_data.dart';
 
@@ -119,7 +120,7 @@ class GrowthChart extends StatelessWidget {
       return 6;
     }
 
-    const heightCurveColor = Color(0xFFE87086);
+    const heightCurveColor = AppColors.primary;
     const weightCurveColor = Color(0xFF2196F3);
     final heightBandColor = heightCurveColor.withOpacity(0.25);
     final weightBandColor = weightCurveColor.withOpacity(0.25);
