@@ -10,19 +10,30 @@ class GrowthRecordListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('身長と体重の記録'),
-          bottom: TabBar(
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
-            indicatorColor: Colors.white,
-            tabs: const [
-              Tab(text: '身長'),
-              Tab(text: '体重'),
-            ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(32),
+            child: SizedBox(
+              height: 32,
+              child: TabBar(
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.white70,
+                indicatorColor: Colors.white,
+                labelStyle: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                unselectedLabelStyle: theme.textTheme.bodyMedium,
+                tabs: const [
+                  Tab(text: '身長'),
+                  Tab(text: '体重'),
+                ],
+              ),
+            ),
           ),
         ),
         body: TabBarView(
