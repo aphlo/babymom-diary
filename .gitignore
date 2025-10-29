@@ -53,7 +53,19 @@ unlinked_spec.ds
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
 **/android/key.properties
+keystore.properties
+android/keystore.properties
+android/app/src/*/google-services.json
 *.jks
+
+# Firebase config
+lib/firebase_options.dart
+lib/firebase_options_local.dart
+lib/firebase_options_prod.dart
+
+# Fastlane environment files
+fastlane/.env.local
+fastlane/.env.prod
 
 # iOS/XCode related
 **/ios/**/*.mode1v3

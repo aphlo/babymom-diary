@@ -8,6 +8,12 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+}
+
 android {
     namespace = "com.example.babymom_diary"
     compileSdk = flutter.compileSdkVersion
@@ -27,17 +33,62 @@ android {
         applicationId = "com.example.babymom_diary"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
-    buildTypes {
+    signingConfigs {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            // Resolve signing credentials from local keystore.properties or CI environment.
+            def resolvedStoreFile = keystoreProperties['storeFile'] ?: System.getenv('ANDROID_KEYSTORE_PATH')
+            def resolvedStorePassword = keystoreProperties['storePassword'] ?: System.getenv('ANDROID_KEYSTORE_PASSWORD')
+            def resolvedKeyAlias = keystoreProperties['keyAlias'] ?: System.getenv('ANDROID_KEY_ALIAS')
+            def resolvedKeyPassword = keystoreProperties['keyPassword'] ?: System.getenv('ANDROID_KEY_PASSWORD')
+
+            if (resolvedStoreFile) {
+                def storeFileBase = keystorePropertiesFile.exists() ? keystorePropertiesFile.parentFile : rootProject.projectDir
+                def candidate = new File(resolvedStoreFile)
+                if (!candidate.isAbsolute()) {
+                    candidate = new File(storeFileBase, resolvedStoreFile)
+                }
+                storeFile candidate
+            }
+            if (resolvedStorePassword) {
+                storePassword resolvedStorePassword
+            }
+            if (resolvedKeyAlias) {
+                keyAlias resolvedKeyAlias
+            }
+            if (resolvedKeyPassword) {
+                keyPassword resolvedKeyPassword
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
+        }
+    }
+
+    flavorDimensions += "env"
+    productFlavors {
+        local {
+            dimension "env"
+            applicationIdSuffix ".local"
+            versionNameSuffix "-local"
+            resValue "string", "app_name", "Milu (Local)"
+        }
+        prod {
+            dimension "env"
+            resValue "string", "app_name", "Milu"
         }
     }
 }
