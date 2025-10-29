@@ -22,7 +22,7 @@ TASKS = {
     description: "Run app with local flavor (set ARGS for extra flutter flags)",
   },
   format: {
-    command: "dart format lib test",
+    command: "fvm dart format lib test",
     description: "format dart files",
   },
   test: {
