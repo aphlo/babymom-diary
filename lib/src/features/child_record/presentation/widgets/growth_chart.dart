@@ -383,7 +383,7 @@ _AxisSettings _axisSettingsFor(AgeRange range) {
           for (final v in [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]) v.toDouble(),
         },
         heightLabels: {
-          for (final v in [40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100])
+          for (final v in [40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95])
             v.toDouble(),
         },
       );
