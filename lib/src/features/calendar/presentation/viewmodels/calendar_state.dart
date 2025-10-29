@@ -1,8 +1,8 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:babymom_diary/src/core/utils/date_formatter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_settings.dart';
@@ -75,7 +75,7 @@ class CalendarState {
   Object? get loadError => eventsAsync.whenOrNull(error: (error, __) => error);
 
   String get monthLabel {
-    return DateFormat.yMMMM('ja').format(focusedDay);
+    return DateFormatter.yyyyMM(focusedDay);
   }
 
   List<CalendarEvent> eventsForSelectedDay() {
