@@ -97,6 +97,7 @@ class _EditChildScreenState extends ConsumerState<EditChildScreen> {
                         name: form.name,
                         birthday: form.birthday,
                         color: colorHex,
+                        gender: form.gender,
                       );
                       await ref
                           .read(childrenLocalProvider(hid).notifier)

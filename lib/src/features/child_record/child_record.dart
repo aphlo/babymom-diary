@@ -1,4 +1,11 @@
 export 'domain/entities/record.dart';
+export 'domain/entities/growth_record.dart';
+export 'domain/entities/growth_curve_point.dart';
 export 'domain/repositories/child_record_repository.dart';
+export 'domain/repositories/growth_record_repository.dart';
+export 'domain/repositories/growth_curve_repository.dart';
 export 'domain/value/record_type.dart';
 export 'domain/value/excretion_volume.dart';
+export 'domain/value/age_range.dart';
+export 'domain/value/measurement_type.dart';
+export 'domain/value/percentile.dart';
