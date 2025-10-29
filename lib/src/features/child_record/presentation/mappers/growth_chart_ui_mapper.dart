@@ -17,7 +17,7 @@ class GrowthChartUiMapper {
             ageInMonths: _ageInMonths(birthday, record.recordedAt),
             recordedAt: record.recordedAt,
             height: record.height,
-            weight: record.weight,
+            weight: _normalizedWeight(record.weight),
             note: record.note,
           ),
         )
@@ -40,5 +40,15 @@ class GrowthChartUiMapper {
     final diff = recordedAt.difference(birthday);
     final months = diff.inDays / 30.4375;
     return months.isFinite ? months.clamp(0, double.infinity) as double : 0;
+  }
+
+  double? _normalizedWeight(double? value) {
+    if (value == null) {
+      return null;
+    }
+    if (value > 20) {
+      return value / 1000;
+    }
+    return value;
   }
 }

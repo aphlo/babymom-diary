@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../child_record.dart';
 import '../models/growth_chart_data.dart';
+import '../viewmodels/record_view_model.dart';
 import '../widgets/growth_chart.dart';
 import '../viewmodels/growth_chart_view_model.dart';
+import '../widgets/growth_measurement_sheet.dart';
 
 class GrowthChartTab extends ConsumerWidget {
   const GrowthChartTab({super.key});
@@ -15,6 +17,7 @@ class GrowthChartTab extends ConsumerWidget {
     final notifier = ref.read(growthChartViewModelProvider.notifier);
     final summary = state.childSummary;
     final theme = Theme.of(context);
+    final selectedDate = ref.watch(recordViewModelProvider).selectedDate;
 
     if (state.isLoadingChild) {
       return const Center(child: CircularProgressIndicator());
@@ -44,6 +47,8 @@ class GrowthChartTab extends ConsumerWidget {
                 data: data,
                 ageRange: state.selectedAgeRange,
                 theme: theme,
+                initialDate: selectedDate,
+                childBirthday: summary.birthday,
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => _EmptyPlaceholder(
@@ -64,11 +69,15 @@ class _ChartContent extends StatelessWidget {
     required this.data,
     required this.ageRange,
     required this.theme,
+    required this.initialDate,
+    required this.childBirthday,
   });
 
   final GrowthChartData data;
   final AgeRange ageRange;
   final ThemeData theme;
+  final DateTime initialDate;
+  final DateTime? childBirthday;
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +104,10 @@ class _ChartContent extends StatelessWidget {
           child: const _Legend(isInline: true),
         ),
         const SizedBox(height: 8),
-        const _ChartActions(),
+        _ChartActions(
+          initialDate: initialDate,
+          childBirthday: childBirthday,
+        ),
       ],
     );
   }
@@ -255,7 +267,13 @@ class _LegendItem extends StatelessWidget {
 }
 
 class _ChartActions extends StatelessWidget {
-  const _ChartActions();
+  const _ChartActions({
+    required this.initialDate,
+    required this.childBirthday,
+  });
+
+  final DateTime initialDate;
+  final DateTime? childBirthday;
 
   @override
   Widget build(BuildContext context) {
@@ -266,16 +284,29 @@ class _ChartActions extends StatelessWidget {
         label: '身長を記録',
         icon: Icons.straighten,
         color: buttonColor,
+        onPressed: () => showHeightRecordSheet(
+          context: context,
+          initialDate: initialDate,
+          minimumDate: childBirthday,
+          maximumDate: DateTime.now(),
+        ),
       ),
       _ActionButtonData(
         label: '体重を記録',
         icon: Icons.monitor_weight,
         color: buttonColor,
+        onPressed: () => showWeightRecordSheet(
+          context: context,
+          initialDate: initialDate,
+          minimumDate: childBirthday,
+          maximumDate: DateTime.now(),
+        ),
       ),
       _ActionButtonData(
         label: '一覧',
         icon: Icons.list_alt,
         color: buttonColor,
+        onPressed: () {},
       ),
     ];
     return Row(
@@ -285,7 +316,7 @@ class _ChartActions extends StatelessWidget {
             child: SizedBox(
               height: 36,
               child: FilledButton(
-                onPressed: () {},
+                onPressed: buttons[i].onPressed,
                 style: FilledButton.styleFrom(
                   backgroundColor: buttons[i].color,
                   padding: EdgeInsets.zero,
@@ -322,11 +353,13 @@ class _ActionButtonData {
     required this.label,
     required this.icon,
     required this.color,
+    required this.onPressed,
   });
 
   final String label;
   final IconData icon;
   final Color color;
+  final VoidCallback onPressed;
 }
 
 class _EmptyPlaceholder extends StatelessWidget {

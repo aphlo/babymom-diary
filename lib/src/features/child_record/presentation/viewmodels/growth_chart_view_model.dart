@@ -10,6 +10,7 @@ import '../../infrastructure/repositories/growth_curve_repository_impl.dart';
 import '../../infrastructure/repositories/growth_record_repository_impl.dart';
 import '../../infrastructure/sources/asset_growth_curve_data_source.dart';
 import '../../infrastructure/sources/growth_record_firestore_data_source.dart';
+import '../../application/usecases/add_growth_record.dart';
 import '../../application/usecases/get_growth_curves.dart';
 import '../../application/usecases/watch_growth_records.dart';
 import '../mappers/growth_chart_ui_mapper.dart';
@@ -52,6 +53,12 @@ final watchGrowthRecordsUseCaseProvider =
     Provider.family<WatchGrowthRecords, String>((ref, hid) {
   final repo = ref.watch(growthRecordRepositoryProvider(hid));
   return WatchGrowthRecords(repo);
+});
+
+final addGrowthRecordUseCaseProvider =
+    Provider.family<AddGrowthRecord, String>((ref, hid) {
+  final repo = ref.watch(growthRecordRepositoryProvider(hid));
+  return AddGrowthRecord(repo);
 });
 
 final growthChartViewModelProvider =
@@ -243,6 +250,64 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
     }
     state = state.copyWith(selectedAgeRange: range);
     await _loadCurvesForCurrentChild();
+  }
+
+  Future<void> addHeightRecord({
+    required DateTime recordedAt,
+    required double heightCm,
+    String? note,
+  }) async {
+    final householdId = _householdId;
+    final child = state.childSummary;
+    if (householdId == null || child == null) {
+      throw StateError('Cannot add height record without household and child.');
+    }
+    final sanitizedNote = _sanitizeNote(note);
+    final record = GrowthRecord(
+      childId: child.id,
+      recordedAt: _normalizeDate(recordedAt),
+      height: heightCm,
+      note: sanitizedNote,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    final addUseCase = _ref.read(addGrowthRecordUseCaseProvider(householdId));
+    await addUseCase(record);
+  }
+
+  Future<void> addWeightRecord({
+    required DateTime recordedAt,
+    required double weightGrams,
+    String? note,
+  }) async {
+    final householdId = _householdId;
+    final child = state.childSummary;
+    if (householdId == null || child == null) {
+      throw StateError('Cannot add weight record without household and child.');
+    }
+    final sanitizedNote = _sanitizeNote(note);
+    final record = GrowthRecord(
+      childId: child.id,
+      recordedAt: _normalizeDate(recordedAt),
+      weight: weightGrams,
+      note: sanitizedNote,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    final addUseCase = _ref.read(addGrowthRecordUseCaseProvider(householdId));
+    await addUseCase(record);
+  }
+
+  DateTime _normalizeDate(DateTime input) {
+    return DateTime(input.year, input.month, input.day);
+  }
+
+  String? _sanitizeNote(String? note) {
+    final trimmed = note?.trim();
+    if (trimmed == null || trimmed.isEmpty) {
+      return null;
+    }
+    return trimmed;
   }
 
   @override

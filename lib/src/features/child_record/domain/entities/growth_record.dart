@@ -1,5 +1,38 @@
 class GrowthRecord {
-  const GrowthRecord({
+  factory GrowthRecord({
+    String? id,
+    required String childId,
+    required DateTime recordedAt,
+    double? height,
+    double? weight,
+    String? note,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    assert(
+      height != null || weight != null,
+      'Either height or weight must be provided.',
+    );
+    final finalId = id ??
+        _generateGrowthRecordId(
+          childId: childId,
+          recordedAt: recordedAt,
+          hasHeight: height != null,
+          hasWeight: weight != null,
+        );
+    return GrowthRecord._(
+      id: finalId,
+      childId: childId,
+      recordedAt: recordedAt,
+      height: height,
+      weight: weight,
+      note: note,
+      createdAt: createdAt ?? DateTime.now(),
+      updatedAt: updatedAt ?? DateTime.now(),
+    );
+  }
+
+  GrowthRecord._({
     required this.id,
     required this.childId,
     required this.recordedAt,
@@ -8,10 +41,7 @@ class GrowthRecord {
     this.note,
     this.createdAt,
     this.updatedAt,
-  }) : assert(
-          height != null || weight != null,
-          'Either height or weight must be provided.',
-        );
+  });
 
   final String id;
   final String childId;
@@ -57,4 +87,25 @@ class GrowthRecord {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+}
+
+String _generateGrowthRecordId({
+  required String childId,
+  required DateTime recordedAt,
+  required bool hasHeight,
+  required bool hasWeight,
+}) {
+  String measurementPart;
+  if (hasHeight && hasWeight) {
+    measurementPart = 'both';
+  } else if (hasHeight) {
+    measurementPart = 'height';
+  } else {
+    measurementPart = 'weight';
+  }
+  final datePart =
+      '${recordedAt.year.toString().padLeft(4, '0')}-${recordedAt.month.toString().padLeft(2, '0')}-${recordedAt.day.toString().padLeft(2, '0')}';
+  final randomPart =
+      DateTime.now().microsecondsSinceEpoch.toRadixString(36).padLeft(8, '0');
+  return '$childId-$datePart-$measurementPart-$randomPart';
 }
