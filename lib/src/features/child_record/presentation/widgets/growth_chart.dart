@@ -123,8 +123,6 @@ class GrowthChart extends StatelessWidget {
     const weightCurveColor = Color(0xFF2196F3);
     final heightBandColor = heightCurveColor.withOpacity(0.25);
     final weightBandColor = weightCurveColor.withOpacity(0.25);
-    final tooltipBaseStyle =
-        theme.textTheme.bodySmall ?? const TextStyle(fontSize: 12);
     const heightLabelColor = heightCurveColor;
     const weightLabelColor = weightCurveColor;
 
@@ -153,45 +151,7 @@ class GrowthChart extends StatelessWidget {
         maxX: ageRange.maxMonths,
         minY: 0,
         maxY: maxY,
-        lineTouchData: LineTouchData(
-          enabled: true,
-          handleBuiltInTouches: true,
-          touchTooltipData: LineTouchTooltipData(
-            getTooltipColor: (_) => theme.colorScheme.surface.withOpacity(0.9),
-            tooltipBorder: BorderSide(
-              color: theme.dividerColor.withOpacity(0.2),
-            ),
-            getTooltipItems: (touchedSpots) {
-              return touchedSpots
-                  .map((spot) {
-                    final month = spot.x;
-                    if (spot.barIndex == 4) {
-                      final height = yToHeight(spot.y);
-                      return LineTooltipItem(
-                        '月齢 ${month.toStringAsFixed(1)} ヶ月\n身長 ${height.toStringAsFixed(1)} cm',
-                        tooltipBaseStyle.copyWith(
-                          color: heightCurveColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      );
-                    }
-                    if (spot.barIndex == 5) {
-                      final weight = yToWeight(spot.y);
-                      return LineTooltipItem(
-                        '月齢 ${month.toStringAsFixed(1)} ヶ月\n体重 ${weight.toStringAsFixed(2)} kg',
-                        tooltipBaseStyle.copyWith(
-                          color: weightCurveColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      );
-                    }
-                    return null;
-                  })
-                  .whereType<LineTooltipItem>()
-                  .toList();
-            },
-          ),
-        ),
+        lineTouchData: const LineTouchData(enabled: false),
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
