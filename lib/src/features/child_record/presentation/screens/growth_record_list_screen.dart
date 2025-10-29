@@ -71,6 +71,50 @@ class _RecordListView extends ConsumerWidget {
     return '${normalized.toStringAsFixed(2)} kg';
   }
 
+  String? _formatElapsedSinceBirth(DateTime? birthday, DateTime recordedAt) {
+    if (birthday == null) {
+      return null;
+    }
+    final birthDate = DateUtils.dateOnly(birthday);
+    final recordDate = DateUtils.dateOnly(recordedAt);
+
+    if (recordDate.isBefore(birthDate)) {
+      return null;
+    }
+
+    int years = recordDate.year - birthDate.year;
+    int months = recordDate.month - birthDate.month;
+    int days = recordDate.day - birthDate.day;
+
+    if (days < 0) {
+      final previousMonth = DateTime(recordDate.year, recordDate.month, 0);
+      days += previousMonth.day;
+      months -= 1;
+    }
+
+    if (months < 0) {
+      years -= 1;
+      months += 12;
+    }
+
+    final totalMonths = years * 12 + months;
+    final buffer = StringBuffer();
+
+    if (totalMonths > 0) {
+      buffer.write('$totalMonthsヶ月');
+    }
+
+    if (days > 0) {
+      buffer.write('$days日');
+    }
+
+    if (buffer.isEmpty) {
+      buffer.write('0日');
+    }
+
+    return '生後${buffer.toString()}目';
+  }
+
   Future<bool?> _showDeleteConfirmDialog(BuildContext context) {
     return showDialog<bool>(
       context: context,
@@ -149,23 +193,53 @@ class _RecordListView extends ConsumerWidget {
             }
 
             final record = item;
-            final formattedDate = DateFormatter.yyyyMMddE(record.recordedAt);
+            final formattedDate = DateFormatter.ddE(record.recordedAt);
             final value = (type == RecordType.height)
                 ? _formatHeight(record.height)
                 : _formatWeight(record.weight);
+            final ageText =
+                _formatElapsedSinceBirth(childBirthday, record.recordedAt);
+            final theme = Theme.of(context);
+            final valueTextStyle = theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              fontSize: (theme.textTheme.titleMedium?.fontSize ??
+                      theme.textTheme.bodyLarge?.fontSize ??
+                      16) +
+                  2,
+              color: theme.textTheme.titleMedium?.color,
+            );
 
             return Container(
               color: Colors.white,
               child: Column(
                 children: [
                   ListTile(
-                    title: Text(formattedDate),
-                    subtitle: Text(value),
+                    contentPadding: const EdgeInsets.only(
+                      left: 16,
+                      right: 8,
+                    ),
+                    title: Text(
+                      formattedDate,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                    subtitle: ageText == null ? null : Text(ageText),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        Text(
+                          value,
+                          style: valueTextStyle,
+                        ),
+                        const SizedBox(width: 16),
                         IconButton(
                           icon: const Icon(Icons.edit),
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          constraints: const BoxConstraints(
+                            minWidth: 28,
+                            minHeight: 28,
+                          ),
+                          visualDensity: VisualDensity.compact,
+                          splashRadius: 18,
                           onPressed: () {
                             if (type == RecordType.height) {
                               showHeightRecordSheet(
@@ -188,6 +262,13 @@ class _RecordListView extends ConsumerWidget {
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete),
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          constraints: const BoxConstraints(
+                            minWidth: 28,
+                            minHeight: 28,
+                          ),
+                          visualDensity: VisualDensity.compact,
+                          splashRadius: 18,
                           onPressed: () async {
                             final confirmed =
                                 await _showDeleteConfirmDialog(context);

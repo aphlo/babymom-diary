@@ -22,4 +22,10 @@ class DateFormatter {
     final weekday = _weekdayMap[date.weekday] ?? '';
     return '$formattedDate($weekday)';
   }
+
+  static String ddE(DateTime date) {
+    final formattedDate = DateFormat('dd日').format(date);
+    final weekday = _weekdayMap[date.weekday] ?? '';
+    return '$formattedDate($weekday)';
+  }
 }
