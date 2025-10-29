@@ -9,15 +9,59 @@ import '../viewmodels/record_view_model.dart';
 import '../widgets/app_bar_child_info.dart';
 import '../widgets/app_bar_date_switcher.dart';
 
-class RecordTablePage extends ConsumerWidget {
+class RecordTablePage extends ConsumerStatefulWidget {
   const RecordTablePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RecordTablePage> createState() => _RecordTablePageState();
+}
+
+class _RecordTablePageState extends ConsumerState<RecordTablePage>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    final initialIndex = ref.read(recordViewModelProvider).selectedTabIndex;
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: initialIndex,
+    );
+    _tabController.addListener(_onTabChanged);
+  }
+
+  @override
+  void dispose() {
+    _tabController.removeListener(_onTabChanged);
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _onTabChanged() {
+    if (_tabController.indexIsChanging) {
+      return;
+    }
+    ref
+        .read(recordViewModelProvider.notifier)
+        .onSelectTab(_tabController.index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final state = ref.watch(recordViewModelProvider);
     final notifier = ref.read(recordViewModelProvider.notifier);
     final selectedDate = state.selectedDate;
+
+    final tabIndex = state.selectedTabIndex;
+    if (tabIndex >= 0 &&
+        tabIndex < _tabController.length &&
+        _tabController.index != tabIndex &&
+        !_tabController.indexIsChanging) {
+      _tabController.animateTo(tabIndex);
+    }
 
     final today = DateTime.now();
     final today0 = DateTime(today.year, today.month, today.day);
@@ -36,69 +80,68 @@ class RecordTablePage extends ConsumerWidget {
       await notifier.onSelectDate(nd);
     }
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          centerTitle: true,
-          toolbarHeight: 64,
-          titleSpacing: 0,
-          title: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const AppBarChildInfo(),
-              const SizedBox(height: 3),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _AppBarIconButton(
-                    icon: Icons.chevron_left,
-                    tooltip: '前日',
-                    onPressed: goToPreviousDate,
-                  ),
-                  const Expanded(
-                    child: Center(child: AppBarDateSwitcher()),
-                  ),
-                  _AppBarIconButton(
-                    icon: Icons.chevron_right,
-                    tooltip: '翌日',
-                    onPressed: isToday ? null : goToNextDate,
-                  ),
-                ],
-              ),
-            ],
-          ),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(32),
-            child: SizedBox(
-              height: 32,
-              child: TabBar(
-                labelColor: Colors.white,
-                unselectedLabelColor: Colors.white70,
-                indicatorColor: Colors.white,
-                labelStyle: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        toolbarHeight: 64,
+        titleSpacing: 0,
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const AppBarChildInfo(),
+            const SizedBox(height: 3),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _AppBarIconButton(
+                  icon: Icons.chevron_left,
+                  tooltip: '前日',
+                  onPressed: goToPreviousDate,
                 ),
-                unselectedLabelStyle: theme.textTheme.bodyMedium,
-                tabs: const [
-                  Tab(text: '授乳表'),
-                  Tab(text: '成長曲線'),
-                ],
+                const Expanded(
+                  child: Center(child: AppBarDateSwitcher()),
+                ),
+                _AppBarIconButton(
+                  icon: Icons.chevron_right,
+                  tooltip: '翌日',
+                  onPressed: isToday ? null : goToNextDate,
+                ),
+              ],
+            ),
+          ],
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(32),
+          child: SizedBox(
+            height: 32,
+            child: TabBar(
+              controller: _tabController,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white70,
+              indicatorColor: Colors.white,
+              labelStyle: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
               ),
+              unselectedLabelStyle: theme.textTheme.bodyMedium,
+              tabs: const [
+                Tab(text: '授乳表'),
+                Tab(text: '成長曲線'),
+              ],
             ),
           ),
         ),
-        body: const TabBarView(
-          children: [
-            FeedingTableTab(),
-            GrowthChartTab(),
-          ],
-        ),
-        bottomNavigationBar: const AppBottomNav(),
       ),
+      body: TabBarView(
+        controller: _tabController,
+        children: const [
+          FeedingTableTab(),
+          GrowthChartTab(),
+        ],
+      ),
+      bottomNavigationBar: const AppBottomNav(),
     );
   }
 }

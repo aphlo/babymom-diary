@@ -8,21 +8,25 @@ class MomRecordPageState {
   const MomRecordPageState({
     required this.focusMonth,
     required this.monthlyRecords,
+    required this.selectedTabIndex,
     this.householdId,
   });
 
   final DateTime focusMonth;
   final AsyncValue<MomMonthlyRecordUiModel> monthlyRecords;
+  final int selectedTabIndex;
   final String? householdId;
 
   MomRecordPageState copyWith({
     DateTime? focusMonth,
     AsyncValue<MomMonthlyRecordUiModel>? monthlyRecords,
+    int? selectedTabIndex,
     String? householdId,
   }) {
     return MomRecordPageState(
       focusMonth: focusMonth ?? this.focusMonth,
       monthlyRecords: monthlyRecords ?? this.monthlyRecords,
+      selectedTabIndex: selectedTabIndex ?? this.selectedTabIndex,
       householdId: householdId ?? this.householdId,
     );
   }
@@ -33,6 +37,7 @@ class MomRecordPageState {
     return MomRecordPageState(
       focusMonth: normalized,
       monthlyRecords: const AsyncValue.loading(),
+      selectedTabIndex: 0,
       householdId: null,
     );
   }

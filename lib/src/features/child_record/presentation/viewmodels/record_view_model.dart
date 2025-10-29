@@ -99,6 +99,16 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     );
   }
 
+  void onSelectTab(int index) {
+    if (index == state.selectedTabIndex) {
+      return;
+    }
+    state = state.copyWith(
+      selectedTabIndex: index,
+      pendingUiEvent: null,
+    );
+  }
+
   Future<void> _loadInitialData() async {
     final previousRecords = state.recordsAsync;
     final previousTags = state.otherTagsAsync;

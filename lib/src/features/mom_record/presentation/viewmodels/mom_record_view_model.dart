@@ -18,11 +18,14 @@ final momRecordViewModelProvider =
 );
 
 class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
-  MomRecordViewModel(this._ref) : super(MomRecordPageState.initial()) {
+  MomRecordViewModel(this._ref)
+      : _keepAliveLink = _ref.keepAlive(),
+        super(MomRecordPageState.initial()) {
     unawaited(loadForMonth(state.focusMonth));
   }
 
   final Ref _ref;
+  final KeepAliveLink _keepAliveLink;
   GetMomMonthlyRecords? _fetchUseCase;
   SaveMomDailyRecord? _saveUseCase;
 
@@ -60,6 +63,13 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
     final current = state.focusMonth;
     final nextMonth = DateTime(current.year, current.month + 1);
     return loadForMonth(nextMonth);
+  }
+
+  void onSelectTab(int index) {
+    if (index == state.selectedTabIndex) {
+      return;
+    }
+    state = state.copyWith(selectedTabIndex: index);
   }
 
   Future<void> saveRecord(MomDailyRecord record) async {
@@ -103,5 +113,11 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
 
   static DateTime _normalizeMonth(DateTime date) {
     return DateTime(date.year, date.month);
+  }
+
+  @override
+  void dispose() {
+    _keepAliveLink.close();
+    super.dispose();
   }
 }

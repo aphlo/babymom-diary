@@ -57,6 +57,7 @@ class RecordUiEvent {
 class RecordPageState {
   const RecordPageState({
     required this.selectedDate,
+    required this.selectedTabIndex,
     required this.recordsAsync,
     required this.otherTagsAsync,
     required this.selectedChildId,
@@ -67,6 +68,7 @@ class RecordPageState {
   });
 
   final DateTime selectedDate;
+  final int selectedTabIndex;
   final AsyncValue<List<RecordItemModel>> recordsAsync;
   final AsyncValue<List<String>> otherTagsAsync;
   final String? selectedChildId;
@@ -84,6 +86,7 @@ class RecordPageState {
 
   RecordPageState copyWith({
     DateTime? selectedDate,
+    int? selectedTabIndex,
     AsyncValue<List<RecordItemModel>>? recordsAsync,
     AsyncValue<List<String>>? otherTagsAsync,
     String? selectedChildId,
@@ -94,6 +97,7 @@ class RecordPageState {
   }) {
     return RecordPageState(
       selectedDate: selectedDate ?? this.selectedDate,
+      selectedTabIndex: selectedTabIndex ?? this.selectedTabIndex,
       recordsAsync: recordsAsync ?? this.recordsAsync,
       otherTagsAsync: otherTagsAsync ?? this.otherTagsAsync,
       selectedChildId: selectedChildId ?? this.selectedChildId,
@@ -109,6 +113,7 @@ class RecordPageState {
     final normalized = DateTime(now.year, now.month, now.day);
     return RecordPageState(
       selectedDate: normalized,
+      selectedTabIndex: 0,
       recordsAsync: const AsyncValue<List<RecordItemModel>>.loading(),
       otherTagsAsync: const AsyncValue<List<String>>.loading(),
       selectedChildId: null,
