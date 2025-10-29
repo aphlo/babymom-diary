@@ -301,10 +301,10 @@ class GrowthChart extends StatelessWidget {
       dotData: FlDotData(
         show: true,
         getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
-          radius: 4,
+          radius: 2,
           color: Colors.white,
           strokeColor: color,
-          strokeWidth: 2,
+          strokeWidth: 1,
         ),
       ),
     );
