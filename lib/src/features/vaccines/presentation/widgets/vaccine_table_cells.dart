@@ -5,6 +5,7 @@ import '../styles/vaccine_type_styles.dart';
 import 'vaccine_type_badge.dart';
 
 const double _doseBadgeDiameter = 24;
+const double _doseBadgeDiameterSmall = 20;
 const double _gridBorderOverlap = 0.6;
 
 class HeaderCornerCell extends StatelessWidget {
@@ -127,7 +128,11 @@ class DoseScheduleCell extends StatelessWidget {
                   endOffset: _gridBorderOverlap,
                 ),
               ),
-              Center(child: DoseNumberBadge(number: doseNumbers.first)),
+              Center(child: DoseNumberBadge(
+                number: doseNumbers.first,
+                size: _doseBadgeDiameter,
+                fontSize: 12,
+              )),
             ],
           );
         case DoseArrowSegment.middle:
@@ -160,14 +165,29 @@ class DoseScheduleCell extends StatelessWidget {
 
     final List<int> displayNumbers = List<int>.of(doseNumbers)..sort();
 
+    final bool isMultipleDoses = displayNumbers.length > 1;
+    final double badgeSize = isMultipleDoses ? _doseBadgeDiameterSmall : _doseBadgeDiameter;
+    final double spacing = isMultipleDoses ? 2 : 4;
+    final double fontSize = isMultipleDoses ? 10 : 12;
+
     return Center(
-      child: Wrap(
-        alignment: WrapAlignment.center,
-        spacing: 4,
-        runSpacing: 4,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: displayNumbers
+            .asMap()
+            .entries
             .map(
-              (int number) => DoseNumberBadge(number: number),
+              (MapEntry<int, int> entry) => Padding(
+                padding: EdgeInsets.only(
+                  left: entry.key > 0 ? spacing : 0,
+                ),
+                child: DoseNumberBadge(
+                  number: entry.value,
+                  size: badgeSize,
+                  fontSize: fontSize,
+                ),
+              ),
             )
             .toList(),
       ),
@@ -179,9 +199,13 @@ class DoseNumberBadge extends StatelessWidget {
   const DoseNumberBadge({
     super.key,
     required this.number,
+    this.size = _doseBadgeDiameter,
+    this.fontSize = 12,
   });
 
   final int number;
+  final double size;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -190,16 +214,17 @@ class DoseNumberBadge extends StatelessWidget {
         Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: color,
                   fontWeight: FontWeight.w700,
+                  fontSize: fontSize,
                 ) ??
             TextStyle(
               color: color,
               fontWeight: FontWeight.w700,
-              fontSize: 12,
+              fontSize: fontSize,
             );
 
     return Container(
-      width: _doseBadgeDiameter,
-      height: _doseBadgeDiameter,
+      width: size,
+      height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
