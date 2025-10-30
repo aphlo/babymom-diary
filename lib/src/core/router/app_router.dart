@@ -2,15 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/child_record/presentation/pages/record_table_page.dart';
-import '../../features/vaccines/presentation/screens/vaccines_screen.dart';
+import '../../features/vaccines/presentation/pages/vaccines_page.dart';
 import '../../features/mom_record/presentation/pages/mom_record_page.dart';
 import '../../features/calendar/presentation/pages/calendar_page.dart';
 import '../../features/calendar/presentation/pages/calendar_settings_page.dart';
-import '../../features/menu/presentation/screens/menu_screen.dart';
-import '../../features/children/presentation/screens/add_child_screen.dart';
-import '../../features/children/presentation/screens/manage_children_screen.dart';
-import '../../features/children/presentation/screens/edit_child_screen.dart';
-import '../../features/household/presentation/screens/household_share_screen.dart';
+import '../../features/menu/presentation/pages/menu_page.dart';
+import '../../features/children/presentation/pages/add_child_page.dart';
+import '../../features/children/presentation/pages/manage_children_page.dart';
+import '../../features/children/presentation/pages/edit_child_page.dart';
+import '../../features/household/presentation/pages/household_share_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -30,7 +30,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/vaccines',
         name: 'vaccines',
         pageBuilder: (context, state) =>
-            const NoTransitionPage(child: VaccinesScreen()),
+            const NoTransitionPage(child: VaccinesPage()),
       ),
       GoRoute(
         path: '/mom',
@@ -54,33 +54,33 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/menu',
         name: 'menu',
         pageBuilder: (context, state) =>
-            const NoTransitionPage(child: MenuScreen()),
+            const NoTransitionPage(child: MenuPage()),
       ),
       GoRoute(
         path: '/children/add',
         name: 'children_add',
         pageBuilder: (context, state) =>
-            const CupertinoPage(child: AddChildScreen()),
+            const CupertinoPage(child: AddChildPage()),
       ),
       GoRoute(
         path: '/children/manage',
         name: 'children_manage',
         pageBuilder: (context, state) =>
-            const CupertinoPage(child: ManageChildrenScreen()),
+            const CupertinoPage(child: ManageChildrenPage()),
       ),
       GoRoute(
         path: '/children/edit/:id',
         name: 'children_edit',
         pageBuilder: (context, state) {
           final id = state.pathParameters['id']!;
-          return CupertinoPage(child: EditChildScreen(childId: id));
+          return CupertinoPage(child: EditChildPage(childId: id));
         },
       ),
       GoRoute(
         path: '/household/share',
         name: 'household_share',
         pageBuilder: (context, state) =>
-            const CupertinoPage(child: HouseholdShareScreen()),
+            const CupertinoPage(child: HouseholdSharePage()),
       ),
     ],
   );

@@ -4,17 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/firebase/household_service.dart';
-import '../../../children/data/sources/child_firestore_data_source.dart';
+import '../../data/infrastructure/child_firestore_data_source.dart';
 import '../widgets/child_form.dart';
 
-class AddChildScreen extends ConsumerStatefulWidget {
-  const AddChildScreen({super.key});
+class AddChildPage extends ConsumerStatefulWidget {
+  const AddChildPage({super.key});
 
   @override
-  ConsumerState<AddChildScreen> createState() => _AddChildScreenState();
+  ConsumerState<AddChildPage> createState() => _AddChildPageState();
 }
 
-class _AddChildScreenState extends ConsumerState<AddChildScreen> {
+class _AddChildPageState extends ConsumerState<AddChildPage> {
   String _toHex(Color c) =>
       '#${c.value.toRadixString(16).padLeft(8, '0').substring(2)}';
 

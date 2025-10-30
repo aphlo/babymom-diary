@@ -4,12 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
-import 'package:babymom_diary/src/features/children/data/sources/child_firestore_data_source.dart';
+import 'package:babymom_diary/src/features/children/data/infrastructure/child_firestore_data_source.dart';
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 import 'package:babymom_diary/src/features/children/application/selected_child_provider.dart';
 
-class MenuScreen extends ConsumerWidget {
-  const MenuScreen({super.key});
+class MenuPage extends ConsumerWidget {
+  const MenuPage({super.key});
 
   Color _parseColor(String? hex) {
     if (hex == null || hex.isEmpty) return Colors.grey;

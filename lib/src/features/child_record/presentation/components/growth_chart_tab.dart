@@ -8,7 +8,7 @@ import '../viewmodels/record_view_model.dart';
 import '../widgets/growth_chart.dart';
 import '../viewmodels/growth_chart_view_model.dart';
 import '../widgets/growth_measurement_sheet.dart';
-import '../pages/growth_record_list_screen.dart';
+import '../pages/growth_record_list_page.dart';
 
 class GrowthChartTab extends ConsumerWidget {
   const GrowthChartTab({super.key});

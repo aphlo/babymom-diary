@@ -3,15 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/firebase/household_service.dart';
 
-class HouseholdShareScreen extends ConsumerStatefulWidget {
-  const HouseholdShareScreen({super.key});
+class HouseholdSharePage extends ConsumerStatefulWidget {
+  const HouseholdSharePage({super.key});
 
   @override
-  ConsumerState<HouseholdShareScreen> createState() =>
-      _HouseholdShareScreenState();
+  ConsumerState<HouseholdSharePage> createState() => _HouseholdSharePageState();
 }
 
-class _HouseholdShareScreenState extends ConsumerState<HouseholdShareScreen> {
+class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
   String? _code;
   DateTime? _expireAt;
   final _joinCodeCtrl = TextEditingController();

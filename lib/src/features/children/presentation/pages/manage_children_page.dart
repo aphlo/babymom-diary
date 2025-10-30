@@ -6,10 +6,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/firebase/household_service.dart';
 import '../../../../core/types/gender.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../data/sources/child_firestore_data_source.dart';
+import '../../data/infrastructure/child_firestore_data_source.dart';
 
-class ManageChildrenScreen extends ConsumerWidget {
-  const ManageChildrenScreen({super.key});
+class ManageChildrenPage extends ConsumerWidget {
+  const ManageChildrenPage({super.key});
 
   Color _parseColor(String? hex) {
     if (hex == null || hex.isEmpty) return Colors.grey;

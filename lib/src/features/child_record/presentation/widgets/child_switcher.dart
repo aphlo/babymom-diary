@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/firebase/household_service.dart';
-import '../../../children/data/sources/child_firestore_data_source.dart';
+import '../../../children/data/infrastructure/child_firestore_data_source.dart';
 import '../../../children/application/selected_child_provider.dart';
 
 class ChildSwitcher extends ConsumerWidget {

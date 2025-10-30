@@ -10,7 +10,7 @@ import '../../child_record.dart';
 import '../../infrastructure/repositories/child_record_repository_impl.dart';
 import '../../infrastructure/sources/record_firestore_data_source.dart';
 import '../../../children/application/selected_child_provider.dart';
-import '../../../children/data/sources/child_firestore_data_source.dart';
+import '../../../children/data/infrastructure/child_firestore_data_source.dart';
 import '../../../../core/firebase/household_service.dart' as fbcore;
 import '../mappers/record_ui_mapper.dart';
 import '../models/record_draft.dart';

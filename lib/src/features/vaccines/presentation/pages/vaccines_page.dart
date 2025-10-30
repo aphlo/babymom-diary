@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 
-class VaccinesScreen extends StatelessWidget {
-  const VaccinesScreen({super.key});
+class VaccinesPage extends StatelessWidget {
+  const VaccinesPage({super.key});
 
   @override
   Widget build(BuildContext context) {

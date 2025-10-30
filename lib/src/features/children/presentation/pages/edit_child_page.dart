@@ -8,19 +8,19 @@ import '../../../../core/types/gender.dart';
 import '../../application/children_local_provider.dart';
 import '../../application/selected_child_provider.dart';
 import '../../application/selected_child_snapshot_provider.dart';
-import '../../data/sources/child_firestore_data_source.dart';
+import '../../data/infrastructure/child_firestore_data_source.dart';
 import '../../domain/entities/child_summary.dart';
 import '../widgets/child_form.dart';
 
-class EditChildScreen extends ConsumerStatefulWidget {
-  const EditChildScreen({super.key, required this.childId});
+class EditChildPage extends ConsumerStatefulWidget {
+  const EditChildPage({super.key, required this.childId});
   final String childId;
 
   @override
-  ConsumerState<EditChildScreen> createState() => _EditChildScreenState();
+  ConsumerState<EditChildPage> createState() => _EditChildPageState();
 }
 
-class _EditChildScreenState extends ConsumerState<EditChildScreen> {
+class _EditChildPageState extends ConsumerState<EditChildPage> {
   bool _loading = true;
   ChildFormData? _initial;
   String _toHex(Color c) =>

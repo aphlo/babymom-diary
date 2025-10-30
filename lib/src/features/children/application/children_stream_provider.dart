@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/firebase/household_service.dart';
 import '../../../core/types/gender.dart';
-import '../data/sources/child_firestore_data_source.dart';
+import '../data/infrastructure/child_firestore_data_source.dart';
 import '../domain/entities/child_summary.dart';
 
 /// Household 内の子ども一覧を監視する StreamProvider。
