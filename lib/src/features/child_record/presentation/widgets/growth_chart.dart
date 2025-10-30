@@ -121,7 +121,7 @@ class GrowthChart extends StatelessWidget {
     }
 
     const heightCurveColor = AppColors.primary;
-    const weightCurveColor = Color(0xFF2196F3);
+    const weightCurveColor = AppColors.secondary;
     final heightBandColor = heightCurveColor.withOpacity(0.25);
     final weightBandColor = weightCurveColor.withOpacity(0.25);
     const heightLabelColor = heightCurveColor;

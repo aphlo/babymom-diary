@@ -215,7 +215,7 @@ class _Legend extends StatelessWidget {
   Widget build(BuildContext context) {
     const items = [
       _LegendItem(color: AppColors.primary, label: '身長 (cm)'),
-      _LegendItem(color: Color(0xFF2196F3), label: '体重 (kg)'),
+      _LegendItem(color: AppColors.secondary, label: '体重 (kg)'),
     ];
     if (isInline) {
       return Row(
