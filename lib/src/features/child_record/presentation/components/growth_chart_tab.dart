@@ -8,7 +8,7 @@ import '../viewmodels/record_view_model.dart';
 import '../widgets/growth_chart.dart';
 import '../viewmodels/growth_chart_view_model.dart';
 import '../widgets/growth_measurement_sheet.dart';
-import '../screens/growth_record_list_screen.dart';
+import '../pages/growth_record_list_screen.dart';
 
 class GrowthChartTab extends ConsumerWidget {
   const GrowthChartTab({super.key});
@@ -311,7 +311,7 @@ class _ChartActions extends StatelessWidget {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => const GrowthRecordListScreen(),
+              builder: (context) => const GrowthRecordListPage(),
             ),
           );
         },

@@ -7,8 +7,8 @@ import 'package:babymom_diary/src/core/utils/date_formatter.dart';
 import '../viewmodels/growth_chart_view_model.dart';
 import '../widgets/growth_measurement_sheet.dart';
 
-class GrowthRecordListScreen extends ConsumerWidget {
-  const GrowthRecordListScreen({super.key});
+class GrowthRecordListPage extends ConsumerWidget {
+  const GrowthRecordListPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
