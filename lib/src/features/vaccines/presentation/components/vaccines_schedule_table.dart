@@ -217,20 +217,102 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                       physics: const ClampingScrollPhysics(),
                       itemExtent: _rowHeight,
                       itemBuilder: (BuildContext context, int rowIndex) {
-                        return Row(
-                          children: List<Widget>.generate(
-                            widget.periods.length,
-                            (int columnIndex) => GridCell(
+                        final VaccineInfo vaccine = widget.vaccines[rowIndex];
+                        final List<Widget> periodCells = <Widget>[];
+                        int columnIndex = 0;
+
+                        while (columnIndex < widget.periods.length) {
+                          final String periodLabel =
+                              widget.periods[columnIndex];
+                          final List<int> doseNumbers =
+                              vaccine.doseSchedules[periodLabel] ??
+                                  const <int>[];
+                          final bool hasSingleDose = doseNumbers.length == 1;
+                          final int? currentDoseNumber =
+                              hasSingleDose ? doseNumbers.first : null;
+
+                          if (hasSingleDose) {
+                            int runLength = 1;
+                            int lookAheadIndex = columnIndex + 1;
+
+                            while (lookAheadIndex < widget.periods.length) {
+                              final String nextPeriodLabel =
+                                  widget.periods[lookAheadIndex];
+                              final List<int> nextDoseNumbers =
+                                  vaccine.doseSchedules[nextPeriodLabel] ??
+                                      const <int>[];
+
+                              if (nextDoseNumbers.length == 1 &&
+                                  nextDoseNumbers.first == currentDoseNumber) {
+                                runLength += 1;
+                                lookAheadIndex += 1;
+                              } else {
+                                break;
+                              }
+                            }
+
+                            periodCells.add(
+                              GridCell(
+                                width: _periodColumnWidth,
+                                height: _rowHeight,
+                                border: Border(
+                                  right: borderSide,
+                                  bottom: borderSide,
+                                ),
+                                child: DoseScheduleCell(
+                                  doseNumbers: doseNumbers,
+                                  arrowSegment: runLength > 1
+                                      ? DoseArrowSegment.start
+                                      : null,
+                                ),
+                              ),
+                            );
+
+                            if (runLength > 1) {
+                              for (int offset = 1;
+                                  offset < runLength;
+                                  offset++) {
+                                final bool isLast = offset == runLength - 1;
+                                periodCells.add(
+                                  GridCell(
+                                    width: _periodColumnWidth,
+                                    height: _rowHeight,
+                                    border: Border(
+                                      right: borderSide,
+                                      bottom: borderSide,
+                                    ),
+                                    child: DoseScheduleCell(
+                                      doseNumbers: const <int>[],
+                                      arrowSegment: isLast
+                                          ? DoseArrowSegment.end
+                                          : DoseArrowSegment.middle,
+                                    ),
+                                  ),
+                                );
+                              }
+                            }
+
+                            columnIndex += runLength;
+                            continue;
+                          }
+
+                          periodCells.add(
+                            GridCell(
                               width: _periodColumnWidth,
                               height: _rowHeight,
                               border: Border(
                                 right: borderSide,
                                 bottom: borderSide,
                               ),
-                              child: const EmptyScheduleCell(),
+                              child: DoseScheduleCell(
+                                doseNumbers: doseNumbers,
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                          columnIndex += 1;
+                        }
+
+                        return Row(children: periodCells);
                       },
                     ),
                   ),
