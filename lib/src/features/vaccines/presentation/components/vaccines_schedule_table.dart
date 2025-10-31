@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 
 import '../models/vaccine_info.dart';
+import '../styles/vaccine_schedule_highlight_styles.dart';
 import '../widgets/vaccine_table_cells.dart';
 
 class VaccinesScheduleTable extends StatefulWidget {
@@ -117,6 +118,21 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
     }
   }
 
+  VaccinePeriodHighlightStyle? _highlightStyleFor(
+    VaccineInfo vaccine,
+    String periodLabel,
+  ) {
+    final VaccinePeriodHighlight? highlight =
+        vaccine.periodHighlights[periodLabel];
+    if (highlight == null) {
+      return null;
+    }
+    return vaccinePeriodHighlightStyle(
+      highlight: highlight,
+      palette: vaccine.highlightPalette,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -227,6 +243,8 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                           final List<int> doseNumbers =
                               vaccine.doseSchedules[periodLabel] ??
                                   const <int>[];
+                          final VaccinePeriodHighlightStyle? highlightStyle =
+                              _highlightStyleFor(vaccine, periodLabel);
                           final bool hasSingleDose = doseNumbers.length == 1;
                           final int? currentDoseNumber =
                               hasSingleDose ? doseNumbers.first : null;
@@ -255,6 +273,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                               GridCell(
                                 width: _periodColumnWidth,
                                 height: _rowHeight,
+                                backgroundColor: highlightStyle?.cellColor,
                                 border: Border(
                                   right: borderSide,
                                   bottom: borderSide,
@@ -264,6 +283,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                                   arrowSegment: runLength > 1
                                       ? DoseArrowSegment.start
                                       : null,
+                                  highlightStyle: highlightStyle,
                                 ),
                               ),
                             );
@@ -272,11 +292,22 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                               for (int offset = 1;
                                   offset < runLength;
                                   offset++) {
+                                final int nextColumnIndex =
+                                    columnIndex + offset;
+                                final String nextPeriodLabel =
+                                    widget.periods[nextColumnIndex];
+                                final VaccinePeriodHighlightStyle?
+                                    nextHighlightStyle = _highlightStyleFor(
+                                  vaccine,
+                                  nextPeriodLabel,
+                                );
                                 final bool isLast = offset == runLength - 1;
                                 periodCells.add(
                                   GridCell(
                                     width: _periodColumnWidth,
                                     height: _rowHeight,
+                                    backgroundColor:
+                                        nextHighlightStyle?.cellColor,
                                     border: Border(
                                       right: borderSide,
                                       bottom: borderSide,
@@ -286,6 +317,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                                       arrowSegment: isLast
                                           ? DoseArrowSegment.end
                                           : DoseArrowSegment.middle,
+                                      highlightStyle: nextHighlightStyle,
                                     ),
                                   ),
                                 );
@@ -300,12 +332,14 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                             GridCell(
                               width: _periodColumnWidth,
                               height: _rowHeight,
+                              backgroundColor: highlightStyle?.cellColor,
                               border: Border(
                                 right: borderSide,
                                 bottom: borderSide,
                               ),
                               child: DoseScheduleCell(
                                 doseNumbers: doseNumbers,
+                                highlightStyle: highlightStyle,
                               ),
                             ),
                           );
