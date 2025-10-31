@@ -12,4 +12,8 @@ class AppColors {
 
   // Surfaces / backgrounds
   static const Color pageBackground = Color(0xFFF5F5F5);
+
+  // Vaccine badge colors
+  static const Color vaccineInactivated = Color.fromARGB(255, 0, 211, 4);
+  static const Color vaccineLive = Color.fromARGB(255, 255, 111, 0);
 }

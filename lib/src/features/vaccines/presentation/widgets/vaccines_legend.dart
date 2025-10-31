@@ -20,9 +20,9 @@ class VaccinesLegend extends StatelessWidget {
     );
 
     final VaccineTypeStyles liveStyles =
-        vaccineTypeStyles(VaccineCategory.live, colorScheme);
+        vaccineTypeStyles(VaccineCategory.live);
     final VaccineTypeStyles inactivatedStyles =
-        vaccineTypeStyles(VaccineCategory.inactivated, colorScheme);
+        vaccineTypeStyles(VaccineCategory.inactivated);
 
     return Container(
       height: _height,

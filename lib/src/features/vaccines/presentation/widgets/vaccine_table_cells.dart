@@ -63,12 +63,9 @@ class VaccineNameCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final TextTheme textTheme = theme.textTheme;
-    final ColorScheme colorScheme = theme.colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
 
-    final VaccineTypeStyles styles =
-        vaccineTypeStyles(vaccine.category, colorScheme);
+    final VaccineTypeStyles styles = vaccineTypeStyles(vaccine.category);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -128,7 +125,8 @@ class DoseScheduleCell extends StatelessWidget {
                   endOffset: _gridBorderOverlap,
                 ),
               ),
-              Center(child: DoseNumberBadge(
+              Center(
+                  child: DoseNumberBadge(
                 number: doseNumbers.first,
                 size: _doseBadgeDiameter,
                 fontSize: 12,
@@ -166,7 +164,8 @@ class DoseScheduleCell extends StatelessWidget {
     final List<int> displayNumbers = List<int>.of(doseNumbers)..sort();
 
     final bool isMultipleDoses = displayNumbers.length > 1;
-    final double badgeSize = isMultipleDoses ? _doseBadgeDiameterSmall : _doseBadgeDiameter;
+    final double badgeSize =
+        isMultipleDoses ? _doseBadgeDiameterSmall : _doseBadgeDiameter;
     final double spacing = isMultipleDoses ? 2 : 4;
     final double fontSize = isMultipleDoses ? 10 : 12;
 
