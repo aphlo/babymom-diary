@@ -46,6 +46,7 @@ class _VaccineReservationPageState
     final viewModel =
         ref.watch(vaccineReservationViewModelProvider(params).notifier);
     final state = ref.watch(vaccineReservationViewModelProvider(params));
+    final bool canSubmit = state.canSubmit && !state.isLoading;
 
     // エラー表示
     ref.listen(vaccineReservationViewModelProvider(params), (previous, next) {
@@ -64,21 +65,6 @@ class _VaccineReservationPageState
       backgroundColor: AppColors.pageBackground,
       appBar: AppBar(
         title: const Text('ワクチン接種予約'),
-        actions: [
-          if (state.canSubmit)
-            TextButton(
-              onPressed: state.isSubmitting
-                  ? null
-                  : () => _submitReservation(context, viewModel),
-              child: state.isSubmitting
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('予約'),
-            ),
-        ],
       ),
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -109,6 +95,34 @@ class _VaccineReservationPageState
                 ],
               ),
             ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: canSubmit
+                  ? () => _submitReservation(context, viewModel)
+                  : null,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              child: state.isSubmitting
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Text('予約を保存'),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -129,12 +143,6 @@ class _VaccineReservationPageState
 
     final success = await viewModel.createReservation(selectedChildId);
     if (success && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('予約が完了しました'),
-          backgroundColor: Colors.green,
-        ),
-      );
       context.pop();
     }
   }

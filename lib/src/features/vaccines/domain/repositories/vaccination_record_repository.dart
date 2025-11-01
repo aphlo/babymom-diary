@@ -9,6 +9,13 @@ abstract class VaccinationRecordRepository {
     required String childId,
   });
 
+  /// 指定した子供の特定のワクチン接種記録を監視
+  Stream<VaccinationRecord?> watchVaccinationRecord({
+    required String householdId,
+    required String childId,
+    required String vaccineId,
+  });
+
   /// 指定した子供の特定のワクチン接種記録を取得
   Future<VaccinationRecord?> getVaccinationRecord({
     required String householdId,

@@ -12,6 +12,7 @@ import 'package:babymom_diary/src/features/vaccines/application/usecases/get_vac
 import 'package:babymom_diary/src/features/vaccines/application/usecases/create_vaccine_reservation.dart';
 import 'package:babymom_diary/src/features/vaccines/application/usecases/get_available_vaccines_for_reservation.dart';
 import 'package:babymom_diary/src/features/vaccines/application/usecases/get_vaccines_for_simulataneous_reservation.dart';
+import 'package:babymom_diary/src/features/vaccines/application/usecases/watch_vaccination_record.dart';
 
 final vaccineCatalogRepositoryProvider =
     Provider<VaccineCatalogRepository>((ref) {
@@ -55,6 +56,11 @@ final getAvailableVaccinesProvider =
     Provider<GetAvailableVaccinesForReservation>((ref) {
   final repository = ref.watch(vaccinationRecordRepositoryProvider);
   return GetAvailableVaccinesForReservation(repository);
+});
+
+final watchVaccinationRecordProvider = Provider<WatchVaccinationRecord>((ref) {
+  final repository = ref.watch(vaccinationRecordRepositoryProvider);
+  return WatchVaccinationRecord(repository);
 });
 
 final getAvailableVaccinesForSimultaneousReservationProvider =

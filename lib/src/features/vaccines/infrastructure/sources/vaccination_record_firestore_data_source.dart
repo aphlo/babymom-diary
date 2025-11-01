@@ -10,6 +10,20 @@ import '../../domain/value_objects/vaccine_category.dart';
 import '../../domain/value_objects/vaccine_requirement.dart';
 import '../../domain/repositories/vaccine_master_repository.dart';
 
+class _ReservationTransactionItem {
+  const _ReservationTransactionItem({
+    required this.request,
+    required this.docRef,
+    required this.scheduledDateUtc,
+    required this.existingData,
+  });
+
+  final VaccineReservationRequest request;
+  final DocumentReference<Map<String, dynamic>> docRef;
+  final DateTime scheduledDateUtc;
+  final Map<String, dynamic>? existingData;
+}
+
 class VaccinationRecordFirestoreDataSource {
   VaccinationRecordFirestoreDataSource(
     this._firestore,
@@ -40,6 +54,28 @@ class VaccinationRecordFirestoreDataSource {
     }).handleError((error) {
       // エラーが発生した場合は空のリストを返す
       return <VaccinationRecord>[];
+    });
+  }
+
+  /// 指定した子供の特定のワクチン接種記録を監視
+  Stream<VaccinationRecord?> watchVaccinationRecord({
+    required String householdId,
+    required String childId,
+    required String vaccineId,
+  }) {
+    final docRef = _firestore
+        .collection('households')
+        .doc(householdId)
+        .collection('children')
+        .doc(childId)
+        .collection('vaccination_records')
+        .doc(vaccineId);
+
+    return docRef.snapshots().map((snapshot) {
+      if (!snapshot.exists) return null;
+      return _mapDocumentSnapshotToVaccinationRecord(snapshot);
+    }).handleError((error) {
+      return null;
     });
   }
 
@@ -143,7 +179,9 @@ class VaccinationRecordFirestoreDataSource {
 
       await _executeWithRetry(() async {
         await _firestore.runTransaction((transaction) async {
-          // 各ワクチンの予約を処理
+          final pendingItems = <_ReservationTransactionItem>[];
+
+          // すべてのドキュメントを先に読み込む（書き込みより前に全ての読み取りを実行）
           for (final request in requests) {
             final scheduledDateUtc = request.scheduledDate.toUtc();
 
@@ -155,14 +193,30 @@ class VaccinationRecordFirestoreDataSource {
                 .collection('vaccination_records')
                 .doc(request.vaccineId);
 
-            final doc = await transaction.get(docRef);
+            final snapshot = await transaction.get(docRef);
+            final existingData = snapshot.exists
+                ? Map<String, dynamic>.from(snapshot.data()!)
+                : null;
 
-            if (doc.exists) {
-              // 既存の記録に新しい接種を追加
-              final currentData = doc.data() as Map<String, dynamic>;
+            pendingItems.add(
+              _ReservationTransactionItem(
+                request: request,
+                docRef: docRef,
+                scheduledDateUtc: scheduledDateUtc,
+                existingData: existingData,
+              ),
+            );
+          }
+
+          // 予約の書き込みを実行
+          for (final item in pendingItems) {
+            final request = item.request;
+            final docRef = item.docRef;
+            final scheduledDateUtc = item.scheduledDateUtc;
+
+            if (item.existingData != null) {
               final doses =
-                  Map<String, dynamic>.from(currentData['doses'] ?? {});
-
+                  Map<String, dynamic>.from(item.existingData!['doses'] ?? {});
               doses[request.doseNumber.toString()] = {
                 'status': 'scheduled',
                 'scheduledDate': Timestamp.fromDate(scheduledDateUtc),
@@ -172,29 +226,29 @@ class VaccinationRecordFirestoreDataSource {
                 'doses': doses,
                 'updatedAt': Timestamp.fromDate(nowUtc),
               });
-            } else {
-              // 新しい接種記録を作成
-              final vaccine = await _vaccineMasterRepository
-                  .getVaccineById(request.vaccineId);
-              if (vaccine == null) {
-                throw Exception('Vaccine not found: ${request.vaccineId}');
-              }
-
-              transaction.set(docRef, {
-                'vaccineId': request.vaccineId,
-                'vaccineName': vaccine.name,
-                'category': vaccine.category.name,
-                'requirement': vaccine.requirement.name,
-                'doses': {
-                  request.doseNumber.toString(): {
-                    'status': 'scheduled',
-                    'scheduledDate': Timestamp.fromDate(scheduledDateUtc),
-                  }
-                },
-                'createdAt': Timestamp.fromDate(nowUtc),
-                'updatedAt': Timestamp.fromDate(nowUtc),
-              });
+              continue;
             }
+
+            final vaccine = await _vaccineMasterRepository
+                .getVaccineById(request.vaccineId);
+            if (vaccine == null) {
+              throw Exception('Vaccine not found: ${request.vaccineId}');
+            }
+
+            transaction.set(docRef, {
+              'vaccineId': request.vaccineId,
+              'vaccineName': vaccine.name,
+              'category': vaccine.category.name,
+              'requirement': vaccine.requirement.name,
+              'doses': {
+                request.doseNumber.toString(): {
+                  'status': 'scheduled',
+                  'scheduledDate': Timestamp.fromDate(scheduledDateUtc),
+                }
+              },
+              'createdAt': Timestamp.fromDate(nowUtc),
+              'updatedAt': Timestamp.fromDate(nowUtc),
+            });
           }
         });
       });

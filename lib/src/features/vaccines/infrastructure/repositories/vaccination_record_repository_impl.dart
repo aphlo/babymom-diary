@@ -23,6 +23,19 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
   }
 
   @override
+  Stream<VaccinationRecord?> watchVaccinationRecord({
+    required String householdId,
+    required String childId,
+    required String vaccineId,
+  }) {
+    return _dataSource.watchVaccinationRecord(
+      householdId: householdId,
+      childId: childId,
+      vaccineId: vaccineId,
+    );
+  }
+
+  @override
   Future<VaccinationRecord?> getVaccinationRecord({
     required String householdId,
     required String childId,
