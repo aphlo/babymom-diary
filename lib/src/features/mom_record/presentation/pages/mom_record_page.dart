@@ -5,6 +5,7 @@ import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 import 'package:babymom_diary/src/features/mom_record/presentation/components/mom_diary_overview_tab.dart';
 import 'package:babymom_diary/src/features/mom_record/presentation/components/mom_record_overview_tab.dart';
 import 'package:babymom_diary/src/features/mom_record/presentation/viewmodels/mom_record_view_model.dart';
+import 'package:babymom_diary/src/features/mom_record/presentation/widgets/mom_support_fab.dart';
 
 class MomRecordPage extends ConsumerStatefulWidget {
   const MomRecordPage({super.key});
@@ -115,6 +116,7 @@ class _MomRecordPageState extends ConsumerState<MomRecordPage>
           MomDiaryOverviewTab(),
         ],
       ),
+      floatingActionButton: const MomSupportFab(),
       bottomNavigationBar: const AppBottomNav(),
     );
   }
