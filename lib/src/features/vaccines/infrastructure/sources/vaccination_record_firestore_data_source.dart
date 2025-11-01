@@ -8,11 +8,16 @@ import '../../domain/entities/vaccine_reservation_request.dart';
 import '../../domain/entities/vaccination_schedule.dart';
 import '../../domain/value_objects/vaccine_category.dart';
 import '../../domain/value_objects/vaccine_requirement.dart';
+import '../../domain/repositories/vaccine_master_repository.dart';
 
 class VaccinationRecordFirestoreDataSource {
-  VaccinationRecordFirestoreDataSource(this._firestore);
+  VaccinationRecordFirestoreDataSource(
+    this._firestore,
+    this._vaccineMasterRepository,
+  );
 
   final FirebaseFirestore _firestore;
+  final VaccineMasterRepository _vaccineMasterRepository;
 
   /// 指定した子供のワクチン接種記録を監視
   Stream<List<VaccinationRecord>> watchVaccinationRecords({
@@ -98,14 +103,17 @@ class VaccinationRecordFirestoreDataSource {
             });
           } else {
             // 新しい接種記録を作成
-            // TODO: ワクチン情報をマスタデータから取得
-            final vaccineInfo = _getVaccineInfo(request.vaccineId);
+            final vaccine = await _vaccineMasterRepository
+                .getVaccineById(request.vaccineId);
+            if (vaccine == null) {
+              throw Exception('Vaccine not found: ${request.vaccineId}');
+            }
 
             transaction.set(docRef, {
               'vaccineId': request.vaccineId,
-              'vaccineName': vaccineInfo['name'],
-              'category': vaccineInfo['category'],
-              'requirement': vaccineInfo['requirement'],
+              'vaccineName': vaccine.name,
+              'category': vaccine.category.name,
+              'requirement': vaccine.requirement.name,
               'doses': {
                 request.doseNumber.toString(): {
                   'status': 'scheduled',
@@ -166,13 +174,17 @@ class VaccinationRecordFirestoreDataSource {
               });
             } else {
               // 新しい接種記録を作成
-              final vaccineInfo = _getVaccineInfo(request.vaccineId);
+              final vaccine = await _vaccineMasterRepository
+                  .getVaccineById(request.vaccineId);
+              if (vaccine == null) {
+                throw Exception('Vaccine not found: ${request.vaccineId}');
+              }
 
               transaction.set(docRef, {
                 'vaccineId': request.vaccineId,
-                'vaccineName': vaccineInfo['name'],
-                'category': vaccineInfo['category'],
-                'requirement': vaccineInfo['requirement'],
+                'vaccineName': vaccine.name,
+                'category': vaccine.category.name,
+                'requirement': vaccine.requirement.name,
                 'doses': {
                   request.doseNumber.toString(): {
                     'status': 'scheduled',
@@ -579,70 +591,6 @@ class VaccinationRecordFirestoreDataSource {
       default:
         return null;
     }
-  }
-
-  /// ワクチン情報を取得（仮実装）
-  Map<String, String> _getVaccineInfo(String vaccineId) {
-    // TODO: ワクチンマスタデータから取得するように実装
-    final vaccineInfoMap = {
-      'hib': {
-        'name': 'Hib（ヒブ）',
-        'category': 'inactivated',
-        'requirement': 'mandatory',
-      },
-      'pneumococcal': {
-        'name': '小児用肺炎球菌',
-        'category': 'inactivated',
-        'requirement': 'mandatory',
-      },
-      'dpt_ipv': {
-        'name': '四種混合（DPT-IPV）',
-        'category': 'inactivated',
-        'requirement': 'mandatory',
-      },
-      'bcg': {
-        'name': 'BCG',
-        'category': 'live',
-        'requirement': 'mandatory',
-      },
-      'mr1': {
-        'name': 'MR（麻疹・風疹）1期',
-        'category': 'live',
-        'requirement': 'mandatory',
-      },
-      'mr2': {
-        'name': 'MR（麻疹・風疹）2期',
-        'category': 'live',
-        'requirement': 'mandatory',
-      },
-      'hepatitis_b': {
-        'name': 'B型肝炎',
-        'category': 'inactivated',
-        'requirement': 'mandatory',
-      },
-      'rotavirus': {
-        'name': 'ロタウイルス',
-        'category': 'live',
-        'requirement': 'optional',
-      },
-      'japanese_encephalitis_1': {
-        'name': '日本脳炎1期',
-        'category': 'inactivated',
-        'requirement': 'mandatory',
-      },
-      'japanese_encephalitis_2': {
-        'name': '日本脳炎2期',
-        'category': 'inactivated',
-        'requirement': 'mandatory',
-      },
-    };
-
-    return vaccineInfoMap[vaccineId] ??
-        {
-          'name': vaccineId,
-          'category': 'inactivated',
-          'requirement': 'optional',
-        };
   }
 
   /// リトライ機能付きでFirestore操作を実行

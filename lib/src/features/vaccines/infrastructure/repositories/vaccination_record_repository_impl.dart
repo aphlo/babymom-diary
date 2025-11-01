@@ -5,7 +5,9 @@ import '../../domain/repositories/vaccination_record_repository.dart';
 import '../sources/vaccination_record_firestore_data_source.dart';
 
 class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
-  VaccinationRecordRepositoryImpl(this._dataSource);
+  VaccinationRecordRepositoryImpl(
+    this._dataSource,
+  );
 
   final VaccinationRecordFirestoreDataSource _dataSource;
 
