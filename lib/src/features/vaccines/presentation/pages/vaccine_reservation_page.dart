@@ -8,6 +8,11 @@ import '../models/vaccine_info.dart';
 import '../../../children/application/selected_child_provider.dart';
 import '../viewmodels/vaccine_reservation_view_model.dart';
 import '../widgets/vaccine_header.dart';
+import '../widgets/vaccine_type_badge.dart';
+import '../styles/vaccine_type_styles.dart';
+import '../../domain/entities/vaccination_record.dart';
+import '../../domain/value_objects/vaccine_category.dart' as vo;
+import '../../domain/value_objects/vaccine_requirement.dart';
 
 class VaccineReservationPage extends ConsumerStatefulWidget {
   const VaccineReservationPage({
@@ -300,8 +305,8 @@ class _ConcurrentVaccinesCard extends StatelessWidget {
     required this.onToggleVaccine,
   });
 
-  final List availableVaccines;
-  final List selectedVaccines;
+  final List<VaccinationRecord> availableVaccines;
+  final List<VaccinationRecord> selectedVaccines;
   final bool isExpanded;
   final VoidCallback onToggleExpanded;
   final ValueChanged<String> onToggleVaccine;
@@ -381,25 +386,33 @@ class _ConcurrentVaccinesCard extends StatelessWidget {
                 itemCount: availableVaccines.length,
                 separatorBuilder: (context, index) => const Divider(height: 1),
                 itemBuilder: (context, index) {
-                  final vaccine = availableVaccines[index];
-                  final isSelected = selectedVaccines
+                  final VaccinationRecord vaccine = availableVaccines[index];
+                  final bool isSelected = selectedVaccines
                       .any((v) => v.vaccineId == vaccine.vaccineId);
-                  final nextDose = vaccine.nextAvailableDose ?? 1;
+                  final int nextDose = vaccine.nextAvailableDose ?? 1;
 
                   return CheckboxListTile(
                     value: isSelected,
                     onChanged: (_) => onToggleVaccine(vaccine.vaccineId),
                     title: Text(
-                      '$vaccine.vaccineName $nextDose回目',
+                      '${vaccine.vaccineName} $nextDose回目',
                       style: theme.textTheme.bodyLarge,
                     ),
-                    subtitle: Text(
-                      vaccine.requirement.name == 'mandatory' ? '定期接種' : '任意接種',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Row(
+                        children: [
+                          _RequirementBadge(
+                            requirement: vaccine.requirement,
+                          ),
+                          const SizedBox(width: 8),
+                          _VaccineTypeBadge(
+                            category: vaccine.category,
+                          ),
+                        ],
                       ),
                     ),
-                    controlAffinity: ListTileControlAffinity.trailing,
+                    controlAffinity: ListTileControlAffinity.leading,
                   );
                 },
               ),
@@ -407,5 +420,90 @@ class _ConcurrentVaccinesCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// バッジクラスの定義
+class _RequirementBadge extends StatelessWidget {
+  const _RequirementBadge({required this.requirement});
+
+  final VaccineRequirement requirement;
+
+  @override
+  Widget build(BuildContext context) {
+    final presentation = _RequirementPresentation.fromRequirement(requirement);
+    final textStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: presentation.foregroundColor,
+            ) ??
+        TextStyle(
+          fontWeight: FontWeight.w700,
+          color: presentation.foregroundColor,
+          fontSize: 12,
+        );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: presentation.backgroundColor,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(presentation.label, style: textStyle),
+    );
+  }
+}
+
+class _VaccineTypeBadge extends StatelessWidget {
+  const _VaccineTypeBadge({required this.category});
+
+  final vo.VaccineCategory category;
+
+  @override
+  Widget build(BuildContext context) {
+    final typeStyles = vaccineTypeStylesFromValueObject(category);
+
+    return VaccineTypeBadge(
+      label: typeStyles.label,
+      backgroundColor: typeStyles.backgroundColor,
+      foregroundColor: typeStyles.foregroundColor,
+      borderColor: typeStyles.borderColor,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 6,
+      ),
+      fontSize: 12,
+      fontWeight: FontWeight.w700,
+      borderWidth: 0,
+    );
+  }
+}
+
+class _RequirementPresentation {
+  const _RequirementPresentation({
+    required this.label,
+    required this.backgroundColor,
+    required this.foregroundColor,
+  });
+
+  final String label;
+  final Color backgroundColor;
+  final Color foregroundColor;
+
+  static _RequirementPresentation fromRequirement(
+      VaccineRequirement requirement) {
+    switch (requirement) {
+      case VaccineRequirement.mandatory:
+        return const _RequirementPresentation(
+          label: '定期接種',
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+        );
+      case VaccineRequirement.optional:
+        return const _RequirementPresentation(
+          label: '任意接種',
+          backgroundColor: AppColors.secondary,
+          foregroundColor: Colors.white,
+        );
+    }
   }
 }

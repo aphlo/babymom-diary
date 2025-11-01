@@ -1,6 +1,8 @@
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine.dart'
     as domain;
+import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_category.dart'
+    as vo;
 import 'package:flutter/material.dart';
 
 class VaccineTypeStyles {
@@ -35,5 +37,15 @@ VaccineTypeStyles vaccineTypeStyles(domain.VaccineCategory category) {
         foregroundColor: baseColor,
         borderColor: baseColor.withOpacity(0.4),
       );
+  }
+}
+
+VaccineTypeStyles vaccineTypeStylesFromValueObject(
+    vo.VaccineCategory category) {
+  switch (category) {
+    case vo.VaccineCategory.live:
+      return vaccineTypeStyles(domain.VaccineCategory.live);
+    case vo.VaccineCategory.inactivated:
+      return vaccineTypeStyles(domain.VaccineCategory.inactivated);
   }
 }

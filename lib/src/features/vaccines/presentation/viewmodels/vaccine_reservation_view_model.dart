@@ -1,18 +1,30 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/firebase/household_service.dart';
 import '../../../children/application/selected_child_provider.dart';
+import '../../../children/application/children_stream_provider.dart';
+import '../../../children/domain/entities/child_summary.dart';
 import '../../application/usecases/create_vaccine_reservation.dart';
-import '../../application/usecases/get_available_vaccines_for_reservation.dart';
+import '../../application/usecases/get_vaccines_for_simulataneous_reservation.dart';
 import '../../application/vaccine_catalog_providers.dart';
 import '../models/vaccine_info.dart';
 import 'vaccine_reservation_state.dart';
+
+// HouseholdServiceのプロバイダー
+final householdServiceProvider = Provider<HouseholdService>((ref) {
+  return HouseholdService(
+    FirebaseAuth.instance,
+    FirebaseFirestore.instance,
+  );
+});
 
 class VaccineReservationViewModel
     extends StateNotifier<VaccineReservationState> {
   VaccineReservationViewModel({
     required CreateVaccineReservation createVaccineReservation,
-    required GetAvailableVaccinesForReservation getAvailableVaccines,
+    required GetVaccinesForSimultaneousReservation getAvailableVaccines,
     required HouseholdService householdService,
   })  : _createVaccineReservation = createVaccineReservation,
         _getAvailableVaccines = getAvailableVaccines,
@@ -20,7 +32,7 @@ class VaccineReservationViewModel
         super(const VaccineReservationState());
 
   final CreateVaccineReservation _createVaccineReservation;
-  final GetAvailableVaccinesForReservation _getAvailableVaccines;
+  final GetVaccinesForSimultaneousReservation _getAvailableVaccines;
   final HouseholdService _householdService;
 
   /// 初期化
@@ -28,6 +40,7 @@ class VaccineReservationViewModel
     required VaccineInfo primaryVaccine,
     required int doseNumber,
     required String childId,
+    required ChildSummary child,
   }) async {
     state = state.copyWith(
       isLoading: true,
@@ -46,10 +59,11 @@ class VaccineReservationViewModel
         return;
       }
 
-      // 同時接種可能なワクチンを取得
+      // 年齢に基づいて同時接種可能なワクチンを取得
       final availableVaccines = await _getAvailableVaccines(
         householdId: householdId,
         childId: childId,
+        child: child,
       );
 
       // メインのワクチンを除外
@@ -161,7 +175,8 @@ final vaccineReservationViewModelProvider = StateNotifierProvider.autoDispose
   (ref, params) {
     final createVaccineReservation =
         ref.watch(createVaccineReservationProvider);
-    final getAvailableVaccines = ref.watch(getAvailableVaccinesProvider);
+    final getAvailableVaccines =
+        ref.watch(getAvailableVaccinesForSimultaneousReservationProvider);
     final householdService = ref.watch(householdServiceProvider);
 
     final viewModel = VaccineReservationViewModel(
@@ -171,14 +186,45 @@ final vaccineReservationViewModelProvider = StateNotifierProvider.autoDispose
     );
 
     // 初期化
+
     final selectedChildId = ref.watch(selectedChildControllerProvider).value;
+
     if (selectedChildId != null) {
-      viewModel.initialize(
-        primaryVaccine: params.vaccine,
-        doseNumber: params.doseNumber,
-        childId: selectedChildId,
-      );
-    }
+      // まずhouseholdIdを取得
+      Future.microtask(() async {
+        try {
+          final householdId =
+              await householdService.findExistingHouseholdForCurrentUser();
+          if (householdId != null) {
+            // 子供のリストから該当する子供を検索
+            final childrenAsync =
+                ref.watch(childrenStreamProvider(householdId));
+
+            childrenAsync.when(
+              data: (children) {
+                final selectedChild = children
+                        .where((child) => child.id == selectedChildId)
+                        .isNotEmpty
+                    ? children
+                        .firstWhere((child) => child.id == selectedChildId)
+                    : null;
+
+                if (selectedChild != null) {
+                  viewModel.initialize(
+                    primaryVaccine: params.vaccine,
+                    doseNumber: params.doseNumber,
+                    childId: selectedChildId,
+                    child: selectedChild,
+                  );
+                } else {}
+              },
+              loading: () {},
+              error: (error, stackTrace) {},
+            );
+          } else {}
+        } catch (error) {/* Intentionally ignored */}
+      });
+    } else {}
 
     return viewModel;
   },
