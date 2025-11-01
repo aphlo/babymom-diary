@@ -34,21 +34,96 @@ class HeaderPeriodCell extends StatelessWidget {
   const HeaderPeriodCell({
     super.key,
     required this.label,
+    this.scheduledDate,
   });
 
   final String label;
+  final DateTime? scheduledDate;
 
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
-    return Center(
-      child: Text(
-        label,
-        style: textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w600,
+    if (scheduledDate == null) {
+      return Center(
+        child: Text(
+          label,
+          style: textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+          textAlign: TextAlign.center,
         ),
-        textAlign: TextAlign.center,
+      );
+    }
+
+    final DateTime date = scheduledDate!;
+    final String yearText = date.year.toString();
+    final String monthText = date.month.toString().padLeft(2, '0');
+    final String dayText = date.day.toString().padLeft(2, '0');
+
+    final TextStyle baseStyle = textTheme.labelSmall?.copyWith(
+          color: textTheme.bodyMedium?.color,
+          height: 1.0,
+        ) ??
+        const TextStyle(fontSize: 9, height: 1.0);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          _ScaledHeaderLabel(
+            text: yearText,
+            style: baseStyle.copyWith(
+              fontSize: 9,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 1),
+          _ScaledHeaderLabel(
+            text: '$monthText/$dayText',
+            style: baseStyle.copyWith(
+              fontSize: 9,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 1),
+          _ScaledHeaderLabel(
+            text: label,
+            style: baseStyle.copyWith(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ScaledHeaderLabel extends StatelessWidget {
+  const _ScaledHeaderLabel({
+    required this.text,
+    required this.style,
+  });
+
+  final String text;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.center,
+        child: Text(
+          text,
+          style: style,
+          maxLines: 1,
+          softWrap: false,
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }

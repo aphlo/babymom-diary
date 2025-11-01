@@ -14,11 +14,13 @@ class VaccinesScheduleTable extends StatefulWidget {
     super.key,
     required this.periods,
     required this.vaccines,
+    this.childBirthday,
     this.onVaccineTap,
   });
 
   final List<String> periods;
   final List<VaccineInfo> vaccines;
+  final DateTime? childBirthday;
   final ValueChanged<VaccineInfo>? onVaccineTap;
 
   @override
@@ -141,6 +143,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final DateTime? childBirthday = widget.childBirthday;
     final BorderSide borderSide = BorderSide(
       color: colorScheme.outlineVariant.withOpacity(0.6),
       width: 0.5,
@@ -170,17 +173,27 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                 child: Row(
                   children: List<Widget>.generate(
                     widget.periods.length,
-                    (int index) => GridCell(
-                      width: _periodColumnWidth,
-                      height: _headerHeight,
-                      backgroundColor: Colors.grey.shade100,
-                      border: Border(
-                        top: borderSide,
-                        right: borderSide,
-                        bottom: borderSide,
-                      ),
-                      child: HeaderPeriodCell(label: widget.periods[index]),
-                    ),
+                    (int index) {
+                      final String periodLabel = widget.periods[index];
+                      final DateTime? scheduledDate = _dateForPeriodLabel(
+                        birthday: childBirthday,
+                        label: periodLabel,
+                      );
+                      return GridCell(
+                        width: _periodColumnWidth,
+                        height: _headerHeight,
+                        backgroundColor: Colors.grey.shade100,
+                        border: Border(
+                          top: borderSide,
+                          right: borderSide,
+                          bottom: borderSide,
+                        ),
+                        child: HeaderPeriodCell(
+                          label: periodLabel,
+                          scheduledDate: scheduledDate,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -375,4 +388,56 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
       ],
     );
   }
+
+  DateTime? _dateForPeriodLabel({
+    required DateTime? birthday,
+    required String label,
+  }) {
+    if (birthday == null) {
+      return null;
+    }
+    final int? monthsOffset = _monthsOffsetForLabel(label);
+    if (monthsOffset == null) {
+      return null;
+    }
+    return _addMonthsClamped(birthday, monthsOffset);
+  }
+
+  int? _monthsOffsetForLabel(String label) {
+    final RegExpMatch? monthMatch = _monthPattern.firstMatch(label);
+    if (monthMatch != null) {
+      return int.tryParse(monthMatch.group(1)!);
+    }
+    final RegExpMatch? yearMatch = _yearPattern.firstMatch(label);
+    if (yearMatch != null) {
+      final int years = int.tryParse(yearMatch.group(1)!) ?? 0;
+      return years * 12;
+    }
+    final RegExpMatch? yearMonthMatch = _yearMonthPattern.firstMatch(label);
+    if (yearMonthMatch != null) {
+      final int years = int.tryParse(yearMonthMatch.group(1)!) ?? 0;
+      final int months = int.tryParse(yearMonthMatch.group(2)!) ?? 0;
+      return years * 12 + months;
+    }
+    return null;
+  }
+
+  DateTime _addMonthsClamped(DateTime date, int monthsToAdd) {
+    final int totalMonths = date.month - 1 + monthsToAdd;
+    final int targetYear = date.year + totalMonths ~/ 12;
+    final int targetMonth = (totalMonths % 12) + 1;
+    final int lastDay = _lastDayOfMonth(targetYear, targetMonth);
+    final int targetDay = date.day > lastDay ? lastDay : date.day;
+    return DateTime(targetYear, targetMonth, targetDay);
+  }
+
+  int _lastDayOfMonth(int year, int month) {
+    final DateTime firstDayNextMonth =
+        month == 12 ? DateTime(year + 1, 1, 1) : DateTime(year, month + 1, 1);
+    return firstDayNextMonth.subtract(const Duration(days: 1)).day;
+  }
 }
+
+final RegExp _monthPattern = RegExp(r'^(\d+)ヶ月$');
+final RegExp _yearPattern = RegExp(r'^(\d+)才$');
+final RegExp _yearMonthPattern = RegExp(r'^(\d+)才(\d+)ヶ月$');
