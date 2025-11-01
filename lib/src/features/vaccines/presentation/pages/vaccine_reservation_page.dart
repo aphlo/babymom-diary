@@ -268,32 +268,6 @@ class _DateSelectionCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.blue.shade50,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.info_outline,
-                  color: Colors.blue.shade700,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '接種時期の目安: ${_getVaccinationPeriodText()}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.blue.shade700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -314,11 +288,6 @@ class _DateSelectionCard extends StatelessWidget {
       currentTime: initialDate,
       locale: LocaleType.jp,
     );
-  }
-
-  String _getVaccinationPeriodText() {
-    // TODO: ワクチンの接種時期情報を取得
-    return '生後2ヶ月〜7ヶ月未満';
   }
 }
 
