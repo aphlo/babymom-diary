@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
 /// Provides utilities for translating vaccination period labels (e.g. `2ヶ月`,
-/// `9-11ヶ月`, `2才`) into concrete dates relative to a child's birthday.
+/// `9ヶ月`, `2才`) into concrete dates relative to a child's birthday.
 @immutable
 class VaccinationPeriodCalculator {
   const VaccinationPeriodCalculator._();

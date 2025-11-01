@@ -45,7 +45,7 @@ const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '9-11ヶ月',
+          periodId: '9ヶ月',
           highlight: VaccinationPeriodHighlight.available,
         ),
       ],
@@ -147,7 +147,7 @@ const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
           highlight: VaccinationPeriodHighlight.recommended,
         ),
         VaccineScheduleSlot(
-          periodId: '12-15ヶ月',
+          periodId: '1才',
           doseNumbers: <int>[4],
           highlight: VaccinationPeriodHighlight.recommended,
         ),
@@ -168,7 +168,7 @@ const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '9-11ヶ月',
+          periodId: '9ヶ月',
           highlight: VaccinationPeriodHighlight.available,
         ),
       ],
@@ -203,17 +203,17 @@ const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
           highlight: VaccinationPeriodHighlight.recommended,
         ),
         VaccineScheduleSlot(
-          periodId: '12-15ヶ月',
+          periodId: '1才',
           doseNumbers: <int>[4],
           highlight: VaccinationPeriodHighlight.recommended,
         ),
         VaccineScheduleSlot(
-          periodId: '16-17ヶ月',
+          periodId: '1才4ヶ月',
           doseNumbers: <int>[4],
           highlight: VaccinationPeriodHighlight.recommended,
         ),
         VaccineScheduleSlot(
-          periodId: '18-23ヶ月',
+          periodId: '1才6ヶ月',
           doseNumbers: <int>[4],
           highlight: VaccinationPeriodHighlight.recommended,
         ),
@@ -234,7 +234,7 @@ const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '9-11ヶ月',
+          periodId: '9ヶ月',
           highlight: VaccinationPeriodHighlight.available,
         ),
       ],
@@ -269,17 +269,17 @@ const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '12-15ヶ月',
+          periodId: '1才',
           doseNumbers: <int>[4],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '16-17ヶ月',
+          periodId: '1才4ヶ月',
           doseNumbers: <int>[4],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '18-23ヶ月',
+          periodId: '1才6ヶ月',
           doseNumbers: <int>[4],
           highlight: VaccinationPeriodHighlight.available,
         ),
@@ -320,7 +320,7 @@ const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '9-11ヶ月',
+          periodId: '9ヶ月',
           highlight: VaccinationPeriodHighlight.available,
         ),
       ],
@@ -355,17 +355,17 @@ const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '12-15ヶ月',
+          periodId: '1才',
           doseNumbers: <int>[4],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '16-17ヶ月',
+          periodId: '1才4ヶ月',
           doseNumbers: <int>[4],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '18-23ヶ月',
+          periodId: '1才6ヶ月',
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
@@ -397,7 +397,7 @@ const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '9-11ヶ月',
+          periodId: '9ヶ月',
           highlight: VaccinationPeriodHighlight.available,
         ),
       ],
@@ -448,7 +448,7 @@ const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '9-11ヶ月',
+          periodId: '9ヶ月',
           highlight: VaccinationPeriodHighlight.available,
         ),
       ],
@@ -463,17 +463,17 @@ const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
       requirement: VaccineRequirement.mandatory,
       schedule: <VaccineScheduleSlot>[
         VaccineScheduleSlot(
-          periodId: '12-15ヶ月',
+          periodId: '1才',
           doseNumbers: <int>[1],
           highlight: VaccinationPeriodHighlight.recommended,
         ),
         VaccineScheduleSlot(
-          periodId: '16-17ヶ月',
+          periodId: '1才4ヶ月',
           doseNumbers: <int>[1],
           highlight: VaccinationPeriodHighlight.recommended,
         ),
         VaccineScheduleSlot(
-          periodId: '18-23ヶ月',
+          periodId: '1才6ヶ月',
           doseNumbers: <int>[1],
           highlight: VaccinationPeriodHighlight.recommended,
         ),
@@ -502,17 +502,17 @@ const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
       requirement: VaccineRequirement.mandatory,
       schedule: <VaccineScheduleSlot>[
         VaccineScheduleSlot(
-          periodId: '12-15ヶ月',
+          periodId: '1才',
           doseNumbers: <int>[1],
           highlight: VaccinationPeriodHighlight.recommended,
         ),
         VaccineScheduleSlot(
-          periodId: '18-23ヶ月',
+          periodId: '1才6ヶ月',
           doseNumbers: <int>[2],
           highlight: VaccinationPeriodHighlight.recommended,
         ),
         VaccineScheduleSlot(
-          periodId: '16-17ヶ月',
+          periodId: '1才4ヶ月',
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
@@ -556,19 +556,19 @@ const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '9-11ヶ月',
+          periodId: '9ヶ月',
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '12-15ヶ月',
+          periodId: '1才',
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '16-17ヶ月',
+          periodId: '1才4ヶ月',
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '18-23ヶ月',
+          periodId: '1才6ヶ月',
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
@@ -600,7 +600,7 @@ const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
       priority: VaccinePriority.highlight,
       schedule: <VaccineScheduleSlot>[
         VaccineScheduleSlot(
-          periodId: '12-15ヶ月',
+          periodId: '1才',
           doseNumbers: <int>[1],
           highlight: VaccinationPeriodHighlight.recommended,
         ),
@@ -615,27 +615,11 @@ const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
           highlight: VaccinationPeriodHighlight.academyRecommendation,
         ),
         VaccineScheduleSlot(
-          periodId: '6ヶ月',
+          periodId: '1才4ヶ月',
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '7ヶ月',
-          highlight: VaccinationPeriodHighlight.available,
-        ),
-        VaccineScheduleSlot(
-          periodId: '8ヶ月',
-          highlight: VaccinationPeriodHighlight.available,
-        ),
-        VaccineScheduleSlot(
-          periodId: '9-11ヶ月',
-          highlight: VaccinationPeriodHighlight.available,
-        ),
-        VaccineScheduleSlot(
-          periodId: '16-17ヶ月',
-          highlight: VaccinationPeriodHighlight.available,
-        ),
-        VaccineScheduleSlot(
-          periodId: '18-23ヶ月',
+          periodId: '1才6ヶ月',
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
@@ -681,22 +665,22 @@ const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '9-11ヶ月',
+          periodId: '9ヶ月',
           doseNumbers: <int>[1, 2],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '12-15ヶ月',
+          periodId: '1才',
           doseNumbers: <int>[1, 2],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '16-17ヶ月',
+          periodId: '1才4ヶ月',
           doseNumbers: <int>[1, 2],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
-          periodId: '18-23ヶ月',
+          periodId: '1才6ヶ月',
           doseNumbers: <int>[1, 2],
           highlight: VaccinationPeriodHighlight.available,
         ),
