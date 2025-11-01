@@ -1,14 +1,12 @@
-import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine.dart'
-    as domain;
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 import 'package:babymom_diary/src/core/utils/date_formatter.dart';
 
 import '../models/vaccine_info.dart';
-import '../styles/vaccine_type_styles.dart';
 import '../utils/vaccination_period_calculator.dart';
-import '../widgets/vaccine_type_badge.dart';
+import '../widgets/vaccine_header.dart';
 
 class VaccineDetailPage extends StatelessWidget {
   const VaccineDetailPage({
@@ -25,15 +23,6 @@ class VaccineDetailPage extends StatelessWidget {
     final theme = Theme.of(context);
     final dosePeriodMap = _extractDosePeriods(vaccine);
     final doseNumbers = dosePeriodMap.keys.toList()..sort();
-
-    final requirement =
-        _RequirementPresentation.fromRequirement(vaccine.requirement);
-    final typeStyles = vaccineTypeStyles(vaccine.category);
-    final TextStyle nameTextStyle = theme.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-          fontSize: 20,
-        ) ??
-        const TextStyle(fontSize: 20, fontWeight: FontWeight.w700);
 
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
@@ -60,39 +49,7 @@ class VaccineDetailPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            vaccine.name,
-                            style: nameTextStyle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      _RequirementBadge(presentation: requirement),
-                      const SizedBox(width: 8),
-                      VaccineTypeBadge(
-                        label: typeStyles.label,
-                        backgroundColor: typeStyles.backgroundColor,
-                        foregroundColor: typeStyles.foregroundColor,
-                        borderColor: typeStyles.borderColor,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        borderWidth: 0,
-                      ),
-                    ],
-                  ),
+                  VaccineHeader(vaccine: vaccine),
                   const SizedBox(height: 24),
                   if (doseNumbers.isEmpty)
                     Text(
@@ -104,6 +61,8 @@ class VaccineDetailPage extends StatelessWidget {
                       doseNumbers: doseNumbers,
                       periodsByDose: dosePeriodMap,
                       childBirthday: childBirthday,
+                      vaccine: vaccine,
+                      onReservationTap: _navigateToReservation,
                     ),
                   if (vaccine.notes.isNotEmpty) ...[
                     const SizedBox(height: 24),
@@ -137,6 +96,15 @@ class VaccineDetailPage extends StatelessWidget {
     });
     return result;
   }
+
+  /// ワクチン予約画面に遷移
+  void _navigateToReservation(
+      BuildContext context, VaccineInfo vaccine, int doseNumber) {
+    context.push('/vaccines/reservation', extra: {
+      'vaccine': vaccine,
+      'doseNumber': doseNumber,
+    });
+  }
 }
 
 class VaccineDoseReservationBoard extends StatelessWidget {
@@ -146,12 +114,17 @@ class VaccineDoseReservationBoard extends StatelessWidget {
     required this.periodsByDose,
     this.activeDoseIndex = 0,
     this.childBirthday,
+    this.vaccine,
+    this.onReservationTap,
   });
 
   final List<int> doseNumbers;
   final Map<int, List<String>> periodsByDose;
   final int activeDoseIndex;
   final DateTime? childBirthday;
+  final VaccineInfo? vaccine;
+  final Function(BuildContext context, VaccineInfo vaccine, int doseNumber)?
+      onReservationTap;
 
   @override
   Widget build(BuildContext context) {
@@ -194,6 +167,13 @@ class VaccineDoseReservationBoard extends StatelessWidget {
                       color: i == normalizedActiveIndex
                           ? activeColor
                           : inactiveColor,
+                      isActive: i == normalizedActiveIndex,
+                      onTap: i == normalizedActiveIndex &&
+                              vaccine != null &&
+                              onReservationTap != null
+                          ? () => onReservationTap!(
+                              context, vaccine!, doseNumbers[i])
+                          : null,
                     ),
                   ],
                 ),
@@ -295,9 +275,15 @@ class _VaccineNotesList extends StatelessWidget {
 }
 
 class _DoseStatusBadge extends StatelessWidget {
-  const _DoseStatusBadge({required this.color});
+  const _DoseStatusBadge({
+    required this.color,
+    this.isActive = false,
+    this.onTap,
+  });
 
   final Color color;
+  final bool isActive;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -307,7 +293,7 @@ class _DoseStatusBadge extends StatelessWidget {
             ) ??
         TextStyle(fontWeight: FontWeight.w700, color: color, fontSize: 12);
 
-    return Container(
+    final widget = Container(
       width: 60,
       height: 60,
       decoration: BoxDecoration(
@@ -328,6 +314,16 @@ class _DoseStatusBadge extends StatelessWidget {
         ],
       ),
     );
+
+    if (onTap != null && isActive) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(30),
+        child: widget,
+      );
+    }
+
+    return widget;
   }
 }
 
@@ -405,63 +401,5 @@ class _BubblePointerPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _BubblePointerPainter oldDelegate) {
     return oldDelegate.color != color;
-  }
-}
-
-class _RequirementBadge extends StatelessWidget {
-  const _RequirementBadge({required this.presentation});
-
-  final _RequirementPresentation presentation;
-
-  @override
-  Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: presentation.foregroundColor,
-            ) ??
-        TextStyle(
-          fontWeight: FontWeight.w700,
-          color: presentation.foregroundColor,
-          fontSize: 12,
-        );
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: presentation.backgroundColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(presentation.label, style: textStyle),
-    );
-  }
-}
-
-class _RequirementPresentation {
-  const _RequirementPresentation({
-    required this.label,
-    required this.backgroundColor,
-    required this.foregroundColor,
-  });
-
-  final String label;
-  final Color backgroundColor;
-  final Color foregroundColor;
-
-  static _RequirementPresentation fromRequirement(
-      domain.VaccineRequirement requirement) {
-    switch (requirement) {
-      case domain.VaccineRequirement.mandatory:
-        return const _RequirementPresentation(
-          label: '定期接種',
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-        );
-      case domain.VaccineRequirement.optional:
-        return const _RequirementPresentation(
-          label: '任意接種',
-          backgroundColor: AppColors.secondary,
-          foregroundColor: Colors.white,
-        );
-    }
   }
 }

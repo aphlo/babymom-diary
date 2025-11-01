@@ -1,0 +1,1 @@
+enum VaccineRequirement { mandatory, optional }

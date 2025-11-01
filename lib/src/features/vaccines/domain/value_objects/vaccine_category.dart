@@ -1,0 +1,1 @@
+enum VaccineCategory { live, inactivated }

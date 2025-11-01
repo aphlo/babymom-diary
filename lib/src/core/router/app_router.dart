@@ -11,6 +11,9 @@ import '../../features/children/presentation/pages/add_child_page.dart';
 import '../../features/children/presentation/pages/manage_children_page.dart';
 import '../../features/children/presentation/pages/edit_child_page.dart';
 import '../../features/household/presentation/pages/household_share_page.dart';
+import '../../features/vaccines/presentation/pages/vaccine_detail_page.dart';
+import '../../features/vaccines/presentation/pages/vaccine_reservation_page.dart';
+import '../../features/vaccines/presentation/models/vaccine_info.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -81,6 +84,31 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'household_share',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: HouseholdSharePage()),
+      ),
+      GoRoute(
+        path: '/vaccines/detail',
+        name: 'vaccine_detail',
+        pageBuilder: (context, state) {
+          final vaccine = state.extra as VaccineInfo;
+          return CupertinoPage(
+            child: VaccineDetailPage(vaccine: vaccine),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/vaccines/reservation',
+        name: 'vaccine_reservation',
+        pageBuilder: (context, state) {
+          final params = state.extra as Map<String, dynamic>;
+          final vaccine = params['vaccine'] as VaccineInfo;
+          final doseNumber = params['doseNumber'] as int;
+          return CupertinoPage(
+            child: VaccineReservationPage(
+              vaccine: vaccine,
+              doseNumber: doseNumber,
+            ),
+          );
+        },
       ),
     ],
   );
