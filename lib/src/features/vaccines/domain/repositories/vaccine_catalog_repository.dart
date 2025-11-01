@@ -1,5 +1,5 @@
-import '../entities/vaccine_guideline.dart';
+import '../entities/vaccine_master.dart';
 
 abstract class VaccineCatalogRepository {
-  Future<VaccineGuideline> fetchGuideline();
+  Future<VaccineMaster> fetchGuideline();
 }

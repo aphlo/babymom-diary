@@ -8,7 +8,7 @@ import 'package:babymom_diary/src/features/vaccines/infrastructure/repositories/
 import 'package:babymom_diary/src/features/vaccines/infrastructure/repositories/in_memory_vaccine_master_repository.dart';
 import 'package:babymom_diary/src/features/vaccines/infrastructure/repositories/vaccination_record_repository_impl.dart';
 import 'package:babymom_diary/src/features/vaccines/infrastructure/sources/vaccination_record_firestore_data_source.dart';
-import 'package:babymom_diary/src/features/vaccines/application/usecases/get_vaccine_guideline.dart';
+import 'package:babymom_diary/src/features/vaccines/application/usecases/get_vaccine_master.dart';
 import 'package:babymom_diary/src/features/vaccines/application/usecases/create_vaccine_reservation.dart';
 import 'package:babymom_diary/src/features/vaccines/application/usecases/get_available_vaccines_for_reservation.dart';
 
@@ -39,9 +39,9 @@ final vaccinationRecordRepositoryProvider =
   );
 });
 
-final getVaccineGuidelineProvider = Provider<GetVaccineGuideline>((ref) {
+final getVaccineGuidelineProvider = Provider<GetVaccineMaster>((ref) {
   final repository = ref.watch(vaccineCatalogRepositoryProvider);
-  return GetVaccineGuideline(repository);
+  return GetVaccineMaster(repository);
 });
 
 final createVaccineReservationProvider =

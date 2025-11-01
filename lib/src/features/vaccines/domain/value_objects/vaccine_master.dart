@@ -1,8 +1,8 @@
 import '../entities/vaccine.dart';
-import '../entities/vaccine_guideline.dart';
-import '../value_objects/vaccination_period.dart';
+import '../entities/vaccine_master.dart';
+import 'vaccination_period.dart';
 
-const VaccineGuideline japaneseNationalVaccinationGuideline = VaccineGuideline(
+const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
   version: '2024-01',
   periods: standardVaccinationPeriods,
   vaccines: <Vaccine>[

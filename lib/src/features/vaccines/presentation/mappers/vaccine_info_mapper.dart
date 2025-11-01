@@ -1,12 +1,12 @@
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine.dart'
     as domain;
-import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine_guideline.dart';
+import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine_master.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccination_period.dart';
 
 import '../models/vaccine_info.dart';
 import '../viewmodels/vaccines_view_data.dart';
 
-VaccinesViewData mapGuidelineToViewData(VaccineGuideline guideline) {
+VaccinesViewData mapGuidelineToViewData(VaccineMaster guideline) {
   final List<String> periodLabels = guideline.periods
       .map((VaccinationPeriod period) => period.label)
       .toList(growable: false);

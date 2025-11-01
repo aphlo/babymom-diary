@@ -1,6 +1,6 @@
 import '../../domain/entities/vaccine.dart';
 import '../../domain/repositories/vaccine_master_repository.dart';
-import '../../domain/specifications/vaccine_guideline_data.dart';
+import '../../domain/value_objects/vaccine_master.dart';
 
 class InMemoryVaccineMasterRepository implements VaccineMasterRepository {
   const InMemoryVaccineMasterRepository();
@@ -8,7 +8,7 @@ class InMemoryVaccineMasterRepository implements VaccineMasterRepository {
   @override
   Future<Vaccine?> getVaccineById(String vaccineId) async {
     try {
-      return japaneseNationalVaccinationGuideline.vaccines.firstWhere(
+      return japaneseNationalVaccinationMaster.vaccines.firstWhere(
         (vaccine) => vaccine.id == vaccineId,
       );
     } catch (e) {
@@ -18,13 +18,13 @@ class InMemoryVaccineMasterRepository implements VaccineMasterRepository {
 
   @override
   Future<List<Vaccine>> getAllVaccines() async {
-    return japaneseNationalVaccinationGuideline.vaccines;
+    return japaneseNationalVaccinationMaster.vaccines;
   }
 
   @override
   Future<Vaccine?> getVaccineByName(String vaccineName) async {
     try {
-      return japaneseNationalVaccinationGuideline.vaccines.firstWhere(
+      return japaneseNationalVaccinationMaster.vaccines.firstWhere(
         (vaccine) => vaccine.name == vaccineName,
       );
     } catch (e) {

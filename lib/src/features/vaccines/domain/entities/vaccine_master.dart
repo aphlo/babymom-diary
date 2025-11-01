@@ -4,8 +4,8 @@ import 'vaccine.dart';
 import '../value_objects/vaccination_period.dart';
 
 @immutable
-class VaccineGuideline {
-  const VaccineGuideline({
+class VaccineMaster {
+  const VaccineMaster({
     required this.periods,
     required this.vaccines,
     this.version,
