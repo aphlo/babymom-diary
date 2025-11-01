@@ -65,11 +65,7 @@ class VaccineScheduleSlot {
 class VaccineNote {
   const VaccineNote({
     required this.message,
-    this.severity = VaccineNoteSeverity.standard,
   });
 
   final String message;
-  final VaccineNoteSeverity severity;
 }
-
-enum VaccineNoteSeverity { standard, attention }

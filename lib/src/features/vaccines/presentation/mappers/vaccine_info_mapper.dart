@@ -47,7 +47,6 @@ VaccineInfo _mapVaccine(domain.Vaccine vaccine) {
       .map(
         (domain.VaccineNote note) => VaccineGuidelineNote(
           message: note.message,
-          isAttention: note.severity == domain.VaccineNoteSeverity.attention,
         ),
       )
       .toList(growable: false);

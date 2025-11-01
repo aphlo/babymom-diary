@@ -53,7 +53,6 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
         VaccineNote(message: '①と②は27日以上空ける'),
         VaccineNote(
           message: '①と③は139日以上空ける',
-          severity: VaccineNoteSeverity.attention,
         ),
       ],
     ),
@@ -177,7 +176,6 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
         VaccineNote(message: '②と③は27日以上空ける'),
         VaccineNote(
           message: '③と④は60日以上空け、1才から1才3ヶ月の間に接種する',
-          severity: VaccineNoteSeverity.attention,
         ),
       ],
     ),
@@ -243,7 +241,6 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
         VaccineNote(message: '②と③は20〜56日空ける'),
         VaccineNote(
           message: '③と④は6ヶ月以上空け、18ヶ月までに接種する',
-          severity: VaccineNoteSeverity.attention,
         ),
       ],
     ),
@@ -329,7 +326,6 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
         VaccineNote(message: '②と③は20〜56日空ける'),
         VaccineNote(
           message: '③と④は6ヶ月以上空け、18ヶ月までに接種する',
-          severity: VaccineNoteSeverity.attention,
         ),
       ],
     ),
@@ -406,7 +402,6 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
         VaccineNote(message: '②と③は27〜56日空ける'),
         VaccineNote(
           message: '③と④は7〜13ヶ月空ける',
-          severity: VaccineNoteSeverity.attention,
         ),
       ],
     ),
@@ -491,7 +486,6 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
       notes: <VaccineNote>[
         VaccineNote(
           message: '2回目以降は小学校入学前の1年間に接種する',
-          severity: VaccineNoteSeverity.attention,
         ),
       ],
     ),
@@ -523,7 +517,6 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
       notes: <VaccineNote>[
         VaccineNote(
           message: '①と②は6〜12ヶ月空ける',
-          severity: VaccineNoteSeverity.attention,
         ),
       ],
     ),
@@ -588,7 +581,6 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
         VaccineNote(message: '①と②は6〜28日空ける'),
         VaccineNote(
           message: '②と③は1年空けて、4才の時に接種する',
-          severity: VaccineNoteSeverity.attention,
         ),
       ],
     ),
@@ -638,7 +630,6 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
       notes: <VaccineNote>[
         VaccineNote(
           message: '②はMRと同時期（小学校入学前の1年間）での接種を推奨',
-          severity: VaccineNoteSeverity.attention,
         ),
       ],
     ),
@@ -713,7 +704,6 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
       notes: <VaccineNote>[
         VaccineNote(
           message: '13才未満は2回接種。①と②は4週間空ける',
-          severity: VaccineNoteSeverity.attention,
         ),
       ],
     ),

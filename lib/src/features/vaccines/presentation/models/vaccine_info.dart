@@ -26,11 +26,9 @@ class VaccineInfo {
 class VaccineGuidelineNote {
   const VaccineGuidelineNote({
     required this.message,
-    this.isAttention = false,
   });
 
   final String message;
-  final bool isAttention;
 }
 
 enum VaccineHighlightPalette { primary, secondary }

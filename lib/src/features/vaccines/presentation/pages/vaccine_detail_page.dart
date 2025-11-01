@@ -263,7 +263,7 @@ class _VaccineNotesList extends StatelessWidget {
       children: notes.asMap().entries.map((entry) {
         final note = entry.value;
         final TextStyle? textStyle = textTheme.bodySmall?.copyWith(
-          fontWeight: note.isAttention ? FontWeight.w600 : FontWeight.w400,
+          fontWeight: FontWeight.w400,
           color: Colors.black,
         );
 
