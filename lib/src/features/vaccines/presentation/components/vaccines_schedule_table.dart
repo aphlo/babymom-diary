@@ -7,6 +7,7 @@ import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine.dart
 
 import '../models/vaccine_info.dart';
 import '../styles/vaccine_schedule_highlight_styles.dart';
+import '../utils/vaccination_period_calculator.dart';
 import '../widgets/vaccine_table_cells.dart';
 
 class VaccinesScheduleTable extends StatefulWidget {
@@ -175,7 +176,8 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                     widget.periods.length,
                     (int index) {
                       final String periodLabel = widget.periods[index];
-                      final DateTime? scheduledDate = _dateForPeriodLabel(
+                      final DateTime? scheduledDate =
+                          VaccinationPeriodCalculator.dateForLabel(
                         birthday: childBirthday,
                         label: periodLabel,
                       );
@@ -388,56 +390,4 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
       ],
     );
   }
-
-  DateTime? _dateForPeriodLabel({
-    required DateTime? birthday,
-    required String label,
-  }) {
-    if (birthday == null) {
-      return null;
-    }
-    final int? monthsOffset = _monthsOffsetForLabel(label);
-    if (monthsOffset == null) {
-      return null;
-    }
-    return _addMonthsClamped(birthday, monthsOffset);
-  }
-
-  int? _monthsOffsetForLabel(String label) {
-    final RegExpMatch? monthMatch = _monthPattern.firstMatch(label);
-    if (monthMatch != null) {
-      return int.tryParse(monthMatch.group(1)!);
-    }
-    final RegExpMatch? yearMatch = _yearPattern.firstMatch(label);
-    if (yearMatch != null) {
-      final int years = int.tryParse(yearMatch.group(1)!) ?? 0;
-      return years * 12;
-    }
-    final RegExpMatch? yearMonthMatch = _yearMonthPattern.firstMatch(label);
-    if (yearMonthMatch != null) {
-      final int years = int.tryParse(yearMonthMatch.group(1)!) ?? 0;
-      final int months = int.tryParse(yearMonthMatch.group(2)!) ?? 0;
-      return years * 12 + months;
-    }
-    return null;
-  }
-
-  DateTime _addMonthsClamped(DateTime date, int monthsToAdd) {
-    final int totalMonths = date.month - 1 + monthsToAdd;
-    final int targetYear = date.year + totalMonths ~/ 12;
-    final int targetMonth = (totalMonths % 12) + 1;
-    final int lastDay = _lastDayOfMonth(targetYear, targetMonth);
-    final int targetDay = date.day > lastDay ? lastDay : date.day;
-    return DateTime(targetYear, targetMonth, targetDay);
-  }
-
-  int _lastDayOfMonth(int year, int month) {
-    final DateTime firstDayNextMonth =
-        month == 12 ? DateTime(year + 1, 1, 1) : DateTime(year, month + 1, 1);
-    return firstDayNextMonth.subtract(const Duration(days: 1)).day;
-  }
 }
-
-final RegExp _monthPattern = RegExp(r'^(\d+)ヶ月$');
-final RegExp _yearPattern = RegExp(r'^(\d+)才$');
-final RegExp _yearMonthPattern = RegExp(r'^(\d+)才(\d+)ヶ月$');

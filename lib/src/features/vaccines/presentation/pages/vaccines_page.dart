@@ -35,7 +35,10 @@ class VaccinesPage extends ConsumerWidget {
           onVaccineTap: (vaccine) {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => VaccineDetailPage(vaccine: vaccine),
+                builder: (_) => VaccineDetailPage(
+                  vaccine: vaccine,
+                  childBirthday: childBirthday,
+                ),
               ),
             );
           },
