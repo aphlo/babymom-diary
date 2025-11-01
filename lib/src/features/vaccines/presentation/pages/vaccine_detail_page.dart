@@ -66,14 +66,40 @@ class VaccineDetailPage extends StatelessWidget {
                     ),
                   if (vaccine.notes.isNotEmpty) ...[
                     const SizedBox(height: 24),
-                    Text(
-                      '接種時の注意点',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: Colors.blue.shade700,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  '接種時の注意点',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.blue.shade700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          _VaccineNotesList(notes: vaccine.notes),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    _VaccineNotesList(notes: vaccine.notes),
                   ],
                 ],
               ),
@@ -231,33 +257,25 @@ class _VaccineNotesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: notes.asMap().entries.map((entry) {
         final note = entry.value;
-        final Color accentColor =
-            note.isAttention ? AppColors.secondary : colorScheme.outline;
-        final TextStyle? textStyle = textTheme.bodyMedium?.copyWith(
+        final TextStyle? textStyle = textTheme.bodySmall?.copyWith(
           fontWeight: note.isAttention ? FontWeight.w600 : FontWeight.w400,
-          color: note.isAttention
-              ? AppColors.secondary
-              : textTheme.bodyMedium?.color,
+          color: Colors.black,
         );
 
         return Padding(
           padding: EdgeInsets.only(top: entry.key == 0 ? 0 : 8),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 3),
-                child: Icon(
-                  Icons.circle,
-                  size: 6,
-                  color: accentColor,
-                ),
+              Icon(
+                Icons.circle,
+                size: 6,
+                color: Colors.black,
               ),
               const SizedBox(width: 8),
               Expanded(
