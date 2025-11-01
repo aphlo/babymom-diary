@@ -1,3 +1,5 @@
+import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine.dart'
+    as domain;
 import 'package:flutter/material.dart';
 
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
@@ -95,6 +97,17 @@ class VaccineDetailPage extends StatelessWidget {
                       doseNumbers: doseNumbers,
                       periodsByDose: dosePeriodMap,
                     ),
+                  if (vaccine.notes.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    Text(
+                      '接種時の注意点',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _VaccineNotesList(notes: vaccine.notes),
+                  ],
                 ],
               ),
             ),
@@ -195,6 +208,57 @@ String _buildPeriodText(List<String> labels) {
     return '接種時期のめやす\n${labels.first}ごろ';
   }
   return '接種時期のめやす\n${labels.first} 〜 ${labels.last}ごろ';
+}
+
+class _VaccineNotesList extends StatelessWidget {
+  const _VaccineNotesList({required this.notes});
+
+  final List<VaccineGuidelineNote> notes;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: notes.asMap().entries.map((entry) {
+        final note = entry.value;
+        final Color accentColor =
+            note.isAttention ? AppColors.secondary : colorScheme.outline;
+        final TextStyle? textStyle = textTheme.bodyMedium?.copyWith(
+          fontWeight: note.isAttention ? FontWeight.w600 : FontWeight.w400,
+          color: note.isAttention
+              ? AppColors.secondary
+              : textTheme.bodyMedium?.color,
+        );
+
+        return Padding(
+          padding: EdgeInsets.only(top: entry.key == 0 ? 0 : 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: Icon(
+                  Icons.circle,
+                  size: 6,
+                  color: accentColor,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  note.message,
+                  style: textStyle,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(growable: false),
+    );
+  }
 }
 
 class _DoseStatusBadge extends StatelessWidget {
@@ -351,15 +415,15 @@ class _RequirementPresentation {
   final Color foregroundColor;
 
   static _RequirementPresentation fromRequirement(
-      VaccineRequirement requirement) {
+      domain.VaccineRequirement requirement) {
     switch (requirement) {
-      case VaccineRequirement.mandatory:
+      case domain.VaccineRequirement.mandatory:
         return const _RequirementPresentation(
           label: '定期接種',
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
         );
-      case VaccineRequirement.optional:
+      case domain.VaccineRequirement.optional:
         return const _RequirementPresentation(
           label: '任意接種',
           backgroundColor: AppColors.secondary,

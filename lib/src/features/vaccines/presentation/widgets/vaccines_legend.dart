@@ -1,6 +1,6 @@
+import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine.dart'
+    as domain;
 import 'package:flutter/material.dart';
-
-import '../models/vaccine_info.dart';
 import '../styles/vaccine_type_styles.dart';
 import 'vaccine_type_badge.dart';
 
@@ -20,9 +20,9 @@ class VaccinesLegend extends StatelessWidget {
     );
 
     final VaccineTypeStyles liveStyles =
-        vaccineTypeStyles(VaccineCategory.live);
+        vaccineTypeStyles(domain.VaccineCategory.live);
     final VaccineTypeStyles inactivatedStyles =
-        vaccineTypeStyles(VaccineCategory.inactivated);
+        vaccineTypeStyles(domain.VaccineCategory.inactivated);
 
     return Container(
       height: _height,

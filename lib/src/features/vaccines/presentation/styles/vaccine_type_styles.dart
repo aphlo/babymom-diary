@@ -1,7 +1,7 @@
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine.dart'
+    as domain;
 import 'package:flutter/material.dart';
-
-import '../models/vaccine_info.dart';
 
 class VaccineTypeStyles {
   const VaccineTypeStyles({
@@ -17,9 +17,9 @@ class VaccineTypeStyles {
   final Color borderColor;
 }
 
-VaccineTypeStyles vaccineTypeStyles(VaccineCategory category) {
+VaccineTypeStyles vaccineTypeStyles(domain.VaccineCategory category) {
   switch (category) {
-    case VaccineCategory.live:
+    case domain.VaccineCategory.live:
       const Color baseColor = AppColors.vaccineLive;
       return VaccineTypeStyles(
         label: '生',
@@ -27,7 +27,7 @@ VaccineTypeStyles vaccineTypeStyles(VaccineCategory category) {
         foregroundColor: baseColor,
         borderColor: baseColor.withOpacity(0.4),
       );
-    case VaccineCategory.inactivated:
+    case domain.VaccineCategory.inactivated:
       const Color baseColor = AppColors.vaccineInactivated;
       return VaccineTypeStyles(
         label: '不活化',

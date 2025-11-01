@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine.dart'
+    as domain;
+
 import '../../../../core/theme/app_colors.dart';
 import '../models/vaccine_info.dart';
 
@@ -18,15 +21,15 @@ class VaccinePeriodHighlightStyle {
 }
 
 VaccinePeriodHighlightStyle vaccinePeriodHighlightStyle({
-  required VaccinePeriodHighlight highlight,
+  required domain.VaccinationPeriodHighlight highlight,
   required VaccineHighlightPalette palette,
 }) {
   switch (highlight) {
-    case VaccinePeriodHighlight.recommended:
+    case domain.VaccinationPeriodHighlight.recommended:
       return _recommendedStyle(palette);
-    case VaccinePeriodHighlight.available:
+    case domain.VaccinationPeriodHighlight.available:
       return _availableStyle(palette);
-    case VaccinePeriodHighlight.academyRecommendation:
+    case domain.VaccinationPeriodHighlight.academyRecommendation:
       return _academyRecommendationStyle();
   }
 }

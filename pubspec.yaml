@@ -26,6 +26,7 @@ dependencies:
   rxdart: ^0.28.0
   fl_chart: ^0.68.0
   collection: ^1.18.0
+  meta: ^1.15.0
 
 dev_dependencies:
   flutter_test:

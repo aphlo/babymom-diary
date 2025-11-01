@@ -1,348 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 import 'package:babymom_diary/src/features/child_record/presentation/widgets/app_bar_child_info.dart';
 
 import '../components/vaccines_schedule_table.dart';
 import '../models/vaccine_info.dart';
+import '../viewmodels/vaccines_view_data.dart';
+import '../viewmodels/vaccines_view_model.dart';
 import '../widgets/vaccines_legend.dart';
 import 'vaccine_detail_page.dart';
 
-class VaccinesPage extends StatelessWidget {
+class VaccinesPage extends ConsumerWidget {
   const VaccinesPage({super.key});
 
-  static const List<String> _periods = <String>[
-    '0ヶ月',
-    '1ヶ月',
-    '2ヶ月',
-    '3ヶ月',
-    '4ヶ月',
-    '5ヶ月',
-    '6ヶ月',
-    '7ヶ月',
-    '8ヶ月',
-    '9-11ヶ月',
-    '12-15ヶ月',
-    '16-17ヶ月',
-    '18-23ヶ月',
-    '2才',
-    '3才',
-    '4才',
-    '5才',
-    '6才',
-  ];
-
-  static const List<VaccineInfo> _vaccines = <VaccineInfo>[
-    VaccineInfo(
-      name: 'B型肝炎',
-      category: VaccineCategory.inactivated,
-      requirement: VaccineRequirement.mandatory,
-      doseSchedules: <String, List<int>>{
-        '2ヶ月': <int>[1],
-        '3ヶ月': <int>[2],
-        '7ヶ月': <int>[3],
-        '8ヶ月': <int>[3],
-      },
-      periodHighlights: <String, VaccinePeriodHighlight>{
-        '2ヶ月': VaccinePeriodHighlight.recommended,
-        '3ヶ月': VaccinePeriodHighlight.recommended,
-        '7ヶ月': VaccinePeriodHighlight.recommended,
-        '8ヶ月': VaccinePeriodHighlight.recommended,
-        '4ヶ月': VaccinePeriodHighlight.available,
-        '5ヶ月': VaccinePeriodHighlight.available,
-        '6ヶ月': VaccinePeriodHighlight.available,
-        '9-11ヶ月': VaccinePeriodHighlight.available,
-      },
-    ),
-    VaccineInfo(
-      name: 'ロタウィルス(1価)',
-      category: VaccineCategory.live,
-      requirement: VaccineRequirement.mandatory,
-      doseSchedules: <String, List<int>>{
-        '2ヶ月': <int>[1],
-        '3ヶ月': <int>[2],
-      },
-      periodHighlights: <String, VaccinePeriodHighlight>{
-        '2ヶ月': VaccinePeriodHighlight.recommended,
-        '3ヶ月': VaccinePeriodHighlight.recommended,
-        '4ヶ月': VaccinePeriodHighlight.available,
-        '5ヶ月': VaccinePeriodHighlight.available,
-      },
-    ),
-    VaccineInfo(
-      name: 'ロタウィルス(5価)',
-      category: VaccineCategory.live,
-      requirement: VaccineRequirement.mandatory,
-      doseSchedules: <String, List<int>>{
-        '2ヶ月': <int>[1],
-        '3ヶ月': <int>[2],
-        '4ヶ月': <int>[3],
-      },
-      periodHighlights: <String, VaccinePeriodHighlight>{
-        '2ヶ月': VaccinePeriodHighlight.recommended,
-        '3ヶ月': VaccinePeriodHighlight.recommended,
-        '4ヶ月': VaccinePeriodHighlight.recommended,
-        '5ヶ月': VaccinePeriodHighlight.available,
-        '6ヶ月': VaccinePeriodHighlight.available,
-        '7ヶ月': VaccinePeriodHighlight.available,
-      },
-    ),
-    VaccineInfo(
-      name: '肺炎球菌',
-      category: VaccineCategory.inactivated,
-      requirement: VaccineRequirement.mandatory,
-      doseSchedules: <String, List<int>>{
-        '2ヶ月': <int>[1],
-        '3ヶ月': <int>[2],
-        '4ヶ月': <int>[3],
-        '12-15ヶ月': <int>[4],
-      },
-      periodHighlights: <String, VaccinePeriodHighlight>{
-        '2ヶ月': VaccinePeriodHighlight.recommended,
-        '3ヶ月': VaccinePeriodHighlight.recommended,
-        '4ヶ月': VaccinePeriodHighlight.recommended,
-        '12-15ヶ月': VaccinePeriodHighlight.recommended,
-        '5ヶ月': VaccinePeriodHighlight.available,
-        '6ヶ月': VaccinePeriodHighlight.available,
-        '7ヶ月': VaccinePeriodHighlight.available,
-        '8ヶ月': VaccinePeriodHighlight.available,
-        '9-11ヶ月': VaccinePeriodHighlight.available,
-      },
-    ),
-    VaccineInfo(
-      name: '5種混合',
-      category: VaccineCategory.inactivated,
-      requirement: VaccineRequirement.mandatory,
-      doseSchedules: <String, List<int>>{
-        '2ヶ月': <int>[1],
-        '3ヶ月': <int>[2],
-        '4ヶ月': <int>[3],
-        '12-15ヶ月': <int>[4],
-        '16-17ヶ月': <int>[4],
-        '18-23ヶ月': <int>[4],
-      },
-      periodHighlights: <String, VaccinePeriodHighlight>{
-        '2ヶ月': VaccinePeriodHighlight.recommended,
-        '3ヶ月': VaccinePeriodHighlight.recommended,
-        '4ヶ月': VaccinePeriodHighlight.recommended,
-        '12-15ヶ月': VaccinePeriodHighlight.recommended,
-        '16-17ヶ月': VaccinePeriodHighlight.recommended,
-        '18-23ヶ月': VaccinePeriodHighlight.recommended,
-        '5ヶ月': VaccinePeriodHighlight.available,
-        '6ヶ月': VaccinePeriodHighlight.available,
-        '7ヶ月': VaccinePeriodHighlight.available,
-        '8ヶ月': VaccinePeriodHighlight.available,
-        '9-11ヶ月': VaccinePeriodHighlight.available,
-      },
-    ),
-    VaccineInfo(
-      name: '4種混合',
-      category: VaccineCategory.inactivated,
-      requirement: VaccineRequirement.mandatory,
-      doseSchedules: <String, List<int>>{
-        '2ヶ月': <int>[1],
-        '3ヶ月': <int>[2],
-        '4ヶ月': <int>[3],
-        '12-15ヶ月': <int>[4],
-        '16-17ヶ月': <int>[4],
-        '18-23ヶ月': <int>[4],
-      },
-      periodHighlights: <String, VaccinePeriodHighlight>{
-        '2ヶ月': VaccinePeriodHighlight.available,
-        '3ヶ月': VaccinePeriodHighlight.available,
-        '4ヶ月': VaccinePeriodHighlight.available,
-        '5ヶ月': VaccinePeriodHighlight.available,
-        '6ヶ月': VaccinePeriodHighlight.available,
-        '7ヶ月': VaccinePeriodHighlight.available,
-        '8ヶ月': VaccinePeriodHighlight.available,
-        '9-11ヶ月': VaccinePeriodHighlight.available,
-        '12-15ヶ月': VaccinePeriodHighlight.available,
-        '16-17ヶ月': VaccinePeriodHighlight.available,
-        '18-23ヶ月': VaccinePeriodHighlight.available,
-        '2才': VaccinePeriodHighlight.available,
-        '3才': VaccinePeriodHighlight.available,
-        '4才': VaccinePeriodHighlight.available,
-        '5才': VaccinePeriodHighlight.available,
-        '6才': VaccinePeriodHighlight.available,
-      },
-    ),
-    VaccineInfo(
-      name: 'ヒブ',
-      category: VaccineCategory.inactivated,
-      requirement: VaccineRequirement.mandatory,
-      doseSchedules: <String, List<int>>{
-        '2ヶ月': <int>[1],
-        '3ヶ月': <int>[2],
-        '4ヶ月': <int>[3],
-        '12-15ヶ月': <int>[4],
-        '16-17ヶ月': <int>[4],
-      },
-      periodHighlights: <String, VaccinePeriodHighlight>{
-        '2ヶ月': VaccinePeriodHighlight.available,
-        '3ヶ月': VaccinePeriodHighlight.available,
-        '4ヶ月': VaccinePeriodHighlight.available,
-        '5ヶ月': VaccinePeriodHighlight.available,
-        '6ヶ月': VaccinePeriodHighlight.available,
-        '7ヶ月': VaccinePeriodHighlight.available,
-        '8ヶ月': VaccinePeriodHighlight.available,
-        '9-11ヶ月': VaccinePeriodHighlight.available,
-        '12-15ヶ月': VaccinePeriodHighlight.available,
-        '16-17ヶ月': VaccinePeriodHighlight.available,
-        '18-23ヶ月': VaccinePeriodHighlight.available,
-        '2才': VaccinePeriodHighlight.available,
-        '3才': VaccinePeriodHighlight.available,
-        '4才': VaccinePeriodHighlight.available,
-      },
-    ),
-    VaccineInfo(
-      name: 'BCG',
-      category: VaccineCategory.live,
-      requirement: VaccineRequirement.mandatory,
-      doseSchedules: <String, List<int>>{
-        '5ヶ月': <int>[1],
-        '6ヶ月': <int>[1],
-        '7ヶ月': <int>[1],
-      },
-      periodHighlights: <String, VaccinePeriodHighlight>{
-        '5ヶ月': VaccinePeriodHighlight.recommended,
-        '6ヶ月': VaccinePeriodHighlight.recommended,
-        '7ヶ月': VaccinePeriodHighlight.recommended,
-        '2ヶ月': VaccinePeriodHighlight.available,
-        '3ヶ月': VaccinePeriodHighlight.available,
-        '4ヶ月': VaccinePeriodHighlight.available,
-        '8ヶ月': VaccinePeriodHighlight.available,
-        '9-11ヶ月': VaccinePeriodHighlight.available,
-      },
-    ),
-    VaccineInfo(
-      name: '麻疹風疹(MR)',
-      category: VaccineCategory.live,
-      requirement: VaccineRequirement.mandatory,
-      doseSchedules: <String, List<int>>{
-        '12-15ヶ月': <int>[1],
-        '16-17ヶ月': <int>[1],
-        '18-23ヶ月': <int>[1],
-        '5才': <int>[2],
-        '6才': <int>[2],
-      },
-      periodHighlights: <String, VaccinePeriodHighlight>{
-        '12-15ヶ月': VaccinePeriodHighlight.recommended,
-        '16-17ヶ月': VaccinePeriodHighlight.recommended,
-        '18-23ヶ月': VaccinePeriodHighlight.recommended,
-        '5才': VaccinePeriodHighlight.recommended,
-        '6才': VaccinePeriodHighlight.recommended,
-      },
-    ),
-    VaccineInfo(
-      name: '水痘',
-      category: VaccineCategory.live,
-      requirement: VaccineRequirement.mandatory,
-      doseSchedules: <String, List<int>>{
-        '12-15ヶ月': <int>[1],
-        '18-23ヶ月': <int>[2],
-      },
-      periodHighlights: <String, VaccinePeriodHighlight>{
-        '12-15ヶ月': VaccinePeriodHighlight.recommended,
-        '18-23ヶ月': VaccinePeriodHighlight.recommended,
-        '16-17ヶ月': VaccinePeriodHighlight.available,
-        '2才': VaccinePeriodHighlight.available,
-      },
-    ),
-    VaccineInfo(
-      name: '日本脳炎',
-      category: VaccineCategory.inactivated,
-      requirement: VaccineRequirement.mandatory,
-      doseSchedules: <String, List<int>>{
-        '3才': <int>[1, 2],
-        '4才': <int>[3],
-      },
-      periodHighlights: <String, VaccinePeriodHighlight>{
-        '3才': VaccinePeriodHighlight.recommended,
-        '4才': VaccinePeriodHighlight.recommended,
-        '6ヶ月': VaccinePeriodHighlight.available,
-        '7ヶ月': VaccinePeriodHighlight.available,
-        '8ヶ月': VaccinePeriodHighlight.available,
-        '9-11ヶ月': VaccinePeriodHighlight.available,
-        '12-15ヶ月': VaccinePeriodHighlight.available,
-        '16-17ヶ月': VaccinePeriodHighlight.available,
-        '18-23ヶ月': VaccinePeriodHighlight.available,
-        '2才': VaccinePeriodHighlight.available,
-        '5才': VaccinePeriodHighlight.available,
-        '6才': VaccinePeriodHighlight.available,
-      },
-    ),
-    VaccineInfo(
-      name: 'おたふくかぜ',
-      category: VaccineCategory.live,
-      requirement: VaccineRequirement.optional,
-      doseSchedules: <String, List<int>>{
-        '12-15ヶ月': <int>[1],
-        '5才': <int>[2],
-        '6才': <int>[2],
-      },
-      periodHighlights: <String, VaccinePeriodHighlight>{
-        '12-15ヶ月': VaccinePeriodHighlight.recommended,
-        '6ヶ月': VaccinePeriodHighlight.available,
-        '7ヶ月': VaccinePeriodHighlight.available,
-        '8ヶ月': VaccinePeriodHighlight.available,
-        '9-11ヶ月': VaccinePeriodHighlight.available,
-        '16-17ヶ月': VaccinePeriodHighlight.available,
-        '18-23ヶ月': VaccinePeriodHighlight.available,
-        '2才': VaccinePeriodHighlight.available,
-        '3才': VaccinePeriodHighlight.available,
-        '4才': VaccinePeriodHighlight.available,
-        '5才': VaccinePeriodHighlight.academyRecommendation,
-        '6才': VaccinePeriodHighlight.academyRecommendation,
-      },
-      highlightPalette: VaccineHighlightPalette.secondary,
-    ),
-    VaccineInfo(
-      name: 'インフルエンザ',
-      category: VaccineCategory.inactivated,
-      requirement: VaccineRequirement.optional,
-      doseSchedules: <String, List<int>>{
-        '6ヶ月': <int>[1, 2],
-        '7ヶ月': <int>[1, 2],
-        '8ヶ月': <int>[1, 2],
-        '9-11ヶ月': <int>[1, 2],
-        '12-15ヶ月': <int>[1, 2],
-        '16-17ヶ月': <int>[1, 2],
-        '18-23ヶ月': <int>[1, 2],
-        '2才': <int>[1, 2],
-        '3才': <int>[1, 2],
-        '4才': <int>[1, 2],
-        '5才': <int>[1, 2],
-        '6才': <int>[1, 2],
-      },
-      periodHighlights: <String, VaccinePeriodHighlight>{
-        '6ヶ月': VaccinePeriodHighlight.available,
-        '7ヶ月': VaccinePeriodHighlight.available,
-        '8ヶ月': VaccinePeriodHighlight.available,
-        '9-11ヶ月': VaccinePeriodHighlight.available,
-        '12-15ヶ月': VaccinePeriodHighlight.available,
-        '16-17ヶ月': VaccinePeriodHighlight.available,
-        '18-23ヶ月': VaccinePeriodHighlight.available,
-        '2才': VaccinePeriodHighlight.available,
-        '3才': VaccinePeriodHighlight.available,
-        '4才': VaccinePeriodHighlight.available,
-        '5才': VaccinePeriodHighlight.available,
-        '6才': VaccinePeriodHighlight.available,
-      },
-      highlightPalette: VaccineHighlightPalette.secondary,
-    ),
-  ];
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AsyncValue<VaccinesViewData> state =
+        ref.watch(vaccinesViewModelProvider);
+
     return Scaffold(
       appBar: AppBar(title: const AppBarChildInfo()),
-      body: const _VaccinesContent(),
+      body: state.when(
+        data: (data) => _VaccinesContent(
+          data: data,
+          onVaccineTap: (vaccine) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => VaccineDetailPage(vaccine: vaccine),
+              ),
+            );
+          },
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => _VaccinesErrorView(
+          onRetry: () => ref.read(vaccinesViewModelProvider.notifier).refresh(),
+        ),
+      ),
       bottomNavigationBar: const AppBottomNav(),
     );
   }
 }
 
 class _VaccinesContent extends StatelessWidget {
-  const _VaccinesContent();
+  const _VaccinesContent({
+    required this.data,
+    required this.onVaccineTap,
+  });
+
+  final VaccinesViewData data;
+  final ValueChanged<VaccineInfo> onVaccineTap;
 
   @override
   Widget build(BuildContext context) {
@@ -350,19 +57,41 @@ class _VaccinesContent extends StatelessWidget {
       children: <Widget>[
         Expanded(
           child: VaccinesScheduleTable(
-            periods: VaccinesPage._periods,
-            vaccines: VaccinesPage._vaccines,
-            onVaccineTap: (vaccine) {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => VaccineDetailPage(vaccine: vaccine),
-                ),
-              );
-            },
+            periods: data.periodLabels,
+            vaccines: data.vaccines,
+            onVaccineTap: onVaccineTap,
           ),
         ),
         const VaccinesLegend(),
       ],
+    );
+  }
+}
+
+class _VaccinesErrorView extends StatelessWidget {
+  const _VaccinesErrorView({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'ワクチン情報の読み込みに失敗しました',
+            style: theme.textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: onRetry,
+            child: const Text('再試行'),
+          ),
+        ],
+      ),
     );
   }
 }
