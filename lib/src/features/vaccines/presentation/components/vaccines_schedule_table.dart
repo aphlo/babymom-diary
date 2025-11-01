@@ -11,10 +11,12 @@ class VaccinesScheduleTable extends StatefulWidget {
     super.key,
     required this.periods,
     required this.vaccines,
+    this.onVaccineTap,
   });
 
   final List<String> periods;
   final List<VaccineInfo> vaccines;
+  final ValueChanged<VaccineInfo>? onVaccineTap;
 
   @override
   State<VaccinesScheduleTable> createState() => _VaccinesScheduleTableState();
@@ -205,16 +207,22 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                         backgroundColor = AppColors.secondary.withOpacity(0.2);
                         break;
                     }
-                    return GridCell(
-                      width: _firstColumnWidth,
-                      height: _rowHeight,
-                      backgroundColor: backgroundColor,
-                      border: Border(
-                        left: borderSide,
-                        right: borderSide,
-                        bottom: borderSide,
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: widget.onVaccineTap == null
+                          ? null
+                          : () => widget.onVaccineTap!(vaccine),
+                      child: GridCell(
+                        width: _firstColumnWidth,
+                        height: _rowHeight,
+                        backgroundColor: backgroundColor,
+                        border: Border(
+                          left: borderSide,
+                          right: borderSide,
+                          bottom: borderSide,
+                        ),
+                        child: VaccineNameCell(vaccine: vaccine),
                       ),
-                      child: VaccineNameCell(vaccine: vaccine),
                     );
                   },
                 ),
@@ -346,7 +354,13 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                           columnIndex += 1;
                         }
 
-                        return Row(children: periodCells);
+                        return GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: widget.onVaccineTap == null
+                              ? null
+                              : () => widget.onVaccineTap!(vaccine),
+                          child: Row(children: periodCells),
+                        );
                       },
                     ),
                   ),

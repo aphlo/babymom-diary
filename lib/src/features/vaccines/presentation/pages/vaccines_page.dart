@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 import 'package:babymom_diary/src/features/child_record/presentation/widgets/app_bar_child_info.dart';
 
+import '../components/vaccines_schedule_table.dart';
 import '../models/vaccine_info.dart';
 import '../widgets/vaccines_legend.dart';
-import '../components/vaccines_schedule_table.dart';
+import 'vaccine_detail_page.dart';
 
 class VaccinesPage extends StatelessWidget {
   const VaccinesPage({super.key});
@@ -351,6 +352,13 @@ class _VaccinesContent extends StatelessWidget {
           child: VaccinesScheduleTable(
             periods: VaccinesPage._periods,
             vaccines: VaccinesPage._vaccines,
+            onVaccineTap: (vaccine) {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => VaccineDetailPage(vaccine: vaccine),
+                ),
+              );
+            },
           ),
         ),
         const VaccinesLegend(),
