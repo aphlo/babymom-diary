@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../models/vaccine_info.dart';
@@ -169,7 +170,7 @@ class _VaccineInfoCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(0.1),
+              color: AppColors.secondary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -177,14 +178,14 @@ class _VaccineInfoCard extends StatelessWidget {
               children: [
                 Icon(
                   Icons.vaccines,
-                  color: theme.colorScheme.primary,
+                  color: AppColors.secondary,
                   size: 20,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '$doseNumber回目の接種',
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.primary,
+                    color: AppColors.secondary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -238,42 +239,32 @@ class _DateSelectionCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          InkWell(
-            onTap: () => _selectDate(context),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              alignment: Alignment.centerLeft,
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    color: theme.colorScheme.primary,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      selectedDate != null
-                          ? '${selectedDate!.year}年${selectedDate!.month}月${selectedDate!.day}日'
-                          : '日付を選択してください',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: selectedDate != null
-                            ? theme.colorScheme.onSurface
-                            : Colors.grey.shade600,
-                      ),
+            ),
+            onPressed: () => _selectDate(context),
+            child: Row(
+              children: [
+                Icon(Icons.event, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    selectedDate != null
+                        ? '${selectedDate!.year}年${selectedDate!.month}月${selectedDate!.day}日'
+                        : '日付を選択してください',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: selectedDate != null
+                          ? theme.colorScheme.onSurface
+                          : Colors.grey.shade600,
                     ),
                   ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: Colors.grey.shade600,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),
@@ -312,16 +303,17 @@ class _DateSelectionCard extends StatelessWidget {
     final now = DateTime.now();
     final initialDate = selectedDate ?? now;
 
-    final date = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 365 * 2)),
+    DatePicker.showDatePicker(
+      context,
+      showTitleActions: true,
+      minTime: now,
+      maxTime: now.add(const Duration(days: 365 * 2)),
+      onConfirm: (date) {
+        onDateSelected(date);
+      },
+      currentTime: initialDate,
+      locale: LocaleType.jp,
     );
-
-    if (date != null) {
-      onDateSelected(date);
-    }
   }
 
   String _getVaccinationPeriodText() {
@@ -386,7 +378,7 @@ class _ConcurrentVaccinesCard extends StatelessWidget {
                           Text(
                             '${selectedVaccines.length}個のワクチンを選択中',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.primary,
+                              color: AppColors.primary,
                             ),
                           ),
                         ],
@@ -395,7 +387,7 @@ class _ConcurrentVaccinesCard extends StatelessWidget {
                   ),
                   Icon(
                     isExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: theme.colorScheme.primary,
+                    color: AppColors.primary,
                   ),
                 ],
               ),
