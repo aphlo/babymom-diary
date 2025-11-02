@@ -9,7 +9,6 @@ import 'package:babymom_diary/src/core/utils/date_formatter.dart';
 import '../../../children/application/selected_child_provider.dart';
 import '../../domain/entities/dose_record.dart';
 import '../models/vaccine_info.dart';
-import '../utils/vaccination_period_calculator.dart';
 import '../viewmodels/vaccine_detail_state.dart';
 import '../viewmodels/vaccine_detail_view_model.dart';
 import '../widgets/vaccine_header.dart';
@@ -26,8 +25,7 @@ class VaccineDetailPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Map<int, List<String>> dosePeriodMap = _extractDosePeriods(vaccine);
-    final List<int> doseNumbers = dosePeriodMap.keys.toList()..sort();
+    final List<int> doseNumbers = _extractDoseNumbers(vaccine);
 
     final AsyncValue<String> householdAsync =
         ref.watch(currentHouseholdIdProvider);
@@ -50,6 +48,7 @@ class VaccineDetailPage extends ConsumerWidget {
                 doseNumbers: List<int>.unmodifiable(doseNumbers),
                 householdId: householdId,
                 childId: childId,
+                childBirthday: childBirthday,
               );
 
               final VaccineDetailState detailState =
@@ -57,9 +56,6 @@ class VaccineDetailPage extends ConsumerWidget {
 
               return _VaccineDetailContent(
                 vaccine: vaccine,
-                childBirthday: childBirthday,
-                doseNumbers: doseNumbers,
-                dosePeriodMap: dosePeriodMap,
                 state: detailState,
                 onReservationTap: _navigateToReservation,
               );
@@ -76,17 +72,11 @@ class VaccineDetailPage extends ConsumerWidget {
     );
   }
 
-  Map<int, List<String>> _extractDosePeriods(VaccineInfo vaccine) {
-    final Map<int, List<String>> result = <int, List<String>>{};
-    vaccine.doseSchedules.forEach((String periodLabel, List<int> doses) {
-      for (final int dose in doses) {
-        final periods = result.putIfAbsent(dose, () => <String>[]);
-        if (!periods.contains(periodLabel)) {
-          periods.add(periodLabel);
-        }
-      }
-    });
-    return result;
+  List<int> _extractDoseNumbers(VaccineInfo vaccine) {
+    final Set<int> result = <int>{};
+    vaccine.doseSchedules.values.forEach(result.addAll);
+    final List<int> sorted = result.toList()..sort();
+    return sorted;
   }
 
   void _navigateToReservation(
@@ -101,17 +91,11 @@ class VaccineDetailPage extends ConsumerWidget {
 class _VaccineDetailContent extends StatelessWidget {
   const _VaccineDetailContent({
     required this.vaccine,
-    required this.childBirthday,
-    required this.doseNumbers,
-    required this.dosePeriodMap,
     required this.state,
     required this.onReservationTap,
   });
 
   final VaccineInfo vaccine;
-  final DateTime? childBirthday;
-  final List<int> doseNumbers;
-  final Map<int, List<String>> dosePeriodMap;
   final VaccineDetailState state;
   final Function(BuildContext, VaccineInfo, int)? onReservationTap;
 
@@ -165,18 +149,18 @@ class _VaccineDetailContent extends StatelessWidget {
                     ),
                   ),
                 ],
-                if (doseNumbers.isEmpty)
+                if (state.doseNumbers.isEmpty)
                   Text(
                     '接種回数の情報が見つかりませんでした',
                     style: theme.textTheme.bodyMedium,
                   )
                 else
                   VaccineDoseReservationBoard(
-                    doseNumbers: doseNumbers,
-                    periodsByDose: dosePeriodMap,
+                    doseNumbers: state.doseNumbers,
                     doseStatuses: state.doseStatuses,
                     activeDoseNumber: state.activeDoseNumber,
-                    childBirthday: childBirthday,
+                    pendingDoseNumber: state.pendingDoseNumber,
+                    recommendationText: state.recommendation?.message,
                     vaccine: vaccine,
                     onReservationTap: onReservationTap,
                   ),
@@ -230,19 +214,19 @@ class VaccineDoseReservationBoard extends StatelessWidget {
   const VaccineDoseReservationBoard({
     super.key,
     required this.doseNumbers,
-    required this.periodsByDose,
     required this.doseStatuses,
     this.activeDoseNumber,
-    this.childBirthday,
+    this.pendingDoseNumber,
+    this.recommendationText,
     this.vaccine,
     this.onReservationTap,
   });
 
   final List<int> doseNumbers;
-  final Map<int, List<String>> periodsByDose;
   final Map<int, DoseStatusInfo> doseStatuses;
   final int? activeDoseNumber;
-  final DateTime? childBirthday;
+  final int? pendingDoseNumber;
+  final String? recommendationText;
   final VaccineInfo? vaccine;
   final Function(BuildContext context, VaccineInfo vaccine, int doseNumber)?
       onReservationTap;
@@ -252,10 +236,13 @@ class VaccineDoseReservationBoard extends StatelessWidget {
     final theme = Theme.of(context);
     final int doseCount = doseNumbers.length;
 
-    final int? resolvedActiveDose =
-        (activeDoseNumber != null && doseNumbers.contains(activeDoseNumber))
+    final bool hasPending =
+        pendingDoseNumber != null && doseNumbers.contains(pendingDoseNumber);
+    final int? resolvedActiveDose = hasPending
+        ? pendingDoseNumber
+        : ((activeDoseNumber != null && doseNumbers.contains(activeDoseNumber))
             ? activeDoseNumber
-            : (doseCount > 0 ? doseNumbers.first : null);
+            : (doseCount > 0 ? doseNumbers.first : null));
     final int normalizedActiveIndex = doseCount == 0
         ? 0
         : doseNumbers
@@ -264,18 +251,6 @@ class VaccineDoseReservationBoard extends StatelessWidget {
     final double pointerAlignmentX = doseCount == 0
         ? 0
         : ((normalizedActiveIndex + 0.5) / doseCount) * 2 - 1;
-
-    final List<String> activeLabels = doseCount == 0
-        ? const <String>[]
-        : periodsByDose[doseNumbers[normalizedActiveIndex]] ?? const <String>[];
-    final DoseStatusInfo? activeStatus = doseCount == 0
-        ? null
-        : doseStatuses[doseNumbers[normalizedActiveIndex]];
-    final String recommendationText = _buildRecommendationText(
-      labels: activeLabels,
-      childBirthday: childBirthday,
-      activeStatus: activeStatus,
-    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -305,13 +280,44 @@ class VaccineDoseReservationBoard extends StatelessWidget {
                             vaccine != null &&
                             onReservationTap != null &&
                             statusInfo?.status != DoseStatus.completed;
-                        return _DoseStatusBadge(
-                          presentation: presentation,
-                          isActive: isActive,
-                          onTap: canTap
-                              ? () => onReservationTap!(
-                                  context, vaccine!, doseNumbers[i])
-                              : null,
+                        final String? scheduledLabel =
+                            statusInfo?.status == DoseStatus.scheduled &&
+                                    statusInfo?.scheduledDate != null
+                                ? DateFormatter.yyyyMMddE(
+                                    statusInfo!.scheduledDate!,
+                                  )
+                                : null;
+                        return Column(
+                          children: [
+                            _DoseStatusBadge(
+                              presentation: presentation,
+                              isActive: isActive,
+                              onTap: canTap
+                                  ? () => onReservationTap!(
+                                      context, vaccine!, doseNumbers[i])
+                                  : null,
+                            ),
+                            if (scheduledLabel != null) ...[
+                              const SizedBox(height: 8),
+                              SizedBox(
+                                width: 88,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    scheduledLabel,
+                                    maxLines: 1,
+                                    softWrap: false,
+                                    overflow: TextOverflow.fade,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black87,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         );
                       },
                     ),
@@ -321,65 +327,14 @@ class VaccineDoseReservationBoard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        if (doseCount > 0)
+        if (doseCount > 0 && recommendationText != null)
           _DoseRecommendationBubble(
-            text: recommendationText,
+            text: recommendationText!,
             alignmentX: pointerAlignmentX.clamp(-1.0, 1.0),
           ),
       ],
     );
   }
-}
-
-String _buildRecommendationText({
-  required List<String> labels,
-  required DateTime? childBirthday,
-  DoseStatusInfo? activeStatus,
-}) {
-  final DoseStatus? status = activeStatus?.status;
-
-  if (status == DoseStatus.scheduled && activeStatus?.scheduledDate != null) {
-    final String scheduledText =
-        DateFormatter.yyyyMMddE(activeStatus!.scheduledDate!);
-    return '接種予約日\n$scheduledText';
-  }
-
-  if (status == DoseStatus.completed && activeStatus?.completedDate != null) {
-    final String completedText =
-        DateFormatter.yyyyMMddE(activeStatus!.completedDate!);
-    return '接種完了日\n$completedText';
-  }
-
-  if (status == DoseStatus.skipped) {
-    return '接種を見送りました';
-  }
-
-  if (labels.isEmpty) {
-    return '接種時期の情報がありません';
-  }
-
-  final DateRange? range = VaccinationPeriodCalculator.dateRangeForLabels(
-    birthday: childBirthday,
-    labels: labels,
-  );
-  if (range == null || range.end.isBefore(range.start)) {
-    return _fallbackRecommendationText(labels);
-  }
-
-  final String startText = DateFormatter.yyyyMMddE(range.start);
-  final String endText = DateFormatter.yyyyMMddE(range.end);
-
-  if (range.start.isAtSameMomentAs(range.end)) {
-    return '接種時期のめやす\n$startText';
-  }
-  return '接種時期のめやす\n$startText〜\n$endText';
-}
-
-String _fallbackRecommendationText(List<String> labels) {
-  if (labels.length == 1) {
-    return '接種時期のめやす\n${labels.first}ごろ';
-  }
-  return '接種時期のめやす\n${labels.first} 〜 ${labels.last}ごろ';
 }
 
 class _VaccineNotesList extends StatelessWidget {
