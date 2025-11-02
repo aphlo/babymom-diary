@@ -50,9 +50,9 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
         ),
       ],
       notes: <VaccineNote>[
-        VaccineNote(message: '①と②は27日以上空ける'),
+        VaccineNote(message: '1回目と2回目の接種間隔は27日以上空ける'),
         VaccineNote(
-          message: '①と③は139日以上空ける',
+          message: '1回目と3回目の接種間隔は139日以上空ける',
         ),
       ],
     ),
@@ -82,7 +82,7 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
         ),
       ],
       notes: <VaccineNote>[
-        VaccineNote(message: '①と②は27日以上空ける'),
+        VaccineNote(message: '1回目と2回目の接種は27日以上空ける'),
       ],
     ),
     Vaccine(
@@ -120,8 +120,7 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
         ),
       ],
       notes: <VaccineNote>[
-        VaccineNote(message: '①と②は27日以上空ける'),
-        VaccineNote(message: '②と③も27日以上空ける'),
+        VaccineNote(message: '接種間隔は27日以上空ける'),
       ],
     ),
     Vaccine(
@@ -172,10 +171,9 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
         ),
       ],
       notes: <VaccineNote>[
-        VaccineNote(message: '①と②は27日以上空ける'),
-        VaccineNote(message: '②と③は27日以上空ける'),
+        VaccineNote(message: '接種間隔は27日以上空ける'),
         VaccineNote(
-          message: '③と④は60日以上空け、1才から1才3ヶ月の間に接種する',
+          message: '3回目と4回目の接種は60日以上空け、1才から1才3ヶ月の間に接種する',
         ),
       ],
     ),
@@ -237,10 +235,9 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
         ),
       ],
       notes: <VaccineNote>[
-        VaccineNote(message: '①と②は20〜56日空ける'),
-        VaccineNote(message: '②と③は20〜56日空ける'),
+        VaccineNote(message: '接種間隔は20〜56日空ける'),
         VaccineNote(
-          message: '③と④は6ヶ月以上空け、18ヶ月までに接種する',
+          message: '3回目と4回目の接種は6ヶ月以上空け、18ヶ月までに接種する',
         ),
       ],
     ),
@@ -322,10 +319,9 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
         ),
       ],
       notes: <VaccineNote>[
-        VaccineNote(message: '①と②は20〜56日空ける'),
-        VaccineNote(message: '②と③は20〜56日空ける'),
+        VaccineNote(message: '接種間隔は20〜56日空ける'),
         VaccineNote(
-          message: '③と④は6ヶ月以上空け、18ヶ月までに接種する',
+          message: '3回目と4回目の接種は6ヶ月以上空け、18ヶ月までに接種する',
         ),
       ],
     ),
@@ -398,10 +394,9 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
         ),
       ],
       notes: <VaccineNote>[
-        VaccineNote(message: '①と②は27〜56日空ける'),
-        VaccineNote(message: '②と③は27〜56日空ける'),
+        VaccineNote(message: '接種間隔は27〜56日空ける'),
         VaccineNote(
-          message: '③と④は7〜13ヶ月空ける',
+          message: '3回目と4回目の接種は7〜13ヶ月空ける',
         ),
       ],
     ),
@@ -516,7 +511,7 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
       ],
       notes: <VaccineNote>[
         VaccineNote(
-          message: '①と②は6〜12ヶ月空ける',
+          message: '1回目と2回目の接種は6〜12ヶ月空ける',
         ),
       ],
     ),
@@ -578,9 +573,9 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
         ),
       ],
       notes: <VaccineNote>[
-        VaccineNote(message: '①と②は6〜28日空ける'),
+        VaccineNote(message: '1回目と2回目の接種は6〜28日空ける'),
         VaccineNote(
-          message: '②と③は1年空けて、4才の時に接種する',
+          message: '2回目と3回目の接種は1年空けて、4才の時に接種する',
         ),
       ],
     ),
@@ -629,7 +624,7 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
       ],
       notes: <VaccineNote>[
         VaccineNote(
-          message: '②はMRと同時期（小学校入学前の1年間）での接種を推奨',
+          message: '2回目は風疹麻疹(MR)と同時期（小学校入学前の1年間）での接種を推奨',
         ),
       ],
     ),
@@ -703,7 +698,7 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
       ],
       notes: <VaccineNote>[
         VaccineNote(
-          message: '13才未満は2回接種。①と②は4週間空ける',
+          message: '13才未満は2回接種。接種間隔は4週間空ける',
         ),
       ],
     ),
