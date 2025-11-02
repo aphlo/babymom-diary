@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -14,6 +15,9 @@ import 'package:babymom_diary/src/features/calendar/presentation/widgets/calenda
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/calendar_error_banner.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/calendar_error_view.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/selected_day_event_list.dart';
+import 'package:babymom_diary/src/features/vaccines/presentation/models/vaccine_info.dart';
+import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine.dart'
+    as domain;
 
 class CalendarPage extends ConsumerStatefulWidget {
   const CalendarPage({super.key});
@@ -293,6 +297,13 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   }
 
   void _handleEventTap(BuildContext context, CalendarEvent event) {
+    // ワクチン予約イベントの場合はワクチン予約ページに遷移
+    if (event.id.startsWith('vaccination_')) {
+      _handleVaccinationEventTap(context, event);
+      return;
+    }
+
+    // 通常のイベントの場合は編集ページに遷移
     Navigator.of(context)
         .push(
       MaterialPageRoute(
@@ -307,6 +318,36 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         // ViewModelが自動的にリフレッシュするため、特別な処理は不要
       }
     });
+  }
+
+  void _handleVaccinationEventTap(BuildContext context, CalendarEvent event) {
+    // イベントIDからワクチン情報を抽出
+    // vaccination_${childId}_${vaccineId}_${doseNumber} の形式
+    final parts = event.id.split('_');
+    if (parts.length < 4) return;
+
+    final vaccineId = parts[2];
+    final doseNumber = int.tryParse(parts[3]);
+
+    if (doseNumber == null) return;
+
+    // ワクチン情報を作成（仮実装）
+    final vaccine = VaccineInfo(
+      id: vaccineId,
+      name: event.title
+          .replaceAll(RegExp(r'\s+\d+回目$'), ''), // "ワクチン名 1回目" から "ワクチン名" を抽出
+      category: domain.VaccineCategory.inactivated, // 仮の値
+      requirement: domain.VaccineRequirement.mandatory, // 仮の値
+    );
+
+    // ワクチン予約ページに遷移
+    context.pushNamed(
+      'vaccine_reservation',
+      extra: {
+        'vaccine': vaccine,
+        'doseNumber': doseNumber,
+      },
+    );
   }
 }
 

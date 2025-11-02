@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:babymom_diary/src/features/calendar/application/calendar_event_controller.dart';
+import 'package:babymom_diary/src/features/calendar/application/mappers/vaccination_to_calendar_event_mapper.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_settings.dart';
 import 'package:babymom_diary/src/features/calendar/domain/repositories/calendar_event_repository.dart';
@@ -14,6 +15,9 @@ import 'package:babymom_diary/src/features/children/application/children_local_p
 import 'package:babymom_diary/src/features/children/application/selected_child_provider.dart';
 import 'package:babymom_diary/src/features/children/application/selected_child_snapshot_provider.dart';
 import 'package:babymom_diary/src/features/children/domain/entities/child_summary.dart';
+import 'package:babymom_diary/src/features/vaccines/application/vaccine_catalog_providers.dart';
+import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_schedule.dart';
+import 'package:babymom_diary/src/features/vaccines/domain/repositories/vaccination_record_repository.dart';
 import 'package:babymom_diary/src/core/firebase/household_service.dart'
     as fbcore;
 
@@ -22,7 +26,10 @@ final calendarViewModelProvider =
   (ref) {
     final repository = ref.watch(calendarEventRepositoryProvider);
     final settingsRepository = ref.watch(calendarSettingsRepositoryProvider);
-    return CalendarViewModel(ref, repository, settingsRepository);
+    final vaccinationRepository =
+        ref.watch(vaccinationRecordRepositoryProvider);
+    return CalendarViewModel(
+        ref, repository, settingsRepository, vaccinationRepository);
   },
 );
 
@@ -31,23 +38,30 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     this._ref,
     this._repository,
     this._settingsRepository,
+    this._vaccinationRepository,
   ) : super(CalendarState.initial()) {
     _initialize();
     _ref.onDispose(() {
       _eventsSubscription?.cancel();
       _settingsSubscription?.cancel();
+      _vaccinationSubscription?.cancel();
       _eventsSubscription = null;
       _settingsSubscription = null;
+      _vaccinationSubscription = null;
     });
   }
 
   final Ref _ref;
   final CalendarEventRepository _repository;
   final CalendarSettingsRepository _settingsRepository;
+  final VaccinationRecordRepository _vaccinationRepository;
 
   StreamSubscription<List<CalendarEvent>>? _eventsSubscription;
   StreamSubscription<CalendarSettings>? _settingsSubscription;
+  StreamSubscription<List<VaccinationSchedule>>? _vaccinationSubscription;
   List<CalendarEvent> _latestEvents = const <CalendarEvent>[];
+  List<VaccinationSchedule> _latestVaccinationSchedules =
+      const <VaccinationSchedule>[];
   List<ChildSummary> _localChildren = const <ChildSummary>[];
   ChildSummary? _snapshotChild;
 
@@ -64,6 +78,7 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
       state = state.copyWith(householdId: householdId);
       _subscribeToChildren(householdId);
       _refreshEventsSubscription();
+      _refreshVaccinationSubscription();
     } catch (error, stackTrace) {
       state = state.copyWith(
         pendingUiEvent: const CalendarUiEvent.showMessage('世帯情報の取得に失敗しました'),
@@ -138,7 +153,7 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
       availableChildren: available,
       pendingUiEvent: null,
     );
-    _updateEventsState(_latestEvents);
+    _updateCombinedEventsState();
   }
 
   void _refreshEventsSubscription() {
@@ -161,7 +176,7 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
         .listen(
       (events) {
         _latestEvents = events;
-        _updateEventsState(events);
+        _updateCombinedEventsState();
       },
       onError: (error, stackTrace) {
         state = state.copyWith(
@@ -174,19 +189,53 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     );
   }
 
-  void _updateEventsState(List<CalendarEvent> events) {
-    final eventsByDay = _groupEventsByDay(events);
+  void _refreshVaccinationSubscription() {
+    _vaccinationSubscription?.cancel();
+    final householdId = state.householdId;
+    final selectedChildId = state.selectedChildId;
+    if (householdId == null || selectedChildId == null) {
+      return;
+    }
+    final range = _visibleRangeForMonth(state.focusedDay);
+
+    _vaccinationSubscription = _vaccinationRepository
+        .getVaccinationSchedules(
+          householdId: householdId,
+          childId: selectedChildId,
+          startDate: range.start,
+          endDate: range.end,
+        )
+        .asStream()
+        .listen(
+      (schedules) {
+        _latestVaccinationSchedules = schedules;
+        _updateCombinedEventsState();
+      },
+      onError: (error, stackTrace) {
+        // ワクチン予定の取得エラーは通常のイベント表示に影響しないようにする
+        _latestVaccinationSchedules = const <VaccinationSchedule>[];
+        _updateCombinedEventsState();
+      },
+    );
+  }
+
+  void _updateCombinedEventsState() {
+    // 通常のイベントとワクチン予定を統合
+    final vaccinationEvents = VaccinationToCalendarEventMapper.toCalendarEvents(
+        _latestVaccinationSchedules);
+    final combinedEvents = [..._latestEvents, ...vaccinationEvents];
+    final eventsByDay = _groupEventsByDay(combinedEvents);
 
     // ローディング状態の場合は常に更新する
     // または状態が実際に変更された場合のみ更新
     final currentEvents = state.eventsAsync.valueOrNull ?? [];
     final isLoading = state.eventsAsync.isLoading;
-    final hasChanged = events.length != currentEvents.length ||
-        !_eventsEqual(events, currentEvents);
+    final hasChanged = combinedEvents.length != currentEvents.length ||
+        !_eventsEqual(combinedEvents, currentEvents);
 
     if (isLoading || hasChanged) {
       state = state.copyWith(
-        eventsAsync: AsyncValue.data(events),
+        eventsAsync: AsyncValue.data(combinedEvents),
         eventsByDay: eventsByDay,
         pendingUiEvent: null,
       );
@@ -212,6 +261,10 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     );
     if (requiresRefresh) {
       _refreshEventsSubscription();
+      _refreshVaccinationSubscription();
+      _refreshVaccinationSubscription();
+      _refreshVaccinationSubscription();
+      _refreshVaccinationSubscription();
     }
   }
 

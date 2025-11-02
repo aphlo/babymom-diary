@@ -16,6 +16,8 @@ class CalendarEventTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final timeFormatter = DateFormat('HH:mm');
+    final isVaccination = event.id.startsWith('vaccination_');
+
     final subtitle = event.allDay
         ? '終日'
         : '${timeFormatter.format(event.start)} - ${timeFormatter.format(event.end)}';
@@ -46,6 +48,7 @@ class CalendarEventTile extends StatelessWidget {
 
     return Card(
       elevation: 0,
+      color: isVaccination ? Colors.blue.shade50 : null, // ワクチン予約は背景色を変更
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -61,18 +64,39 @@ class CalendarEventTile extends StatelessWidget {
                     const SizedBox(width: 12),
                   ],
                   Expanded(
-                    child: Text(
-                      event.title,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                    child: Row(
+                      children: [
+                        if (isVaccination) ...[
+                          Icon(
+                            Icons.vaccines,
+                            size: 16,
+                            color: Colors.blue.shade700,
+                          ),
+                          const SizedBox(width: 4),
+                        ],
+                        Expanded(
+                          child: Text(
+                            event.title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: isVaccination
+                                      ? Colors.blue.shade700
+                                      : null,
+                                ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 12),
                   Text(
                     subtitle,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: isVaccination ? Colors.blue.shade600 : null,
+                        ),
                   ),
                 ],
               ),
@@ -82,7 +106,9 @@ class CalendarEventTile extends StatelessWidget {
                       left: 52), // 40 (icon width) + 12 (spacing)
                   child: Text(
                     event.memo,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: isVaccination ? Colors.blue.shade600 : null,
+                        ),
                   ),
                 ),
               ],
