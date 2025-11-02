@@ -266,16 +266,41 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                         while (columnIndex < widget.periods.length) {
                           final String periodLabel =
                               widget.periods[columnIndex];
-                          final List<int> doseNumbers =
-                              vaccine.doseSchedules[periodLabel] ??
-                                  const <int>[];
+                          final bool isInfluenza = vaccine.id == 'influenza';
                           final VaccinePeriodHighlightStyle? highlightStyle =
                               _highlightStyleFor(vaccine, periodLabel);
+                          final List<int> rawDoseNumbers =
+                              vaccine.doseSchedules[periodLabel] ??
+                                  const <int>[];
+                          final List<int> doseNumbers = isInfluenza
+                              ? rawDoseNumbers
+                                  .where((int doseNumber) =>
+                                      vaccine.doseStatuses[doseNumber] != null)
+                                  .toList(growable: false)
+                              : rawDoseNumbers;
+
+                          if (isInfluenza && doseNumbers.isEmpty) {
+                            periodCells.add(
+                              GridCell(
+                                width: _periodColumnWidth,
+                                height: _rowHeight,
+                                backgroundColor: highlightStyle?.cellColor,
+                                border: Border(
+                                  right: borderSide,
+                                  bottom: borderSide,
+                                ),
+                                child: const SizedBox.shrink(),
+                              ),
+                            );
+                            columnIndex += 1;
+                            continue;
+                          }
+
                           final bool hasSingleDose = doseNumbers.length == 1;
                           final int? currentDoseNumber =
                               hasSingleDose ? doseNumbers.first : null;
 
-                          if (hasSingleDose) {
+                          if (!isInfluenza && hasSingleDose) {
                             int runLength = 1;
                             int lookAheadIndex = columnIndex + 1;
 

@@ -19,10 +19,14 @@ class VaccineReservationPage extends ConsumerStatefulWidget {
     super.key,
     required this.vaccine,
     required this.doseNumber,
+    this.influenzaSeasonLabel,
+    this.influenzaDoseOrder,
   });
 
   final VaccineInfo vaccine;
   final int doseNumber;
+  final String? influenzaSeasonLabel;
+  final int? influenzaDoseOrder;
 
   @override
   ConsumerState<VaccineReservationPage> createState() =>
@@ -76,6 +80,8 @@ class _VaccineReservationPageState
                   _VaccineInfoCard(
                     vaccine: widget.vaccine,
                     doseNumber: widget.doseNumber,
+                    influenzaSeasonLabel: widget.influenzaSeasonLabel,
+                    influenzaDoseOrder: widget.influenzaDoseOrder,
                   ),
                   const SizedBox(height: 24),
                   _DateSelectionCard(
@@ -152,10 +158,14 @@ class _VaccineInfoCard extends StatelessWidget {
   const _VaccineInfoCard({
     required this.vaccine,
     required this.doseNumber,
+    this.influenzaSeasonLabel,
+    this.influenzaDoseOrder,
   });
 
   final VaccineInfo vaccine;
   final int doseNumber;
+  final String? influenzaSeasonLabel;
+  final int? influenzaDoseOrder;
 
   @override
   Widget build(BuildContext context) {
@@ -196,7 +206,7 @@ class _VaccineInfoCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '$doseNumber回目の接種',
+                  _buildDoseLabel(),
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: AppColors.secondary,
                     fontWeight: FontWeight.w600,
@@ -208,6 +218,21 @@ class _VaccineInfoCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _buildDoseLabel() {
+    if (vaccine.id != 'influenza') {
+      return '$doseNumber回目の接種';
+    }
+    final bool hasSeason = influenzaSeasonLabel != null &&
+        influenzaSeasonLabel!.isNotEmpty &&
+        influenzaSeasonLabel != '未設定';
+    final String orderPart = ((influenzaDoseOrder ?? doseNumber)).toString();
+    final String orderLabel = '$orderPart回目';
+    if (hasSeason) {
+      return '${influenzaSeasonLabel!}$orderLabelの接種';
+    }
+    return '$orderLabelの接種';
   }
 }
 

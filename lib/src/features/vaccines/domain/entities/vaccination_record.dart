@@ -104,6 +104,8 @@ class VaccinationRecord {
       case 'pneumococcal':
       case 'dpt_ipv':
         return 4;
+      case 'influenza':
+        return 14;
       case 'bcg':
       case 'mr1':
       case 'mr2':

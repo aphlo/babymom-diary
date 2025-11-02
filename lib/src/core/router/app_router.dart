@@ -102,10 +102,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final params = state.extra as Map<String, dynamic>;
           final vaccine = params['vaccine'] as VaccineInfo;
           final doseNumber = params['doseNumber'] as int;
+          final String? influenzaSeasonLabel =
+              params['influenzaSeasonLabel'] as String?;
+          final int? influenzaDoseOrder = params['influenzaDoseOrder'] as int?;
           return CupertinoPage(
             child: VaccineReservationPage(
               vaccine: vaccine,
               doseNumber: doseNumber,
+              influenzaSeasonLabel: influenzaSeasonLabel,
+              influenzaDoseOrder: influenzaDoseOrder,
             ),
           );
         },

@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../../domain/entities/dose_record.dart';
+import '../../domain/value_objects/influenza_season.dart';
 
 @immutable
 class DoseStatusInfo {
@@ -27,6 +28,7 @@ class VaccineDetailState {
     this.activeDoseNumber,
     this.pendingDoseNumber,
     this.recommendation,
+    this.influenzaSeasons = const <InfluenzaSeasonSchedule>[],
   });
 
   final bool isLoading;
@@ -36,6 +38,7 @@ class VaccineDetailState {
   final int? activeDoseNumber;
   final int? pendingDoseNumber;
   final DoseRecommendationInfo? recommendation;
+  final List<InfluenzaSeasonSchedule> influenzaSeasons;
 
   VaccineDetailState copyWith({
     bool? isLoading,
@@ -45,6 +48,7 @@ class VaccineDetailState {
     int? activeDoseNumber,
     int? pendingDoseNumber,
     DoseRecommendationInfo? recommendation,
+    List<InfluenzaSeasonSchedule>? influenzaSeasons,
     bool clearRecommendation = false,
     bool clearError = false,
   }) {
@@ -57,6 +61,7 @@ class VaccineDetailState {
       pendingDoseNumber: pendingDoseNumber ?? this.pendingDoseNumber,
       recommendation:
           clearRecommendation ? null : (recommendation ?? this.recommendation),
+      influenzaSeasons: influenzaSeasons ?? this.influenzaSeasons,
     );
   }
 }

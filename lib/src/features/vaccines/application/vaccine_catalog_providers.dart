@@ -16,6 +16,7 @@ import 'package:babymom_diary/src/features/vaccines/application/usecases/get_vac
 import 'package:babymom_diary/src/features/vaccines/application/usecases/watch_vaccination_record.dart';
 import 'package:babymom_diary/src/features/vaccines/application/usecases/watch_vaccination_records.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/services/vaccination_schedule_policy.dart';
+import 'package:babymom_diary/src/features/vaccines/domain/services/influenza_schedule_generator.dart';
 
 final vaccineCatalogRepositoryProvider =
     Provider<VaccineCatalogRepository>((ref) {
@@ -88,4 +89,9 @@ final getVaccineByIdProvider = Provider<GetVaccineById>((ref) {
 final vaccinationSchedulePolicyProvider =
     Provider<VaccinationSchedulePolicy>((ref) {
   return const VaccinationSchedulePolicy();
+});
+
+final influenzaScheduleGeneratorProvider =
+    Provider<InfluenzaScheduleGenerator>((ref) {
+  return const InfluenzaScheduleGenerator();
 });

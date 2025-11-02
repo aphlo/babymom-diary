@@ -10,11 +10,11 @@ enum AgeRange {
   String get label {
     switch (this) {
       case AgeRange.oneYear:
-        return '1歳';
+        return '1才';
       case AgeRange.twoYears:
-        return '2歳';
+        return '2才';
       case AgeRange.fourYears:
-        return '4歳';
+        return '4才';
     }
   }
 

@@ -9,6 +9,8 @@ import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_
 import 'package:babymom_diary/src/features/vaccines/application/usecases/watch_vaccination_records.dart';
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/features/children/application/selected_child_provider.dart';
+import 'package:babymom_diary/src/features/children/application/selected_child_snapshot_provider.dart';
+import 'package:babymom_diary/src/features/vaccines/domain/services/influenza_schedule_generator.dart';
 
 import '../mappers/vaccine_info_mapper.dart';
 import 'vaccines_view_data.dart';
@@ -17,14 +19,23 @@ final vaccinesViewModelProvider = AutoDisposeStateNotifierProvider<
     VaccinesViewModel, AsyncValue<VaccinesViewData>>((ref) {
   final getGuideline = ref.watch(getVaccineGuidelineProvider);
   final watchVaccinationRecords = ref.watch(watchVaccinationRecordsProvider);
+  final influenzaScheduleGenerator =
+      ref.watch(influenzaScheduleGeneratorProvider);
   final String? householdId = ref.watch(currentHouseholdIdProvider).value;
   final String? childId = ref.watch(selectedChildControllerProvider).value;
+
+  // 選択された子供の情報を取得
+  final selectedChildSnapshot = householdId != null
+      ? ref.watch(selectedChildSnapshotProvider(householdId)).value
+      : null;
 
   final viewModel = VaccinesViewModel(
     getGuideline: getGuideline,
     watchVaccinationRecords: watchVaccinationRecords,
+    influenzaScheduleGenerator: influenzaScheduleGenerator,
     householdId: householdId,
     childId: childId,
+    childBirthday: selectedChildSnapshot?.birthday,
   );
   viewModel.initialize();
   return viewModel;
@@ -34,16 +45,21 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
   VaccinesViewModel({
     required GetVaccineMaster getGuideline,
     required WatchVaccinationRecords watchVaccinationRecords,
+    required InfluenzaScheduleGenerator influenzaScheduleGenerator,
     this.householdId,
     this.childId,
+    this.childBirthday,
   })  : _getGuideline = getGuideline,
         _watchVaccinationRecords = watchVaccinationRecords,
+        _influenzaScheduleGenerator = influenzaScheduleGenerator,
         super(const AsyncValue.loading());
 
   final GetVaccineMaster _getGuideline;
   final WatchVaccinationRecords _watchVaccinationRecords;
+  final InfluenzaScheduleGenerator _influenzaScheduleGenerator;
   final String? householdId;
   final String? childId;
+  final DateTime? childBirthday;
 
   StreamSubscription<List<VaccinationRecord>>? _recordSubscription;
   VaccineMaster? _guideline;
@@ -100,7 +116,9 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
     state = AsyncValue.data(
       mapGuidelineToViewData(
         guideline,
+        influenzaScheduleGenerator: _influenzaScheduleGenerator,
         recordsByVaccine: recordMap,
+        childBirthday: childBirthday,
       ),
     );
   }

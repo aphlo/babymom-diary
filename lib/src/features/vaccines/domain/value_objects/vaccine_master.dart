@@ -637,62 +637,50 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
       schedule: <VaccineScheduleSlot>[
         VaccineScheduleSlot(
           periodId: '6ヶ月',
-          doseNumbers: <int>[1, 2],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
           periodId: '7ヶ月',
-          doseNumbers: <int>[1, 2],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
           periodId: '8ヶ月',
-          doseNumbers: <int>[1, 2],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
           periodId: '9ヶ月',
-          doseNumbers: <int>[1, 2],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
           periodId: '1才',
-          doseNumbers: <int>[1, 2],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
           periodId: '1才4ヶ月',
-          doseNumbers: <int>[1, 2],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
           periodId: '1才6ヶ月',
-          doseNumbers: <int>[1, 2],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
           periodId: '2才',
-          doseNumbers: <int>[1, 2],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
           periodId: '3才',
-          doseNumbers: <int>[1, 2],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
           periodId: '4才',
-          doseNumbers: <int>[1, 2],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
           periodId: '5才',
-          doseNumbers: <int>[1, 2],
           highlight: VaccinationPeriodHighlight.available,
         ),
         VaccineScheduleSlot(
           periodId: '6才',
-          doseNumbers: <int>[1, 2],
           highlight: VaccinationPeriodHighlight.available,
         ),
       ],
