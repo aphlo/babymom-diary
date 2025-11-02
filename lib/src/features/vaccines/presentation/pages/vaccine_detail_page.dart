@@ -405,7 +405,7 @@ class _DoseBadgePresentation {
       case DoseStatus.scheduled:
         return const _DoseBadgePresentation(
           label: '予約済',
-          baseColor: AppColors.secondary,
+          baseColor: AppColors.reserved,
           icon: Icons.event_available,
           status: DoseStatus.scheduled,
         );
