@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
+
 import '../models/vaccine_info.dart';
 import '../styles/vaccine_schedule_highlight_styles.dart';
 import '../styles/vaccine_type_styles.dart';
@@ -176,11 +179,13 @@ class DoseScheduleCell extends StatelessWidget {
     required this.doseNumbers,
     this.arrowSegment,
     this.highlightStyle,
+    this.doseStatuses = const <int, DoseStatus?>{},
   });
 
   final List<int> doseNumbers;
   final DoseArrowSegment? arrowSegment;
   final VaccinePeriodHighlightStyle? highlightStyle;
+  final Map<int, DoseStatus?> doseStatuses;
 
   @override
   Widget build(BuildContext context) {
@@ -207,14 +212,16 @@ class DoseScheduleCell extends StatelessWidget {
                 ),
               ),
               Center(
-                  child: DoseNumberBadge(
-                number: doseNumbers.first,
-                size: _doseBadgeDiameter,
-                fontSize: 12,
-                backgroundColor: badgeFillColor,
-                textColor: badgeTextColor,
-                borderColor: badgeBorderColor,
-              )),
+                child: DoseNumberBadge(
+                  number: doseNumbers.first,
+                  size: _doseBadgeDiameter,
+                  fontSize: 12,
+                  backgroundColor: badgeFillColor,
+                  textColor: badgeTextColor,
+                  borderColor: badgeBorderColor,
+                  status: doseStatuses[doseNumbers.first],
+                ),
+              ),
             ],
           );
         case DoseArrowSegment.middle:
@@ -272,6 +279,7 @@ class DoseScheduleCell extends StatelessWidget {
                   backgroundColor: badgeFillColor,
                   textColor: badgeTextColor,
                   borderColor: badgeBorderColor,
+                  status: doseStatuses[entry.value],
                 ),
               ),
             )
@@ -290,6 +298,7 @@ class DoseNumberBadge extends StatelessWidget {
     this.backgroundColor,
     this.textColor,
     this.borderColor,
+    this.status,
   });
 
   final int number;
@@ -298,12 +307,25 @@ class DoseNumberBadge extends StatelessWidget {
   final Color? backgroundColor;
   final Color? textColor;
   final Color? borderColor;
+  final DoseStatus? status;
 
   @override
   Widget build(BuildContext context) {
     final Color fallbackColor = Colors.grey.shade600;
-    final Color resolvedTextColor = textColor ?? fallbackColor;
-    final Color resolvedBorderColor = borderColor ?? fallbackColor;
+    Color resolvedTextColor = textColor ?? fallbackColor;
+    Color resolvedBorderColor = borderColor ?? fallbackColor;
+    Color? resolvedBackgroundColor = backgroundColor;
+
+    if (status == DoseStatus.scheduled) {
+      resolvedBackgroundColor = AppColors.reserved;
+      resolvedBorderColor = AppColors.reserved;
+      resolvedTextColor = Colors.white;
+    } else if (status == DoseStatus.completed) {
+      resolvedBackgroundColor = AppColors.vaccinated;
+      resolvedBorderColor = AppColors.vaccinated;
+      resolvedTextColor = Colors.white;
+    }
+
     final TextStyle textStyle =
         Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: resolvedTextColor,
@@ -322,7 +344,7 @@ class DoseNumberBadge extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: backgroundColor,
+        color: resolvedBackgroundColor,
         border: Border.all(color: resolvedBorderColor, width: 1.5),
       ),
       child: Text(

@@ -1,5 +1,6 @@
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine.dart'
     as domain;
+import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
 
 class VaccineInfo {
   const VaccineInfo({
@@ -11,6 +12,7 @@ class VaccineInfo {
     this.periodHighlights = const <String, domain.VaccinationPeriodHighlight>{},
     this.highlightPalette = VaccineHighlightPalette.primary,
     this.notes = const <VaccineGuidelineNote>[],
+    this.doseStatuses = const <int, DoseStatus?>{},
   });
 
   final String id;
@@ -21,6 +23,7 @@ class VaccineInfo {
   final Map<String, domain.VaccinationPeriodHighlight> periodHighlights;
   final VaccineHighlightPalette highlightPalette;
   final List<VaccineGuidelineNote> notes;
+  final Map<int, DoseStatus?> doseStatuses;
 }
 
 class VaccineGuidelineNote {

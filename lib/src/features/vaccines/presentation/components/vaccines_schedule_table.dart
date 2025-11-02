@@ -310,6 +310,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                                       ? DoseArrowSegment.start
                                       : null,
                                   highlightStyle: highlightStyle,
+                                  doseStatuses: vaccine.doseStatuses,
                                 ),
                               ),
                             );
@@ -344,6 +345,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                                           ? DoseArrowSegment.end
                                           : DoseArrowSegment.middle,
                                       highlightStyle: nextHighlightStyle,
+                                      doseStatuses: vaccine.doseStatuses,
                                     ),
                                   ),
                                 );
@@ -366,6 +368,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                               child: DoseScheduleCell(
                                 doseNumbers: doseNumbers,
                                 highlightStyle: highlightStyle,
+                                doseStatuses: vaccine.doseStatuses,
                               ),
                             ),
                           );
