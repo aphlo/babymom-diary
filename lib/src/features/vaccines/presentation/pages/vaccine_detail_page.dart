@@ -280,13 +280,17 @@ class VaccineDoseReservationBoard extends StatelessWidget {
                             vaccine != null &&
                             onReservationTap != null &&
                             statusInfo?.status != DoseStatus.completed;
-                        final String? scheduledLabel =
+                        final DateTime? scheduledDate =
+                            statusInfo?.scheduledDate;
+                        final bool showScheduledLabel =
                             statusInfo?.status == DoseStatus.scheduled &&
-                                    statusInfo?.scheduledDate != null
-                                ? DateFormatter.yyyyMMddE(
-                                    statusInfo!.scheduledDate!,
-                                  )
-                                : null;
+                                scheduledDate != null;
+                        final String? scheduledYearLabel = showScheduledLabel
+                            ? DateFormatter.yyyy(scheduledDate)
+                            : null;
+                        final String? scheduledDateLabel = showScheduledLabel
+                            ? DateFormatter.mmddE(scheduledDate)
+                            : null;
                         return Column(
                           children: [
                             _DoseStatusBadge(
@@ -297,23 +301,34 @@ class VaccineDoseReservationBoard extends StatelessWidget {
                                       context, vaccine!, doseNumbers[i])
                                   : null,
                             ),
-                            if (scheduledLabel != null) ...[
+                            if (scheduledYearLabel != null &&
+                                scheduledDateLabel != null) ...[
                               const SizedBox(height: 8),
                               SizedBox(
                                 width: 88,
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    scheduledLabel,
-                                    maxLines: 1,
-                                    softWrap: false,
-                                    overflow: TextOverflow.fade,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black87,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      scheduledYearLabel,
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black87,
+                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
-                                    textAlign: TextAlign.center,
-                                  ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      scheduledDateLabel,
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.black87,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],

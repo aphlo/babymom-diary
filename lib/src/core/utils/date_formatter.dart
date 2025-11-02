@@ -17,8 +17,18 @@ class DateFormatter {
     return DateFormat('yyyy年MM月').format(date);
   }
 
+  static String yyyy(DateTime date) {
+    return DateFormat('yyyy年').format(date);
+  }
+
   static String yyyyMMddE(DateTime date) {
     final formattedDate = DateFormat('yyyy年MM月dd日').format(date);
+    final weekday = _weekdayMap[date.weekday] ?? '';
+    return '$formattedDate($weekday)';
+  }
+
+  static String mmddE(DateTime date) {
+    final formattedDate = DateFormat('MM月dd日').format(date);
     final weekday = _weekdayMap[date.weekday] ?? '';
     return '$formattedDate($weekday)';
   }
