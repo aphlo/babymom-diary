@@ -318,8 +318,8 @@ class _DateSelectionCard extends StatelessWidget {
     DatePicker.showDatePicker(
       context,
       showTitleActions: true,
-      minTime: now,
-      maxTime: now.add(const Duration(days: 365 * 2)),
+      minTime: now.subtract(const Duration(days: 365 * 20)),
+      maxTime: now.add(const Duration(days: 365 * 100)),
       onConfirm: (date) {
         onDateSelected(date);
       },
