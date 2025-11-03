@@ -22,6 +22,15 @@ typedef VaccineReservationTap = void Function(
   int? influenzaDoseOrder,
 });
 
+typedef ScheduledDoseTap = void Function(
+  BuildContext context,
+  VaccineInfo vaccine,
+  int doseNumber,
+  DoseStatusInfo statusInfo, {
+  String? influenzaSeasonLabel,
+  int? influenzaDoseOrder,
+});
+
 class VaccineDetailPage extends ConsumerWidget {
   const VaccineDetailPage({
     super.key,
@@ -62,12 +71,25 @@ class VaccineDetailPage extends ConsumerWidget {
 
               final VaccineDetailState detailState =
                   ref.watch(vaccineDetailViewModelProvider(params));
+              final viewModel =
+                  ref.watch(vaccineDetailViewModelProvider(params).notifier);
 
               return _VaccineDetailContent(
                 vaccine: vaccine,
                 state: detailState,
                 childBirthday: childBirthday,
                 onReservationTap: _navigateToReservation,
+                onScheduledDoseTap: (context, vaccine, doseNumber, statusInfo,
+                        {influenzaSeasonLabel, influenzaDoseOrder}) =>
+                    _showScheduledDoseBottomSheet(
+                  context,
+                  vaccine,
+                  doseNumber,
+                  statusInfo,
+                  viewModel,
+                  influenzaSeasonLabel: influenzaSeasonLabel,
+                  influenzaDoseOrder: influenzaDoseOrder,
+                ),
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -103,6 +125,83 @@ class VaccineDetailPage extends ConsumerWidget {
       'influenzaDoseOrder': influenzaDoseOrder,
     });
   }
+
+  void _showScheduledDoseBottomSheet(
+    BuildContext context,
+    VaccineInfo vaccine,
+    int doseNumber,
+    DoseStatusInfo statusInfo,
+    VaccineDetailViewModel viewModel, {
+    String? influenzaSeasonLabel,
+    int? influenzaDoseOrder,
+  }) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return _ScheduledDoseBottomSheet(
+          vaccine: vaccine,
+          doseNumber: doseNumber,
+          statusInfo: statusInfo,
+          influenzaSeasonLabel: influenzaSeasonLabel,
+          influenzaDoseOrder: influenzaDoseOrder,
+          onMarkAsCompleted: () {
+            Navigator.of(context).pop();
+            _markDoseAsCompleted(context, vaccine, doseNumber, viewModel);
+          },
+          onShowDetails: () {
+            Navigator.of(context).pop();
+            _navigateToVaccineDetails(context, vaccine, doseNumber, statusInfo,
+                influenzaSeasonLabel: influenzaSeasonLabel,
+                influenzaDoseOrder: influenzaDoseOrder);
+          },
+        );
+      },
+    );
+  }
+
+  void _markDoseAsCompleted(
+    BuildContext context,
+    VaccineInfo vaccine,
+    int doseNumber,
+    VaccineDetailViewModel viewModel,
+  ) async {
+    try {
+      await viewModel.markDoseAsCompleted(doseNumber: doseNumber);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('接種済みに変更しました')),
+        );
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('接種済みへの変更に失敗しました: $error'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _navigateToVaccineDetails(
+    BuildContext context,
+    VaccineInfo vaccine,
+    int doseNumber,
+    DoseStatusInfo statusInfo, {
+    String? influenzaSeasonLabel,
+    int? influenzaDoseOrder,
+  }) {
+    context.push('/vaccines/scheduled-details', extra: {
+      'vaccine': vaccine,
+      'doseNumber': doseNumber,
+      'statusInfo': statusInfo,
+      'influenzaSeasonLabel': influenzaSeasonLabel,
+      'influenzaDoseOrder': influenzaDoseOrder,
+    });
+  }
 }
 
 class _VaccineDetailContent extends StatelessWidget {
@@ -111,12 +210,14 @@ class _VaccineDetailContent extends StatelessWidget {
     required this.state,
     required this.childBirthday,
     required this.onReservationTap,
+    required this.onScheduledDoseTap,
   });
 
   final VaccineInfo vaccine;
   final VaccineDetailState state;
   final DateTime? childBirthday;
   final VaccineReservationTap? onReservationTap;
+  final ScheduledDoseTap? onScheduledDoseTap;
 
   @override
   Widget build(BuildContext context) {
@@ -183,6 +284,7 @@ class _VaccineDetailContent extends StatelessWidget {
                     pendingDoseNumber: state.pendingDoseNumber,
                     vaccine: vaccine,
                     onReservationTap: onReservationTap,
+                    onScheduledDoseTap: onScheduledDoseTap,
                   )
                 else
                   VaccineDoseReservationBoard(
@@ -193,6 +295,7 @@ class _VaccineDetailContent extends StatelessWidget {
                     recommendationText: state.recommendation?.message,
                     vaccine: vaccine,
                     onReservationTap: onReservationTap,
+                    onScheduledDoseTap: onScheduledDoseTap,
                   ),
                 if (vaccine.notes.isNotEmpty) ...[
                   const SizedBox(height: 24),
@@ -250,6 +353,7 @@ class InfluenzaDoseReservationBoard extends StatelessWidget {
     this.pendingDoseNumber,
     this.vaccine,
     this.onReservationTap,
+    this.onScheduledDoseTap,
   });
 
   final List<InfluenzaSeasonSchedule> seasons;
@@ -259,6 +363,7 @@ class InfluenzaDoseReservationBoard extends StatelessWidget {
   final int? pendingDoseNumber;
   final VaccineInfo? vaccine;
   final VaccineReservationTap? onReservationTap;
+  final ScheduledDoseTap? onScheduledDoseTap;
 
   @override
   Widget build(BuildContext context) {
@@ -320,6 +425,7 @@ class InfluenzaDoseReservationBoard extends StatelessWidget {
                         seasonLabel: seasonLabel,
                         vaccine: vaccine,
                         onReservationTap: onReservationTap,
+                        onScheduledDoseTap: onScheduledDoseTap,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -335,6 +441,7 @@ class InfluenzaDoseReservationBoard extends StatelessWidget {
                         seasonLabel: seasonLabel,
                         vaccine: vaccine,
                         onReservationTap: onReservationTap,
+                        onScheduledDoseTap: onScheduledDoseTap,
                       ),
                     ),
                   ],
@@ -357,6 +464,7 @@ class _InfluenzaDoseCell extends StatelessWidget {
     required this.seasonLabel,
     this.vaccine,
     this.onReservationTap,
+    this.onScheduledDoseTap,
   });
 
   final int doseNumber;
@@ -366,6 +474,7 @@ class _InfluenzaDoseCell extends StatelessWidget {
   final String seasonLabel;
   final VaccineInfo? vaccine;
   final VaccineReservationTap? onReservationTap;
+  final ScheduledDoseTap? onScheduledDoseTap;
 
   @override
   Widget build(BuildContext context) {
@@ -416,7 +525,17 @@ class _InfluenzaDoseCell extends StatelessWidget {
                             : seasonLabel,
                     influenzaDoseOrder: displayOrder,
                   )
-              : null,
+              : (statusInfo?.status == DoseStatus.scheduled &&
+                      onScheduledDoseTap != null)
+                  ? () => onScheduledDoseTap!(
+                        context,
+                        vaccine!,
+                        doseNumber,
+                        statusInfo!,
+                        influenzaSeasonLabel: seasonLabel,
+                        influenzaDoseOrder: displayOrder,
+                      )
+                  : null,
         ),
         Container(
           height: 50, // 高さを少し縮める
@@ -467,6 +586,7 @@ class VaccineDoseReservationBoard extends StatelessWidget {
     this.recommendationText,
     this.vaccine,
     this.onReservationTap,
+    this.onScheduledDoseTap,
   });
 
   final List<int> doseNumbers;
@@ -476,6 +596,7 @@ class VaccineDoseReservationBoard extends StatelessWidget {
   final String? recommendationText;
   final VaccineInfo? vaccine;
   final VaccineReservationTap? onReservationTap;
+  final ScheduledDoseTap? onScheduledDoseTap;
 
   @override
   Widget build(BuildContext context) {
@@ -545,7 +666,16 @@ class VaccineDoseReservationBoard extends StatelessWidget {
                               onTap: canTap
                                   ? () => onReservationTap!(
                                       context, vaccine!, doseNumbers[i])
-                                  : null,
+                                  : (statusInfo?.status ==
+                                              DoseStatus.scheduled &&
+                                          onScheduledDoseTap != null)
+                                      ? () => onScheduledDoseTap!(
+                                            context,
+                                            vaccine!,
+                                            doseNumbers[i],
+                                            statusInfo!,
+                                          )
+                                      : null,
                             ),
                             if (scheduledYearLabel != null &&
                                 scheduledDateLabel != null) ...[
@@ -865,6 +995,127 @@ class _AsyncErrorView extends StatelessWidget {
           message,
           style: theme.textTheme.bodyMedium?.copyWith(color: Colors.red),
           textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+}
+
+class _ScheduledDoseBottomSheet extends StatelessWidget {
+  const _ScheduledDoseBottomSheet({
+    required this.vaccine,
+    required this.doseNumber,
+    required this.statusInfo,
+    required this.onMarkAsCompleted,
+    required this.onShowDetails,
+    this.influenzaSeasonLabel,
+    this.influenzaDoseOrder,
+  });
+
+  final VaccineInfo vaccine;
+  final int doseNumber;
+  final DoseStatusInfo statusInfo;
+  final VoidCallback onMarkAsCompleted;
+  final VoidCallback onShowDetails;
+  final String? influenzaSeasonLabel;
+  final int? influenzaDoseOrder;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bool isInfluenza = vaccine.id == 'influenza';
+
+    String doseLabel;
+    if (isInfluenza && influenzaDoseOrder != null) {
+      final String seasonPart = (influenzaSeasonLabel != null &&
+              influenzaSeasonLabel!.isNotEmpty &&
+              influenzaSeasonLabel != '未設定')
+          ? '${influenzaSeasonLabel!} '
+          : '';
+      doseLabel = '$seasonPart${influenzaDoseOrder!}回目';
+    } else {
+      doseLabel = '$doseNumber回目';
+    }
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ハンドル
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // タイトル
+              Text(
+                '${vaccine.name} $doseLabel',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+
+              // 予約済みステータス
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.event_available,
+                    color: AppColors.reserved,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '予約済み',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.reserved,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+
+              // ボタン
+              ElevatedButton.icon(
+                onPressed: onMarkAsCompleted,
+                icon: const Icon(Icons.check_circle),
+                label: const Text('接種済みにする'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              OutlinedButton.icon(
+                onPressed: onShowDetails,
+                icon: const Icon(Icons.info_outline),
+                label: const Text('詳細を確認する'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

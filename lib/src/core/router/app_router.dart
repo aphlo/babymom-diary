@@ -13,7 +13,10 @@ import '../../features/children/presentation/pages/edit_child_page.dart';
 import '../../features/household/presentation/pages/household_share_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_detail_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_reservation_page.dart';
+import '../../features/vaccines/presentation/pages/vaccine_scheduled_details_page.dart';
+import '../../features/vaccines/presentation/pages/vaccine_reschedule_page.dart';
 import '../../features/vaccines/presentation/models/vaccine_info.dart';
+import '../../features/vaccines/presentation/viewmodels/vaccine_detail_state.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -109,6 +112,50 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             child: VaccineReservationPage(
               vaccine: vaccine,
               doseNumber: doseNumber,
+              influenzaSeasonLabel: influenzaSeasonLabel,
+              influenzaDoseOrder: influenzaDoseOrder,
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/vaccines/scheduled-details',
+        name: 'vaccine_scheduled_details',
+        pageBuilder: (context, state) {
+          final params = state.extra as Map<String, dynamic>;
+          final vaccine = params['vaccine'] as VaccineInfo;
+          final doseNumber = params['doseNumber'] as int;
+          final statusInfo = params['statusInfo'] as DoseStatusInfo;
+          final String? influenzaSeasonLabel =
+              params['influenzaSeasonLabel'] as String?;
+          final int? influenzaDoseOrder = params['influenzaDoseOrder'] as int?;
+          return CupertinoPage(
+            child: VaccineScheduledDetailsPage(
+              vaccine: vaccine,
+              doseNumber: doseNumber,
+              statusInfo: statusInfo,
+              influenzaSeasonLabel: influenzaSeasonLabel,
+              influenzaDoseOrder: influenzaDoseOrder,
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/vaccines/reschedule',
+        name: 'vaccine_reschedule',
+        pageBuilder: (context, state) {
+          final params = state.extra as Map<String, dynamic>;
+          final vaccine = params['vaccine'] as VaccineInfo;
+          final doseNumber = params['doseNumber'] as int;
+          final statusInfo = params['statusInfo'] as DoseStatusInfo;
+          final String? influenzaSeasonLabel =
+              params['influenzaSeasonLabel'] as String?;
+          final int? influenzaDoseOrder = params['influenzaDoseOrder'] as int?;
+          return CupertinoPage(
+            child: VaccineReschedulePage(
+              vaccine: vaccine,
+              doseNumber: doseNumber,
+              statusInfo: statusInfo,
               influenzaSeasonLabel: influenzaSeasonLabel,
               influenzaDoseOrder: influenzaDoseOrder,
             ),

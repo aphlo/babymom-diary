@@ -9,6 +9,7 @@ import '../../application/usecases/watch_vaccination_record.dart';
 import '../../domain/entities/dose_record.dart';
 import '../../domain/entities/vaccination_record.dart';
 import '../../domain/entities/vaccine.dart';
+import '../../domain/repositories/vaccination_record_repository.dart';
 import '../../domain/services/vaccination_schedule_policy.dart';
 import '../../domain/value_objects/vaccination_recommendation.dart';
 import '../../domain/services/influenza_schedule_generator.dart';
@@ -22,16 +23,19 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
     required GetVaccineById getVaccineById,
     required VaccinationSchedulePolicy vaccinationSchedulePolicy,
     required InfluenzaScheduleGenerator influenzaScheduleGenerator,
+    required VaccinationRecordRepository vaccinationRecordRepository,
   })  : _watchVaccinationRecord = watchVaccinationRecord,
         _getVaccineById = getVaccineById,
         _vaccinationSchedulePolicy = vaccinationSchedulePolicy,
         _influenzaScheduleGenerator = influenzaScheduleGenerator,
+        _vaccinationRecordRepository = vaccinationRecordRepository,
         super(const VaccineDetailState());
 
   final WatchVaccinationRecord _watchVaccinationRecord;
   final GetVaccineById _getVaccineById;
   final VaccinationSchedulePolicy _vaccinationSchedulePolicy;
   final InfluenzaScheduleGenerator _influenzaScheduleGenerator;
+  final VaccinationRecordRepository _vaccinationRecordRepository;
 
   StreamSubscription<VaccinationRecord?>? _subscription;
   Vaccine? _vaccine;
@@ -42,6 +46,9 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
   List<InfluenzaSeasonSchedule> _influenzaSeasonSchedules =
       const <InfluenzaSeasonSchedule>[];
   bool _initialized = false;
+  String? _householdId;
+  String? _childId;
+  String? _vaccineId;
 
   void initialize({
     required String householdId,
@@ -55,6 +62,9 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
     }
     _initialized = true;
 
+    _householdId = householdId;
+    _childId = childId;
+    _vaccineId = vaccineId;
     _childBirthday = childBirthday;
     _doseNumbers = List<int>.from(doseNumbers)..sort();
 
@@ -313,6 +323,94 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
     return sorted;
   }
 
+  /// 接種を完了状態に更新
+  Future<void> markDoseAsCompleted({
+    required int doseNumber,
+    DateTime? completedDate,
+  }) async {
+    if (_householdId == null || _childId == null || _vaccineId == null) {
+      state = state.copyWith(error: '必要な情報が不足しています');
+      return;
+    }
+
+    try {
+      state = state.copyWith(isLoading: true, clearError: true);
+
+      await _vaccinationRecordRepository.completeVaccination(
+        householdId: _householdId!,
+        childId: _childId!,
+        vaccineId: _vaccineId!,
+        doseNumber: doseNumber,
+        completedDate: completedDate ?? DateTime.now(),
+      );
+
+      // 成功時はストリームから自動的に更新される
+    } catch (error) {
+      state = state.copyWith(
+        isLoading: false,
+        error: '接種完了の更新に失敗しました: $error',
+      );
+    }
+  }
+
+  /// ワクチン接種の予約を削除
+  Future<void> deleteVaccineReservation({
+    required int doseNumber,
+  }) async {
+    if (_householdId == null || _childId == null || _vaccineId == null) {
+      state = state.copyWith(error: '必要な情報が不足しています');
+      return;
+    }
+
+    try {
+      state = state.copyWith(isLoading: true, clearError: true);
+
+      await _vaccinationRecordRepository.deleteVaccineReservation(
+        householdId: _householdId!,
+        childId: _childId!,
+        vaccineId: _vaccineId!,
+        doseNumber: doseNumber,
+      );
+
+      // 成功時はストリームから自動的に更新される
+    } catch (error) {
+      state = state.copyWith(
+        isLoading: false,
+        error: '予約削除に失敗しました: $error',
+      );
+    }
+  }
+
+  /// ワクチン接種の予約を更新
+  Future<void> updateVaccineReservation({
+    required int doseNumber,
+    required DateTime scheduledDate,
+  }) async {
+    if (_householdId == null || _childId == null || _vaccineId == null) {
+      state = state.copyWith(error: '必要な情報が不足しています');
+      return;
+    }
+
+    try {
+      state = state.copyWith(isLoading: true, clearError: true);
+
+      await _vaccinationRecordRepository.updateVaccineReservation(
+        householdId: _householdId!,
+        childId: _childId!,
+        vaccineId: _vaccineId!,
+        doseNumber: doseNumber,
+        scheduledDate: scheduledDate,
+      );
+
+      // 成功時はストリームから自動的に更新される
+    } catch (error) {
+      state = state.copyWith(
+        isLoading: false,
+        error: '予約更新に失敗しました: $error',
+      );
+    }
+  }
+
   @override
   void dispose() {
     _subscription?.cancel();
@@ -328,11 +426,14 @@ final vaccineDetailViewModelProvider = StateNotifierProvider.autoDispose
     final schedulePolicy = ref.watch(vaccinationSchedulePolicyProvider);
     final influenzaScheduleGenerator =
         ref.watch(influenzaScheduleGeneratorProvider);
+    final vaccinationRecordRepository =
+        ref.watch(vaccinationRecordRepositoryProvider);
     final viewModel = VaccineDetailViewModel(
       watchVaccinationRecord: watchRecord,
       getVaccineById: getVaccineById,
       vaccinationSchedulePolicy: schedulePolicy,
       influenzaScheduleGenerator: influenzaScheduleGenerator,
+      vaccinationRecordRepository: vaccinationRecordRepository,
     );
     viewModel.initialize(
       householdId: params.householdId,
