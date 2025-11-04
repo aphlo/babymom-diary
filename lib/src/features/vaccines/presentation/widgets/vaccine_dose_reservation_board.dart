@@ -78,18 +78,26 @@ class VaccineDoseReservationBoard extends StatelessWidget {
                         final bool canTap = isActive &&
                             vaccine != null &&
                             onReservationTap != null &&
-                            statusInfo?.status != DoseStatus.completed;
+                            statusInfo?.status != DoseStatus.completed &&
+                            statusInfo?.status != DoseStatus.scheduled;
                         final DateTime? scheduledDate =
                             statusInfo?.scheduledDate;
-                        final bool showScheduledLabel =
-                            statusInfo?.status == DoseStatus.scheduled &&
-                                scheduledDate != null;
-                        final DateTime? effectiveDate =
-                            showScheduledLabel ? scheduledDate : null;
-                        final String? scheduledYearLabel = effectiveDate != null
+                        final DateTime? completedDate =
+                            statusInfo?.completedDate;
+                        final bool showDateLabel =
+                            (statusInfo?.status == DoseStatus.scheduled &&
+                                    scheduledDate != null) ||
+                                (statusInfo?.status == DoseStatus.completed &&
+                                    completedDate != null);
+                        final DateTime? effectiveDate = showDateLabel
+                            ? (statusInfo?.status == DoseStatus.completed
+                                ? completedDate
+                                : scheduledDate)
+                            : null;
+                        final String? dateYearLabel = effectiveDate != null
                             ? DateFormatter.yyyy(effectiveDate)
                             : null;
-                        final String? scheduledDateLabel = effectiveDate != null
+                        final String? dateDateLabel = effectiveDate != null
                             ? DateFormatter.mmddE(effectiveDate)
                             : null;
                         return Column(
@@ -114,8 +122,8 @@ class VaccineDoseReservationBoard extends StatelessWidget {
                                           )
                                       : null,
                             ),
-                            if (scheduledYearLabel != null &&
-                                scheduledDateLabel != null) ...[
+                            if (dateYearLabel != null &&
+                                dateDateLabel != null) ...[
                               const SizedBox(height: 8),
                               SizedBox(
                                 width: 88,
@@ -123,7 +131,7 @@ class VaccineDoseReservationBoard extends StatelessWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      scheduledYearLabel,
+                                      dateYearLabel,
                                       style:
                                           theme.textTheme.bodySmall?.copyWith(
                                         fontWeight: FontWeight.w500,
@@ -133,7 +141,7 @@ class VaccineDoseReservationBoard extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      scheduledDateLabel,
+                                      dateDateLabel,
                                       style:
                                           theme.textTheme.bodySmall?.copyWith(
                                         fontWeight: FontWeight.w700,
