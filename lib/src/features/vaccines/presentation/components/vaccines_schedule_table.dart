@@ -154,24 +154,36 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
           )
         : rawDoseNumbers;
 
-    final List<int> filteredBase = baseNumbers.where(
-      (int doseNumber) {
-        final String? overrideLabel = overrides[doseNumber];
-        return overrideLabel == null || overrideLabel == periodLabel;
-      },
-    ).toList(growable: false);
+    // 元々のガイドライン表示は常に表示する
+    final List<int> guidelineNumbers = baseNumbers.toList(growable: false);
 
+    // 予約による追加表示
     final Iterable<int> overrideAdditions = overrides.entries
         .where((MapEntry<int, String> entry) => entry.value == periodLabel)
         .map((MapEntry<int, String> entry) => entry.key);
 
     final Set<int> combined = <int>{
-      ...filteredBase,
+      ...guidelineNumbers,
       ...overrideAdditions,
     };
 
     final List<int> sorted = combined.toList()..sort();
     return sorted;
+  }
+
+  List<int> _getGuidelineDoseNumbers({
+    required VaccineInfo vaccine,
+    required String periodLabel,
+    required List<int> rawDoseNumbers,
+    required bool isInfluenza,
+  }) {
+    final Iterable<int> baseNumbers = isInfluenza
+        ? rawDoseNumbers.where(
+            (int doseNumber) => vaccine.doseStatuses[doseNumber] != null,
+          )
+        : rawDoseNumbers;
+
+    return baseNumbers.toList(growable: false);
   }
 
   @override
@@ -311,6 +323,21 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                             rawDoseNumbers: rawDoseNumbers,
                             isInfluenza: isInfluenza,
                           );
+                          final List<int> guidelineDoseNumbers =
+                              _getGuidelineDoseNumbers(
+                            vaccine: vaccine,
+                            periodLabel: periodLabel,
+                            rawDoseNumbers: rawDoseNumbers,
+                            isInfluenza: isInfluenza,
+                          );
+                          // 予約による追加表示の数字を取得
+                          final Map<int, String> overrides =
+                              vaccine.doseDisplayOverrides;
+                          final List<int> overrideAdditions = overrides.entries
+                              .where((MapEntry<int, String> entry) =>
+                                  entry.value == periodLabel)
+                              .map((MapEntry<int, String> entry) => entry.key)
+                              .toList();
 
                           if (isInfluenza && doseNumbers.isEmpty) {
                             periodCells.add(
@@ -372,6 +399,8 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                                       : null,
                                   highlightStyle: highlightStyle,
                                   doseStatuses: vaccine.doseStatuses,
+                                  guidelineDoseNumbers: guidelineDoseNumbers,
+                                  overrideAdditions: overrideAdditions,
                                 ),
                               ),
                             );
@@ -407,6 +436,8 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                                           : DoseArrowSegment.middle,
                                       highlightStyle: nextHighlightStyle,
                                       doseStatuses: vaccine.doseStatuses,
+                                      guidelineDoseNumbers: const <int>[],
+                                      overrideAdditions: const <int>[],
                                     ),
                                   ),
                                 );
@@ -430,6 +461,8 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                                 doseNumbers: doseNumbers,
                                 highlightStyle: highlightStyle,
                                 doseStatuses: vaccine.doseStatuses,
+                                guidelineDoseNumbers: guidelineDoseNumbers,
+                                overrideAdditions: overrideAdditions,
                               ),
                             ),
                           );

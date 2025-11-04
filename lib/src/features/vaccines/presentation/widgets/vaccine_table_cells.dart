@@ -180,12 +180,16 @@ class DoseScheduleCell extends StatelessWidget {
     this.arrowSegment,
     this.highlightStyle,
     this.doseStatuses = const <int, DoseStatus?>{},
+    this.guidelineDoseNumbers = const <int>[],
+    this.overrideAdditions = const <int>[],
   });
 
   final List<int> doseNumbers;
   final DoseArrowSegment? arrowSegment;
   final VaccinePeriodHighlightStyle? highlightStyle;
   final Map<int, DoseStatus?> doseStatuses;
+  final List<int> guidelineDoseNumbers;
+  final List<int> overrideAdditions;
 
   @override
   Widget build(BuildContext context) {
@@ -195,6 +199,14 @@ class DoseScheduleCell extends StatelessWidget {
     final Color? badgeBorderColor = highlightStyle?.badgeBorderColor;
 
     if (arrowSegment != null) {
+      // 矢印付きガイドラインの場合も背景と前景を分離
+      final List<int> actualDoses = overrideAdditions
+          .where((dose) =>
+              doseStatuses[dose] == DoseStatus.scheduled ||
+              doseStatuses[dose] == DoseStatus.completed)
+          .toList()
+        ..sort();
+
       switch (arrowSegment!) {
         case DoseArrowSegment.start:
           return Stack(
@@ -208,16 +220,28 @@ class DoseScheduleCell extends StatelessWidget {
                   endOffset: _gridBorderOverlap,
                 ),
               ),
-              if (doseNumbers.isNotEmpty)
+              // 背景：ガイドラインバッジ（highlightStyleの影響を受けない）
+              if (guidelineDoseNumbers.isNotEmpty)
                 Center(
                   child: DoseNumberBadge(
-                    number: doseNumbers.first,
+                    number: guidelineDoseNumbers.first,
+                    size: _doseBadgeDiameter,
+                    fontSize: 12,
+                    isGuidelineOnly: true,
+                    status: null,
+                  ),
+                ),
+              // 前景：実際の予約バッジ（highlightStyleを適用）
+              if (actualDoses.isNotEmpty)
+                Center(
+                  child: DoseNumberBadge(
+                    number: actualDoses.first,
                     size: _doseBadgeDiameter,
                     fontSize: 12,
                     backgroundColor: badgeFillColor,
                     textColor: badgeTextColor,
                     borderColor: badgeBorderColor,
-                    status: doseStatuses[doseNumbers.first],
+                    status: doseStatuses[actualDoses.first],
                   ),
                 ),
             ],
@@ -246,43 +270,67 @@ class DoseScheduleCell extends StatelessWidget {
       }
     }
 
-    if (doseNumbers.isEmpty) {
+    // 実際の予約がある回数を特定（予約による追加表示のみ）
+    final List<int> actualDoses = overrideAdditions
+        .where((dose) =>
+            doseStatuses[dose] == DoseStatus.scheduled ||
+            doseStatuses[dose] == DoseStatus.completed)
+        .toList()
+      ..sort();
+
+    if (guidelineDoseNumbers.isEmpty && actualDoses.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    final List<int> displayNumbers = List<int>.of(doseNumbers)..sort();
-
-    final bool isMultipleDoses = displayNumbers.length > 1;
+    // 複数のバッジがある場合はサイズを小さくする
+    final bool isMultiple =
+        (guidelineDoseNumbers.length + actualDoses.length) > 1;
     final double badgeSize =
-        isMultipleDoses ? _doseBadgeDiameterSmall : _doseBadgeDiameter;
-    final double spacing = isMultipleDoses ? 2 : 4;
-    final double fontSize = isMultipleDoses ? 10 : 12;
+        isMultiple ? _doseBadgeDiameterSmall : _doseBadgeDiameter;
+    final double fontSize = isMultiple ? 10 : 12;
+    final double spacing = isMultiple ? 1 : 2;
 
-    return Center(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: displayNumbers
-            .asMap()
-            .entries
-            .map(
-              (MapEntry<int, int> entry) => Padding(
-                padding: EdgeInsets.only(
-                  left: entry.key > 0 ? spacing : 0,
-                ),
-                child: DoseNumberBadge(
-                  number: entry.value,
+    return Stack(
+      children: [
+        // 背景として常にガイドラインバッジを描画（highlightStyleの影響を受けない）
+        if (guidelineDoseNumbers.isNotEmpty)
+          Center(
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: spacing,
+              children: guidelineDoseNumbers.map((dose) {
+                return DoseNumberBadge(
+                  number: dose,
+                  size: badgeSize,
+                  fontSize: fontSize,
+                  isGuidelineOnly: true,
+                  status: null,
+                );
+              }).toList(),
+            ),
+          ),
+        // 前景として実際の予約バッジを描画（highlightStyleを適用）
+        if (actualDoses.isNotEmpty)
+          Center(
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: spacing,
+              children: actualDoses.map((dose) {
+                return DoseNumberBadge(
+                  number: dose,
                   size: badgeSize,
                   fontSize: fontSize,
                   backgroundColor: badgeFillColor,
                   textColor: badgeTextColor,
                   borderColor: badgeBorderColor,
-                  status: doseStatuses[entry.value],
-                ),
-              ),
-            )
-            .toList(),
-      ),
+                  status: doseStatuses[dose],
+                );
+              }).toList(),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -297,6 +345,7 @@ class DoseNumberBadge extends StatelessWidget {
     this.textColor,
     this.borderColor,
     this.status,
+    this.isGuidelineOnly = false,
   });
 
   final int number;
@@ -306,6 +355,7 @@ class DoseNumberBadge extends StatelessWidget {
   final Color? textColor;
   final Color? borderColor;
   final DoseStatus? status;
+  final bool isGuidelineOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -314,7 +364,12 @@ class DoseNumberBadge extends StatelessWidget {
     Color resolvedBorderColor = borderColor ?? fallbackColor;
     Color? resolvedBackgroundColor = backgroundColor;
 
-    if (status == DoseStatus.scheduled) {
+    // ガイドライン表示の場合は、statusに関係なく固定の色を使用
+    if (isGuidelineOnly) {
+      resolvedBackgroundColor = Colors.white;
+      resolvedTextColor = Colors.grey.shade600;
+      resolvedBorderColor = Colors.grey.shade600;
+    } else if (status == DoseStatus.scheduled) {
       resolvedBackgroundColor = AppColors.reserved;
       resolvedBorderColor = AppColors.reserved;
       resolvedTextColor = Colors.white;
