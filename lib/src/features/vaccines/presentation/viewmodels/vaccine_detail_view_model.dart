@@ -327,11 +327,22 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
       return;
     }
 
+    final doseStatus = state.doseStatuses[doseNumber];
+    final resolvedCompletedDate =
+        completedDate ?? doseStatus?.completedDate ?? doseStatus?.scheduledDate;
+    if (resolvedCompletedDate == null) {
+      state = state.copyWith(
+        error: '接種日が設定されていません',
+        clearError: false,
+      );
+      return;
+    }
+
     try {
       state = state.copyWith(isLoading: true, clearError: true);
 
       final groupId = state.doseStatuses[doseNumber]?.reservationGroupId;
-      final completedAt = completedDate ?? DateTime.now();
+      final completedAt = resolvedCompletedDate;
 
       if (groupId != null && applyToGroup) {
         await _vaccinationRecordRepository.completeReservationGroup(
