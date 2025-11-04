@@ -169,6 +169,7 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
         doseNumber: widget.doseNumber,
         scheduledDate: _selectedDate!,
         applyToGroup: applyToGroup,
+        reservationGroupId: widget.statusInfo.reservationGroupId,
       );
 
       if (context.mounted) {
@@ -524,32 +525,6 @@ class _ConcurrentVaccinesCard extends ConsumerWidget {
             '同時接種するワクチンはありません',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: Colors.grey.shade600,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.orange.shade50,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.info_outline,
-                  color: Colors.orange.shade700,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '同時接種するワクチンがある場合、それらの日時も一緒に変更されます。',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.orange.shade700,
-                    ),
-                  ),
-                ),
-              ],
             ),
           ),
         ],

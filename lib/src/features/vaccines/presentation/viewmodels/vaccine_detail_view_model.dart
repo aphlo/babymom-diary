@@ -344,6 +344,14 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
       final groupId = state.doseStatuses[doseNumber]?.reservationGroupId;
       final completedAt = resolvedCompletedDate;
 
+      if (applyToGroup && groupId == null) {
+        state = state.copyWith(
+          isLoading: false,
+          error: '同時接種グループ情報の取得に失敗しました',
+        );
+        return;
+      }
+
       if (groupId != null && applyToGroup) {
         await _vaccinationRecordRepository.completeReservationGroup(
           householdId: _householdId!,
@@ -393,8 +401,17 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
     try {
       state = state.copyWith(isLoading: true, clearError: true);
 
-      final groupId = reservationGroupId ??
+      String? groupId = reservationGroupId ??
           state.doseStatuses[doseNumber]?.reservationGroupId;
+
+      if (applyToGroup && groupId == null) {
+        final record = await _vaccinationRecordRepository.getVaccinationRecord(
+          householdId: _householdId!,
+          childId: _childId!,
+          vaccineId: _vaccineId!,
+        );
+        groupId = record?.getDose(doseNumber)?.reservationGroupId;
+      }
 
       if (groupId != null && applyToGroup) {
         await _vaccinationRecordRepository.deleteReservationGroup(
@@ -435,6 +452,7 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
     required int doseNumber,
     required DateTime scheduledDate,
     bool applyToGroup = true,
+    String? reservationGroupId,
   }) async {
     if (_householdId == null || _childId == null || _vaccineId == null) {
       state = state.copyWith(error: '必要な情報が不足しています');
@@ -444,7 +462,8 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
     try {
       state = state.copyWith(isLoading: true, clearError: true);
 
-      final groupId = state.doseStatuses[doseNumber]?.reservationGroupId;
+      final groupId = reservationGroupId ??
+          state.doseStatuses[doseNumber]?.reservationGroupId;
 
       if (groupId != null && applyToGroup) {
         await _vaccinationRecordRepository.updateReservationGroupSchedule(
