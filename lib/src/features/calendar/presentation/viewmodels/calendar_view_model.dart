@@ -16,6 +16,7 @@ import 'package:babymom_diary/src/features/children/application/selected_child_p
 import 'package:babymom_diary/src/features/children/application/selected_child_snapshot_provider.dart';
 import 'package:babymom_diary/src/features/children/domain/entities/child_summary.dart';
 import 'package:babymom_diary/src/features/vaccines/application/vaccine_catalog_providers.dart';
+import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/repositories/vaccination_record_repository.dart';
 import 'package:babymom_diary/src/core/firebase/household_service.dart'
@@ -377,6 +378,32 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
         ),
       );
     }
+  }
+
+  ({
+    VaccinationRecord record,
+    DoseRecord dose,
+    int doseNumber,
+  })? findScheduledDoseByEventId(String eventId) {
+    final childId = _snapshotChild?.id;
+    if (childId == null || childId.isEmpty) {
+      return null;
+    }
+    for (final record in _latestVaccinationRecords) {
+      final doses = record.doses;
+      for (final entry in doses.entries) {
+        final dose = entry.value;
+        if (dose.status != DoseStatus.scheduled) {
+          continue;
+        }
+        final expectedId =
+            'vaccination_${childId}_${record.vaccineId}_${entry.key}';
+        if (expectedId == eventId) {
+          return (record: record, dose: dose, doseNumber: entry.key);
+        }
+      }
+    }
+    return null;
   }
 
   static Map<DateTime, List<CalendarEvent>> _groupEventsByDay(

@@ -15,9 +15,14 @@ import 'package:babymom_diary/src/features/calendar/presentation/widgets/calenda
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/calendar_error_banner.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/calendar_error_view.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/selected_day_event_list.dart';
-import 'package:babymom_diary/src/features/vaccines/presentation/models/vaccine_info.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine.dart'
     as domain;
+import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_category.dart'
+    as record_category;
+import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_requirement.dart'
+    as record_requirement;
+import 'package:babymom_diary/src/features/vaccines/presentation/models/vaccine_info.dart';
+import 'package:babymom_diary/src/features/vaccines/presentation/viewmodels/vaccine_detail_state.dart';
 
 class CalendarPage extends ConsumerStatefulWidget {
   const CalendarPage({super.key});
@@ -321,31 +326,38 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   }
 
   void _handleVaccinationEventTap(BuildContext context, CalendarEvent event) {
-    // イベントIDからワクチン情報を抽出
-    // vaccination_${childId}_${vaccineId}_${doseNumber} の形式
-    final parts = event.id.split('_');
-    if (parts.length < 4) return;
+    final viewModel = ref.read(calendarViewModelProvider.notifier);
+    final match = viewModel.findScheduledDoseByEventId(event.id);
 
-    final vaccineId = parts[2];
-    final doseNumber = int.tryParse(parts[3]);
+    if (match == null || match.dose.scheduledDate == null) {
+      _showCalendarSnack(context, '予約情報が見つかりませんでした');
+      return;
+    }
 
-    if (doseNumber == null) return;
+    final record = match.record;
+    final doseRecord = match.dose;
 
-    // ワクチン情報を作成（仮実装）
     final vaccine = VaccineInfo(
-      id: vaccineId,
-      name: event.title
-          .replaceAll(RegExp(r'\s+\d+回目$'), ''), // "ワクチン名 1回目" から "ワクチン名" を抽出
-      category: domain.VaccineCategory.inactivated, // 仮の値
-      requirement: domain.VaccineRequirement.mandatory, // 仮の値
+      id: record.vaccineId,
+      name: record.vaccineName,
+      category: _mapVaccineCategory(record.category),
+      requirement: _mapVaccineRequirement(record.requirement),
     );
 
-    // ワクチン予約ページに遷移
+    final statusInfo = DoseStatusInfo(
+      doseNumber: match.doseNumber,
+      status: doseRecord.status,
+      scheduledDate: doseRecord.scheduledDate,
+      completedDate: doseRecord.completedDate,
+      reservationGroupId: doseRecord.reservationGroupId,
+    );
+
     context.pushNamed(
-      'vaccine_reservation',
+      'vaccine_reschedule',
       extra: {
         'vaccine': vaccine,
-        'doseNumber': doseNumber,
+        'doseNumber': match.doseNumber,
+        'statusInfo': statusInfo,
       },
     );
   }
@@ -373,4 +385,32 @@ class _AppBarIconButton extends StatelessWidget {
       splashRadius: 16,
     );
   }
+}
+
+domain.VaccineCategory _mapVaccineCategory(
+  record_category.VaccineCategory category,
+) {
+  switch (category) {
+    case record_category.VaccineCategory.live:
+      return domain.VaccineCategory.live;
+    case record_category.VaccineCategory.inactivated:
+      return domain.VaccineCategory.inactivated;
+  }
+}
+
+domain.VaccineRequirement _mapVaccineRequirement(
+  record_requirement.VaccineRequirement requirement,
+) {
+  switch (requirement) {
+    case record_requirement.VaccineRequirement.mandatory:
+      return domain.VaccineRequirement.mandatory;
+    case record_requirement.VaccineRequirement.optional:
+      return domain.VaccineRequirement.optional;
+  }
+}
+
+void _showCalendarSnack(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message)),
+  );
 }
