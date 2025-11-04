@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-enum DoseStatus { scheduled, completed, skipped }
+enum DoseStatus { scheduled, completed }
 
 @immutable
 class DoseRecord {
@@ -9,12 +9,14 @@ class DoseRecord {
     required this.status,
     this.scheduledDate,
     this.completedDate,
+    this.reservationGroupId,
   });
 
   final int doseNumber;
   final DoseStatus status;
   final DateTime? scheduledDate;
   final DateTime? completedDate;
+  final String? reservationGroupId;
 
   /// 接種記録のコピーを作成
   DoseRecord copyWith({
@@ -22,12 +24,17 @@ class DoseRecord {
     DoseStatus? status,
     DateTime? scheduledDate,
     DateTime? completedDate,
+    String? reservationGroupId,
+    bool clearReservationGroup = false,
   }) {
     return DoseRecord(
       doseNumber: doseNumber ?? this.doseNumber,
       status: status ?? this.status,
       scheduledDate: scheduledDate ?? this.scheduledDate,
       completedDate: completedDate ?? this.completedDate,
+      reservationGroupId: clearReservationGroup
+          ? null
+          : (reservationGroupId ?? this.reservationGroupId),
     );
   }
 
@@ -39,18 +46,23 @@ class DoseRecord {
     );
   }
 
+  /// 同時接種グループと結びつけた予約済み状態に変更
+  DoseRecord markAsScheduledWithGroup({
+    required DateTime scheduledDate,
+    required String reservationGroupId,
+  }) {
+    return copyWith(
+      status: DoseStatus.scheduled,
+      scheduledDate: scheduledDate,
+      reservationGroupId: reservationGroupId,
+    );
+  }
+
   /// 完了状態に変更
   DoseRecord markAsCompleted(DateTime completedDate) {
     return copyWith(
       status: DoseStatus.completed,
       completedDate: completedDate,
-    );
-  }
-
-  /// スキップ状態に変更
-  DoseRecord markAsSkipped() {
-    return copyWith(
-      status: DoseStatus.skipped,
     );
   }
 
@@ -62,18 +74,21 @@ class DoseRecord {
           doseNumber == other.doseNumber &&
           status == other.status &&
           scheduledDate == other.scheduledDate &&
-          completedDate == other.completedDate;
+          completedDate == other.completedDate &&
+          reservationGroupId == other.reservationGroupId;
 
   @override
   int get hashCode =>
       doseNumber.hashCode ^
       status.hashCode ^
       scheduledDate.hashCode ^
-      completedDate.hashCode;
+      completedDate.hashCode ^
+      reservationGroupId.hashCode;
 
   @override
   String toString() {
     return 'DoseRecord(doseNumber: $doseNumber, status: $status, '
-        'scheduledDate: $scheduledDate, completedDate: $completedDate)';
+        'scheduledDate: $scheduledDate, completedDate: $completedDate, '
+        'reservationGroupId: $reservationGroupId)';
   }
 }

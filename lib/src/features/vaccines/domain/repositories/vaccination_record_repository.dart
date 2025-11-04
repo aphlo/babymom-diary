@@ -1,6 +1,7 @@
 import '../entities/vaccination_record.dart';
 import '../entities/vaccine_reservation_request.dart';
 import '../entities/vaccination_schedule.dart';
+import '../entities/reservation_group.dart';
 
 abstract class VaccinationRecordRepository {
   /// 指定した子供のワクチン接種記録を監視
@@ -35,12 +36,28 @@ abstract class VaccinationRecordRepository {
     required List<VaccineReservationRequest> requests,
   });
 
+  /// 同時接種グループとして予約を作成
+  Future<String> createReservationGroup({
+    required String householdId,
+    required String childId,
+    required DateTime scheduledDate,
+    required List<VaccineReservationRequest> requests,
+  });
+
   /// ワクチン接種の予約を更新
   Future<void> updateVaccineReservation({
     required String householdId,
     required String childId,
     required String vaccineId,
     required int doseNumber,
+    required DateTime scheduledDate,
+  });
+
+  /// 同時接種グループの予約日時を更新
+  Future<void> updateReservationGroupSchedule({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
     required DateTime scheduledDate,
   });
 
@@ -53,12 +70,22 @@ abstract class VaccinationRecordRepository {
     required DateTime completedDate,
   });
 
-  /// ワクチン接種をスキップ状態に更新
-  Future<void> skipVaccination({
+  /// 同時接種グループをまとめて完了状態に更新
+  Future<void> completeReservationGroup({
     required String householdId,
     required String childId,
+    required String reservationGroupId,
+    required DateTime completedDate,
+  });
+
+  /// 同時接種グループの特定メンバーのみ完了状態に更新
+  Future<void> completeReservationGroupMember({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
     required String vaccineId,
     required int doseNumber,
+    required DateTime completedDate,
   });
 
   /// ワクチン接種の予約を削除
@@ -67,6 +94,13 @@ abstract class VaccinationRecordRepository {
     required String childId,
     required String vaccineId,
     required int doseNumber,
+  });
+
+  /// 同時接種グループの予約をまとめて削除
+  Future<void> deleteReservationGroup({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
   });
 
   /// 指定した期間のワクチン接種予定を取得（カレンダー表示用）
@@ -88,5 +122,12 @@ abstract class VaccinationRecordRepository {
   Future<List<VaccinationRecord>> getAvailableVaccinesForReservation({
     required String householdId,
     required String childId,
+  });
+
+  /// 同時接種グループ情報を取得
+  Future<VaccinationReservationGroup?> getReservationGroup({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
   });
 }

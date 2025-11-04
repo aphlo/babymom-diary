@@ -147,6 +147,8 @@ class VaccineReservationViewModel
         // 複数のワクチン予約（同時接種）
         await _createVaccineReservation.createMultiple(
           householdId: householdId,
+          childId: childId,
+          scheduledDate: state.scheduledDate!,
           requests: requests,
         );
       }

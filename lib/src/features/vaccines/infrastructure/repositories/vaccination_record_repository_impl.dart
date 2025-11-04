@@ -1,6 +1,7 @@
 import '../../domain/entities/vaccination_record.dart';
 import '../../domain/entities/vaccine_reservation_request.dart';
 import '../../domain/entities/vaccination_schedule.dart';
+import '../../domain/entities/reservation_group.dart';
 import '../../domain/repositories/vaccination_record_repository.dart';
 import '../sources/vaccination_record_firestore_data_source.dart';
 
@@ -71,6 +72,21 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
   }
 
   @override
+  Future<String> createReservationGroup({
+    required String householdId,
+    required String childId,
+    required DateTime scheduledDate,
+    required List<VaccineReservationRequest> requests,
+  }) {
+    return _dataSource.createReservationGroup(
+      householdId: householdId,
+      childId: childId,
+      scheduledDate: scheduledDate,
+      requests: requests,
+    );
+  }
+
+  @override
   Future<void> updateVaccineReservation({
     required String householdId,
     required String childId,
@@ -83,6 +99,21 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
       childId: childId,
       vaccineId: vaccineId,
       doseNumber: doseNumber,
+      scheduledDate: scheduledDate,
+    );
+  }
+
+  @override
+  Future<void> updateReservationGroupSchedule({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+    required DateTime scheduledDate,
+  }) {
+    return _dataSource.updateReservationGroupSchedule(
+      householdId: householdId,
+      childId: childId,
+      reservationGroupId: reservationGroupId,
       scheduledDate: scheduledDate,
     );
   }
@@ -105,17 +136,36 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
   }
 
   @override
-  Future<void> skipVaccination({
+  Future<void> completeReservationGroup({
     required String householdId,
     required String childId,
-    required String vaccineId,
-    required int doseNumber,
+    required String reservationGroupId,
+    required DateTime completedDate,
   }) {
-    return _dataSource.skipVaccination(
+    return _dataSource.completeReservationGroup(
       householdId: householdId,
       childId: childId,
+      reservationGroupId: reservationGroupId,
+      completedDate: completedDate,
+    );
+  }
+
+  @override
+  Future<void> completeReservationGroupMember({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+    required String vaccineId,
+    required int doseNumber,
+    required DateTime completedDate,
+  }) {
+    return _dataSource.completeReservationGroupMember(
+      householdId: householdId,
+      childId: childId,
+      reservationGroupId: reservationGroupId,
       vaccineId: vaccineId,
       doseNumber: doseNumber,
+      completedDate: completedDate,
     );
   }
 
@@ -131,6 +181,19 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
       childId: childId,
       vaccineId: vaccineId,
       doseNumber: doseNumber,
+    );
+  }
+
+  @override
+  Future<void> deleteReservationGroup({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+  }) {
+    return _dataSource.deleteReservationGroup(
+      householdId: householdId,
+      childId: childId,
+      reservationGroupId: reservationGroupId,
     );
   }
 
@@ -181,5 +244,18 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
       final nextDose = record.nextAvailableDose;
       return nextDose != null && !record.hasScheduledDose;
     }).toList();
+  }
+
+  @override
+  Future<VaccinationReservationGroup?> getReservationGroup({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+  }) {
+    return _dataSource.getReservationGroup(
+      householdId: householdId,
+      childId: childId,
+      reservationGroupId: reservationGroupId,
+    );
   }
 }

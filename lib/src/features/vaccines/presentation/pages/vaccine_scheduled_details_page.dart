@@ -9,7 +9,9 @@ import '../../../children/application/selected_child_provider.dart';
 import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_state.dart';
 import '../viewmodels/vaccine_detail_view_model.dart';
+import '../viewmodels/concurrent_vaccines_view_model.dart';
 import '../widgets/vaccine_header.dart';
+import '../widgets/concurrent_vaccines_confirmation_dialog.dart';
 
 class VaccineScheduledDetailsPage extends ConsumerWidget {
   const VaccineScheduledDetailsPage({
@@ -86,8 +88,14 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
                     _ScheduledDateCard(statusInfo: statusInfo),
                     const SizedBox(height: 24),
 
-                    // 同時接種ワクチンカード（TODO: 実装）
-                    _ConcurrentVaccinesCard(),
+                    // 同時接種ワクチンカード
+                    _ConcurrentVaccinesCard(
+                      householdId: householdId,
+                      childId: childId,
+                      vaccine: vaccine,
+                      currentDoseNumber: doseNumber,
+                      reservationGroupId: statusInfo.reservationGroupId,
+                    ),
                   ],
                 ),
               );
@@ -246,10 +254,33 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
       childBirthday: null,
     );
 
+    final groupId = statusInfo.reservationGroupId;
+    bool applyToGroup = true;
+
+    if (groupId != null) {
+      final bool? userSelection =
+          await showConcurrentVaccinesConfirmationDialog(
+        context: context,
+        householdId: householdId,
+        childId: childId,
+        reservationGroupId: groupId,
+        currentVaccineId: vaccine.id,
+        currentDoseNumber: doseNumber,
+      );
+
+      if (userSelection == null) {
+        return;
+      }
+      applyToGroup = userSelection;
+    }
+
     try {
       final viewModel =
           ref.read(vaccineDetailViewModelProvider(params).notifier);
-      await viewModel.markDoseAsCompleted(doseNumber: doseNumber);
+      await viewModel.markDoseAsCompleted(
+        doseNumber: doseNumber,
+        applyToGroup: applyToGroup,
+      );
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -422,13 +453,6 @@ class _ScheduledDateCard extends StatelessWidget {
                             color: AppColors.reserved,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${scheduledDate.hour.toString().padLeft(2, '0')}:${scheduledDate.minute.toString().padLeft(2, '0')}',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: AppColors.reserved,
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -449,12 +473,122 @@ class _ScheduledDateCard extends StatelessWidget {
   }
 }
 
-class _ConcurrentVaccinesCard extends StatelessWidget {
-  const _ConcurrentVaccinesCard();
+class _ConcurrentVaccinesCard extends ConsumerWidget {
+  const _ConcurrentVaccinesCard({
+    required this.householdId,
+    required this.childId,
+    required this.vaccine,
+    required this.currentDoseNumber,
+    this.reservationGroupId,
+  });
+
+  final String householdId;
+  final String childId;
+  final VaccineInfo vaccine;
+  final int currentDoseNumber;
+  final String? reservationGroupId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final bool hasGroup =
+        reservationGroupId != null && reservationGroupId!.isNotEmpty;
+
+    final ConcurrentVaccinesState? concurrentState = hasGroup
+        ? ref.watch(
+            concurrentVaccinesViewModelProvider(
+              ConcurrentVaccinesParams(
+                householdId: householdId,
+                childId: childId,
+                reservationGroupId: reservationGroupId!,
+                currentVaccineId: vaccine.id,
+                currentDoseNumber: currentDoseNumber,
+              ),
+            ),
+          )
+        : null;
+
+    Widget buildContent() {
+      if (!hasGroup) {
+        return Text(
+          '同時接種するワクチンはありません',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: Colors.grey.shade600,
+          ),
+        );
+      }
+
+      if (concurrentState == null || concurrentState.isLoading) {
+        return const Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      if (concurrentState.error != null) {
+        return Text(
+          concurrentState.error!,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: Colors.red,
+          ),
+        );
+      }
+
+      if (concurrentState.members.isEmpty) {
+        return Text(
+          '同時接種するワクチンはありません',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: Colors.grey.shade600,
+          ),
+        );
+      }
+
+      final members = concurrentState.members;
+
+      return Column(
+        children: [
+          for (var i = 0; i < members.length; i++)
+            Container(
+              width: double.infinity,
+              margin: EdgeInsets.only(
+                bottom: i == members.length - 1 ? 0 : 12,
+              ),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.vaccines,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      members[i].vaccineName,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${members[i].doseNumber}回目',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.grey.shade700,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      );
+    }
 
     return Container(
       width: double.infinity,
@@ -490,13 +624,7 @@ class _ConcurrentVaccinesCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          // TODO: 同時接種ワクチンのリストを表示
-          Text(
-            '同時接種するワクチンはありません',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.grey.shade600,
-            ),
-          ),
+          buildContent(),
         ],
       ),
     );

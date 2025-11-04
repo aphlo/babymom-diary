@@ -251,6 +251,7 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
         status: doseRecord?.status,
         scheduledDate: doseRecord?.scheduledDate,
         completedDate: doseRecord?.completedDate,
+        reservationGroupId: doseRecord?.reservationGroupId,
       );
     }
     return statuses;
@@ -290,14 +291,6 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
       return pending.first;
     }
 
-    final skipped = sortedDoseNumbers.where((dose) {
-      final info = statuses[dose];
-      return info?.status == DoseStatus.skipped;
-    });
-    if (skipped.isNotEmpty) {
-      return skipped.first;
-    }
-
     return sortedDoseNumbers.last;
   }
 
@@ -327,6 +320,7 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
   Future<void> markDoseAsCompleted({
     required int doseNumber,
     DateTime? completedDate,
+    bool applyToGroup = true,
   }) async {
     if (_householdId == null || _childId == null || _vaccineId == null) {
       state = state.copyWith(error: '必要な情報が不足しています');
@@ -336,13 +330,34 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
     try {
       state = state.copyWith(isLoading: true, clearError: true);
 
-      await _vaccinationRecordRepository.completeVaccination(
-        householdId: _householdId!,
-        childId: _childId!,
-        vaccineId: _vaccineId!,
-        doseNumber: doseNumber,
-        completedDate: completedDate ?? DateTime.now(),
-      );
+      final groupId = state.doseStatuses[doseNumber]?.reservationGroupId;
+      final completedAt = completedDate ?? DateTime.now();
+
+      if (groupId != null && applyToGroup) {
+        await _vaccinationRecordRepository.completeReservationGroup(
+          householdId: _householdId!,
+          childId: _childId!,
+          reservationGroupId: groupId,
+          completedDate: completedAt,
+        );
+      } else if (groupId != null && !applyToGroup) {
+        await _vaccinationRecordRepository.completeReservationGroupMember(
+          householdId: _householdId!,
+          childId: _childId!,
+          reservationGroupId: groupId,
+          vaccineId: _vaccineId!,
+          doseNumber: doseNumber,
+          completedDate: completedAt,
+        );
+      } else {
+        await _vaccinationRecordRepository.completeVaccination(
+          householdId: _householdId!,
+          childId: _childId!,
+          vaccineId: _vaccineId!,
+          doseNumber: doseNumber,
+          completedDate: completedAt,
+        );
+      }
 
       // 成功時はストリームから自動的に更新される
     } catch (error) {
@@ -365,12 +380,22 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
     try {
       state = state.copyWith(isLoading: true, clearError: true);
 
-      await _vaccinationRecordRepository.deleteVaccineReservation(
-        householdId: _householdId!,
-        childId: _childId!,
-        vaccineId: _vaccineId!,
-        doseNumber: doseNumber,
-      );
+      final groupId = state.doseStatuses[doseNumber]?.reservationGroupId;
+
+      if (groupId != null) {
+        await _vaccinationRecordRepository.deleteReservationGroup(
+          householdId: _householdId!,
+          childId: _childId!,
+          reservationGroupId: groupId,
+        );
+      } else {
+        await _vaccinationRecordRepository.deleteVaccineReservation(
+          householdId: _householdId!,
+          childId: _childId!,
+          vaccineId: _vaccineId!,
+          doseNumber: doseNumber,
+        );
+      }
 
       // 成功時はストリームから自動的に更新される
     } catch (error) {
@@ -394,13 +419,24 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
     try {
       state = state.copyWith(isLoading: true, clearError: true);
 
-      await _vaccinationRecordRepository.updateVaccineReservation(
-        householdId: _householdId!,
-        childId: _childId!,
-        vaccineId: _vaccineId!,
-        doseNumber: doseNumber,
-        scheduledDate: scheduledDate,
-      );
+      final groupId = state.doseStatuses[doseNumber]?.reservationGroupId;
+
+      if (groupId != null) {
+        await _vaccinationRecordRepository.updateReservationGroupSchedule(
+          householdId: _householdId!,
+          childId: _childId!,
+          reservationGroupId: groupId,
+          scheduledDate: scheduledDate,
+        );
+      } else {
+        await _vaccinationRecordRepository.updateVaccineReservation(
+          householdId: _householdId!,
+          childId: _childId!,
+          vaccineId: _vaccineId!,
+          doseNumber: doseNumber,
+          scheduledDate: scheduledDate,
+        );
+      }
 
       // 成功時はストリームから自動的に更新される
     } catch (error) {

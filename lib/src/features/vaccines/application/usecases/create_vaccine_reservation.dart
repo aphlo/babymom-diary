@@ -20,12 +20,16 @@ class CreateVaccineReservation {
   /// 複数のワクチン接種予約を同時に作成（同時接種用）
   Future<void> createMultiple({
     required String householdId,
+    required String childId,
+    required DateTime scheduledDate,
     required List<VaccineReservationRequest> requests,
   }) async {
     if (requests.isEmpty) return;
 
-    await _repository.createMultipleVaccineReservations(
+    await _repository.createReservationGroup(
       householdId: householdId,
+      childId: childId,
+      scheduledDate: scheduledDate,
       requests: requests,
     );
   }

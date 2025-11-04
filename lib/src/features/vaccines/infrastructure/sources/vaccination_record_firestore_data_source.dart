@@ -2,582 +2,233 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../domain/entities/reservation_group.dart';
 import '../../domain/entities/vaccination_record.dart';
-import '../../domain/entities/dose_record.dart';
-import '../../domain/entities/vaccine_reservation_request.dart';
 import '../../domain/entities/vaccination_schedule.dart';
-import '../../domain/value_objects/vaccine_category.dart';
-import '../../domain/value_objects/vaccine_requirement.dart';
+import '../../domain/entities/vaccine_reservation_request.dart';
 import '../../domain/repositories/vaccine_master_repository.dart';
-
-class _ReservationTransactionItem {
-  const _ReservationTransactionItem({
-    required this.request,
-    required this.docRef,
-    required this.scheduledDateUtc,
-    required this.existingData,
-  });
-
-  final VaccineReservationRequest request;
-  final DocumentReference<Map<String, dynamic>> docRef;
-  final DateTime scheduledDateUtc;
-  final Map<String, dynamic>? existingData;
-}
+import '../../domain/services/reservation_group_domain_service.dart';
+import 'vaccination_record_firestore/reservation_group_firestore_commands.dart';
+import 'vaccination_record_firestore/vaccination_record_firestore_context.dart';
+import 'vaccination_record_firestore/vaccination_record_firestore_queries.dart';
+import 'vaccination_record_firestore/vaccine_reservation_firestore_commands.dart';
 
 class VaccinationRecordFirestoreDataSource {
   VaccinationRecordFirestoreDataSource(
-    this._firestore,
-    this._vaccineMasterRepository,
-  );
+    FirebaseFirestore firestore,
+    VaccineMasterRepository vaccineMasterRepository, {
+    ReservationGroupDomainService reservationGroupDomainService =
+        const ReservationGroupDomainService(),
+  }) {
+    final context = VaccinationRecordFirestoreContext(
+      firestore: firestore,
+      vaccineMasterRepository: vaccineMasterRepository,
+      reservationGroupDomainService: reservationGroupDomainService,
+    );
+    _queries = VaccinationRecordFirestoreQueries(context);
+    _reservationCommands = VaccineReservationFirestoreCommands(context);
+    _groupCommands = ReservationGroupFirestoreCommands(context);
+  }
 
-  final FirebaseFirestore _firestore;
-  final VaccineMasterRepository _vaccineMasterRepository;
+  late final VaccinationRecordFirestoreQueries _queries;
+  late final VaccineReservationFirestoreCommands _reservationCommands;
+  late final ReservationGroupFirestoreCommands _groupCommands;
 
-  /// 指定した子供のワクチン接種記録を監視
   Stream<List<VaccinationRecord>> watchVaccinationRecords({
     required String householdId,
     required String childId,
   }) {
-    return _firestore
-        .collection('households')
-        .doc(householdId)
-        .collection('children')
-        .doc(childId)
-        .collection('vaccination_records')
-        .snapshots()
-        .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => _mapDocumentToVaccinationRecord(doc))
-          .where((record) => record != null)
-          .cast<VaccinationRecord>()
-          .toList();
-    }).handleError((error) {
-      // エラーが発生した場合は空のリストを返す
-      return <VaccinationRecord>[];
-    });
+    return _queries.watchVaccinationRecords(
+      householdId: householdId,
+      childId: childId,
+    );
   }
 
-  /// 指定した子供の特定のワクチン接種記録を監視
   Stream<VaccinationRecord?> watchVaccinationRecord({
     required String householdId,
     required String childId,
     required String vaccineId,
   }) {
-    final docRef = _firestore
-        .collection('households')
-        .doc(householdId)
-        .collection('children')
-        .doc(childId)
-        .collection('vaccination_records')
-        .doc(vaccineId);
-
-    return docRef.snapshots().map((snapshot) {
-      if (!snapshot.exists) return null;
-      return _mapDocumentSnapshotToVaccinationRecord(snapshot);
-    }).handleError((error) {
-      return null;
-    });
+    return _queries.watchVaccinationRecord(
+      householdId: householdId,
+      childId: childId,
+      vaccineId: vaccineId,
+    );
   }
 
-  /// 指定した子供の特定のワクチン接種記録を取得
   Future<VaccinationRecord?> getVaccinationRecord({
     required String householdId,
     required String childId,
     required String vaccineId,
-  }) async {
-    try {
-      final doc = await _firestore
-          .collection('households')
-          .doc(householdId)
-          .collection('children')
-          .doc(childId)
-          .collection('vaccination_records')
-          .doc(vaccineId)
-          .get();
-
-      if (!doc.exists) return null;
-      return _mapDocumentSnapshotToVaccinationRecord(doc);
-    } catch (error) {
-      rethrow;
-    }
+  }) {
+    return _queries.getVaccinationRecord(
+      householdId: householdId,
+      childId: childId,
+      vaccineId: vaccineId,
+    );
   }
 
-  /// ワクチン接種の予約を作成
   Future<void> createVaccineReservation({
     required String householdId,
     required VaccineReservationRequest request,
-  }) async {
-    try {
-      final nowUtc = DateTime.now().toUtc();
-      final scheduledDateUtc = request.scheduledDate.toUtc();
-
-      final docRef = _firestore
-          .collection('households')
-          .doc(householdId)
-          .collection('children')
-          .doc(request.childId)
-          .collection('vaccination_records')
-          .doc(request.vaccineId);
-
-      await _executeWithRetry(() async {
-        await _firestore.runTransaction((transaction) async {
-          final doc = await transaction.get(docRef);
-
-          if (doc.exists) {
-            // 既存の記録に新しい接種を追加
-            final currentData = doc.data() as Map<String, dynamic>;
-            final doses = Map<String, dynamic>.from(currentData['doses'] ?? {});
-
-            doses[request.doseNumber.toString()] = {
-              'status': 'scheduled',
-              'scheduledDate': Timestamp.fromDate(scheduledDateUtc),
-            };
-
-            transaction.update(docRef, {
-              'doses': doses,
-              'updatedAt': Timestamp.fromDate(nowUtc),
-            });
-          } else {
-            // 新しい接種記録を作成
-            final vaccine = await _vaccineMasterRepository
-                .getVaccineById(request.vaccineId);
-            if (vaccine == null) {
-              throw Exception('Vaccine not found: ${request.vaccineId}');
-            }
-
-            transaction.set(docRef, {
-              'vaccineId': request.vaccineId,
-              'vaccineName': vaccine.name,
-              'category': vaccine.category.name,
-              'requirement': vaccine.requirement.name,
-              'doses': {
-                request.doseNumber.toString(): {
-                  'status': 'scheduled',
-                  'scheduledDate': Timestamp.fromDate(scheduledDateUtc),
-                }
-              },
-              'createdAt': Timestamp.fromDate(nowUtc),
-              'updatedAt': Timestamp.fromDate(nowUtc),
-            });
-          }
-        });
-      });
-    } catch (error) {
-      rethrow;
-    }
+  }) {
+    return _reservationCommands.createVaccineReservation(
+      householdId: householdId,
+      request: request,
+    );
   }
 
-  /// 複数のワクチン接種の予約を同時に作成（同時接種用）
   Future<void> createMultipleVaccineReservations({
     required String householdId,
     required List<VaccineReservationRequest> requests,
-  }) async {
-    if (requests.isEmpty) return;
-
-    try {
-      final nowUtc = DateTime.now().toUtc();
-
-      await _executeWithRetry(() async {
-        await _firestore.runTransaction((transaction) async {
-          final pendingItems = <_ReservationTransactionItem>[];
-
-          // すべてのドキュメントを先に読み込む（書き込みより前に全ての読み取りを実行）
-          for (final request in requests) {
-            final scheduledDateUtc = request.scheduledDate.toUtc();
-
-            final docRef = _firestore
-                .collection('households')
-                .doc(householdId)
-                .collection('children')
-                .doc(request.childId)
-                .collection('vaccination_records')
-                .doc(request.vaccineId);
-
-            final snapshot = await transaction.get(docRef);
-            final existingData = snapshot.exists
-                ? Map<String, dynamic>.from(snapshot.data()!)
-                : null;
-
-            pendingItems.add(
-              _ReservationTransactionItem(
-                request: request,
-                docRef: docRef,
-                scheduledDateUtc: scheduledDateUtc,
-                existingData: existingData,
-              ),
-            );
-          }
-
-          // 予約の書き込みを実行
-          for (final item in pendingItems) {
-            final request = item.request;
-            final docRef = item.docRef;
-            final scheduledDateUtc = item.scheduledDateUtc;
-
-            if (item.existingData != null) {
-              final doses =
-                  Map<String, dynamic>.from(item.existingData!['doses'] ?? {});
-              doses[request.doseNumber.toString()] = {
-                'status': 'scheduled',
-                'scheduledDate': Timestamp.fromDate(scheduledDateUtc),
-              };
-
-              transaction.update(docRef, {
-                'doses': doses,
-                'updatedAt': Timestamp.fromDate(nowUtc),
-              });
-              continue;
-            }
-
-            final vaccine = await _vaccineMasterRepository
-                .getVaccineById(request.vaccineId);
-            if (vaccine == null) {
-              throw Exception('Vaccine not found: ${request.vaccineId}');
-            }
-
-            transaction.set(docRef, {
-              'vaccineId': request.vaccineId,
-              'vaccineName': vaccine.name,
-              'category': vaccine.category.name,
-              'requirement': vaccine.requirement.name,
-              'doses': {
-                request.doseNumber.toString(): {
-                  'status': 'scheduled',
-                  'scheduledDate': Timestamp.fromDate(scheduledDateUtc),
-                }
-              },
-              'createdAt': Timestamp.fromDate(nowUtc),
-              'updatedAt': Timestamp.fromDate(nowUtc),
-            });
-          }
-        });
-      });
-    } catch (error) {
-      rethrow;
-    }
+  }) {
+    return _reservationCommands.createMultipleVaccineReservations(
+      householdId: householdId,
+      requests: requests,
+    );
   }
 
-  /// ワクチン接種の予約を更新
+  Future<String> createReservationGroup({
+    required String householdId,
+    required String childId,
+    required DateTime scheduledDate,
+    required List<VaccineReservationRequest> requests,
+  }) {
+    return _groupCommands.createReservationGroup(
+      householdId: householdId,
+      childId: childId,
+      scheduledDate: scheduledDate,
+      requests: requests,
+    );
+  }
+
+  Future<void> updateReservationGroupSchedule({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+    required DateTime scheduledDate,
+  }) {
+    return _groupCommands.updateReservationGroupSchedule(
+      householdId: householdId,
+      childId: childId,
+      reservationGroupId: reservationGroupId,
+      scheduledDate: scheduledDate,
+    );
+  }
+
+  Future<void> completeReservationGroup({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+    required DateTime completedDate,
+  }) {
+    return _groupCommands.completeReservationGroup(
+      householdId: householdId,
+      childId: childId,
+      reservationGroupId: reservationGroupId,
+      completedDate: completedDate,
+    );
+  }
+
+  Future<void> completeReservationGroupMember({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+    required String vaccineId,
+    required int doseNumber,
+    required DateTime completedDate,
+  }) {
+    return _groupCommands.completeReservationGroupMember(
+      householdId: householdId,
+      childId: childId,
+      reservationGroupId: reservationGroupId,
+      vaccineId: vaccineId,
+      doseNumber: doseNumber,
+      completedDate: completedDate,
+    );
+  }
+
+  Future<void> deleteReservationGroup({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+  }) {
+    return _groupCommands.deleteReservationGroup(
+      householdId: householdId,
+      childId: childId,
+      reservationGroupId: reservationGroupId,
+    );
+  }
+
+  Future<VaccinationReservationGroup?> getReservationGroup({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+  }) {
+    return _groupCommands.getReservationGroup(
+      householdId: householdId,
+      childId: childId,
+      reservationGroupId: reservationGroupId,
+    );
+  }
+
   Future<void> updateVaccineReservation({
     required String householdId,
     required String childId,
     required String vaccineId,
     required int doseNumber,
     required DateTime scheduledDate,
-  }) async {
-    try {
-      final nowUtc = DateTime.now().toUtc();
-      final scheduledDateUtc = scheduledDate.toUtc();
-
-      final docRef = _firestore
-          .collection('households')
-          .doc(householdId)
-          .collection('children')
-          .doc(childId)
-          .collection('vaccination_records')
-          .doc(vaccineId);
-
-      await _executeWithRetry(() async {
-        await _firestore.runTransaction((transaction) async {
-          final doc = await transaction.get(docRef);
-
-          if (!doc.exists) {
-            throw Exception('Vaccination record not found: $vaccineId');
-          }
-
-          final currentData = doc.data() as Map<String, dynamic>;
-          final doses = Map<String, dynamic>.from(currentData['doses'] ?? {});
-
-          if (!doses.containsKey(doseNumber.toString())) {
-            throw Exception('Dose record not found: $doseNumber');
-          }
-
-          doses[doseNumber.toString()] = {
-            'status': 'scheduled',
-            'scheduledDate': Timestamp.fromDate(scheduledDateUtc),
-          };
-
-          transaction.update(docRef, {
-            'doses': doses,
-            'updatedAt': Timestamp.fromDate(nowUtc),
-          });
-        });
-      });
-    } catch (error) {
-      rethrow;
-    }
+  }) {
+    return _reservationCommands.updateVaccineReservation(
+      householdId: householdId,
+      childId: childId,
+      vaccineId: vaccineId,
+      doseNumber: doseNumber,
+      scheduledDate: scheduledDate,
+    );
   }
 
-  /// ワクチン接種を完了状態に更新
   Future<void> completeVaccination({
     required String householdId,
     required String childId,
     required String vaccineId,
     required int doseNumber,
     required DateTime completedDate,
-  }) async {
-    try {
-      final nowUtc = DateTime.now().toUtc();
-      final completedDateUtc = completedDate.toUtc();
-
-      final docRef = _firestore
-          .collection('households')
-          .doc(householdId)
-          .collection('children')
-          .doc(childId)
-          .collection('vaccination_records')
-          .doc(vaccineId);
-
-      await _executeWithRetry(() async {
-        await _firestore.runTransaction((transaction) async {
-          final doc = await transaction.get(docRef);
-
-          if (!doc.exists) {
-            throw Exception('Vaccination record not found: $vaccineId');
-          }
-
-          final currentData = doc.data() as Map<String, dynamic>;
-          final doses = Map<String, dynamic>.from(currentData['doses'] ?? {});
-
-          if (!doses.containsKey(doseNumber.toString())) {
-            throw Exception('Dose record not found: $doseNumber');
-          }
-
-          doses[doseNumber.toString()] = {
-            'status': 'completed',
-            'completedDate': Timestamp.fromDate(completedDateUtc),
-          };
-
-          transaction.update(docRef, {
-            'doses': doses,
-            'updatedAt': Timestamp.fromDate(nowUtc),
-          });
-        });
-      });
-    } catch (error) {
-      rethrow;
-    }
+  }) {
+    return _reservationCommands.completeVaccination(
+      householdId: householdId,
+      childId: childId,
+      vaccineId: vaccineId,
+      doseNumber: doseNumber,
+      completedDate: completedDate,
+    );
   }
 
-  /// ワクチン接種をスキップ状態に更新
-  Future<void> skipVaccination({
-    required String householdId,
-    required String childId,
-    required String vaccineId,
-    required int doseNumber,
-  }) async {
-    try {
-      final nowUtc = DateTime.now().toUtc();
-
-      final docRef = _firestore
-          .collection('households')
-          .doc(householdId)
-          .collection('children')
-          .doc(childId)
-          .collection('vaccination_records')
-          .doc(vaccineId);
-
-      await _executeWithRetry(() async {
-        await _firestore.runTransaction((transaction) async {
-          final doc = await transaction.get(docRef);
-
-          if (!doc.exists) {
-            throw Exception('Vaccination record not found: $vaccineId');
-          }
-
-          final currentData = doc.data() as Map<String, dynamic>;
-          final doses = Map<String, dynamic>.from(currentData['doses'] ?? {});
-
-          if (!doses.containsKey(doseNumber.toString())) {
-            throw Exception('Dose record not found: $doseNumber');
-          }
-
-          doses[doseNumber.toString()] = {
-            'status': 'skipped',
-          };
-
-          transaction.update(docRef, {
-            'doses': doses,
-            'updatedAt': Timestamp.fromDate(nowUtc),
-          });
-        });
-      });
-    } catch (error) {
-      rethrow;
-    }
-  }
-
-  /// ワクチン接種の予約を削除
   Future<void> deleteVaccineReservation({
     required String householdId,
     required String childId,
     required String vaccineId,
     required int doseNumber,
-  }) async {
-    try {
-      final nowUtc = DateTime.now().toUtc();
-
-      final docRef = _firestore
-          .collection('households')
-          .doc(householdId)
-          .collection('children')
-          .doc(childId)
-          .collection('vaccination_records')
-          .doc(vaccineId);
-
-      await _executeWithRetry(() async {
-        await _firestore.runTransaction((transaction) async {
-          final doc = await transaction.get(docRef);
-
-          if (!doc.exists) {
-            throw Exception('Vaccination record not found: $vaccineId');
-          }
-
-          final currentData = doc.data() as Map<String, dynamic>;
-          final doses = Map<String, dynamic>.from(currentData['doses'] ?? {});
-
-          if (!doses.containsKey(doseNumber.toString())) {
-            throw Exception('Dose record not found: $doseNumber');
-          }
-
-          doses.remove(doseNumber.toString());
-
-          if (doses.isEmpty) {
-            // 全ての接種記録が削除された場合はドキュメント自体を削除
-            transaction.delete(docRef);
-          } else {
-            transaction.update(docRef, {
-              'doses': doses,
-              'updatedAt': Timestamp.fromDate(nowUtc),
-            });
-          }
-        });
-      });
-    } catch (error) {
-      rethrow;
-    }
+  }) {
+    return _reservationCommands.deleteVaccineReservation(
+      householdId: householdId,
+      childId: childId,
+      vaccineId: vaccineId,
+      doseNumber: doseNumber,
+    );
   }
 
-  /// 指定した期間のワクチン接種予定を取得（カレンダー表示用）
   Future<List<VaccinationSchedule>> getVaccinationSchedules({
     required String householdId,
     required String childId,
     required DateTime startDate,
     required DateTime endDate,
-  }) async {
-    try {
-      final startUtc = startDate.toUtc();
-      final endUtc = endDate.toUtc();
-
-      final snapshot = await _firestore
-          .collection('households')
-          .doc(householdId)
-          .collection('children')
-          .doc(childId)
-          .collection('vaccination_records')
-          .get();
-
-      final schedules = <VaccinationSchedule>[];
-
-      for (final doc in snapshot.docs) {
-        final record = _mapDocumentToVaccinationRecord(doc);
-        if (record == null) continue;
-
-        // 各接種記録から予定されている接種を抽出
-        for (final entry in record.doses.entries) {
-          final doseNumber = entry.key;
-          final doseRecord = entry.value;
-
-          if (doseRecord.status == DoseStatus.scheduled &&
-              doseRecord.scheduledDate != null) {
-            final scheduledDate = doseRecord.scheduledDate!;
-
-            // 指定期間内の予定のみを含める
-            if (scheduledDate
-                    .isAfter(startUtc.subtract(const Duration(days: 1))) &&
-                scheduledDate.isBefore(endUtc.add(const Duration(days: 1)))) {
-              schedules.add(VaccinationSchedule(
-                childId: childId,
-                vaccineId: record.vaccineId,
-                vaccineName: record.vaccineName,
-                doseNumber: doseNumber,
-                scheduledDate: scheduledDate,
-                category: record.category,
-                requirement: record.requirement,
-              ));
-            }
-          }
-        }
-      }
-
-      return schedules
-        ..sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
-    } catch (error) {
-      rethrow;
-    }
-  }
-
-  /// 指定した日付のワクチン接種予定を取得
-  /// DocumentSnapshotを VaccinationRecord に変換
-  VaccinationRecord? _mapDocumentSnapshotToVaccinationRecord(
-    DocumentSnapshot<Map<String, dynamic>> doc,
-  ) {
-    try {
-      final data = doc.data();
-      if (data == null) return null;
-      return _mapDataToVaccinationRecord(data, doc.id);
-    } catch (error) {
-      return null;
-    }
-  }
-
-  /// データマップを VaccinationRecord に変換
-  VaccinationRecord? _mapDataToVaccinationRecord(
-    Map<String, dynamic> data,
-    String docId,
-  ) {
-    final dosesData = data['doses'] as Map<String, dynamic>? ?? {};
-    final doses = <int, DoseRecord>{};
-
-    for (final entry in dosesData.entries) {
-      final doseNumber = int.tryParse(entry.key);
-      if (doseNumber == null) continue;
-
-      final doseData = entry.value as Map<String, dynamic>;
-      final statusString = doseData['status'] as String?;
-      final status = _parseDoseStatus(statusString);
-      if (status == null) continue;
-
-      final scheduledTimestamp = doseData['scheduledDate'] as Timestamp?;
-      final completedTimestamp = doseData['completedDate'] as Timestamp?;
-
-      doses[doseNumber] = DoseRecord(
-        doseNumber: doseNumber,
-        status: status,
-        scheduledDate: scheduledTimestamp?.toDate(),
-        completedDate: completedTimestamp?.toDate(),
-      );
-    }
-
-    final categoryString = data['category'] as String?;
-    final requirementString = data['requirement'] as String?;
-
-    final category = _parseVaccineCategory(categoryString);
-    final requirement = _parseVaccineRequirement(requirementString);
-
-    if (category == null || requirement == null) return null;
-
-    final createdTimestamp = data['createdAt'] as Timestamp?;
-    final updatedTimestamp = data['updatedAt'] as Timestamp?;
-
-    return VaccinationRecord(
-      vaccineId: data['vaccineId'] as String? ?? docId,
-      vaccineName: data['vaccineName'] as String? ?? '',
-      category: category,
-      requirement: requirement,
-      doses: doses,
-      createdAt: createdTimestamp?.toDate() ?? DateTime.now(),
-      updatedAt: updatedTimestamp?.toDate() ?? DateTime.now(),
+  }) {
+    return _queries.getVaccinationSchedules(
+      householdId: householdId,
+      childId: childId,
+      startDate: startDate,
+      endDate: endDate,
     );
   }
 
@@ -585,85 +236,11 @@ class VaccinationRecordFirestoreDataSource {
     required String householdId,
     required String childId,
     required DateTime date,
-  }) async {
-    final startOfDay = DateTime(date.year, date.month, date.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1));
-
-    return getVaccinationSchedules(
+  }) {
+    return _queries.getVaccinationSchedulesForDate(
       householdId: householdId,
       childId: childId,
-      startDate: startOfDay,
-      endDate: endOfDay,
+      date: date,
     );
-  }
-
-  /// Firestoreドキュメントを VaccinationRecord に変換
-  VaccinationRecord? _mapDocumentToVaccinationRecord(
-    QueryDocumentSnapshot<Map<String, dynamic>> doc,
-  ) {
-    try {
-      final data = doc.data();
-      return _mapDataToVaccinationRecord(data, doc.id);
-    } catch (error) {
-      return null;
-    }
-  }
-
-  /// 文字列を DoseStatus に変換
-  DoseStatus? _parseDoseStatus(String? statusString) {
-    switch (statusString) {
-      case 'scheduled':
-        return DoseStatus.scheduled;
-      case 'completed':
-        return DoseStatus.completed;
-      case 'skipped':
-        return DoseStatus.skipped;
-      default:
-        return null;
-    }
-  }
-
-  /// 文字列を VaccineCategory に変換
-  VaccineCategory? _parseVaccineCategory(String? categoryString) {
-    switch (categoryString) {
-      case 'live':
-        return VaccineCategory.live;
-      case 'inactivated':
-        return VaccineCategory.inactivated;
-      default:
-        return null;
-    }
-  }
-
-  /// 文字列を VaccineRequirement に変換
-  VaccineRequirement? _parseVaccineRequirement(String? requirementString) {
-    switch (requirementString) {
-      case 'mandatory':
-        return VaccineRequirement.mandatory;
-      case 'optional':
-        return VaccineRequirement.optional;
-      default:
-        return null;
-    }
-  }
-
-  /// リトライ機能付きでFirestore操作を実行
-  Future<void> _executeWithRetry(Future<void> Function() operation) async {
-    const maxRetries = 3;
-    var retryCount = 0;
-
-    while (retryCount < maxRetries) {
-      try {
-        await operation();
-        return;
-      } catch (error) {
-        retryCount++;
-        if (retryCount >= maxRetries) {
-          rethrow;
-        }
-        // 指数バックオフで待機
-        await Future.delayed(Duration(milliseconds: 100 * (1 << retryCount)));
-      }
-    }
   }
 }
