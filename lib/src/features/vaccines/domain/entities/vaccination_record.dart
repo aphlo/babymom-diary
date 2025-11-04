@@ -27,15 +27,18 @@ class VaccinationRecord {
 
   /// 次回接種可能な回数を取得
   int? get nextAvailableDose {
-    final completedDoses = doses.values
-        .where((dose) => dose.status == DoseStatus.completed)
+    // 完了済みまたは予約済みの接種回数を取得
+    final existingDoses = doses.values
+        .where((dose) =>
+            dose.status == DoseStatus.completed ||
+            dose.status == DoseStatus.scheduled)
         .length;
 
     // ワクチンの最大接種回数に基づいて判定
     final maxDoses = _getMaxDosesForVaccine(vaccineId);
-    if (completedDoses >= maxDoses) return null;
+    if (existingDoses >= maxDoses) return null;
 
-    return completedDoses + 1;
+    return existingDoses + 1;
   }
 
   /// 予約済みだが未完了の接種があるかチェック
@@ -97,26 +100,35 @@ class VaccinationRecord {
     );
   }
 
-  /// ワクチンの最大接種回数を取得（仮実装）
+  /// ワクチンの最大接種回数を取得
   int _getMaxDosesForVaccine(String vaccineId) {
-    // TODO: ワクチンマスタデータから取得するように実装
     switch (vaccineId) {
+      // 4回接種
       case 'hib':
       case 'pneumococcal':
       case 'dpt_ipv':
+      case 'pentavalent': // 5種混合
         return 4;
+
+      // 3回接種
+      case 'hepatitis_b': // B型肝炎
+      case 'japanese_encephalitis': // 日本脳炎
+      case 'rotavirus_pentavalent': // ロタウィルス(5価)
+        return 3;
+
+      // 2回接種
+      case 'varicella': // 水痘
+      case 'measles_rubella': // 麻疹風疹(MR)
+      case 'mumps': // おたふくかぜ
+      case 'rotavirus_monovalent': // ロタウィルス(1価)
+        return 2;
+
+      // 特殊：インフルエンザ（毎年2回×複数年）
       case 'influenza':
         return 14;
+
+      // 1回接種
       case 'bcg':
-      case 'mr1':
-      case 'mr2':
-      case 'japanese_encephalitis_1':
-      case 'japanese_encephalitis_2':
-        return 1;
-      case 'hepatitis_b':
-        return 3;
-      case 'rotavirus':
-        return 2; // または3（ワクチンの種類による）
       default:
         return 1;
     }
