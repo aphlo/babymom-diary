@@ -198,6 +198,23 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
   }
 
   @override
+  Future<void> deleteReservationGroupMember({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+    required String vaccineId,
+    required int doseNumber,
+  }) {
+    return _dataSource.deleteReservationGroupMember(
+      householdId: householdId,
+      childId: childId,
+      reservationGroupId: reservationGroupId,
+      vaccineId: vaccineId,
+      doseNumber: doseNumber,
+    );
+  }
+
+  @override
   Future<List<VaccinationSchedule>> getVaccinationSchedules({
     required String householdId,
     required String childId,

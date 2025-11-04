@@ -103,6 +103,15 @@ abstract class VaccinationRecordRepository {
     required String reservationGroupId,
   });
 
+  /// 同時接種グループの特定メンバーのみ削除
+  Future<void> deleteReservationGroupMember({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+    required String vaccineId,
+    required int doseNumber,
+  });
+
   /// 指定した期間のワクチン接種予定を取得（カレンダー表示用）
   Future<List<VaccinationSchedule>> getVaccinationSchedules({
     required String householdId,

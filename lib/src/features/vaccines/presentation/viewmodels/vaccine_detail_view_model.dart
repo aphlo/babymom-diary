@@ -382,6 +382,8 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
   /// ワクチン接種の予約を削除
   Future<void> deleteVaccineReservation({
     required int doseNumber,
+    bool applyToGroup = true,
+    String? reservationGroupId,
   }) async {
     if (_householdId == null || _childId == null || _vaccineId == null) {
       state = state.copyWith(error: '必要な情報が不足しています');
@@ -391,15 +393,26 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
     try {
       state = state.copyWith(isLoading: true, clearError: true);
 
-      final groupId = state.doseStatuses[doseNumber]?.reservationGroupId;
+      final groupId = reservationGroupId ??
+          state.doseStatuses[doseNumber]?.reservationGroupId;
 
-      if (groupId != null) {
+      if (groupId != null && applyToGroup) {
         await _vaccinationRecordRepository.deleteReservationGroup(
           householdId: _householdId!,
           childId: _childId!,
           reservationGroupId: groupId,
         );
+      } else if (groupId != null && !applyToGroup) {
+        // グループ内の個別削除の場合、グループから該当ワクチンのみを削除
+        await _vaccinationRecordRepository.deleteReservationGroupMember(
+          householdId: _householdId!,
+          childId: _childId!,
+          reservationGroupId: groupId,
+          vaccineId: _vaccineId!,
+          doseNumber: doseNumber,
+        );
       } else {
+        // グループに属さない個別削除
         await _vaccinationRecordRepository.deleteVaccineReservation(
           householdId: _householdId!,
           childId: _childId!,
@@ -421,6 +434,7 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
   Future<void> updateVaccineReservation({
     required int doseNumber,
     required DateTime scheduledDate,
+    bool applyToGroup = true,
   }) async {
     if (_householdId == null || _childId == null || _vaccineId == null) {
       state = state.copyWith(error: '必要な情報が不足しています');
@@ -432,7 +446,7 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
 
       final groupId = state.doseStatuses[doseNumber]?.reservationGroupId;
 
-      if (groupId != null) {
+      if (groupId != null && applyToGroup) {
         await _vaccinationRecordRepository.updateReservationGroupSchedule(
           householdId: _householdId!,
           childId: _childId!,

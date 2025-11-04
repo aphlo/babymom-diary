@@ -379,6 +379,85 @@ class ReservationGroupFirestoreCommands {
   }) async {
     final nowUtc = DateTime.now().toUtc();
 
+    try {
+      await _ctx.executeWithRetry(() async {
+        await _ctx.transactionExecutor.runForChild(
+          householdId: householdId,
+          childId: childId,
+          handler: (transaction, refs) async {
+            final groupDto =
+                await _ctx.readGroupDto(transaction, refs, reservationGroupId);
+            if (groupDto == null) {
+              throw ReservationGroupNotFoundException(reservationGroupId);
+            }
+
+            final memberRecords = await _ctx.loadGroupMemberRecords(
+              transaction,
+              refs,
+              groupDto,
+            );
+
+            for (final memberRecord in memberRecords) {
+              final recordDto = memberRecord.recordDto;
+              if (recordDto == null) {
+                // ワクチン記録が存在しない場合はスキップ（データ整合性の問題）
+                _ctx.deleteScheduleEntry(
+                  transaction: transaction,
+                  refs: refs,
+                  vaccineId: memberRecord.vaccineId,
+                  doseNumber: memberRecord.doseNumber,
+                );
+                continue;
+              }
+
+              final record = recordDto.toDomain();
+              _ctx.reservationGroupService.ensureDoseBelongsToGroup(
+                record: record,
+                doseNumber: memberRecord.doseNumber,
+                groupId: reservationGroupId,
+              );
+
+              final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
+              updatedDoses.remove(memberRecord.doseNumber);
+
+              if (updatedDoses.isEmpty) {
+                transaction.delete(memberRecord.docRef);
+              } else {
+                transaction.update(
+                  memberRecord.docRef,
+                  <String, dynamic>{
+                    'doses': _ctx.serializeDoses(updatedDoses),
+                    'updatedAt': Timestamp.fromDate(nowUtc),
+                  },
+                );
+              }
+
+              _ctx.deleteScheduleEntry(
+                transaction: transaction,
+                refs: refs,
+                vaccineId: memberRecord.vaccineId,
+                doseNumber: memberRecord.doseNumber,
+              );
+            }
+
+            transaction.delete(refs.reservationGroupDoc(reservationGroupId));
+          },
+        );
+      });
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteReservationGroupMember({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+    required String vaccineId,
+    required int doseNumber,
+  }) async {
+    final nowUtc = DateTime.now().toUtc();
+
     await _ctx.executeWithRetry(() async {
       await _ctx.transactionExecutor.runForChild(
         householdId: householdId,
@@ -390,51 +469,69 @@ class ReservationGroupFirestoreCommands {
             throw ReservationGroupNotFoundException(reservationGroupId);
           }
 
-          final memberRecords = await _ctx.loadGroupMemberRecords(
-            transaction,
-            refs,
-            groupDto,
+          final recordDto =
+              await _ctx.readRecordDto(transaction, refs, vaccineId);
+          if (recordDto == null) {
+            throw VaccinationRecordNotFoundException(vaccineId);
+          }
+
+          final record = recordDto.toDomain();
+          _ctx.reservationGroupService.ensureDoseBelongsToGroup(
+            record: record,
+            doseNumber: doseNumber,
+            groupId: reservationGroupId,
           );
 
-          for (final memberRecord in memberRecords) {
-            final recordDto = memberRecord.recordDto;
-            if (recordDto == null) {
-              throw VaccinationRecordNotFoundException(
-                memberRecord.vaccineId,
-              );
-            }
+          // ワクチン記録から該当の回数を削除
+          final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
+          updatedDoses.remove(doseNumber);
 
-            final record = recordDto.toDomain();
-            _ctx.reservationGroupService.ensureDoseBelongsToGroup(
-              record: record,
-              doseNumber: memberRecord.doseNumber,
-              groupId: reservationGroupId,
-            );
-
-            final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
-            updatedDoses.remove(memberRecord.doseNumber);
-
-            if (updatedDoses.isEmpty) {
-              transaction.delete(memberRecord.docRef);
-            } else {
-              transaction.update(
-                memberRecord.docRef,
-                <String, dynamic>{
-                  'doses': _ctx.serializeDoses(updatedDoses),
-                  'updatedAt': Timestamp.fromDate(nowUtc),
-                },
-              );
-            }
-
-            _ctx.deleteScheduleEntry(
-              transaction: transaction,
-              refs: refs,
-              vaccineId: memberRecord.vaccineId,
-              doseNumber: memberRecord.doseNumber,
+          if (updatedDoses.isEmpty) {
+            transaction.delete(refs.recordDoc(vaccineId));
+          } else {
+            transaction.update(
+              refs.recordDoc(vaccineId),
+              <String, dynamic>{
+                'doses': _ctx.serializeDoses(updatedDoses),
+                'updatedAt': Timestamp.fromDate(nowUtc),
+              },
             );
           }
 
-          transaction.delete(refs.reservationGroupDoc(reservationGroupId));
+          // スケジュールエントリを削除
+          _ctx.deleteScheduleEntry(
+            transaction: transaction,
+            refs: refs,
+            vaccineId: vaccineId,
+            doseNumber: doseNumber,
+          );
+
+          // グループから該当メンバーを削除
+          final updatedMembers = groupDto.members
+              .where((member) => !(member.vaccineId == vaccineId &&
+                  member.doseNumber == doseNumber))
+              .toList();
+
+          if (updatedMembers.isEmpty) {
+            // グループにメンバーがいなくなった場合はグループ自体を削除
+            transaction.delete(refs.reservationGroupDoc(reservationGroupId));
+          } else {
+            // グループのメンバーリストを更新
+            final membersPayload = updatedMembers
+                .map((member) => <String, dynamic>{
+                      'vaccineId': member.vaccineId,
+                      'doseNumber': member.doseNumber,
+                    })
+                .toList();
+
+            transaction.update(
+              refs.reservationGroupDoc(reservationGroupId),
+              <String, dynamic>{
+                'members': membersPayload,
+                'updatedAt': Timestamp.fromDate(nowUtc),
+              },
+            );
+          }
         },
       );
     });

@@ -12,6 +12,7 @@ import '../viewmodels/vaccine_detail_view_model.dart';
 import '../viewmodels/concurrent_vaccines_view_model.dart';
 import '../widgets/vaccine_header.dart';
 import '../widgets/concurrent_vaccines_confirmation_dialog.dart';
+import '../widgets/concurrent_vaccines_delete_dialog.dart';
 
 class VaccineScheduledDetailsPage extends ConsumerWidget {
   const VaccineScheduledDetailsPage({
@@ -57,7 +58,7 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline),
-            onPressed: () => _showDeleteConfirmationDialog(context, ref),
+            onPressed: () => _deleteReservation(context, ref),
           ),
         ],
       ),
@@ -149,33 +150,6 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context, WidgetRef ref) {
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('予約を削除'),
-          content: const Text(
-              'このワクチンの接種予約を削除しますか？\n同時接種するワクチンがある場合は、それらも一緒に削除されます。'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('キャンセル'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _deleteReservation(context, ref);
-              },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('削除'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _deleteReservation(BuildContext context, WidgetRef ref) async {
     final householdId = ref.read(currentHouseholdIdProvider).value;
     final childId = ref.read(selectedChildControllerProvider).value;
@@ -190,6 +164,26 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
       return;
     }
 
+    // 同時接種ワクチンがある場合の確認ダイアログ
+    final groupId = statusInfo.reservationGroupId;
+    bool applyToGroup = true;
+
+    if (groupId != null) {
+      final bool? userSelection = await showConcurrentVaccinesDeleteDialog(
+        context: context,
+        householdId: householdId,
+        childId: childId,
+        reservationGroupId: groupId,
+        currentVaccineId: vaccine.id,
+        currentDoseNumber: doseNumber,
+      );
+
+      if (userSelection == null) {
+        return;
+      }
+      applyToGroup = userSelection;
+    }
+
     final params = VaccineDetailParams(
       vaccineId: vaccine.id,
       doseNumbers: [doseNumber],
@@ -201,7 +195,11 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
     try {
       final viewModel =
           ref.read(vaccineDetailViewModelProvider(params).notifier);
-      await viewModel.deleteVaccineReservation(doseNumber: doseNumber);
+      await viewModel.deleteVaccineReservation(
+        doseNumber: doseNumber,
+        applyToGroup: applyToGroup,
+        reservationGroupId: groupId,
+      );
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

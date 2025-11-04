@@ -160,6 +160,22 @@ class VaccinationRecordFirestoreDataSource {
     );
   }
 
+  Future<void> deleteReservationGroupMember({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+    required String vaccineId,
+    required int doseNumber,
+  }) {
+    return _groupCommands.deleteReservationGroupMember(
+      householdId: householdId,
+      childId: childId,
+      reservationGroupId: reservationGroupId,
+      vaccineId: vaccineId,
+      doseNumber: doseNumber,
+    );
+  }
+
   Future<VaccinationReservationGroup?> getReservationGroup({
     required String householdId,
     required String childId,

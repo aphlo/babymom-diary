@@ -10,6 +10,7 @@ import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_state.dart';
 import '../viewmodels/vaccine_detail_view_model.dart';
 import '../widgets/vaccine_header.dart';
+import '../widgets/concurrent_vaccines_reschedule_dialog.dart';
 
 class VaccineReschedulePage extends ConsumerStatefulWidget {
   const VaccineReschedulePage({
@@ -125,9 +126,24 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
     }
 
     // 同時接種ワクチンがある場合の確認ダイアログ
-    final bool shouldUpdateConcurrent =
-        await _showConcurrentUpdateDialog(context);
-    if (!shouldUpdateConcurrent) return;
+    final groupId = widget.statusInfo.reservationGroupId;
+    bool applyToGroup = true;
+
+    if (groupId != null) {
+      final bool? userSelection = await showConcurrentVaccinesRescheduleDialog(
+        context: context,
+        householdId: householdId,
+        childId: childId,
+        reservationGroupId: groupId,
+        currentVaccineId: widget.vaccine.id,
+        currentDoseNumber: widget.doseNumber,
+      );
+
+      if (userSelection == null) {
+        return;
+      }
+      applyToGroup = userSelection;
+    }
 
     setState(() {
       _isLoading = true;
@@ -147,6 +163,7 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
       await viewModel.updateVaccineReservation(
         doseNumber: widget.doseNumber,
         scheduledDate: _selectedDate!,
+        applyToGroup: applyToGroup,
       );
 
       if (context.mounted) {
@@ -171,60 +188,6 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
         });
       }
     }
-  }
-
-  Future<bool> _showConcurrentUpdateDialog(BuildContext context) async {
-    // TODO: 実際の同時接種ワクチンのデータを取得して表示
-    // 現在はサンプルデータで実装
-    final List<String> concurrentVaccines = []; // 実際のデータに置き換える
-
-    if (concurrentVaccines.isEmpty) {
-      return true; // 同時接種ワクチンがない場合はそのまま続行
-    }
-
-    return await showDialog<bool>(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('同時接種ワクチンの日程変更'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('以下の同時接種ワクチンの日程も一緒に変更されます：'),
-                  const SizedBox(height: 12),
-                  ...concurrentVaccines.map((vaccine) => Padding(
-                        padding: const EdgeInsets.only(left: 16, bottom: 4),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.vaccines,
-                                size: 16, color: Colors.grey),
-                            const SizedBox(width: 8),
-                            Text(vaccine),
-                          ],
-                        ),
-                      )),
-                  const SizedBox(height: 16),
-                  const Text(
-                    '続行しますか？',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('キャンセル'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('変更する'),
-                ),
-              ],
-            );
-          },
-        ) ??
-        false;
   }
 }
 
