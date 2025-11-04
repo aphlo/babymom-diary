@@ -127,9 +127,9 @@ VaccineInfo _mapVaccine(
 
   final Map<int, String> doseDisplayOverrides = canResolveActualPeriods
       ? _buildDoseDisplayOverrides(
-          record: record!,
-          childBirthday: childBirthday!,
-          periods: periods!,
+          record: record,
+          childBirthday: childBirthday,
+          periods: periods,
         )
       : const <int, String>{};
 

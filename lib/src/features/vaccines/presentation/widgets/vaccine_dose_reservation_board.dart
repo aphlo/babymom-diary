@@ -74,8 +74,11 @@ class VaccineDoseReservationBoard extends StatelessWidget {
                         final statusInfo = doseStatuses[doseNumbers[i]];
                         final presentation =
                             DoseBadgePresentation.fromStatus(statusInfo);
-                        final bool isActive = i == normalizedActiveIndex;
-                        final bool canTap = isActive &&
+                        // 予約済みや接種済みの場合は常にactiveな見た目にする
+                        final bool isActive = i == normalizedActiveIndex ||
+                            statusInfo?.status == DoseStatus.scheduled ||
+                            statusInfo?.status == DoseStatus.completed;
+                        final bool canTap = i == normalizedActiveIndex &&
                             vaccine != null &&
                             onReservationTap != null &&
                             statusInfo?.status != DoseStatus.completed &&
