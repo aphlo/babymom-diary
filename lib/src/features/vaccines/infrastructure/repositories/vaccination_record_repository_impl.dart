@@ -1,6 +1,5 @@
 import '../../domain/entities/vaccination_record.dart';
 import '../../domain/entities/vaccine_reservation_request.dart';
-import '../../domain/entities/vaccination_schedule.dart';
 import '../../domain/entities/reservation_group.dart';
 import '../../domain/repositories/vaccination_record_repository.dart';
 import '../sources/vaccination_record_firestore_data_source.dart';
@@ -211,34 +210,6 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
       reservationGroupId: reservationGroupId,
       vaccineId: vaccineId,
       doseNumber: doseNumber,
-    );
-  }
-
-  @override
-  Future<List<VaccinationSchedule>> getVaccinationSchedules({
-    required String householdId,
-    required String childId,
-    required DateTime startDate,
-    required DateTime endDate,
-  }) {
-    return _dataSource.getVaccinationSchedules(
-      householdId: householdId,
-      childId: childId,
-      startDate: startDate,
-      endDate: endDate,
-    );
-  }
-
-  @override
-  Future<List<VaccinationSchedule>> getVaccinationSchedulesForDate({
-    required String householdId,
-    required String childId,
-    required DateTime date,
-  }) {
-    return _dataSource.getVaccinationSchedulesForDate(
-      householdId: householdId,
-      childId: childId,
-      date: date,
     );
   }
 

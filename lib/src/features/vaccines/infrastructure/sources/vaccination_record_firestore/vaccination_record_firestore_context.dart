@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../domain/entities/dose_record.dart';
-import '../../../domain/entities/vaccination_schedule.dart';
 import '../../../domain/entities/vaccine.dart' as vaccine_entity;
 import '../../../domain/errors/vaccination_persistence_exception.dart';
 import '../../../domain/repositories/vaccine_master_repository.dart';
@@ -136,49 +135,6 @@ class VaccinationRecordFirestoreContext {
     return records;
   }
 
-  void upsertScheduleEntry({
-    required Transaction transaction,
-    required VaccinationRecordCollectionRef refs,
-    required String childId,
-    required VaccinationRecordDto record,
-    required int doseNumber,
-    required DateTime scheduledDateUtc,
-    required DateTime nowUtc,
-  }) {
-    final scheduleDoc = refs.scheduleDoc(
-      vaccineId: record.vaccineId,
-      doseNumber: doseNumber,
-    );
-    transaction.set(
-      scheduleDoc,
-      <String, dynamic>{
-        'childId': childId,
-        'vaccineId': record.vaccineId,
-        'vaccineName': record.vaccineName,
-        'doseNumber': doseNumber,
-        'scheduledDate': Timestamp.fromDate(scheduledDateUtc),
-        'category': record.category.name,
-        'requirement': record.requirement.name,
-        'updatedAt': Timestamp.fromDate(nowUtc),
-      },
-      SetOptions(merge: true),
-    );
-  }
-
-  void deleteScheduleEntry({
-    required Transaction transaction,
-    required VaccinationRecordCollectionRef refs,
-    required String vaccineId,
-    required int doseNumber,
-  }) {
-    transaction.delete(
-      refs.scheduleDoc(
-        vaccineId: vaccineId,
-        doseNumber: doseNumber,
-      ),
-    );
-  }
-
   Future<vaccine_entity.Vaccine> requireVaccine(String vaccineId) async {
     final vaccine = await vaccineMasterRepository.getVaccineById(vaccineId);
     if (vaccine == null) {
@@ -202,86 +158,6 @@ class VaccinationRecordFirestoreContext {
       createdAt: nowUtc,
       updatedAt: nowUtc,
     );
-  }
-
-  VaccinationSchedule? mapScheduleDocument(
-    QueryDocumentSnapshot<Map<String, dynamic>> doc,
-    String childId,
-  ) {
-    final data = doc.data();
-    final scheduledTimestamp = data['scheduledDate'] as Timestamp?;
-    final vaccineId = data['vaccineId'] as String?;
-    final vaccineName = data['vaccineName'] as String? ?? '';
-    final doseNumber = data['doseNumber'] as int?;
-    final category = categoryFromString(data['category'] as String?);
-    final requirement = requirementFromString(data['requirement'] as String?);
-
-    if (scheduledTimestamp == null ||
-        vaccineId == null ||
-        doseNumber == null ||
-        category == null ||
-        requirement == null) {
-      return null;
-    }
-
-    return VaccinationSchedule(
-      childId: childId,
-      vaccineId: vaccineId,
-      vaccineName: vaccineName,
-      doseNumber: doseNumber,
-      scheduledDate: scheduledTimestamp.toDate(),
-      category: category,
-      requirement: requirement,
-    );
-  }
-
-  Future<List<VaccinationSchedule>> getLegacySchedules(
-    String householdId,
-    String childId,
-    DateTime startUtc,
-    DateTime endUtc,
-  ) async {
-    final snapshot = await refs(
-      householdId: householdId,
-      childId: childId,
-    ).vaccinationRecords.get();
-
-    final schedules = <VaccinationSchedule>[];
-    for (final doc in snapshot.docs) {
-      final recordDto =
-          VaccinationRecordDto.fromFirestore(doc.data(), docId: doc.id);
-      final record = recordDto.toDomain();
-
-      for (final entry in record.doses.entries) {
-        final doseNumber = entry.key;
-        final doseRecord = entry.value;
-        final scheduledDate = doseRecord.scheduledDate;
-        if (doseRecord.status != DoseStatus.scheduled ||
-            scheduledDate == null) {
-          continue;
-        }
-
-        if (scheduledDate.isBefore(startUtc) ||
-            !scheduledDate.isBefore(endUtc)) {
-          continue;
-        }
-
-        schedules.add(
-          VaccinationSchedule(
-            childId: childId,
-            vaccineId: record.vaccineId,
-            vaccineName: record.vaccineName,
-            doseNumber: doseNumber,
-            scheduledDate: scheduledDate,
-            category: record.category,
-            requirement: record.requirement,
-          ),
-        );
-      }
-    }
-
-    schedules.sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
-    return schedules;
   }
 
   VaccineCategory? categoryFromString(String? value) {

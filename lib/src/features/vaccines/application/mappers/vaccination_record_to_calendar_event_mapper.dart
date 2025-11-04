@@ -1,10 +1,8 @@
-import '../../domain/entities/calendar_event.dart';
-import '../../presentation/models/calendar_event_model.dart';
-import '../../../vaccines/domain/entities/vaccination_record.dart';
+import '../../domain/entities/vaccination_record.dart';
+import '../../../calendar/domain/entities/calendar_event.dart';
+import '../../../calendar/presentation/models/calendar_event_model.dart';
 
-/// VaccinationRecordからCalendarEventに変換するマッパー
-/// VaccinationScheduleは廃止され、VaccinationRecordから直接カレンダーイベントを生成
-class VaccinationToCalendarEventMapper {
+class VaccinationRecordToCalendarEventMapper {
   /// VaccinationRecordのリストからCalendarEventのリストに変換
   static List<CalendarEvent> toCalendarEvents(
     List<VaccinationRecord> records,

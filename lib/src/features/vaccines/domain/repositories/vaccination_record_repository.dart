@@ -1,6 +1,5 @@
 import '../entities/vaccination_record.dart';
 import '../entities/vaccine_reservation_request.dart';
-import '../entities/vaccination_schedule.dart';
 import '../entities/reservation_group.dart';
 
 abstract class VaccinationRecordRepository {
@@ -110,21 +109,6 @@ abstract class VaccinationRecordRepository {
     required String reservationGroupId,
     required String vaccineId,
     required int doseNumber,
-  });
-
-  /// 指定した期間のワクチン接種予定を取得（カレンダー表示用）
-  Future<List<VaccinationSchedule>> getVaccinationSchedules({
-    required String householdId,
-    required String childId,
-    required DateTime startDate,
-    required DateTime endDate,
-  });
-
-  /// 指定した日付のワクチン接種予定を取得
-  Future<List<VaccinationSchedule>> getVaccinationSchedulesForDate({
-    required String householdId,
-    required String childId,
-    required DateTime date,
   });
 
   /// 予約可能なワクチンの一覧を取得（同時接種選択用）

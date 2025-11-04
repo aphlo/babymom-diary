@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/entities/reservation_group.dart';
 import '../../domain/entities/vaccination_record.dart';
-import '../../domain/entities/vaccination_schedule.dart';
 import '../../domain/entities/vaccine_reservation_request.dart';
 import '../../domain/repositories/vaccine_master_repository.dart';
 import '../../domain/services/reservation_group_domain_service.dart';
@@ -231,32 +230,6 @@ class VaccinationRecordFirestoreDataSource {
       childId: childId,
       vaccineId: vaccineId,
       doseNumber: doseNumber,
-    );
-  }
-
-  Future<List<VaccinationSchedule>> getVaccinationSchedules({
-    required String householdId,
-    required String childId,
-    required DateTime startDate,
-    required DateTime endDate,
-  }) {
-    return _queries.getVaccinationSchedules(
-      householdId: householdId,
-      childId: childId,
-      startDate: startDate,
-      endDate: endDate,
-    );
-  }
-
-  Future<List<VaccinationSchedule>> getVaccinationSchedulesForDate({
-    required String householdId,
-    required String childId,
-    required DateTime date,
-  }) {
-    return _queries.getVaccinationSchedulesForDate(
-      householdId: householdId,
-      childId: childId,
-      date: date,
     );
   }
 }

@@ -57,16 +57,6 @@ class VaccineReservationFirestoreCommands {
               },
             );
           }
-
-          _ctx.upsertScheduleEntry(
-            transaction: transaction,
-            refs: refs,
-            childId: request.childId,
-            record: recordDto,
-            doseNumber: request.doseNumber,
-            scheduledDateUtc: scheduledDateUtc,
-            nowUtc: nowUtc,
-          );
         },
       );
     });
@@ -136,16 +126,6 @@ class VaccineReservationFirestoreCommands {
                 },
               );
             }
-
-            _ctx.upsertScheduleEntry(
-              transaction: transaction,
-              refs: refs,
-              childId: childId,
-              record: recordDto,
-              doseNumber: item.request.doseNumber,
-              scheduledDateUtc: scheduledDateUtc,
-              nowUtc: nowUtc,
-            );
           }
         },
       );
@@ -194,19 +174,6 @@ class VaccineReservationFirestoreCommands {
               'updatedAt': Timestamp.fromDate(nowUtc),
             },
           );
-
-          _ctx.upsertScheduleEntry(
-            transaction: transaction,
-            refs: refs,
-            childId: childId,
-            record: recordDto.copyWith(
-              doses: updatedDoses,
-              updatedAt: nowUtc,
-            ),
-            doseNumber: doseNumber,
-            scheduledDateUtc: scheduledDateUtc,
-            nowUtc: nowUtc,
-          );
         },
       );
     });
@@ -254,13 +221,6 @@ class VaccineReservationFirestoreCommands {
               'updatedAt': Timestamp.fromDate(nowUtc),
             },
           );
-
-          _ctx.deleteScheduleEntry(
-            transaction: transaction,
-            refs: refs,
-            vaccineId: vaccineId,
-            doseNumber: doseNumber,
-          );
         },
       );
     });
@@ -305,13 +265,6 @@ class VaccineReservationFirestoreCommands {
               },
             );
           }
-
-          _ctx.deleteScheduleEntry(
-            transaction: transaction,
-            refs: refs,
-            vaccineId: vaccineId,
-            doseNumber: doseNumber,
-          );
         },
       );
     });

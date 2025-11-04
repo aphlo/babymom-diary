@@ -103,15 +103,7 @@ class ReservationGroupFirestoreCommands {
               );
             }
 
-            _ctx.upsertScheduleEntry(
-              transaction: transaction,
-              refs: refs,
-              childId: childId,
-              record: recordDto,
-              doseNumber: item.request.doseNumber,
-              scheduledDateUtc: itemScheduledDateUtc,
-              nowUtc: nowUtc,
-            );
+            // vaccination_schedulesコレクションへの書き込み処理を削除
           }
         },
       );
@@ -185,20 +177,6 @@ class ReservationGroupFirestoreCommands {
                 'updatedAt': Timestamp.fromDate(nowUtc),
               },
             );
-
-            final updatedRecordDto = recordDto.copyWith(
-              doses: updatedDoses,
-              updatedAt: nowUtc,
-            );
-            _ctx.upsertScheduleEntry(
-              transaction: transaction,
-              refs: refs,
-              childId: childId,
-              record: updatedRecordDto,
-              doseNumber: memberRecord.doseNumber,
-              scheduledDateUtc: scheduledDateUtc,
-              nowUtc: nowUtc,
-            );
           }
         },
       );
@@ -268,13 +246,6 @@ class ReservationGroupFirestoreCommands {
                 'doses': _ctx.serializeDoses(updatedDoses),
                 'updatedAt': Timestamp.fromDate(nowUtc),
               },
-            );
-
-            _ctx.deleteScheduleEntry(
-              transaction: transaction,
-              refs: refs,
-              vaccineId: memberRecord.vaccineId,
-              doseNumber: memberRecord.doseNumber,
             );
           }
         },
@@ -350,13 +321,6 @@ class ReservationGroupFirestoreCommands {
             },
           );
 
-          _ctx.deleteScheduleEntry(
-            transaction: transaction,
-            refs: refs,
-            vaccineId: vaccineId,
-            doseNumber: doseNumber,
-          );
-
           if (updatedMembers.isEmpty) {
             transaction.delete(groupDocRef);
           } else {
@@ -401,12 +365,6 @@ class ReservationGroupFirestoreCommands {
               final recordDto = memberRecord.recordDto;
               if (recordDto == null) {
                 // ワクチン記録が存在しない場合はスキップ（データ整合性の問題）
-                _ctx.deleteScheduleEntry(
-                  transaction: transaction,
-                  refs: refs,
-                  vaccineId: memberRecord.vaccineId,
-                  doseNumber: memberRecord.doseNumber,
-                );
                 continue;
               }
 
@@ -431,13 +389,6 @@ class ReservationGroupFirestoreCommands {
                   },
                 );
               }
-
-              _ctx.deleteScheduleEntry(
-                transaction: transaction,
-                refs: refs,
-                vaccineId: memberRecord.vaccineId,
-                doseNumber: memberRecord.doseNumber,
-              );
             }
 
             transaction.delete(refs.reservationGroupDoc(reservationGroupId));
@@ -499,12 +450,6 @@ class ReservationGroupFirestoreCommands {
           }
 
           // スケジュールエントリを削除
-          _ctx.deleteScheduleEntry(
-            transaction: transaction,
-            refs: refs,
-            vaccineId: vaccineId,
-            doseNumber: doseNumber,
-          );
 
           // グループから該当メンバーを削除
           final updatedMembers = groupDto.members

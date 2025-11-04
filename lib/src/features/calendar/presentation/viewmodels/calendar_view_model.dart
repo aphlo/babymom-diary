@@ -16,7 +16,7 @@ import 'package:babymom_diary/src/features/children/application/selected_child_p
 import 'package:babymom_diary/src/features/children/application/selected_child_snapshot_provider.dart';
 import 'package:babymom_diary/src/features/children/domain/entities/child_summary.dart';
 import 'package:babymom_diary/src/features/vaccines/application/vaccine_catalog_providers.dart';
-import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_schedule.dart';
+import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/repositories/vaccination_record_repository.dart';
 import 'package:babymom_diary/src/core/firebase/household_service.dart'
     as fbcore;
@@ -58,10 +58,10 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
 
   StreamSubscription<List<CalendarEvent>>? _eventsSubscription;
   StreamSubscription<CalendarSettings>? _settingsSubscription;
-  StreamSubscription<List<VaccinationSchedule>>? _vaccinationSubscription;
+  StreamSubscription<List<VaccinationRecord>>? _vaccinationSubscription;
   List<CalendarEvent> _latestEvents = const <CalendarEvent>[];
-  List<VaccinationSchedule> _latestVaccinationSchedules =
-      const <VaccinationSchedule>[];
+  List<VaccinationRecord> _latestVaccinationRecords =
+      const <VaccinationRecord>[];
   List<ChildSummary> _localChildren = const <ChildSummary>[];
   ChildSummary? _snapshotChild;
 
@@ -196,24 +196,20 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     if (householdId == null || selectedChildId == null) {
       return;
     }
-    final range = _visibleRangeForMonth(state.focusedDay);
 
     _vaccinationSubscription = _vaccinationRepository
-        .getVaccinationSchedules(
-          householdId: householdId,
-          childId: selectedChildId,
-          startDate: range.start,
-          endDate: range.end,
-        )
-        .asStream()
+        .watchVaccinationRecords(
+      householdId: householdId,
+      childId: selectedChildId,
+    )
         .listen(
-      (schedules) {
-        _latestVaccinationSchedules = schedules;
+      (records) {
+        _latestVaccinationRecords = records;
         _updateCombinedEventsState();
       },
       onError: (error, stackTrace) {
-        // ワクチン予定の取得エラーは通常のイベント表示に影響しないようにする
-        _latestVaccinationSchedules = const <VaccinationSchedule>[];
+        // ワクチン記録の取得エラーは通常のイベント表示に影響しないようにする
+        _latestVaccinationRecords = const <VaccinationRecord>[];
         _updateCombinedEventsState();
       },
     );
@@ -221,8 +217,9 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
 
   void _updateCombinedEventsState() {
     // 通常のイベントとワクチン予定を統合
+    final childId = _snapshotChild?.id ?? '';
     final vaccinationEvents = VaccinationToCalendarEventMapper.toCalendarEvents(
-        _latestVaccinationSchedules);
+        _latestVaccinationRecords, childId);
     final combinedEvents = [..._latestEvents, ...vaccinationEvents];
     final eventsByDay = _groupEventsByDay(combinedEvents);
 

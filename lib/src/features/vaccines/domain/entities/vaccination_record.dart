@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import 'dose_record.dart';
 import '../value_objects/vaccine_category.dart';
 import '../value_objects/vaccine_requirement.dart';
+import '../../../calendar/domain/entities/calendar_event.dart';
 
 @immutable
 class VaccinationRecord {
@@ -119,6 +120,22 @@ class VaccinationRecord {
       default:
         return 1;
     }
+  }
+
+  /// 予約済みの接種をカレンダーイベントに変換
+  List<CalendarEvent> toCalendarEvents(String childId) {
+    return doses.entries
+        .where((entry) => entry.value.status == DoseStatus.scheduled)
+        .map((entry) => CalendarEvent(
+              id: 'vaccination_${childId}_${vaccineId}_${entry.key}',
+              title: '$vaccineName ${entry.key}回目',
+              memo: '$vaccineNameの${entry.key}回目の接種予定です',
+              allDay: true,
+              start: entry.value.scheduledDate!,
+              end: entry.value.scheduledDate!,
+              iconPath: 'assets/icons/vaccination.png',
+            ))
+        .toList();
   }
 
   @override
