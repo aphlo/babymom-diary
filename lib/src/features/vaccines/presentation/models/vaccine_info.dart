@@ -13,6 +13,7 @@ class VaccineInfo {
     this.highlightPalette = VaccineHighlightPalette.primary,
     this.notes = const <VaccineGuidelineNote>[],
     this.doseStatuses = const <int, DoseStatus?>{},
+    this.doseDisplayOverrides = const <int, String>{},
   });
 
   final String id;
@@ -24,6 +25,7 @@ class VaccineInfo {
   final VaccineHighlightPalette highlightPalette;
   final List<VaccineGuidelineNote> notes;
   final Map<int, DoseStatus?> doseStatuses;
+  final Map<int, String> doseDisplayOverrides;
 }
 
 class VaccineGuidelineNote {

@@ -141,6 +141,39 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
     );
   }
 
+  List<int> _displayDoseNumbers({
+    required VaccineInfo vaccine,
+    required String periodLabel,
+    required List<int> rawDoseNumbers,
+    required bool isInfluenza,
+  }) {
+    final Map<int, String> overrides = vaccine.doseDisplayOverrides;
+    final Iterable<int> baseNumbers = isInfluenza
+        ? rawDoseNumbers.where(
+            (int doseNumber) => vaccine.doseStatuses[doseNumber] != null,
+          )
+        : rawDoseNumbers;
+
+    final List<int> filteredBase = baseNumbers.where(
+      (int doseNumber) {
+        final String? overrideLabel = overrides[doseNumber];
+        return overrideLabel == null || overrideLabel == periodLabel;
+      },
+    ).toList(growable: false);
+
+    final Iterable<int> overrideAdditions = overrides.entries
+        .where((MapEntry<int, String> entry) => entry.value == periodLabel)
+        .map((MapEntry<int, String> entry) => entry.key);
+
+    final Set<int> combined = <int>{
+      ...filteredBase,
+      ...overrideAdditions,
+    };
+
+    final List<int> sorted = combined.toList()..sort();
+    return sorted;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -272,12 +305,12 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                           final List<int> rawDoseNumbers =
                               vaccine.doseSchedules[periodLabel] ??
                                   const <int>[];
-                          final List<int> doseNumbers = isInfluenza
-                              ? rawDoseNumbers
-                                  .where((int doseNumber) =>
-                                      vaccine.doseStatuses[doseNumber] != null)
-                                  .toList(growable: false)
-                              : rawDoseNumbers;
+                          final List<int> doseNumbers = _displayDoseNumbers(
+                            vaccine: vaccine,
+                            periodLabel: periodLabel,
+                            rawDoseNumbers: rawDoseNumbers,
+                            isInfluenza: isInfluenza,
+                          );
 
                           if (isInfluenza && doseNumbers.isEmpty) {
                             periodCells.add(
@@ -296,11 +329,14 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                             continue;
                           }
 
-                          final bool hasSingleDose = doseNumbers.length == 1;
-                          final int? currentDoseNumber =
-                              hasSingleDose ? doseNumbers.first : null;
+                          final bool hasGuidelineSingleDose =
+                              !isInfluenza && rawDoseNumbers.length == 1;
+                          final int? currentDoseNumber = hasGuidelineSingleDose
+                              ? rawDoseNumbers.first
+                              : null;
 
-                          if (!isInfluenza && hasSingleDose) {
+                          if (hasGuidelineSingleDose &&
+                              currentDoseNumber != null) {
                             int runLength = 1;
                             int lookAheadIndex = columnIndex + 1;
 

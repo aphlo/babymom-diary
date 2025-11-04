@@ -197,9 +197,6 @@ class DoseScheduleCell extends StatelessWidget {
     if (arrowSegment != null) {
       switch (arrowSegment!) {
         case DoseArrowSegment.start:
-          if (doseNumbers.isEmpty) {
-            return const SizedBox.shrink();
-          }
           return Stack(
             children: <Widget>[
               SizedBox.expand(
@@ -211,17 +208,18 @@ class DoseScheduleCell extends StatelessWidget {
                   endOffset: _gridBorderOverlap,
                 ),
               ),
-              Center(
-                child: DoseNumberBadge(
-                  number: doseNumbers.first,
-                  size: _doseBadgeDiameter,
-                  fontSize: 12,
-                  backgroundColor: badgeFillColor,
-                  textColor: badgeTextColor,
-                  borderColor: badgeBorderColor,
-                  status: doseStatuses[doseNumbers.first],
+              if (doseNumbers.isNotEmpty)
+                Center(
+                  child: DoseNumberBadge(
+                    number: doseNumbers.first,
+                    size: _doseBadgeDiameter,
+                    fontSize: 12,
+                    backgroundColor: badgeFillColor,
+                    textColor: badgeTextColor,
+                    borderColor: badgeBorderColor,
+                    status: doseStatuses[doseNumbers.first],
+                  ),
                 ),
-              ),
             ],
           );
         case DoseArrowSegment.middle:

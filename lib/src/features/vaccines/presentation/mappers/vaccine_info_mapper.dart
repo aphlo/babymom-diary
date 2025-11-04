@@ -52,6 +52,8 @@ VaccineInfo _mapVaccine(
       <String, domain.VaccinationPeriodHighlight>{};
   final Set<int> expectedDoseNumbers = <int>{};
   final bool isInfluenza = vaccine.id == 'influenza';
+  final bool canResolveActualPeriods =
+      record != null && childBirthday != null && periods != null;
 
   if (isInfluenza &&
       record != null &&
@@ -123,6 +125,14 @@ VaccineInfo _mapVaccine(
     isInfluenza: isInfluenza,
   );
 
+  final Map<int, String> doseDisplayOverrides = canResolveActualPeriods
+      ? _buildDoseDisplayOverrides(
+          record: record!,
+          childBirthday: childBirthday!,
+          periods: periods!,
+        )
+      : const <int, String>{};
+
   return VaccineInfo(
     id: vaccine.id,
     name: vaccine.name,
@@ -133,6 +143,7 @@ VaccineInfo _mapVaccine(
     highlightPalette: palette,
     notes: notes,
     doseStatuses: doseStatuses,
+    doseDisplayOverrides: doseDisplayOverrides,
   );
 }
 
@@ -222,6 +233,29 @@ _DynamicInfluenzaMapping _buildDynamicInfluenzaMapping({
     doseSchedules: doseSchedules,
     expectedDoseNumbers: expectedDoseNumbers,
   );
+}
+
+Map<int, String> _buildDoseDisplayOverrides({
+  required VaccinationRecord record,
+  required DateTime childBirthday,
+  required List<String> periods,
+}) {
+  final Map<int, String> overrides = <int, String>{};
+
+  for (final MapEntry<int, DoseRecord> entry in record.doses.entries) {
+    final DateTime? doseDate =
+        entry.value.scheduledDate ?? entry.value.completedDate;
+    if (doseDate == null) {
+      continue;
+    }
+    final int ageInMonths = _calculateAgeInMonths(childBirthday, doseDate);
+    final String? periodLabel = _findPeriodForAge(ageInMonths, periods);
+    if (periodLabel != null) {
+      overrides[entry.key] = periodLabel;
+    }
+  }
+
+  return overrides;
 }
 
 int _calculateAgeInMonths(DateTime birthDate, DateTime targetDate) {
