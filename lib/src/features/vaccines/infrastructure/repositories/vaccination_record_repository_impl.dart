@@ -3,14 +3,17 @@ import '../../domain/entities/vaccination_record.dart';
 import '../../domain/entities/vaccine_reservation_request.dart';
 import '../../domain/entities/reservation_group.dart';
 import '../../domain/repositories/vaccination_record_repository.dart';
+import '../../domain/services/vaccine_schedule_conflict_validator.dart';
 import '../sources/vaccination_record_firestore_data_source.dart';
 
 class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
   VaccinationRecordRepositoryImpl(
     this._dataSource,
+    this._conflictValidator,
   );
 
   final VaccinationRecordFirestoreDataSource _dataSource;
+  final VaccineScheduleConflictValidator _conflictValidator;
 
   @override
   Stream<List<VaccinationRecord>> watchVaccinationRecords({
@@ -53,7 +56,19 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
   Future<void> createVaccineReservation({
     required String householdId,
     required VaccineReservationRequest request,
-  }) {
+  }) async {
+    // 既存の接種記録を取得して重複チェック
+    final existingRecord = await _dataSource.getVaccinationRecord(
+      householdId: householdId,
+      childId: request.childId,
+      vaccineId: request.vaccineId,
+    );
+
+    _conflictValidator.validateSingleVaccine(
+      record: existingRecord,
+      scheduledDate: request.scheduledDate,
+    );
+
     return _dataSource.createVaccineReservation(
       householdId: householdId,
       request: request,
@@ -77,7 +92,25 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
     required String childId,
     required DateTime scheduledDate,
     required List<VaccineReservationRequest> requests,
-  }) {
+  }) async {
+    // グループ内の全てのワクチンについて既存の接種記録を取得して重複チェック
+    final existingRecords = <VaccinationRecord>[];
+    for (final request in requests) {
+      final record = await _dataSource.getVaccinationRecord(
+        householdId: householdId,
+        childId: childId,
+        vaccineId: request.vaccineId,
+      );
+      if (record != null) {
+        existingRecords.add(record);
+      }
+    }
+
+    _conflictValidator.validateReservationGroup(
+      records: existingRecords,
+      scheduledDate: scheduledDate,
+    );
+
     return _dataSource.createReservationGroup(
       householdId: householdId,
       childId: childId,
@@ -93,7 +126,20 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
     required String vaccineId,
     required String doseId,
     required DateTime scheduledDate,
-  }) {
+  }) async {
+    // 既存の接種記録を取得して重複チェック（更新対象のdoseは除外）
+    final existingRecord = await _dataSource.getVaccinationRecord(
+      householdId: householdId,
+      childId: childId,
+      vaccineId: vaccineId,
+    );
+
+    _conflictValidator.validateSingleVaccine(
+      record: existingRecord,
+      scheduledDate: scheduledDate,
+      excludeDoseId: doseId,
+    );
+
     return _dataSource.updateVaccineReservation(
       householdId: householdId,
       childId: childId,
@@ -109,7 +155,40 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
     required String childId,
     required String reservationGroupId,
     required DateTime scheduledDate,
-  }) {
+  }) async {
+    // グループ情報を取得
+    final group = await _dataSource.getReservationGroup(
+      householdId: householdId,
+      childId: childId,
+      reservationGroupId: reservationGroupId,
+    );
+
+    if (group == null) {
+      throw Exception('Reservation group not found: $reservationGroupId');
+    }
+
+    // グループ内の全てのワクチンについて既存の接種記録を取得して重複チェック
+    final existingRecords = <VaccinationRecord>[];
+    final excludeDoseIds = <String, String>{};
+
+    for (final member in group.members) {
+      final record = await _dataSource.getVaccinationRecord(
+        householdId: householdId,
+        childId: childId,
+        vaccineId: member.vaccineId,
+      );
+      if (record != null) {
+        existingRecords.add(record);
+        excludeDoseIds[member.vaccineId] = member.doseId;
+      }
+    }
+
+    _conflictValidator.validateReservationGroup(
+      records: existingRecords,
+      scheduledDate: scheduledDate,
+      excludeDoseIds: excludeDoseIds,
+    );
+
     return _dataSource.updateReservationGroupSchedule(
       householdId: householdId,
       childId: childId,
@@ -248,7 +327,20 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
     required String vaccineId,
     required String doseId,
     required DateTime scheduledDate,
-  }) {
+  }) async {
+    // 既存の接種記録を取得して重複チェック（更新対象のdoseは除外）
+    final existingRecord = await _dataSource.getVaccinationRecord(
+      householdId: householdId,
+      childId: childId,
+      vaccineId: vaccineId,
+    );
+
+    _conflictValidator.validateSingleVaccine(
+      record: existingRecord,
+      scheduledDate: scheduledDate,
+      excludeDoseId: doseId,
+    );
+
     return _dataSource.markDoseAsScheduled(
       householdId: householdId,
       childId: childId,
@@ -264,7 +356,40 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
     required String childId,
     required String reservationGroupId,
     required DateTime scheduledDate,
-  }) {
+  }) async {
+    // グループ情報を取得
+    final group = await _dataSource.getReservationGroup(
+      householdId: householdId,
+      childId: childId,
+      reservationGroupId: reservationGroupId,
+    );
+
+    if (group == null) {
+      throw Exception('Reservation group not found: $reservationGroupId');
+    }
+
+    // グループ内の全てのワクチンについて既存の接種記録を取得して重複チェック
+    final existingRecords = <VaccinationRecord>[];
+    final excludeDoseIds = <String, String>{};
+
+    for (final member in group.members) {
+      final record = await _dataSource.getVaccinationRecord(
+        householdId: householdId,
+        childId: childId,
+        vaccineId: member.vaccineId,
+      );
+      if (record != null) {
+        existingRecords.add(record);
+        excludeDoseIds[member.vaccineId] = member.doseId;
+      }
+    }
+
+    _conflictValidator.validateReservationGroup(
+      records: existingRecords,
+      scheduledDate: scheduledDate,
+      excludeDoseIds: excludeDoseIds,
+    );
+
     return _dataSource.markReservationGroupAsScheduled(
       householdId: householdId,
       childId: childId,

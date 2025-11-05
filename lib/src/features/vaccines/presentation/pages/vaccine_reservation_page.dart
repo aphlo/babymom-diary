@@ -10,6 +10,7 @@ import '../viewmodels/vaccine_reservation_view_model.dart';
 import '../../domain/value_objects/vaccine_record_type.dart';
 import '../widgets/vaccine_header.dart';
 import '../widgets/vaccine_type_badge.dart';
+import '../widgets/vaccine_error_dialog.dart';
 import '../styles/vaccine_type_styles.dart';
 import '../../domain/entities/vaccination_record.dart';
 import '../../domain/value_objects/vaccine_category.dart' as vo;
@@ -70,13 +71,25 @@ class _VaccineReservationPageState
     // エラー表示
     ref.listen(vaccineReservationViewModelProvider(params), (previous, next) {
       if (next.error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.error!),
-            backgroundColor: Colors.red,
-          ),
-        );
-        viewModel.clearError();
+        if (next.isDuplicateError) {
+          // 重複エラーの場合はダイアログで表示
+          VaccineErrorDialog.show(
+            context: context,
+            title: '保存に失敗しました',
+            message: next.error!,
+          ).then((_) {
+            viewModel.clearError();
+          });
+        } else {
+          // その他のエラーはSnackBarで表示
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(next.error!),
+              backgroundColor: Colors.red,
+            ),
+          );
+          viewModel.clearError();
+        }
       }
     });
 

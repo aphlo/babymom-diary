@@ -12,7 +12,9 @@ import '../viewmodels/vaccine_detail_state.dart';
 import '../viewmodels/vaccine_detail_view_model.dart';
 import '../widgets/vaccine_header.dart';
 import '../widgets/concurrent_vaccines_reschedule_dialog.dart';
+import '../widgets/vaccine_error_dialog.dart';
 import '../viewmodels/concurrent_vaccines_view_model.dart';
+import '../../domain/errors/vaccination_persistence_exception.dart';
 
 class VaccineReschedulePage extends ConsumerStatefulWidget {
   const VaccineReschedulePage({
@@ -201,6 +203,14 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
           const SnackBar(content: Text('日付を変更しました')),
         );
         context.pop();
+      }
+    } on DuplicateScheduleDateException catch (e) {
+      if (context.mounted) {
+        await VaccineErrorDialog.show(
+          context: context,
+          title: '予約を変更できません',
+          message: e.message,
+        );
       }
     } catch (error) {
       if (context.mounted) {

@@ -18,6 +18,7 @@ import 'package:babymom_diary/src/features/vaccines/application/usecases/watch_v
 import 'package:babymom_diary/src/features/vaccines/application/usecases/watch_vaccination_records.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/services/vaccination_schedule_policy.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/services/influenza_schedule_generator.dart';
+import 'package:babymom_diary/src/features/vaccines/domain/services/vaccine_schedule_conflict_validator.dart';
 
 final vaccineCatalogRepositoryProvider =
     Provider<VaccineCatalogRepository>((ref) {
@@ -38,11 +39,18 @@ final vaccinationRecordDataSourceProvider =
   );
 });
 
+final vaccineScheduleConflictValidatorProvider =
+    Provider<VaccineScheduleConflictValidator>((ref) {
+  return VaccineScheduleConflictValidator();
+});
+
 final vaccinationRecordRepositoryProvider =
     Provider<VaccinationRecordRepository>((ref) {
   final dataSource = ref.watch(vaccinationRecordDataSourceProvider);
+  final conflictValidator = ref.watch(vaccineScheduleConflictValidatorProvider);
   return VaccinationRecordRepositoryImpl(
     dataSource,
+    conflictValidator,
   );
 });
 

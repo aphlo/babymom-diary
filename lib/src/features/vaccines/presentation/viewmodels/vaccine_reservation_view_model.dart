@@ -10,6 +10,7 @@ import '../../application/usecases/create_vaccine_reservation.dart';
 import '../../application/usecases/get_vaccines_for_simulataneous_reservation.dart';
 import '../../application/vaccine_catalog_providers.dart';
 import '../../domain/value_objects/vaccine_record_type.dart';
+import '../../domain/errors/vaccination_persistence_exception.dart';
 import '../models/vaccine_info.dart';
 import 'vaccine_reservation_state.dart';
 
@@ -167,6 +168,14 @@ class VaccineReservationViewModel
       if (!mounted) return false;
       state = state.copyWith(isSubmitting: false);
       return true;
+    } on DuplicateScheduleDateException catch (e) {
+      if (!mounted) return false;
+      state = state.copyWith(
+        isSubmitting: false,
+        error: e.message,
+        isDuplicateError: true,
+      );
+      return false;
     } catch (error) {
       if (!mounted) return false;
       state = state.copyWith(

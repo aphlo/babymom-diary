@@ -11,6 +11,7 @@ import '../../domain/entities/vaccination_record.dart';
 import '../../domain/entities/vaccine.dart';
 import '../../domain/repositories/vaccination_record_repository.dart';
 import '../../domain/services/vaccination_schedule_policy.dart';
+import '../../domain/errors/vaccination_persistence_exception.dart';
 import '../../domain/value_objects/vaccination_recommendation.dart';
 import '../../domain/services/influenza_schedule_generator.dart';
 import '../../domain/value_objects/influenza_season.dart';
@@ -553,6 +554,13 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
       }
 
       // 成功時はストリームから自動的に更新される
+    } on DuplicateScheduleDateException catch (e) {
+      if (!mounted) rethrow;
+      state = state.copyWith(
+        isLoading: false,
+        error: e.message,
+      );
+      rethrow;
     } catch (error) {
       if (!mounted) rethrow;
       state = state.copyWith(
@@ -622,6 +630,13 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
       }
 
       // 成功時はストリームから自動的に更新される
+    } on DuplicateScheduleDateException catch (e) {
+      if (!mounted) rethrow;
+      state = state.copyWith(
+        isLoading: false,
+        error: e.message,
+      );
+      rethrow;
     } catch (error) {
       if (!mounted) rethrow;
       state = state.copyWith(

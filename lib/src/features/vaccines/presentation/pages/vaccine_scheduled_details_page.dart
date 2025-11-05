@@ -16,6 +16,8 @@ import '../widgets/vaccine_header.dart';
 import '../widgets/concurrent_vaccines_confirmation_dialog.dart';
 import '../widgets/concurrent_vaccines_delete_dialog.dart';
 import '../widgets/concurrent_vaccines_revert_dialog.dart';
+import '../widgets/vaccine_error_dialog.dart';
+import '../../domain/errors/vaccination_persistence_exception.dart';
 
 class VaccineScheduledDetailsPage extends ConsumerWidget {
   const VaccineScheduledDetailsPage({
@@ -462,6 +464,14 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
           const SnackBar(content: Text('未接種に戻しました')),
         );
         context.pop();
+      }
+    } on DuplicateScheduleDateException catch (e) {
+      if (context.mounted) {
+        await VaccineErrorDialog.show(
+          context: context,
+          title: '予約を変更できません',
+          message: e.message,
+        );
       }
     } catch (error) {
       if (context.mounted) {

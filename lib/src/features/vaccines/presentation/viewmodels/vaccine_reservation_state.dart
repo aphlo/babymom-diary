@@ -10,6 +10,7 @@ class VaccineReservationState {
   const VaccineReservationState({
     this.isLoading = false,
     this.error,
+    this.isDuplicateError = false,
     this.primaryVaccine,
     this.primaryDoseNumber,
     this.scheduledDate,
@@ -22,6 +23,7 @@ class VaccineReservationState {
 
   final bool isLoading;
   final String? error;
+  final bool isDuplicateError;
   final VaccineInfo? primaryVaccine;
   final int? primaryDoseNumber;
   final DateTime? scheduledDate;
@@ -81,6 +83,7 @@ class VaccineReservationState {
   VaccineReservationState copyWith({
     bool? isLoading,
     String? error,
+    bool? isDuplicateError,
     VaccineInfo? primaryVaccine,
     int? primaryDoseNumber,
     DateTime? scheduledDate,
@@ -93,6 +96,7 @@ class VaccineReservationState {
     return VaccineReservationState(
       isLoading: isLoading ?? this.isLoading,
       error: error,
+      isDuplicateError: isDuplicateError ?? false,
       primaryVaccine: primaryVaccine ?? this.primaryVaccine,
       primaryDoseNumber: primaryDoseNumber ?? this.primaryDoseNumber,
       scheduledDate: scheduledDate ?? this.scheduledDate,
@@ -106,7 +110,7 @@ class VaccineReservationState {
   }
 
   VaccineReservationState clearError() {
-    return copyWith(error: null);
+    return copyWith(error: null, isDuplicateError: false);
   }
 
   @override
@@ -116,6 +120,7 @@ class VaccineReservationState {
           runtimeType == other.runtimeType &&
           isLoading == other.isLoading &&
           error == other.error &&
+          isDuplicateError == other.isDuplicateError &&
           primaryVaccine == other.primaryVaccine &&
           primaryDoseNumber == other.primaryDoseNumber &&
           scheduledDate == other.scheduledDate &&
@@ -130,6 +135,7 @@ class VaccineReservationState {
   int get hashCode =>
       isLoading.hashCode ^
       error.hashCode ^
+      isDuplicateError.hashCode ^
       primaryVaccine.hashCode ^
       primaryDoseNumber.hashCode ^
       scheduledDate.hashCode ^
