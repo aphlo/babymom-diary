@@ -189,17 +189,21 @@ class VaccinationRecord {
     }
   }
 
-  /// 予約済みの接種をカレンダーイベントに変換
+  /// 予約済みおよび接種済みの接種をカレンダーイベントに変換
   List<CalendarEvent> toCalendarEvents(String childId) {
     final ordered = orderedDoses;
     return doses
-        .where((dose) => dose.status == DoseStatus.scheduled)
+        .where((dose) =>
+            dose.scheduledDate != null &&
+            (dose.status == DoseStatus.scheduled ||
+                dose.status == DoseStatus.completed))
         .map((dose) {
       final sequence = ordered.indexOf(dose) + 1;
+      final isCompleted = dose.status == DoseStatus.completed;
       return CalendarEvent(
         id: 'vaccination_${childId}_${vaccineId}_${dose.doseId}',
-        title: '$vaccineName $sequence回目',
-        memo: '$vaccineNameの$sequence回目の接種予定です',
+        title: '$vaccineName $sequence回目${isCompleted ? '（接種済）' : ''}',
+        memo: '$vaccineNameの$sequence回目${isCompleted ? 'の接種記録' : 'の接種予定'}です',
         allDay: true,
         start: dose.scheduledDate!,
         end: dose.scheduledDate!,

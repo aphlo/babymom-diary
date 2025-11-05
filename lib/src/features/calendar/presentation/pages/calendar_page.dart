@@ -15,6 +15,7 @@ import 'package:babymom_diary/src/features/calendar/presentation/widgets/calenda
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/calendar_error_banner.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/calendar_error_view.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/selected_day_event_list.dart';
+import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_category.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_requirement.dart';
 import 'package:babymom_diary/src/features/vaccines/presentation/models/vaccine_info.dart';
@@ -347,14 +348,23 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       reservationGroupId: doseRecord.reservationGroupId,
     );
 
-    context.pushNamed(
-      'vaccine_reschedule',
-      extra: {
+    // 接種済みの場合は詳細ページへ、予約済みの場合は予約変更ページへ
+    if (doseRecord.status == DoseStatus.completed) {
+      context.push('/vaccines/scheduled-details', extra: {
         'vaccine': vaccine,
         'doseNumber': match.doseNumber,
         'statusInfo': statusInfo,
-      },
-    );
+      });
+    } else {
+      context.pushNamed(
+        'vaccine_reschedule',
+        extra: {
+          'vaccine': vaccine,
+          'doseNumber': match.doseNumber,
+          'statusInfo': statusInfo,
+        },
+      );
+    }
   }
 }
 

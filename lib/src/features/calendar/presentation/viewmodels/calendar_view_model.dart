@@ -397,7 +397,10 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
       final orderedDoses = record.orderedDoses;
       for (int i = 0; i < orderedDoses.length; i++) {
         final dose = orderedDoses[i];
-        if (dose.status != DoseStatus.scheduled) {
+        // Include both scheduled and completed doses with scheduledDate
+        if (dose.scheduledDate == null ||
+            (dose.status != DoseStatus.scheduled &&
+                dose.status != DoseStatus.completed)) {
           continue;
         }
         final doseNumber = i + 1; // 1-based indexing for display

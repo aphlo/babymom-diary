@@ -81,12 +81,15 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
                 childId: childId,
                 childBirthday: null,
               );
-              final detailState = ref.watch(vaccineDetailViewModelProvider(params));
+              final detailState =
+                  ref.watch(vaccineDetailViewModelProvider(params));
               final currentDoseStatus = detailState.doseStatuses[doseNumber];
 
               // Get current scheduled date from ViewModel state (live data)
-              final DateTime? currentScheduledDate = currentDoseStatus?.scheduledDate;
-              final String? currentReservationGroupId = currentDoseStatus?.reservationGroupId;
+              final DateTime? currentScheduledDate =
+                  currentDoseStatus?.scheduledDate;
+              final String? currentReservationGroupId =
+                  currentDoseStatus?.reservationGroupId;
 
               return SingleChildScrollView(
                 padding:
