@@ -52,7 +52,7 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
       appBar: AppBar(
-        title: const Text('日程を変更'),
+        title: const Text('日付を変更'),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -106,7 +106,7 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : const Text('日程を変更'),
+                  : const Text('日付を変更'),
             ),
           ),
         ),
@@ -174,7 +174,7 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('日程を変更しました')),
+          const SnackBar(content: Text('日付を変更しました')),
         );
         context.pop();
       }
@@ -182,7 +182,7 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('日程変更に失敗しました: $error'),
+            content: Text('日付変更に失敗しました: $error'),
             backgroundColor: Colors.red,
           ),
         );
@@ -310,7 +310,7 @@ class _DateSelectionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '新しい予約日時',
+            '新しい日付',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),

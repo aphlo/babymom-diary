@@ -124,7 +124,7 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
                 child: OutlinedButton.icon(
                   onPressed: () => _navigateToReschedule(context),
                   icon: const Icon(Icons.edit_calendar),
-                  label: const Text('日程を変更する'),
+                  label: const Text('日付を変更する'),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
@@ -239,7 +239,7 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
   }
 
   void _navigateToReschedule(BuildContext context) {
-    // TODO: 日程変更画面への遷移を実装
+    // TODO: 日付変更画面への遷移を実装
     context.push('/vaccines/reschedule', extra: {
       'vaccine': vaccine,
       'doseNumber': doseNumber,
@@ -505,7 +505,7 @@ class _ScheduledDateCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                '予約日時',
+                '日付',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),

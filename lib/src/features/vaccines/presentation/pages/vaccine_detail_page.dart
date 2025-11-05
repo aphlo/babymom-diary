@@ -6,6 +6,7 @@ import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 
 import '../../../children/application/selected_child_provider.dart';
+import '../../domain/entities/dose_record.dart';
 import '../controllers/vaccine_detail_interactions.dart';
 import '../models/vaccine_detail_callbacks.dart';
 import '../models/vaccine_info.dart';
@@ -126,6 +127,15 @@ class VaccineDetailPage extends ConsumerWidget {
     String? influenzaSeasonLabel,
     int? influenzaDoseOrder,
   }) {
+    // 接種済みの場合は直接詳細ページに遷移
+    if (statusInfo.status == DoseStatus.completed) {
+      _navigateToVaccineDetails(context, vaccine, doseNumber, statusInfo,
+          influenzaSeasonLabel: influenzaSeasonLabel,
+          influenzaDoseOrder: influenzaDoseOrder);
+      return;
+    }
+
+    // 予約済みの場合はボトムシートを表示
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,

@@ -153,7 +153,7 @@ class _ConcurrentVaccinesRescheduleDialog extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              '同時に予約したワクチンがあります。まとめて日程変更しますか？',
+              '同時に予約したワクチンがあります。まとめて日付変更しますか？',
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 height: 1.4,
@@ -174,7 +174,7 @@ class _ConcurrentVaccinesRescheduleDialog extends ConsumerWidget {
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 4),
                 child: Text(
-                  '全て日程変更する',
+                  '全て日付変更する',
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -193,7 +193,7 @@ class _ConcurrentVaccinesRescheduleDialog extends ConsumerWidget {
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 4),
                 child: Text(
-                  'これだけ日程変更する',
+                  'これだけ日付変更する',
                   textAlign: TextAlign.center,
                 ),
               ),
