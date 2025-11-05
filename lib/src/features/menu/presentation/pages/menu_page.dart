@@ -79,6 +79,15 @@ class MenuPage extends ConsumerWidget {
                     onTap: () => context.push('/household/share'),
                   ),
                   const Divider(height: 0),
+                  ListTile(
+                    tileColor: Colors.white,
+                    leading: const Icon(Icons.vaccines),
+                    title: const Text('ワクチンの表示・非表示'),
+                    subtitle: const Text('表示するワクチンを選択'),
+                    onTap: () =>
+                        context.push('/household/vaccine-visibility-settings'),
+                  ),
+                  const Divider(height: 0),
                 ],
               );
             },

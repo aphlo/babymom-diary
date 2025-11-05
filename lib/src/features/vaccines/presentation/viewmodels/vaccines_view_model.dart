@@ -11,9 +11,20 @@ import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/features/children/application/selected_child_provider.dart';
 import 'package:babymom_diary/src/features/children/application/selected_child_snapshot_provider.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/services/influenza_schedule_generator.dart';
+import 'package:babymom_diary/src/features/household/domain/repositories/vaccine_visibility_settings_repository.dart';
+import 'package:babymom_diary/src/features/household/infrastructure/repositories/vaccine_visibility_settings_repository_impl.dart';
+import 'package:babymom_diary/src/features/household/infrastructure/sources/vaccine_visibility_settings_firestore_data_source.dart';
 
 import '../mappers/vaccine_info_mapper.dart';
 import 'vaccines_view_data.dart';
+
+// ワクチン表示設定リポジトリのプロバイダー
+final _vaccineVisibilitySettingsRepositoryProvider =
+    Provider<VaccineVisibilitySettingsRepository>((ref) {
+  final firestore = ref.watch(firebaseFirestoreProvider);
+  final dataSource = VaccineVisibilitySettingsFirestoreDataSource(firestore);
+  return VaccineVisibilitySettingsRepositoryImpl(dataSource: dataSource);
+});
 
 final vaccinesViewModelProvider = AutoDisposeStateNotifierProvider<
     VaccinesViewModel, AsyncValue<VaccinesViewData>>((ref) {
@@ -21,6 +32,8 @@ final vaccinesViewModelProvider = AutoDisposeStateNotifierProvider<
   final watchVaccinationRecords = ref.watch(watchVaccinationRecordsProvider);
   final influenzaScheduleGenerator =
       ref.watch(influenzaScheduleGeneratorProvider);
+  final visibilitySettingsRepository =
+      ref.watch(_vaccineVisibilitySettingsRepositoryProvider);
   final String? householdId = ref.watch(currentHouseholdIdProvider).value;
   final String? childId = ref.watch(selectedChildControllerProvider).value;
 
@@ -33,6 +46,7 @@ final vaccinesViewModelProvider = AutoDisposeStateNotifierProvider<
     getGuideline: getGuideline,
     watchVaccinationRecords: watchVaccinationRecords,
     influenzaScheduleGenerator: influenzaScheduleGenerator,
+    visibilitySettingsRepository: visibilitySettingsRepository,
     householdId: householdId,
     childId: childId,
     childBirthday: selectedChildSnapshot?.birthday,
@@ -46,17 +60,20 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
     required GetVaccineMaster getGuideline,
     required WatchVaccinationRecords watchVaccinationRecords,
     required InfluenzaScheduleGenerator influenzaScheduleGenerator,
+    required VaccineVisibilitySettingsRepository visibilitySettingsRepository,
     this.householdId,
     this.childId,
     this.childBirthday,
   })  : _getGuideline = getGuideline,
         _watchVaccinationRecords = watchVaccinationRecords,
         _influenzaScheduleGenerator = influenzaScheduleGenerator,
+        _visibilitySettingsRepository = visibilitySettingsRepository,
         super(const AsyncValue.loading());
 
   final GetVaccineMaster _getGuideline;
   final WatchVaccinationRecords _watchVaccinationRecords;
   final InfluenzaScheduleGenerator _influenzaScheduleGenerator;
+  final VaccineVisibilitySettingsRepository _visibilitySettingsRepository;
   final String? householdId;
   final String? childId;
   final DateTime? childBirthday;
@@ -104,7 +121,7 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
     );
   }
 
-  void _emitViewData() {
+  Future<void> _emitViewData() async {
     final VaccineMaster? guideline = _guideline;
     if (guideline == null) {
       return;
@@ -113,14 +130,42 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
         <String, VaccinationRecord>{
       for (final VaccinationRecord record in _records) record.vaccineId: record,
     };
-    state = AsyncValue.data(
-      mapGuidelineToViewData(
-        guideline,
-        influenzaScheduleGenerator: _influenzaScheduleGenerator,
-        recordsByVaccine: recordMap,
-        childBirthday: childBirthday,
-      ),
+
+    // ビューデータを生成
+    final viewData = mapGuidelineToViewData(
+      guideline,
+      influenzaScheduleGenerator: _influenzaScheduleGenerator,
+      recordsByVaccine: recordMap,
+      childBirthday: childBirthday,
     );
+
+    // ワクチン表示設定を取得してフィルタリング
+    if (householdId != null) {
+      try {
+        final settings = await _visibilitySettingsRepository.getSettings(
+          householdId: householdId!,
+        );
+
+        // 表示されるべきワクチンのみをフィルタリング
+        final filteredVaccines = viewData.vaccines
+            .where((vaccine) => settings.isVisible(vaccine.id))
+            .toList();
+
+        state = AsyncValue.data(
+          VaccinesViewData(
+            periodLabels: viewData.periodLabels,
+            vaccines: filteredVaccines,
+            version: viewData.version,
+            publishedAt: viewData.publishedAt,
+          ),
+        );
+      } catch (error) {
+        // フィルタリングに失敗した場合は全てのワクチンを表示
+        state = AsyncValue.data(viewData);
+      }
+    } else {
+      state = AsyncValue.data(viewData);
+    }
   }
 
   Future<void> refresh() async {

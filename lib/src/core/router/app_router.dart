@@ -11,6 +11,7 @@ import '../../features/children/presentation/pages/add_child_page.dart';
 import '../../features/children/presentation/pages/manage_children_page.dart';
 import '../../features/children/presentation/pages/edit_child_page.dart';
 import '../../features/household/presentation/pages/household_share_page.dart';
+import '../../features/household/presentation/pages/vaccine_visibility_settings_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_detail_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_reservation_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_scheduled_details_page.dart';
@@ -87,6 +88,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'household_share',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: HouseholdSharePage()),
+      ),
+      GoRoute(
+        path: '/household/vaccine-visibility-settings',
+        name: 'vaccine_visibility_settings',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: VaccineVisibilitySettingsPage()),
       ),
       GoRoute(
         path: '/vaccines/detail',

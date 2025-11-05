@@ -4,17 +4,24 @@ import '../../domain/repositories/vaccination_record_repository.dart';
 import '../../../children/domain/entities/child_summary.dart';
 import '../../domain/value_objects/vaccine_category.dart' as vo_category;
 import '../../domain/value_objects/vaccine_requirement.dart' as vo_requirement;
+import '../../../household/domain/repositories/vaccine_visibility_settings_repository.dart';
 
 /// 子供の既存の接種記録に基づいて、予約可能なワクチンを取得するユースケース
 class GetVaccinesForSimultaneousReservation {
   GetVaccinesForSimultaneousReservation({
     required VaccineMasterRepository vaccineMasterRepository,
     required VaccinationRecordRepository vaccinationRecordRepository,
+    required VaccineVisibilitySettingsRepository
+        vaccineVisibilitySettingsRepository,
   })  : _vaccineMasterRepository = vaccineMasterRepository,
-        _vaccinationRecordRepository = vaccinationRecordRepository;
+        _vaccinationRecordRepository = vaccinationRecordRepository,
+        _vaccineVisibilitySettingsRepository =
+            vaccineVisibilitySettingsRepository;
 
   final VaccineMasterRepository _vaccineMasterRepository;
   final VaccinationRecordRepository _vaccinationRecordRepository;
+  final VaccineVisibilitySettingsRepository
+      _vaccineVisibilitySettingsRepository;
 
   /// 指定した子供の年齢と接種履歴に基づいて、接種可能なワクチンの一覧を取得
   Future<List<VaccinationRecord>> call({
@@ -70,7 +77,22 @@ class GetVaccinesForSimultaneousReservation {
       }
     }
 
-    return availableVaccines;
+    // ワクチン表示設定を取得してフィルタリング
+    try {
+      final settings = await _vaccineVisibilitySettingsRepository.getSettings(
+        householdId: householdId,
+      );
+
+      // 表示されるべきワクチンのみをフィルタリング
+      final filteredVaccines = availableVaccines
+          .where((record) => settings.isVisible(record.vaccineId))
+          .toList();
+
+      return filteredVaccines;
+    } catch (e) {
+      // フィルタリングに失敗した場合は全てのワクチンを返す
+      return availableVaccines;
+    }
   }
 
   /// ドメインのVaccineCategoryを値オブジェクトにマップ
