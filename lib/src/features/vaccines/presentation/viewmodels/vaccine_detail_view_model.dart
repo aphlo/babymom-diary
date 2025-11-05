@@ -286,9 +286,13 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
   }
 
   List<int> _deriveDoseNumbers(Vaccine vaccine) {
-    if (vaccine.id == 'influenza') {
-      // インフルエンザは固定で14回分
+    if (vaccine.id == 'influenza_injection') {
+      // インフルエンザ注射は固定で14回分
       return List<int>.generate(14, (index) => index + 1);
+    }
+    if (vaccine.id == 'influenza_nasal') {
+      // インフルエンザ経鼻は固定で5回分
+      return List<int>.generate(5, (index) => index + 1);
     }
     final Set<int> result = <int>{};
     for (final VaccineScheduleSlot slot in vaccine.schedule) {

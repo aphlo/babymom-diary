@@ -181,7 +181,7 @@ class _VaccineDetailContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final bool isInfluenza = vaccine.id == 'influenza';
+    final bool isInfluenza = vaccine.id.startsWith('influenza');
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),

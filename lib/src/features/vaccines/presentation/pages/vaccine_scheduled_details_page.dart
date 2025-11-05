@@ -37,7 +37,7 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bool isInfluenza = vaccine.id == 'influenza';
+    final bool isInfluenza = vaccine.id.startsWith('influenza');
 
     String doseLabel;
     if (isInfluenza && influenzaDoseOrder != null) {
@@ -553,7 +553,7 @@ class _VaccineInfoCard extends StatelessWidget {
   }
 
   String _buildDoseLabel() {
-    if (vaccine.id != 'influenza') {
+    if (!vaccine.id.startsWith('influenza')) {
       return '$doseNumber回目の接種';
     }
     final bool hasSeason = influenzaSeasonLabel != null &&

@@ -178,9 +178,13 @@ class VaccinationRecord {
       case 'rotavirus_monovalent': // ロタウィルス(1価)
         return 2;
 
-      // 特殊：インフルエンザ（毎年2回×複数年）
-      case 'influenza':
+      // 特殊：インフルエンザ注射（毎年2回×複数年）
+      case 'influenza_injection':
         return 14;
+
+      // インフルエンザ経鼻（5回）
+      case 'influenza_nasal':
+        return 5;
 
       // 1回接種
       case 'bcg':

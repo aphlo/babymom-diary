@@ -73,7 +73,7 @@ class _VaccineListCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final bool isInfluenza = vaccine.id == 'influenza';
+    final bool isInfluenza = vaccine.id.startsWith('influenza');
 
     // Extract all dose numbers
     final Set<int> allDoseNumbers = <int>{};
@@ -81,9 +81,11 @@ class _VaccineListCard extends StatelessWidget {
       allDoseNumbers.addAll(doseNumbers);
     }
 
-    // For influenza, show all 14 doses regardless of status
+    // For influenza, show all doses regardless of status
     final List<int> sortedDoseNumbers = isInfluenza
-        ? List<int>.generate(14, (index) => index + 1)
+        ? (vaccine.id == 'influenza_injection'
+            ? List<int>.generate(14, (index) => index + 1)
+            : List<int>.generate(5, (index) => index + 1))
         : (allDoseNumbers.toList()..sort());
 
     final requirement =

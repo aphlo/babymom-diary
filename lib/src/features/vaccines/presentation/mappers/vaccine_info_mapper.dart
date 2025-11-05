@@ -50,11 +50,17 @@ VaccineInfo _mapVaccine(
   final Map<String, domain.VaccinationPeriodHighlight> periodHighlights =
       <String, domain.VaccinationPeriodHighlight>{};
   final Set<int> expectedDoseNumbers = <int>{};
-  final bool isInfluenza = vaccine.id == 'influenza';
+  final bool isInfluenza = vaccine.id.startsWith('influenza');
 
   if (isInfluenza) {
-    // インフルエンザは固定で14回分
-    expectedDoseNumbers.addAll(List<int>.generate(14, (index) => index + 1));
+    // インフルエンザは固定回数
+    if (vaccine.id == 'influenza_injection') {
+      // 注射は14回分
+      expectedDoseNumbers.addAll(List<int>.generate(14, (index) => index + 1));
+    } else if (vaccine.id == 'influenza_nasal') {
+      // 経鼻は5回分
+      expectedDoseNumbers.addAll(List<int>.generate(5, (index) => index + 1));
+    }
     // インフルエンザはガイドラインの「一般的な接種期間」がないため、doseSchedulesは空のまま
     // ただしhighlightは反映する
     for (final domain.VaccineScheduleSlot slot in vaccine.schedule) {

@@ -310,7 +310,8 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                         while (columnIndex < widget.periods.length) {
                           final String periodLabel =
                               widget.periods[columnIndex];
-                          final bool isInfluenza = vaccine.id == 'influenza';
+                          final bool isInfluenza =
+                              vaccine.id.startsWith('influenza');
                           final VaccinePeriodHighlightStyle? highlightStyle =
                               _highlightStyleFor(vaccine, periodLabel);
                           final List<int> rawDoseNumbers =

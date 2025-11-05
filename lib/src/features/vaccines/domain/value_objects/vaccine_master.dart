@@ -633,8 +633,8 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
       ],
     ),
     Vaccine(
-      id: 'influenza',
-      name: 'インフルエンザ',
+      id: 'influenza_injection',
+      name: 'インフル注射',
       category: VaccineCategory.inactivated,
       requirement: VaccineRequirement.optional,
       priority: VaccinePriority.highlight,
@@ -690,7 +690,41 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
       ],
       notes: <VaccineNote>[
         VaccineNote(
-          message: '13才未満は2回接種。接種間隔は4週間空ける',
+          message: '13才未満は年に2回接種。接種間隔は4週間空ける',
+        ),
+      ],
+    ),
+    Vaccine(
+      id: 'influenza_nasal',
+      name: 'インフル経鼻',
+      category: VaccineCategory.live,
+      requirement: VaccineRequirement.optional,
+      priority: VaccinePriority.highlight,
+      schedule: <VaccineScheduleSlot>[
+        VaccineScheduleSlot(
+          periodId: '2才',
+          highlight: VaccinationPeriodHighlight.available,
+        ),
+        VaccineScheduleSlot(
+          periodId: '3才',
+          highlight: VaccinationPeriodHighlight.available,
+        ),
+        VaccineScheduleSlot(
+          periodId: '4才',
+          highlight: VaccinationPeriodHighlight.available,
+        ),
+        VaccineScheduleSlot(
+          periodId: '5才',
+          highlight: VaccinationPeriodHighlight.available,
+        ),
+        VaccineScheduleSlot(
+          periodId: '6才',
+          highlight: VaccinationPeriodHighlight.available,
+        ),
+      ],
+      notes: <VaccineNote>[
+        VaccineNote(
+          message: '年に1回摂取してください',
         ),
       ],
     ),

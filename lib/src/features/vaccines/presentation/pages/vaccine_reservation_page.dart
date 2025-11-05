@@ -55,7 +55,7 @@ class _VaccineReservationPageState
     final bool canSubmit = state.canSubmit && !state.isLoading;
 
     // AppBarのタイトル用のラベルを生成
-    final bool isInfluenza = widget.vaccine.id == 'influenza';
+    final bool isInfluenza = widget.vaccine.id.startsWith('influenza');
     String doseLabel;
     if (isInfluenza && widget.influenzaDoseOrder != null) {
       final String seasonPart = (widget.influenzaSeasonLabel != null &&
@@ -251,7 +251,7 @@ class _VaccineInfoCard extends StatelessWidget {
   }
 
   String _buildDoseLabel() {
-    if (vaccine.id != 'influenza') {
+    if (!vaccine.id.startsWith('influenza')) {
       return '$doseNumber回目の接種';
     }
     final bool hasSeason = influenzaSeasonLabel != null &&
