@@ -119,13 +119,11 @@ class VaccinationRecordFirestoreDataSource {
     required String householdId,
     required String childId,
     required String reservationGroupId,
-    required DateTime completedDate,
   }) {
     return _groupCommands.completeReservationGroup(
       householdId: householdId,
       childId: childId,
       reservationGroupId: reservationGroupId,
-      completedDate: completedDate,
     );
   }
 
@@ -135,7 +133,6 @@ class VaccinationRecordFirestoreDataSource {
     required String reservationGroupId,
     required String vaccineId,
     required int doseNumber,
-    required DateTime completedDate,
   }) {
     return _groupCommands.completeReservationGroupMember(
       householdId: householdId,
@@ -143,7 +140,6 @@ class VaccinationRecordFirestoreDataSource {
       reservationGroupId: reservationGroupId,
       vaccineId: vaccineId,
       doseNumber: doseNumber,
-      completedDate: completedDate,
     );
   }
 
@@ -208,14 +204,12 @@ class VaccinationRecordFirestoreDataSource {
     required String childId,
     required String vaccineId,
     required int doseNumber,
-    required DateTime completedDate,
   }) {
     return _reservationCommands.completeVaccination(
       householdId: householdId,
       childId: childId,
       vaccineId: vaccineId,
       doseNumber: doseNumber,
-      completedDate: completedDate,
     );
   }
 
@@ -230,6 +224,36 @@ class VaccinationRecordFirestoreDataSource {
       childId: childId,
       vaccineId: vaccineId,
       doseNumber: doseNumber,
+    );
+  }
+
+  Future<void> markDoseAsScheduled({
+    required String householdId,
+    required String childId,
+    required String vaccineId,
+    required int doseNumber,
+    required DateTime scheduledDate,
+  }) {
+    return _reservationCommands.markDoseAsScheduled(
+      householdId: householdId,
+      childId: childId,
+      vaccineId: vaccineId,
+      doseNumber: doseNumber,
+      scheduledDate: scheduledDate,
+    );
+  }
+
+  Future<void> markReservationGroupAsScheduled({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+    required DateTime scheduledDate,
+  }) {
+    return _groupCommands.markReservationGroupAsScheduled(
+      householdId: householdId,
+      childId: childId,
+      reservationGroupId: reservationGroupId,
+      scheduledDate: scheduledDate,
     );
   }
 }

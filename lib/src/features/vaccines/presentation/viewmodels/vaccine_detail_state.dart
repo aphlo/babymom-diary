@@ -9,14 +9,12 @@ class DoseStatusInfo {
     required this.doseNumber,
     this.status,
     this.scheduledDate,
-    this.completedDate,
     this.reservationGroupId,
   });
 
   final int doseNumber;
   final DoseStatus? status;
   final DateTime? scheduledDate;
-  final DateTime? completedDate;
   final String? reservationGroupId;
 }
 

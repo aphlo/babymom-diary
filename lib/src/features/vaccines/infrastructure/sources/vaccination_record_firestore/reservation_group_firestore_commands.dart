@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../domain/entities/dose_record.dart';
 import '../../../domain/entities/reservation_group.dart';
 import '../../../domain/entities/vaccine_reservation_request.dart';
 import '../../../domain/errors/vaccination_persistence_exception.dart';
@@ -71,9 +72,10 @@ class ReservationGroupFirestoreCommands {
 
           for (final item in pendingItems) {
             final itemScheduledDateUtc = item.request.scheduledDate.toUtc();
-            final doseEntry = _ctx.scheduledDoseEntry(
+            final doseEntry = _ctx.createDoseEntryFromRecordType(
               doseNumber: item.request.doseNumber,
-              scheduledDateUtc: itemScheduledDateUtc,
+              dateUtc: itemScheduledDateUtc,
+              recordType: item.request.recordType.name,
               reservationGroupId: groupId,
             );
 
@@ -144,7 +146,6 @@ class ReservationGroupFirestoreCommands {
               'scheduledDate': Timestamp.fromDate(scheduledDateUtc),
               'status': 'scheduled',
               'updatedAt': Timestamp.fromDate(nowUtc),
-              'completedDate': FieldValue.delete(),
             },
           );
 
@@ -187,9 +188,7 @@ class ReservationGroupFirestoreCommands {
     required String householdId,
     required String childId,
     required String reservationGroupId,
-    required DateTime completedDate,
   }) async {
-    final completedDateUtc = completedDate.toUtc();
     final nowUtc = DateTime.now().toUtc();
 
     await _ctx.executeWithRetry(() async {
@@ -213,7 +212,6 @@ class ReservationGroupFirestoreCommands {
             refs.reservationGroupDoc(reservationGroupId),
             <String, dynamic>{
               'status': 'completed',
-              'completedDate': Timestamp.fromDate(completedDateUtc),
               'updatedAt': Timestamp.fromDate(nowUtc),
             },
           );
@@ -233,10 +231,12 @@ class ReservationGroupFirestoreCommands {
               groupId: reservationGroupId,
             );
 
+            final existingDose = recordDto.doses[memberRecord.doseNumber];
             final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
-            updatedDoses[memberRecord.doseNumber] = _ctx.completedDoseEntry(
+            updatedDoses[memberRecord.doseNumber] = DoseEntryDto(
               doseNumber: memberRecord.doseNumber,
-              completedDateUtc: completedDateUtc,
+              status: DoseStatus.completed,
+              scheduledDate: existingDose?.scheduledDate,
               reservationGroupId: reservationGroupId,
             );
 
@@ -259,10 +259,8 @@ class ReservationGroupFirestoreCommands {
     required String reservationGroupId,
     required String vaccineId,
     required int doseNumber,
-    required DateTime completedDate,
   }) async {
     final nowUtc = DateTime.now().toUtc();
-    final completedDateUtc = completedDate.toUtc();
 
     await _ctx.executeWithRetry(() async {
       await _ctx.transactionExecutor.runForChild(
@@ -307,10 +305,13 @@ class ReservationGroupFirestoreCommands {
             groupId: reservationGroupId,
           );
 
+          final existingDose = recordDto.doses[doseNumber];
           final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
-          updatedDoses[doseNumber] = _ctx.completedDoseEntry(
+          updatedDoses[doseNumber] = DoseEntryDto(
             doseNumber: doseNumber,
-            completedDateUtc: completedDateUtc,
+            status: DoseStatus.completed,
+            scheduledDate: existingDose?.scheduledDate,
+            reservationGroupId: reservationGroupId,
           );
 
           transaction.update(
@@ -328,7 +329,6 @@ class ReservationGroupFirestoreCommands {
               'members': updatedMembers,
               'status': 'scheduled',
               'updatedAt': Timestamp.fromDate(nowUtc),
-              'completedDate': FieldValue.delete(),
             });
           }
         },
@@ -493,6 +493,76 @@ class ReservationGroupFirestoreCommands {
     final snapshot = await docRef.get();
     if (!snapshot.exists) return null;
     return ReservationGroupDto.fromSnapshot(snapshot).toDomain();
+  }
+
+  Future<void> markReservationGroupAsScheduled({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+    required DateTime scheduledDate,
+  }) async {
+    final scheduledDateUtc = scheduledDate.toUtc();
+    final nowUtc = DateTime.now().toUtc();
+
+    await _ctx.executeWithRetry(() async {
+      await _ctx.transactionExecutor.runForChild(
+        householdId: householdId,
+        childId: childId,
+        handler: (transaction, refs) async {
+          final groupDto =
+              await _ctx.readGroupDto(transaction, refs, reservationGroupId);
+          if (groupDto == null) {
+            throw ReservationGroupNotFoundException(reservationGroupId);
+          }
+
+          final memberRecords = await _ctx.loadGroupMemberRecords(
+            transaction,
+            refs,
+            groupDto,
+          );
+
+          transaction.update(
+            refs.reservationGroupDoc(reservationGroupId),
+            <String, dynamic>{
+              'scheduledDate': Timestamp.fromDate(scheduledDateUtc),
+              'status': 'scheduled',
+              'updatedAt': Timestamp.fromDate(nowUtc),
+            },
+          );
+
+          for (final memberRecord in memberRecords) {
+            final recordDto = memberRecord.recordDto;
+            if (recordDto == null) {
+              throw VaccinationRecordNotFoundException(
+                memberRecord.vaccineId,
+              );
+            }
+
+            final record = recordDto.toDomain();
+            _ctx.reservationGroupService.ensureDoseBelongsToGroup(
+              record: record,
+              doseNumber: memberRecord.doseNumber,
+              groupId: reservationGroupId,
+            );
+
+            final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
+            updatedDoses[memberRecord.doseNumber] = _ctx.scheduledDoseEntry(
+              doseNumber: memberRecord.doseNumber,
+              scheduledDateUtc: scheduledDateUtc,
+              reservationGroupId: reservationGroupId,
+            );
+
+            transaction.update(
+              memberRecord.docRef,
+              <String, dynamic>{
+                'doses': _ctx.serializeDoses(updatedDoses),
+                'updatedAt': Timestamp.fromDate(nowUtc),
+              },
+            );
+          }
+        },
+      );
+    });
   }
 }
 

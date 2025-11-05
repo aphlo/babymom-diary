@@ -162,8 +162,8 @@ Map<int, DoseStatus?> _extractDoseStatuses({
     // インフルエンザの場合は動的マッピングを使用
     final scheduledDoses = record.doses.values.toList()
       ..sort((a, b) {
-        final dateA = a.scheduledDate ?? a.completedDate;
-        final dateB = b.scheduledDate ?? b.completedDate;
+        final dateA = a.scheduledDate;
+        final dateB = b.scheduledDate;
         if (dateA == null && dateB == null) return 0;
         if (dateA == null) return 1;
         if (dateB == null) return -1;
@@ -206,8 +206,8 @@ _DynamicInfluenzaMapping _buildDynamicInfluenzaMapping({
   // 予約済みのドーズを日付順にソート
   final scheduledDoses = record.doses.values.toList()
     ..sort((a, b) {
-      final dateA = a.scheduledDate ?? a.completedDate;
-      final dateB = b.scheduledDate ?? b.completedDate;
+      final dateA = a.scheduledDate;
+      final dateB = b.scheduledDate;
       if (dateA == null && dateB == null) return 0;
       if (dateA == null) return 1;
       if (dateB == null) return -1;
@@ -218,7 +218,7 @@ _DynamicInfluenzaMapping _buildDynamicInfluenzaMapping({
   for (int i = 0; i < scheduledDoses.length; i++) {
     final dose = scheduledDoses[i];
     final newDoseNumber = i + 1; // 1から開始
-    final doseDate = dose.scheduledDate ?? dose.completedDate;
+    final doseDate = dose.scheduledDate;
 
     if (doseDate != null) {
       // 子供の年齢を計算して適切な期間を特定
@@ -247,8 +247,7 @@ Map<int, String> _buildDoseDisplayOverrides({
   final Map<int, String> overrides = <int, String>{};
 
   for (final MapEntry<int, DoseRecord> entry in record.doses.entries) {
-    final DateTime? doseDate =
-        entry.value.scheduledDate ?? entry.value.completedDate;
+    final DateTime? doseDate = entry.value.scheduledDate;
     if (doseDate == null) {
       continue;
     }

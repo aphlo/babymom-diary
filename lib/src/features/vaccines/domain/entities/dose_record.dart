@@ -8,14 +8,12 @@ class DoseRecord {
     required this.doseNumber,
     required this.status,
     this.scheduledDate,
-    this.completedDate,
     this.reservationGroupId,
   });
 
   final int doseNumber;
   final DoseStatus status;
   final DateTime? scheduledDate;
-  final DateTime? completedDate;
   final String? reservationGroupId;
 
   /// 接種記録のコピーを作成
@@ -23,7 +21,6 @@ class DoseRecord {
     int? doseNumber,
     DoseStatus? status,
     DateTime? scheduledDate,
-    DateTime? completedDate,
     String? reservationGroupId,
     bool clearReservationGroup = false,
   }) {
@@ -31,7 +28,6 @@ class DoseRecord {
       doseNumber: doseNumber ?? this.doseNumber,
       status: status ?? this.status,
       scheduledDate: scheduledDate ?? this.scheduledDate,
-      completedDate: completedDate ?? this.completedDate,
       reservationGroupId: clearReservationGroup
           ? null
           : (reservationGroupId ?? this.reservationGroupId),
@@ -59,10 +55,10 @@ class DoseRecord {
   }
 
   /// 完了状態に変更
-  DoseRecord markAsCompleted(DateTime completedDate) {
+  DoseRecord markAsCompleted(DateTime scheduledDate) {
     return copyWith(
       status: DoseStatus.completed,
-      completedDate: completedDate,
+      scheduledDate: scheduledDate,
     );
   }
 
@@ -74,7 +70,6 @@ class DoseRecord {
           doseNumber == other.doseNumber &&
           status == other.status &&
           scheduledDate == other.scheduledDate &&
-          completedDate == other.completedDate &&
           reservationGroupId == other.reservationGroupId;
 
   @override
@@ -82,13 +77,12 @@ class DoseRecord {
       doseNumber.hashCode ^
       status.hashCode ^
       scheduledDate.hashCode ^
-      completedDate.hashCode ^
       reservationGroupId.hashCode;
 
   @override
   String toString() {
     return 'DoseRecord(doseNumber: $doseNumber, status: $status, '
-        'scheduledDate: $scheduledDate, completedDate: $completedDate, '
+        'scheduledDate: $scheduledDate, '
         'reservationGroupId: $reservationGroupId)';
   }
 }

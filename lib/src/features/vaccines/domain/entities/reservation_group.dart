@@ -23,7 +23,6 @@ class VaccinationReservationGroup {
     required this.members,
     required this.createdAt,
     required this.updatedAt,
-    this.completedDate,
   });
 
   final String id;
@@ -33,7 +32,6 @@ class VaccinationReservationGroup {
   final List<ReservationGroupMember> members;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final DateTime? completedDate;
 
   VaccinationReservationGroup copyWith({
     String? id,
@@ -43,8 +41,6 @@ class VaccinationReservationGroup {
     List<ReservationGroupMember>? members,
     DateTime? createdAt,
     DateTime? updatedAt,
-    DateTime? completedDate,
-    bool clearCompletedDate = false,
   }) {
     return VaccinationReservationGroup(
       id: id ?? this.id,
@@ -54,8 +50,6 @@ class VaccinationReservationGroup {
       members: members ?? this.members,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      completedDate:
-          clearCompletedDate ? null : (completedDate ?? this.completedDate),
     );
   }
 }

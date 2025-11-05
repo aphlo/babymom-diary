@@ -10,14 +10,12 @@ class DoseEntryDto {
     required this.doseNumber,
     required this.status,
     this.scheduledDate,
-    this.completedDate,
     this.reservationGroupId,
   });
 
   final int doseNumber;
   final DoseStatus status;
   final DateTime? scheduledDate;
-  final DateTime? completedDate;
   final String? reservationGroupId;
 
   factory DoseEntryDto.fromJson(int doseNumber, Map<String, dynamic> json) {
@@ -26,7 +24,6 @@ class DoseEntryDto {
       doseNumber: doseNumber,
       status: _parseDoseStatus(statusString) ?? DoseStatus.scheduled,
       scheduledDate: (json['scheduledDate'] as Timestamp?)?.toDate(),
-      completedDate: (json['completedDate'] as Timestamp?)?.toDate(),
       reservationGroupId: json['reservationGroupId'] as String?,
     );
   }
@@ -47,8 +44,6 @@ class DoseEntryDto {
       'status': status.name,
       if (scheduledDate != null)
         'scheduledDate': Timestamp.fromDate(scheduledDate!),
-      if (completedDate != null)
-        'completedDate': Timestamp.fromDate(completedDate!),
       if (reservationGroupId != null) 'reservationGroupId': reservationGroupId,
     };
   }
@@ -58,7 +53,6 @@ class DoseEntryDto {
       doseNumber: doseNumber,
       status: status,
       scheduledDate: scheduledDate,
-      completedDate: completedDate,
       reservationGroupId: reservationGroupId,
     );
   }

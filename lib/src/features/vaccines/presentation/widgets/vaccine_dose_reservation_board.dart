@@ -85,18 +85,13 @@ class VaccineDoseReservationBoard extends StatelessWidget {
                             statusInfo?.status != DoseStatus.scheduled;
                         final DateTime? scheduledDate =
                             statusInfo?.scheduledDate;
-                        final DateTime? completedDate =
-                            statusInfo?.completedDate;
                         final bool showDateLabel =
                             (statusInfo?.status == DoseStatus.scheduled &&
                                     scheduledDate != null) ||
                                 (statusInfo?.status == DoseStatus.completed &&
-                                    completedDate != null);
-                        final DateTime? effectiveDate = showDateLabel
-                            ? (statusInfo?.status == DoseStatus.completed
-                                ? completedDate
-                                : scheduledDate)
-                            : null;
+                                    scheduledDate != null);
+                        final DateTime? effectiveDate =
+                            showDateLabel ? scheduledDate : null;
                         final String? dateYearLabel = effectiveDate != null
                             ? DateFormatter.yyyy(effectiveDate)
                             : null;
@@ -123,7 +118,16 @@ class VaccineDoseReservationBoard extends StatelessWidget {
                                             doseNumbers[i],
                                             statusInfo!,
                                           )
-                                      : null,
+                                      : (statusInfo?.status ==
+                                                  DoseStatus.completed &&
+                                              onScheduledDoseTap != null)
+                                          ? () => onScheduledDoseTap!(
+                                                context,
+                                                vaccine!,
+                                                doseNumbers[i],
+                                                statusInfo!,
+                                              )
+                                          : null,
                             ),
                             if (dateYearLabel != null &&
                                 dateDateLabel != null) ...[

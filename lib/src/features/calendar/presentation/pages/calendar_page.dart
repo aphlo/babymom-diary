@@ -344,7 +344,6 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       doseNumber: match.doseNumber,
       status: doseRecord.status,
       scheduledDate: doseRecord.scheduledDate,
-      completedDate: doseRecord.completedDate,
       reservationGroupId: doseRecord.reservationGroupId,
     );
 

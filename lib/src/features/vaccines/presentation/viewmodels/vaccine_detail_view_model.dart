@@ -250,7 +250,6 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
         doseNumber: dose,
         status: doseRecord?.status,
         scheduledDate: doseRecord?.scheduledDate,
-        completedDate: doseRecord?.completedDate,
         reservationGroupId: doseRecord?.reservationGroupId,
       );
     }
@@ -319,7 +318,6 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
   /// 接種を完了状態に更新
   Future<void> markDoseAsCompleted({
     required int doseNumber,
-    DateTime? completedDate,
     bool applyToGroup = true,
   }) async {
     if (_householdId == null || _childId == null || _vaccineId == null) {
@@ -328,8 +326,7 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
     }
 
     final doseStatus = state.doseStatuses[doseNumber];
-    final resolvedCompletedDate =
-        completedDate ?? doseStatus?.completedDate ?? doseStatus?.scheduledDate;
+    final resolvedCompletedDate = doseStatus?.scheduledDate;
     if (resolvedCompletedDate == null) {
       state = state.copyWith(
         error: '接種日が設定されていません',
@@ -342,7 +339,6 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
       state = state.copyWith(isLoading: true, clearError: true);
 
       final groupId = state.doseStatuses[doseNumber]?.reservationGroupId;
-      final completedAt = resolvedCompletedDate;
 
       if (applyToGroup && groupId == null) {
         state = state.copyWith(
@@ -357,7 +353,6 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
           householdId: _householdId!,
           childId: _childId!,
           reservationGroupId: groupId,
-          completedDate: completedAt,
         );
       } else if (groupId != null && !applyToGroup) {
         await _vaccinationRecordRepository.completeReservationGroupMember(
@@ -366,7 +361,6 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
           reservationGroupId: groupId,
           vaccineId: _vaccineId!,
           doseNumber: doseNumber,
-          completedDate: completedAt,
         );
       } else {
         await _vaccinationRecordRepository.completeVaccination(
@@ -374,7 +368,6 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
           childId: _childId!,
           vaccineId: _vaccineId!,
           doseNumber: doseNumber,
-          completedDate: completedAt,
         );
       }
 
@@ -487,6 +480,59 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
       state = state.copyWith(
         isLoading: false,
         error: '予約更新に失敗しました: $error',
+      );
+    }
+  }
+
+  /// 接種済みを予約済みに戻す
+  Future<void> markDoseAsScheduled({
+    required int doseNumber,
+    required DateTime scheduledDate,
+    bool applyToGroup = true,
+    String? reservationGroupId,
+  }) async {
+    if (_householdId == null || _childId == null || _vaccineId == null) {
+      state = state.copyWith(error: '必要な情報が不足しています');
+      return;
+    }
+
+    try {
+      state = state.copyWith(isLoading: true, clearError: true);
+
+      String? groupId = reservationGroupId ??
+          state.doseStatuses[doseNumber]?.reservationGroupId;
+
+      if (applyToGroup && groupId == null) {
+        final record = await _vaccinationRecordRepository.getVaccinationRecord(
+          householdId: _householdId!,
+          childId: _childId!,
+          vaccineId: _vaccineId!,
+        );
+        groupId = record?.getDose(doseNumber)?.reservationGroupId;
+      }
+
+      if (groupId != null && applyToGroup) {
+        await _vaccinationRecordRepository.markReservationGroupAsScheduled(
+          householdId: _householdId!,
+          childId: _childId!,
+          reservationGroupId: groupId,
+          scheduledDate: scheduledDate,
+        );
+      } else {
+        await _vaccinationRecordRepository.markDoseAsScheduled(
+          householdId: _householdId!,
+          childId: _childId!,
+          vaccineId: _vaccineId!,
+          doseNumber: doseNumber,
+          scheduledDate: scheduledDate,
+        );
+      }
+
+      // 成功時はストリームから自動的に更新される
+    } catch (error) {
+      state = state.copyWith(
+        isLoading: false,
+        error: '予約済みへの変更に失敗しました: $error',
       );
     }
   }

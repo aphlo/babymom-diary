@@ -74,13 +74,13 @@ class VaccinationRecordFirestoreContext {
 
   DoseEntryDto completedDoseEntry({
     required int doseNumber,
-    required DateTime completedDateUtc,
+    required DateTime scheduledDateUtc,
     String? reservationGroupId,
   }) {
     return DoseEntryDto(
       doseNumber: doseNumber,
       status: DoseStatus.completed,
-      completedDate: completedDateUtc,
+      scheduledDate: scheduledDateUtc,
       reservationGroupId: reservationGroupId,
     );
   }
@@ -102,7 +102,7 @@ class VaccinationRecordFirestoreContext {
       case 'completed':
         return completedDoseEntry(
           doseNumber: doseNumber,
-          completedDateUtc: dateUtc,
+          scheduledDateUtc: dateUtc,
           reservationGroupId: reservationGroupId,
         );
       default:

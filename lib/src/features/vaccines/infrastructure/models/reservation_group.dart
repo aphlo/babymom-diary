@@ -33,7 +33,6 @@ class ReservationGroupDto {
     required this.members,
     required this.createdAt,
     required this.updatedAt,
-    this.completedDate,
   });
 
   final String id;
@@ -43,7 +42,6 @@ class ReservationGroupDto {
   final List<ReservationGroupMemberDto> members;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final DateTime? completedDate;
 
   factory ReservationGroupDto.fromSnapshot(
     DocumentSnapshot<Map<String, dynamic>> snapshot,
@@ -81,7 +79,6 @@ class ReservationGroupDto {
       members: members,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      completedDate: (data['completedDate'] as Timestamp?)?.toDate(),
     );
   }
 
@@ -94,7 +91,6 @@ class ReservationGroupDto {
       members: members.map((member) => member.toDomain()).toList(),
       createdAt: createdAt,
       updatedAt: updatedAt,
-      completedDate: completedDate,
     );
   }
 
@@ -106,8 +102,6 @@ class ReservationGroupDto {
         'members': members.map((member) => member.toJson()).toList(),
         'createdAt': Timestamp.fromDate(createdAt),
         'updatedAt': Timestamp.fromDate(updatedAt),
-        if (completedDate != null)
-          'completedDate': Timestamp.fromDate(completedDate!),
       };
 
   ReservationGroupDto copyWith({
@@ -115,8 +109,6 @@ class ReservationGroupDto {
     ReservationGroupStatus? status,
     List<ReservationGroupMemberDto>? members,
     DateTime? updatedAt,
-    DateTime? completedDate,
-    bool clearCompletedDate = false,
   }) {
     return ReservationGroupDto(
       id: id,
@@ -126,8 +118,6 @@ class ReservationGroupDto {
       members: members ?? this.members,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      completedDate:
-          clearCompletedDate ? null : (completedDate ?? this.completedDate),
     );
   }
 

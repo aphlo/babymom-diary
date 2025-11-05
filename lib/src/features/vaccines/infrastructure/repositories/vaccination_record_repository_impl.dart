@@ -123,14 +123,12 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
     required String childId,
     required String vaccineId,
     required int doseNumber,
-    required DateTime completedDate,
   }) {
     return _dataSource.completeVaccination(
       householdId: householdId,
       childId: childId,
       vaccineId: vaccineId,
       doseNumber: doseNumber,
-      completedDate: completedDate,
     );
   }
 
@@ -139,13 +137,11 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
     required String householdId,
     required String childId,
     required String reservationGroupId,
-    required DateTime completedDate,
   }) {
     return _dataSource.completeReservationGroup(
       householdId: householdId,
       childId: childId,
       reservationGroupId: reservationGroupId,
-      completedDate: completedDate,
     );
   }
 
@@ -156,7 +152,6 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
     required String reservationGroupId,
     required String vaccineId,
     required int doseNumber,
-    required DateTime completedDate,
   }) {
     return _dataSource.completeReservationGroupMember(
       householdId: householdId,
@@ -164,7 +159,6 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
       reservationGroupId: reservationGroupId,
       vaccineId: vaccineId,
       doseNumber: doseNumber,
-      completedDate: completedDate,
     );
   }
 
@@ -244,6 +238,38 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
       householdId: householdId,
       childId: childId,
       reservationGroupId: reservationGroupId,
+    );
+  }
+
+  @override
+  Future<void> markDoseAsScheduled({
+    required String householdId,
+    required String childId,
+    required String vaccineId,
+    required int doseNumber,
+    required DateTime scheduledDate,
+  }) {
+    return _dataSource.markDoseAsScheduled(
+      householdId: householdId,
+      childId: childId,
+      vaccineId: vaccineId,
+      doseNumber: doseNumber,
+      scheduledDate: scheduledDate,
+    );
+  }
+
+  @override
+  Future<void> markReservationGroupAsScheduled({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+    required DateTime scheduledDate,
+  }) {
+    return _dataSource.markReservationGroupAsScheduled(
+      householdId: householdId,
+      childId: childId,
+      reservationGroupId: reservationGroupId,
+      scheduledDate: scheduledDate,
     );
   }
 }

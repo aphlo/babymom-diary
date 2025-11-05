@@ -100,8 +100,7 @@ class VaccinationSchedulePolicy {
 
     for (final _DoseIntervalConstraint constraint in candidates) {
       final DoseRecord? baseRecord = record.getDose(constraint.fromDose);
-      final DateTime? baseDate =
-          baseRecord?.completedDate ?? baseRecord?.scheduledDate;
+      final DateTime? baseDate = baseRecord?.scheduledDate;
       if (baseDate == null) {
         continue;
       }

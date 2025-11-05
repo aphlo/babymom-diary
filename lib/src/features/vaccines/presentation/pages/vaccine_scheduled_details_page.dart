@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/firebase/household_service.dart';
 import '../../../children/application/selected_child_provider.dart';
+import '../../domain/entities/dose_record.dart';
 import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_state.dart';
 import '../viewmodels/vaccine_detail_view_model.dart';
@@ -13,6 +14,7 @@ import '../viewmodels/concurrent_vaccines_view_model.dart';
 import '../widgets/vaccine_header.dart';
 import '../widgets/concurrent_vaccines_confirmation_dialog.dart';
 import '../widgets/concurrent_vaccines_delete_dialog.dart';
+import '../widgets/concurrent_vaccines_revert_dialog.dart';
 
 class VaccineScheduledDetailsPage extends ConsumerWidget {
   const VaccineScheduledDetailsPage({
@@ -129,20 +131,37 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: () => _markAsCompleted(context, ref),
-                  icon: const Icon(Icons.check_circle),
-                  label: const Text('接種済みにする'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
+              if (statusInfo.status == DoseStatus.completed) ...[
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _markAsScheduled(context, ref),
+                    icon: const Icon(Icons.undo),
+                    label: const Text('未接種に戻す'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                    ),
                   ),
                 ),
-              ),
+              ] else ...[
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _markAsCompleted(context, ref),
+                    icon: const Icon(Icons.check_circle),
+                    label: const Text('接種済みにする'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -291,6 +310,75 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('接種済みへの変更に失敗しました: $error'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _markAsScheduled(BuildContext context, WidgetRef ref) async {
+    final householdId = ref.read(currentHouseholdIdProvider).value;
+    final childId = ref.read(selectedChildControllerProvider).value;
+
+    if (householdId == null || childId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('必要な情報が不足しています'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final params = VaccineDetailParams(
+      vaccineId: vaccine.id,
+      doseNumbers: [doseNumber],
+      householdId: householdId,
+      childId: childId,
+      childBirthday: null,
+    );
+
+    final groupId = statusInfo.reservationGroupId;
+    bool applyToGroup = true;
+
+    if (groupId != null) {
+      final bool? userSelection = await showConcurrentVaccinesRevertDialog(
+        context: context,
+        householdId: householdId,
+        childId: childId,
+        reservationGroupId: groupId,
+        currentVaccineId: vaccine.id,
+        currentDoseNumber: doseNumber,
+      );
+
+      if (userSelection == null) {
+        return;
+      }
+      applyToGroup = userSelection;
+    }
+
+    try {
+      final viewModel =
+          ref.read(vaccineDetailViewModelProvider(params).notifier);
+      await viewModel.markDoseAsScheduled(
+        doseNumber: doseNumber,
+        scheduledDate: statusInfo.scheduledDate ?? DateTime.now(),
+        applyToGroup: applyToGroup,
+        reservationGroupId: groupId,
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('未接種に戻しました')),
+        );
+        context.pop();
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('未接種への変更に失敗しました: $error'),
             backgroundColor: Colors.red,
           ),
         );

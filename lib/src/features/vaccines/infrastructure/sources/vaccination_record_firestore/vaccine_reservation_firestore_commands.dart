@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../domain/entities/dose_record.dart';
 import '../../../domain/entities/vaccine_reservation_request.dart';
 import '../../../domain/errors/vaccination_persistence_exception.dart';
 import '../../models/vaccination_record.dart';
@@ -186,10 +187,8 @@ class VaccineReservationFirestoreCommands {
     required String childId,
     required String vaccineId,
     required int doseNumber,
-    required DateTime completedDate,
   }) async {
     final nowUtc = DateTime.now().toUtc();
-    final completedDateUtc = completedDate.toUtc();
 
     await _ctx.executeWithRetry(() async {
       await _ctx.transactionExecutor.runForChild(
@@ -210,9 +209,10 @@ class VaccineReservationFirestoreCommands {
           }
 
           final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
-          updatedDoses[doseNumber] = _ctx.completedDoseEntry(
+          updatedDoses[doseNumber] = DoseEntryDto(
             doseNumber: doseNumber,
-            completedDateUtc: completedDateUtc,
+            status: DoseStatus.completed,
+            scheduledDate: existingDose.scheduledDate,
             reservationGroupId: existingDose.reservationGroupId,
           );
 
@@ -267,6 +267,53 @@ class VaccineReservationFirestoreCommands {
               },
             );
           }
+        },
+      );
+    });
+  }
+
+  Future<void> markDoseAsScheduled({
+    required String householdId,
+    required String childId,
+    required String vaccineId,
+    required int doseNumber,
+    required DateTime scheduledDate,
+  }) async {
+    final nowUtc = DateTime.now().toUtc();
+    final scheduledDateUtc = scheduledDate.toUtc();
+
+    await _ctx.executeWithRetry(() async {
+      await _ctx.transactionExecutor.runForChild(
+        householdId: householdId,
+        childId: childId,
+        handler: (transaction, refs) async {
+          final recordDto =
+              await _ctx.readRecordDto(transaction, refs, vaccineId);
+          if (recordDto == null) {
+            throw VaccinationRecordNotFoundException(vaccineId);
+          }
+
+          final existingDose = recordDto.doses[doseNumber];
+          if (existingDose == null) {
+            throw VaccinationPersistenceException(
+              'Dose record not found: $doseNumber',
+            );
+          }
+
+          final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
+          updatedDoses[doseNumber] = _ctx.scheduledDoseEntry(
+            doseNumber: doseNumber,
+            scheduledDateUtc: scheduledDateUtc,
+            reservationGroupId: existingDose.reservationGroupId,
+          );
+
+          transaction.update(
+            refs.recordDoc(vaccineId),
+            <String, dynamic>{
+              'doses': _ctx.serializeDoses(updatedDoses),
+              'updatedAt': Timestamp.fromDate(nowUtc),
+            },
+          );
         },
       );
     });
