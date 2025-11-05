@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
-import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine.dart'
-    as domain;
+import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccination_period_highlight.dart';
 
 import '../models/vaccine_info.dart';
 import '../styles/vaccine_schedule_highlight_styles.dart';
@@ -26,27 +25,27 @@ class VaccinesLegend extends StatelessWidget {
 
     final VaccinePeriodHighlightStyle recommendedPrimaryStyle =
         vaccinePeriodHighlightStyle(
-      highlight: domain.VaccinationPeriodHighlight.recommended,
+      highlight: VaccinationPeriodHighlight.recommended,
       palette: VaccineHighlightPalette.primary,
     );
     final VaccinePeriodHighlightStyle recommendedSecondaryStyle =
         vaccinePeriodHighlightStyle(
-      highlight: domain.VaccinationPeriodHighlight.recommended,
+      highlight: VaccinationPeriodHighlight.recommended,
       palette: VaccineHighlightPalette.secondary,
     );
     final VaccinePeriodHighlightStyle availablePrimaryStyle =
         vaccinePeriodHighlightStyle(
-      highlight: domain.VaccinationPeriodHighlight.available,
+      highlight: VaccinationPeriodHighlight.available,
       palette: VaccineHighlightPalette.primary,
     );
     final VaccinePeriodHighlightStyle availableSecondaryStyle =
         vaccinePeriodHighlightStyle(
-      highlight: domain.VaccinationPeriodHighlight.available,
+      highlight: VaccinationPeriodHighlight.available,
       palette: VaccineHighlightPalette.secondary,
     );
     final VaccinePeriodHighlightStyle academyRecommendationStyle =
         vaccinePeriodHighlightStyle(
-      highlight: domain.VaccinationPeriodHighlight.academyRecommendation,
+      highlight: VaccinationPeriodHighlight.academyRecommendation,
       palette: VaccineHighlightPalette.primary,
     );
 

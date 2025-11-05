@@ -9,6 +9,7 @@ import '../../../children/domain/entities/child_summary.dart';
 import '../../application/usecases/create_vaccine_reservation.dart';
 import '../../application/usecases/get_vaccines_for_simulataneous_reservation.dart';
 import '../../application/vaccine_catalog_providers.dart';
+import '../../domain/value_objects/vaccine_record_type.dart';
 import '../models/vaccine_info.dart';
 import 'vaccine_reservation_state.dart';
 
@@ -86,6 +87,11 @@ class VaccineReservationViewModel
   /// 予約日時を設定
   void setScheduledDate(DateTime date) {
     state = state.copyWith(scheduledDate: date);
+  }
+
+  /// 記録種別を設定
+  void setRecordType(VaccineRecordType recordType) {
+    state = state.copyWith(recordType: recordType);
   }
 
   /// アコーディオンの開閉状態を切り替え

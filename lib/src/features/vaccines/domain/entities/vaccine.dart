@@ -1,16 +1,10 @@
 import 'package:meta/meta.dart';
 
 import '../value_objects/vaccination_period.dart';
-
-enum VaccineCategory { live, inactivated }
-
-enum VaccineRequirement { mandatory, optional }
-
-enum VaccinationPeriodHighlight {
-  recommended,
-  available,
-  academyRecommendation,
-}
+import '../value_objects/vaccine_category.dart';
+import '../value_objects/vaccine_requirement.dart';
+import '../value_objects/vaccination_period_highlight.dart';
+import '../value_objects/vaccine_priority.dart';
 
 @immutable
 class Vaccine {
@@ -32,8 +26,6 @@ class Vaccine {
   final List<VaccineNote> notes;
   final VaccinePriority priority;
 }
-
-enum VaccinePriority { standard, highlight }
 
 @immutable
 class VaccineScheduleSlot {

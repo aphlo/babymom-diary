@@ -15,12 +15,8 @@ import 'package:babymom_diary/src/features/calendar/presentation/widgets/calenda
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/calendar_error_banner.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/calendar_error_view.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/widgets/selected_day_event_list.dart';
-import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine.dart'
-    as domain;
-import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_category.dart'
-    as record_category;
-import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_requirement.dart'
-    as record_requirement;
+import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_category.dart';
+import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_requirement.dart';
 import 'package:babymom_diary/src/features/vaccines/presentation/models/vaccine_info.dart';
 import 'package:babymom_diary/src/features/vaccines/presentation/viewmodels/vaccine_detail_state.dart';
 
@@ -387,25 +383,25 @@ class _AppBarIconButton extends StatelessWidget {
   }
 }
 
-domain.VaccineCategory _mapVaccineCategory(
-  record_category.VaccineCategory category,
+VaccineCategory _mapVaccineCategory(
+  VaccineCategory category,
 ) {
   switch (category) {
-    case record_category.VaccineCategory.live:
-      return domain.VaccineCategory.live;
-    case record_category.VaccineCategory.inactivated:
-      return domain.VaccineCategory.inactivated;
+    case VaccineCategory.live:
+      return VaccineCategory.live;
+    case VaccineCategory.inactivated:
+      return VaccineCategory.inactivated;
   }
 }
 
-domain.VaccineRequirement _mapVaccineRequirement(
-  record_requirement.VaccineRequirement requirement,
+VaccineRequirement _mapVaccineRequirement(
+  VaccineRequirement requirement,
 ) {
   switch (requirement) {
-    case record_requirement.VaccineRequirement.mandatory:
-      return domain.VaccineRequirement.mandatory;
-    case record_requirement.VaccineRequirement.optional:
-      return domain.VaccineRequirement.optional;
+    case VaccineRequirement.mandatory:
+      return VaccineRequirement.mandatory;
+    case VaccineRequirement.optional:
+      return VaccineRequirement.optional;
   }
 }
 

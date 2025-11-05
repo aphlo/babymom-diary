@@ -24,9 +24,10 @@ class VaccineReservationFirestoreCommands {
         handler: (transaction, refs) async {
           final existing =
               await _ctx.readRecordDto(transaction, refs, request.vaccineId);
-          final doseEntry = _ctx.scheduledDoseEntry(
+          final doseEntry = _ctx.createDoseEntryFromRecordType(
             doseNumber: request.doseNumber,
-            scheduledDateUtc: scheduledDateUtc,
+            dateUtc: scheduledDateUtc,
+            recordType: request.recordType.name,
             reservationGroupId: request.reservationGroupId,
           );
 
@@ -95,9 +96,10 @@ class VaccineReservationFirestoreCommands {
 
           for (final item in pendingItems) {
             final scheduledDateUtc = item.request.scheduledDate.toUtc();
-            final doseEntry = _ctx.scheduledDoseEntry(
+            final doseEntry = _ctx.createDoseEntryFromRecordType(
               doseNumber: item.request.doseNumber,
-              scheduledDateUtc: scheduledDateUtc,
+              dateUtc: scheduledDateUtc,
+              recordType: item.request.recordType.name,
               reservationGroupId: item.request.reservationGroupId,
             );
 

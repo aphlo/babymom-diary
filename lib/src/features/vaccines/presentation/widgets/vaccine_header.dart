@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../models/vaccine_info.dart';
 import '../styles/vaccine_type_styles.dart';
-import '../../domain/entities/vaccine.dart' as domain;
+import '../../domain/value_objects/vaccine_requirement.dart';
 import 'vaccine_type_badge.dart';
 
 class VaccineHeader extends StatelessWidget {
@@ -102,15 +102,15 @@ class _RequirementPresentation {
   final Color foregroundColor;
 
   static _RequirementPresentation fromRequirement(
-      domain.VaccineRequirement requirement) {
+      VaccineRequirement requirement) {
     switch (requirement) {
-      case domain.VaccineRequirement.mandatory:
+      case VaccineRequirement.mandatory:
         return const _RequirementPresentation(
           label: '定期接種',
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
         );
-      case domain.VaccineRequirement.optional:
+      case VaccineRequirement.optional:
         return const _RequirementPresentation(
           label: '任意接種',
           backgroundColor: AppColors.secondary,

@@ -1,4 +1,3 @@
-import '../../domain/entities/vaccine.dart';
 import '../../domain/entities/vaccination_record.dart';
 import '../../domain/repositories/vaccine_master_repository.dart';
 import '../../domain/repositories/vaccination_record_repository.dart';
@@ -83,22 +82,23 @@ class GetVaccinesForSimultaneousReservation {
   }
 
   /// ドメインのVaccineCategoryを値オブジェクトにマップ
-  vo_category.VaccineCategory _mapVaccineCategory(VaccineCategory category) {
+  vo_category.VaccineCategory _mapVaccineCategory(
+      vo_category.VaccineCategory category) {
     switch (category) {
-      case VaccineCategory.live:
+      case vo_category.VaccineCategory.live:
         return vo_category.VaccineCategory.live;
-      case VaccineCategory.inactivated:
+      case vo_category.VaccineCategory.inactivated:
         return vo_category.VaccineCategory.inactivated;
     }
   }
 
   /// ドメインのVaccineRequirementを値オブジェクトにマップ
   vo_requirement.VaccineRequirement _mapVaccineRequirement(
-      VaccineRequirement requirement) {
+      vo_requirement.VaccineRequirement requirement) {
     switch (requirement) {
-      case VaccineRequirement.mandatory:
+      case vo_requirement.VaccineRequirement.mandatory:
         return vo_requirement.VaccineRequirement.mandatory;
-      case VaccineRequirement.optional:
+      case vo_requirement.VaccineRequirement.optional:
         return vo_requirement.VaccineRequirement.optional;
     }
   }

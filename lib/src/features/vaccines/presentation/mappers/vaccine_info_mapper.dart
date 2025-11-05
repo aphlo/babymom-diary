@@ -1,6 +1,10 @@
 import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine.dart'
     as domain;
+import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccination_period_highlight.dart'
+    as domain;
+import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_priority.dart'
+    as domain;
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine_master.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/services/influenza_schedule_generator.dart';

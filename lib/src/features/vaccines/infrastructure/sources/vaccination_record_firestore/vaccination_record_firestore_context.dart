@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../domain/entities/dose_record.dart';
-import '../../../domain/entities/vaccine.dart' as vaccine_entity;
+import '../../../domain/entities/vaccine.dart';
 import '../../../domain/errors/vaccination_persistence_exception.dart';
 import '../../../domain/repositories/vaccine_master_repository.dart';
 import '../../../domain/services/reservation_group_domain_service.dart';
@@ -85,6 +85,35 @@ class VaccinationRecordFirestoreContext {
     );
   }
 
+  /// recordTypeに基づいてDoseEntryDtoを作成
+  DoseEntryDto createDoseEntryFromRecordType({
+    required int doseNumber,
+    required DateTime dateUtc,
+    required String recordType,
+    String? reservationGroupId,
+  }) {
+    switch (recordType) {
+      case 'scheduled':
+        return scheduledDoseEntry(
+          doseNumber: doseNumber,
+          scheduledDateUtc: dateUtc,
+          reservationGroupId: reservationGroupId,
+        );
+      case 'completed':
+        return completedDoseEntry(
+          doseNumber: doseNumber,
+          completedDateUtc: dateUtc,
+          reservationGroupId: reservationGroupId,
+        );
+      default:
+        return scheduledDoseEntry(
+          doseNumber: doseNumber,
+          scheduledDateUtc: dateUtc,
+          reservationGroupId: reservationGroupId,
+        );
+    }
+  }
+
   Map<String, dynamic> serializeDoses(Map<int, DoseEntryDto> doses) {
     return doses.map(
       (key, value) => MapEntry(key.toString(), value.toJson()),
@@ -135,7 +164,7 @@ class VaccinationRecordFirestoreContext {
     return records;
   }
 
-  Future<vaccine_entity.Vaccine> requireVaccine(String vaccineId) async {
+  Future<Vaccine> requireVaccine(String vaccineId) async {
     final vaccine = await vaccineMasterRepository.getVaccineById(vaccineId);
     if (vaccine == null) {
       throw VaccinationPersistenceException('Vaccine not found: $vaccineId');
@@ -144,7 +173,7 @@ class VaccinationRecordFirestoreContext {
   }
 
   VaccinationRecordDto buildNewRecordDto({
-    required vaccine_entity.Vaccine vaccine,
+    required Vaccine vaccine,
     required DoseEntryDto doseEntry,
     required DateTime nowUtc,
   }) {
@@ -183,23 +212,23 @@ class VaccinationRecordFirestoreContext {
   }
 
   VaccineCategory _mapCategoryFromEntity(
-    vaccine_entity.VaccineCategory category,
+    VaccineCategory category,
   ) {
     switch (category) {
-      case vaccine_entity.VaccineCategory.live:
+      case VaccineCategory.live:
         return VaccineCategory.live;
-      case vaccine_entity.VaccineCategory.inactivated:
+      case VaccineCategory.inactivated:
         return VaccineCategory.inactivated;
     }
   }
 
   VaccineRequirement _mapRequirementFromEntity(
-    vaccine_entity.VaccineRequirement requirement,
+    VaccineRequirement requirement,
   ) {
     switch (requirement) {
-      case vaccine_entity.VaccineRequirement.mandatory:
+      case VaccineRequirement.mandatory:
         return VaccineRequirement.mandatory;
-      case vaccine_entity.VaccineRequirement.optional:
+      case VaccineRequirement.optional:
         return VaccineRequirement.optional;
     }
   }

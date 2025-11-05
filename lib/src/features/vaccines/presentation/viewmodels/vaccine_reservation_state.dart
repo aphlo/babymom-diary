@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import '../../domain/entities/vaccination_record.dart';
 import '../../domain/entities/vaccine_reservation_request.dart';
+import '../../domain/value_objects/vaccine_record_type.dart';
 import '../models/vaccine_info.dart';
 
 @immutable
@@ -16,6 +17,7 @@ class VaccineReservationState {
     this.selectedAdditionalVaccines = const [],
     this.isAccordionExpanded = false,
     this.isSubmitting = false,
+    this.recordType = VaccineRecordType.scheduled,
   });
 
   final bool isLoading;
@@ -27,6 +29,7 @@ class VaccineReservationState {
   final List<VaccinationRecord> selectedAdditionalVaccines;
   final bool isAccordionExpanded;
   final bool isSubmitting;
+  final VaccineRecordType recordType;
 
   /// 予約可能かどうか
   bool get canSubmit =>
@@ -54,6 +57,7 @@ class VaccineReservationState {
       vaccineId: primaryVaccine!.id,
       doseNumber: primaryDoseNumber!,
       scheduledDate: scheduledDate!,
+      recordType: recordType,
     ));
 
     // 同時接種のワクチン予約
@@ -65,6 +69,7 @@ class VaccineReservationState {
           vaccineId: vaccine.vaccineId,
           doseNumber: nextDose,
           scheduledDate: scheduledDate!,
+          recordType: recordType,
         ));
       }
     }
@@ -82,6 +87,7 @@ class VaccineReservationState {
     List<VaccinationRecord>? selectedAdditionalVaccines,
     bool? isAccordionExpanded,
     bool? isSubmitting,
+    VaccineRecordType? recordType,
   }) {
     return VaccineReservationState(
       isLoading: isLoading ?? this.isLoading,
@@ -94,6 +100,7 @@ class VaccineReservationState {
           selectedAdditionalVaccines ?? this.selectedAdditionalVaccines,
       isAccordionExpanded: isAccordionExpanded ?? this.isAccordionExpanded,
       isSubmitting: isSubmitting ?? this.isSubmitting,
+      recordType: recordType ?? this.recordType,
     );
   }
 
@@ -115,7 +122,8 @@ class VaccineReservationState {
           _listEquals(
               selectedAdditionalVaccines, other.selectedAdditionalVaccines) &&
           isAccordionExpanded == other.isAccordionExpanded &&
-          isSubmitting == other.isSubmitting;
+          isSubmitting == other.isSubmitting &&
+          recordType == other.recordType;
 
   @override
   int get hashCode =>
@@ -127,7 +135,8 @@ class VaccineReservationState {
       availableVaccines.hashCode ^
       selectedAdditionalVaccines.hashCode ^
       isAccordionExpanded.hashCode ^
-      isSubmitting.hashCode;
+      isSubmitting.hashCode ^
+      recordType.hashCode;
 
   bool _listEquals<T>(List<T> list1, List<T> list2) {
     if (list1.length != list2.length) return false;
@@ -148,6 +157,7 @@ class VaccineReservationState {
         'availableVaccines: ${availableVaccines.length}, '
         'selectedAdditionalVaccines: ${selectedAdditionalVaccines.length}, '
         'isAccordionExpanded: $isAccordionExpanded, '
-        'isSubmitting: $isSubmitting)';
+        'isSubmitting: $isSubmitting, '
+        'recordType: $recordType)';
   }
 }

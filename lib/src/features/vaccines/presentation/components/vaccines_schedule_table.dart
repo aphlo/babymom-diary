@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
-
-import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine.dart'
-    as domain;
+import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccination_period_highlight.dart';
+import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_requirement.dart';
 
 import '../models/vaccine_info.dart';
 import '../styles/vaccine_schedule_highlight_styles.dart';
@@ -130,7 +129,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
     VaccineInfo vaccine,
     String periodLabel,
   ) {
-    final domain.VaccinationPeriodHighlight? highlight =
+    final VaccinationPeriodHighlight? highlight =
         vaccine.periodHighlights[periodLabel];
     if (highlight == null) {
       return null;
@@ -263,10 +262,10 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                     final vaccine = widget.vaccines[index];
                     final Color backgroundColor;
                     switch (vaccine.requirement) {
-                      case domain.VaccineRequirement.mandatory:
+                      case VaccineRequirement.mandatory:
                         backgroundColor = AppColors.primary.withOpacity(0.2);
                         break;
-                      case domain.VaccineRequirement.optional:
+                      case VaccineRequirement.optional:
                         backgroundColor = AppColors.secondary.withOpacity(0.2);
                         break;
                     }

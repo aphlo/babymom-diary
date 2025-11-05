@@ -1,6 +1,10 @@
-import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine.dart'
-    as domain;
 import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
+import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccination_period_highlight.dart'
+    as domain;
+import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_category.dart'
+    as domain;
+import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_requirement.dart'
+    as domain;
 
 class VaccineInfo {
   const VaccineInfo({

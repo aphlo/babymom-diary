@@ -1,6 +1,10 @@
 import '../entities/vaccine.dart';
 import '../entities/vaccine_master.dart';
 import 'vaccination_period.dart';
+import 'vaccine_category.dart';
+import 'vaccine_requirement.dart';
+import 'vaccination_period_highlight.dart';
+import 'vaccine_priority.dart';
 
 const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
   version: '2024-01',

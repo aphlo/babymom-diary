@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../models/vaccine_info.dart';
 import '../../../children/application/selected_child_provider.dart';
 import '../viewmodels/vaccine_reservation_view_model.dart';
+import '../../domain/value_objects/vaccine_record_type.dart';
 import '../widgets/vaccine_header.dart';
 import '../widgets/vaccine_type_badge.dart';
 import '../styles/vaccine_type_styles.dart';
@@ -52,6 +53,20 @@ class _VaccineReservationPageState
     final state = ref.watch(vaccineReservationViewModelProvider(params));
     final bool canSubmit = state.canSubmit && !state.isLoading;
 
+    // AppBarのタイトル用のラベルを生成
+    final bool isInfluenza = widget.vaccine.id == 'influenza';
+    String doseLabel;
+    if (isInfluenza && widget.influenzaDoseOrder != null) {
+      final String seasonPart = (widget.influenzaSeasonLabel != null &&
+              widget.influenzaSeasonLabel!.isNotEmpty &&
+              widget.influenzaSeasonLabel != '未設定')
+          ? '${widget.influenzaSeasonLabel!} '
+          : '';
+      doseLabel = '$seasonPart${widget.influenzaDoseOrder!}回目';
+    } else {
+      doseLabel = '${widget.doseNumber}回目';
+    }
+
     // エラー表示
     ref.listen(vaccineReservationViewModelProvider(params), (previous, next) {
       if (next.error != null) {
@@ -68,7 +83,7 @@ class _VaccineReservationPageState
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
       appBar: AppBar(
-        title: const Text('ワクチン接種予約'),
+        title: Text('${widget.vaccine.name} $doseLabel'),
       ),
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -89,6 +104,8 @@ class _VaccineReservationPageState
                     onDateSelected: viewModel.setScheduledDate,
                     vaccine: widget.vaccine,
                     doseNumber: widget.doseNumber,
+                    recordType: state.recordType,
+                    onRecordTypeChanged: viewModel.setRecordType,
                   ),
                   const SizedBox(height: 24),
                   _ConcurrentVaccinesCard(
@@ -124,7 +141,7 @@ class _VaccineReservationPageState
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : const Text('予約を保存'),
+                  : Text('保存'),
             ),
           ),
         ),
@@ -242,12 +259,16 @@ class _DateSelectionCard extends StatelessWidget {
     required this.onDateSelected,
     required this.vaccine,
     required this.doseNumber,
+    required this.recordType,
+    required this.onRecordTypeChanged,
   });
 
   final DateTime? selectedDate;
   final ValueChanged<DateTime> onDateSelected;
   final VaccineInfo vaccine;
   final int doseNumber;
+  final VaccineRecordType recordType;
+  final ValueChanged<VaccineRecordType> onRecordTypeChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -270,10 +291,36 @@ class _DateSelectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '予約日時',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
+          // SegmentedButton for record type selection
+          SizedBox(
+            width: double.infinity,
+            child: SegmentedButton<VaccineRecordType>(
+              segments: const [
+                ButtonSegment<VaccineRecordType>(
+                  value: VaccineRecordType.scheduled,
+                  label: Text('予約'),
+                  icon: Icon(Icons.schedule, size: 18),
+                ),
+                ButtonSegment<VaccineRecordType>(
+                  value: VaccineRecordType.completed,
+                  label: Text('接種'),
+                  icon: Icon(Icons.check_circle, size: 18),
+                ),
+              ],
+              selected: {recordType},
+              onSelectionChanged: (Set<VaccineRecordType> newSelection) {
+                onRecordTypeChanged(newSelection.first);
+              },
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                  (Set<WidgetState> states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return AppColors.primary;
+                    }
+                    return Colors.transparent;
+                  },
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 16),

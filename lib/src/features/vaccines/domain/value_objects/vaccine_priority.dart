@@ -1,0 +1,1 @@
+enum VaccinePriority { standard, highlight }
