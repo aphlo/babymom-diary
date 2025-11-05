@@ -17,7 +17,6 @@ import 'package:babymom_diary/src/features/vaccines/application/usecases/get_res
 import 'package:babymom_diary/src/features/vaccines/application/usecases/watch_vaccination_record.dart';
 import 'package:babymom_diary/src/features/vaccines/application/usecases/watch_vaccination_records.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/services/vaccination_schedule_policy.dart';
-import 'package:babymom_diary/src/features/vaccines/domain/services/influenza_schedule_generator.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/services/vaccine_schedule_conflict_validator.dart';
 import 'package:babymom_diary/src/features/menu/household/domain/repositories/vaccine_visibility_settings_repository.dart';
 import 'package:babymom_diary/src/features/menu/household/infrastructure/repositories/vaccine_visibility_settings_repository_impl.dart';
@@ -115,9 +114,4 @@ final getReservationGroupProvider = Provider<GetReservationGroup>((ref) {
 final vaccinationSchedulePolicyProvider =
     Provider<VaccinationSchedulePolicy>((ref) {
   return const VaccinationSchedulePolicy();
-});
-
-final influenzaScheduleGeneratorProvider =
-    Provider<InfluenzaScheduleGenerator>((ref) {
-  return const InfluenzaScheduleGenerator();
 });

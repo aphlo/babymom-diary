@@ -72,16 +72,14 @@ class VaccineDetailPage extends ConsumerWidget {
                 state: detailState,
                 childBirthday: childBirthday,
                 onReservationTap: _navigateToReservation,
-                onScheduledDoseTap: (context, vaccine, doseNumber, statusInfo,
-                        {influenzaSeasonLabel, influenzaDoseOrder}) =>
-                    _showScheduledDoseBottomSheet(
+                onScheduledDoseTap:
+                    (context, vaccine, doseNumber, statusInfo) =>
+                        _showScheduledDoseBottomSheet(
                   context,
                   vaccine,
                   doseNumber,
                   statusInfo,
                   interactions,
-                  influenzaSeasonLabel: influenzaSeasonLabel,
-                  influenzaDoseOrder: influenzaDoseOrder,
                 ),
               );
             },
@@ -107,15 +105,11 @@ class VaccineDetailPage extends ConsumerWidget {
   void _navigateToReservation(
     BuildContext context,
     VaccineInfo vaccine,
-    int doseNumber, {
-    String? influenzaSeasonLabel,
-    int? influenzaDoseOrder,
-  }) {
+    int doseNumber,
+  ) {
     context.push('/vaccines/reservation', extra: {
       'vaccine': vaccine,
       'doseNumber': doseNumber,
-      'influenzaSeasonLabel': influenzaSeasonLabel,
-      'influenzaDoseOrder': influenzaDoseOrder,
     });
   }
 
@@ -124,15 +118,11 @@ class VaccineDetailPage extends ConsumerWidget {
     VaccineInfo vaccine,
     int doseNumber,
     DoseStatusInfo statusInfo,
-    VaccineDetailInteractions interactions, {
-    String? influenzaSeasonLabel,
-    int? influenzaDoseOrder,
-  }) {
+    VaccineDetailInteractions interactions,
+  ) {
     // 接種済みの場合は直接詳細ページに遷移
     if (statusInfo.status == DoseStatus.completed) {
-      _navigateToVaccineDetails(context, vaccine, doseNumber, statusInfo,
-          influenzaSeasonLabel: influenzaSeasonLabel,
-          influenzaDoseOrder: influenzaDoseOrder);
+      _navigateToVaccineDetails(context, vaccine, doseNumber, statusInfo);
       return;
     }
 
@@ -146,17 +136,13 @@ class VaccineDetailPage extends ConsumerWidget {
           vaccine: vaccine,
           doseNumber: doseNumber,
           statusInfo: statusInfo,
-          influenzaSeasonLabel: influenzaSeasonLabel,
-          influenzaDoseOrder: influenzaDoseOrder,
           onMarkAsCompleted: () {
             Navigator.of(context).pop();
             interactions.markDoseAsCompleted(context, vaccine, doseNumber);
           },
           onShowDetails: () {
             Navigator.of(context).pop();
-            _navigateToVaccineDetails(context, vaccine, doseNumber, statusInfo,
-                influenzaSeasonLabel: influenzaSeasonLabel,
-                influenzaDoseOrder: influenzaDoseOrder);
+            _navigateToVaccineDetails(context, vaccine, doseNumber, statusInfo);
           },
         );
       },
@@ -167,16 +153,12 @@ class VaccineDetailPage extends ConsumerWidget {
     BuildContext context,
     VaccineInfo vaccine,
     int doseNumber,
-    DoseStatusInfo statusInfo, {
-    String? influenzaSeasonLabel,
-    int? influenzaDoseOrder,
-  }) {
+    DoseStatusInfo statusInfo,
+  ) {
     context.push('/vaccines/scheduled-details', extra: {
       'vaccine': vaccine,
       'doseNumber': doseNumber,
       'statusInfo': statusInfo,
-      'influenzaSeasonLabel': influenzaSeasonLabel,
-      'influenzaDoseOrder': influenzaDoseOrder,
     });
   }
 }
@@ -254,7 +236,6 @@ class _VaccineDetailContent extends StatelessWidget {
                   )
                 else if (isInfluenza)
                   InfluenzaDoseReservationBoard(
-                    seasons: state.influenzaSeasons,
                     doseNumbers: state.doseNumbers,
                     doseStatuses: state.doseStatuses,
                     activeDoseNumber: state.activeDoseNumber,

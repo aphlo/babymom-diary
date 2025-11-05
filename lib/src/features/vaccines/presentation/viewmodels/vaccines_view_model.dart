@@ -10,7 +10,6 @@ import 'package:babymom_diary/src/features/vaccines/application/usecases/watch_v
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
-import 'package:babymom_diary/src/features/vaccines/domain/services/influenza_schedule_generator.dart';
 import 'package:babymom_diary/src/features/menu/household/domain/repositories/vaccine_visibility_settings_repository.dart';
 import 'package:babymom_diary/src/features/menu/household/infrastructure/repositories/vaccine_visibility_settings_repository_impl.dart';
 import 'package:babymom_diary/src/features/menu/household/infrastructure/sources/vaccine_visibility_settings_firestore_data_source.dart';
@@ -30,8 +29,6 @@ final vaccinesViewModelProvider = AutoDisposeStateNotifierProvider<
     VaccinesViewModel, AsyncValue<VaccinesViewData>>((ref) {
   final getGuideline = ref.watch(getVaccineGuidelineProvider);
   final watchVaccinationRecords = ref.watch(watchVaccinationRecordsProvider);
-  final influenzaScheduleGenerator =
-      ref.watch(influenzaScheduleGeneratorProvider);
   final visibilitySettingsRepository =
       ref.watch(_vaccineVisibilitySettingsRepositoryProvider);
   final String? householdId = ref.watch(currentHouseholdIdProvider).value;
@@ -45,7 +42,6 @@ final vaccinesViewModelProvider = AutoDisposeStateNotifierProvider<
   final viewModel = VaccinesViewModel(
     getGuideline: getGuideline,
     watchVaccinationRecords: watchVaccinationRecords,
-    influenzaScheduleGenerator: influenzaScheduleGenerator,
     visibilitySettingsRepository: visibilitySettingsRepository,
     householdId: householdId,
     childId: childId,
@@ -59,20 +55,17 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
   VaccinesViewModel({
     required GetVaccineMaster getGuideline,
     required WatchVaccinationRecords watchVaccinationRecords,
-    required InfluenzaScheduleGenerator influenzaScheduleGenerator,
     required VaccineVisibilitySettingsRepository visibilitySettingsRepository,
     this.householdId,
     this.childId,
     this.childBirthday,
   })  : _getGuideline = getGuideline,
         _watchVaccinationRecords = watchVaccinationRecords,
-        _influenzaScheduleGenerator = influenzaScheduleGenerator,
         _visibilitySettingsRepository = visibilitySettingsRepository,
         super(const AsyncValue.loading());
 
   final GetVaccineMaster _getGuideline;
   final WatchVaccinationRecords _watchVaccinationRecords;
-  final InfluenzaScheduleGenerator _influenzaScheduleGenerator;
   final VaccineVisibilitySettingsRepository _visibilitySettingsRepository;
   final String? householdId;
   final String? childId;
@@ -134,7 +127,6 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
     // ビューデータを生成
     final viewData = mapGuidelineToViewData(
       guideline,
-      influenzaScheduleGenerator: _influenzaScheduleGenerator,
       recordsByVaccine: recordMap,
       childBirthday: childBirthday,
     );

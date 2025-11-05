@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:babymom_diary/src/core/utils/date_formatter.dart';
 
 import '../../domain/entities/dose_record.dart';
-import '../../domain/value_objects/influenza_season.dart';
 import '../models/vaccine_detail_callbacks.dart';
 import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_state.dart';
@@ -12,7 +11,6 @@ import 'dose_status_badge.dart';
 class InfluenzaDoseReservationBoard extends StatelessWidget {
   const InfluenzaDoseReservationBoard({
     super.key,
-    required this.seasons,
     required this.doseNumbers,
     required this.doseStatuses,
     this.activeDoseNumber,
@@ -22,7 +20,6 @@ class InfluenzaDoseReservationBoard extends StatelessWidget {
     this.onScheduledDoseTap,
   });
 
-  final List<InfluenzaSeasonSchedule> seasons;
   final List<int> doseNumbers;
   final Map<int, DoseStatusInfo> doseStatuses;
   final int? activeDoseNumber;
@@ -33,12 +30,12 @@ class InfluenzaDoseReservationBoard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    if (seasons.isEmpty) {
+    final List<int> sortedDoseNumbers = List<int>.of(doseNumbers)..sort();
+
+    if (sortedDoseNumbers.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    final List<int> sortedDoseNumbers = List<int>.of(doseNumbers)..sort();
     final bool hasPending = pendingDoseNumber != null &&
         sortedDoseNumbers.contains(pendingDoseNumber);
     final int? resolvedActiveDose = hasPending
@@ -48,72 +45,36 @@ class InfluenzaDoseReservationBoard extends StatelessWidget {
             ? activeDoseNumber
             : sortedDoseNumbers.first);
 
-    final List<InfluenzaSeasonSchedule> sortedSeasons =
-        List<InfluenzaSeasonSchedule>.of(seasons)
-          ..sort(
-            (InfluenzaSeasonSchedule a, InfluenzaSeasonSchedule b) =>
-                a.seasonIndex.compareTo(b.seasonIndex),
-          );
+    // 1行4個のグリッドレイアウト
+    final int columns = 4;
+    final int rows = (sortedDoseNumbers.length / columns).ceil();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: List.generate(sortedSeasons.length, (int index) {
-        final InfluenzaSeasonSchedule season = sortedSeasons[index];
-        final String seasonLabel = season.seasonLabel();
-        final int firstDoseNumber = season.firstDoseNumber;
-        final int secondDoseNumber = season.secondDoseNumber;
-
+      children: List.generate(rows, (rowIndex) {
         return Padding(
-          padding: EdgeInsets.only(
-            bottom: index == sortedSeasons.length - 1 ? 0 : 12,
-          ),
+          padding: EdgeInsets.only(bottom: rowIndex == rows - 1 ? 0 : 16),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 72,
-                child: Text(
-                  seasonLabel,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: List.generate(columns, (colIndex) {
+              final int index = rowIndex * columns + colIndex;
+              if (index >= sortedDoseNumbers.length) {
+                // 空のセル
+                return const Expanded(child: SizedBox.shrink());
+              }
+
+              final int doseNumber = sortedDoseNumbers[index];
+              return Expanded(
+                child: _InfluenzaDoseCell(
+                  doseNumber: doseNumber,
+                  doseStatuses: doseStatuses,
+                  isActive: doseNumber == resolvedActiveDose,
+                  vaccine: vaccine,
+                  onReservationTap: onReservationTap,
+                  onScheduledDoseTap: onScheduledDoseTap,
                 ),
-              ),
-              Expanded(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _InfluenzaDoseCell(
-                        doseNumber: firstDoseNumber,
-                        doseStatuses: doseStatuses,
-                        displayOrder: 1,
-                        isActive: true,
-                        seasonLabel: seasonLabel,
-                        vaccine: vaccine,
-                        onReservationTap: onReservationTap,
-                        onScheduledDoseTap: onScheduledDoseTap,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _InfluenzaDoseCell(
-                        doseNumber: secondDoseNumber,
-                        doseStatuses: doseStatuses,
-                        displayOrder: 2,
-                        isActive: resolvedActiveDose == secondDoseNumber ||
-                            (doseStatuses[firstDoseNumber]?.status ==
-                                    DoseStatus.completed &&
-                                doseStatuses[secondDoseNumber]?.status == null),
-                        seasonLabel: seasonLabel,
-                        vaccine: vaccine,
-                        onReservationTap: onReservationTap,
-                        onScheduledDoseTap: onScheduledDoseTap,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              );
+            }),
           ),
         );
       }),
@@ -126,8 +87,6 @@ class _InfluenzaDoseCell extends StatelessWidget {
     required this.doseNumber,
     required this.doseStatuses,
     required this.isActive,
-    required this.displayOrder,
-    required this.seasonLabel,
     this.vaccine,
     this.onReservationTap,
     this.onScheduledDoseTap,
@@ -136,8 +95,6 @@ class _InfluenzaDoseCell extends StatelessWidget {
   final int doseNumber;
   final Map<int, DoseStatusInfo> doseStatuses;
   final bool isActive;
-  final int displayOrder;
-  final String seasonLabel;
   final VaccineInfo? vaccine;
   final VaccineReservationTap? onReservationTap;
   final ScheduledDoseTap? onScheduledDoseTap;
@@ -149,89 +106,94 @@ class _InfluenzaDoseCell extends StatelessWidget {
     final DoseBadgePresentation presentation =
         DoseBadgePresentation.fromStatus(statusInfo);
 
+    // 予約済みや接種済みの場合は常にactiveな見た目にする
+    final bool effectiveIsActive = isActive ||
+        statusInfo?.status == DoseStatus.scheduled ||
+        statusInfo?.status == DoseStatus.completed;
+
     final bool canTap = isActive &&
         vaccine != null &&
         onReservationTap != null &&
-        statusInfo?.status != DoseStatus.completed;
+        statusInfo?.status != DoseStatus.completed &&
+        statusInfo?.status != DoseStatus.scheduled;
     final DateTime? scheduledDate = statusInfo?.scheduledDate;
-    final bool showScheduledLabel =
-        statusInfo?.status == DoseStatus.scheduled && scheduledDate != null;
-    final DateTime? effectiveDate = showScheduledLabel ? scheduledDate : null;
-    final String? scheduledYearLabel =
-        effectiveDate != null ? DateFormatter.yyyy(effectiveDate) : null;
-    final String? scheduledDateLabel =
-        effectiveDate != null ? DateFormatter.mmddE(effectiveDate) : null;
+    final bool hasScheduledDate = (statusInfo?.status == DoseStatus.scheduled ||
+            statusInfo?.status == DoseStatus.completed) &&
+        scheduledDate != null;
+
+    // 日付表示用のラベル
+    final String dateYearLabel =
+        hasScheduledDate ? DateFormatter.yyyy(scheduledDate) : '----年';
+    final String dateDateLabel =
+        hasScheduledDate ? DateFormatter.mmddE(scheduledDate) : '--月--日(-)';
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                '$displayOrder回目',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DoseStatusBadge(
-                presentation: presentation,
-                isActive: isActive,
-                onTap: canTap
-                    ? () => onReservationTap!(
-                          context,
-                          vaccine!,
-                          doseNumber,
-                          influenzaSeasonLabel: seasonLabel,
-                          influenzaDoseOrder: displayOrder,
-                        )
-                    : (statusInfo?.status == DoseStatus.scheduled &&
-                            onScheduledDoseTap != null)
-                        ? () => onScheduledDoseTap!(
-                              context,
-                              vaccine!,
-                              doseNumber,
-                              statusInfo!,
-                              influenzaSeasonLabel: seasonLabel,
-                              influenzaDoseOrder: displayOrder,
-                            )
-                        : null,
-              ),
-            ),
-          ],
-        ),
-        if (scheduledYearLabel != null && scheduledDateLabel != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  scheduledYearLabel,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  scheduledDateLabel,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black87,
-                  ),
-                ),
-              ],
-            ),
+        // 回数表示
+        Text(
+          '$doseNumber回目',
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Colors.grey.shade700,
           ),
+        ),
+        const SizedBox(height: 8),
+        // ステータスバッジ
+        DoseStatusBadge(
+          presentation: presentation,
+          isActive: effectiveIsActive,
+          onTap: canTap
+              ? () => onReservationTap!(
+                    context,
+                    vaccine!,
+                    doseNumber,
+                  )
+              : (statusInfo?.status == DoseStatus.scheduled &&
+                      onScheduledDoseTap != null)
+                  ? () => onScheduledDoseTap!(
+                        context,
+                        vaccine!,
+                        doseNumber,
+                        statusInfo!,
+                      )
+                  : (statusInfo?.status == DoseStatus.completed &&
+                          onScheduledDoseTap != null)
+                      ? () => onScheduledDoseTap!(
+                            context,
+                            vaccine!,
+                            doseNumber,
+                            statusInfo!,
+                          )
+                      : null,
+        ),
+        const SizedBox(height: 8),
+        // 日付表示（2行）
+        SizedBox(
+          width: 88,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                dateYearLabel,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: hasScheduledDate ? Colors.black87 : Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                dateDateLabel,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: hasScheduledDate ? Colors.black87 : Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }

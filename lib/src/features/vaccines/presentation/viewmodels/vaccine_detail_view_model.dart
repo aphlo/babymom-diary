@@ -13,8 +13,6 @@ import '../../domain/repositories/vaccination_record_repository.dart';
 import '../../domain/services/vaccination_schedule_policy.dart';
 import '../../domain/errors/vaccination_persistence_exception.dart';
 import '../../domain/value_objects/vaccination_recommendation.dart';
-import '../../domain/services/influenza_schedule_generator.dart';
-import '../../domain/value_objects/influenza_season.dart';
 import '../../application/vaccine_catalog_providers.dart';
 import 'vaccine_detail_state.dart';
 
@@ -23,29 +21,22 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
     required WatchVaccinationRecord watchVaccinationRecord,
     required GetVaccineById getVaccineById,
     required VaccinationSchedulePolicy vaccinationSchedulePolicy,
-    required InfluenzaScheduleGenerator influenzaScheduleGenerator,
     required VaccinationRecordRepository vaccinationRecordRepository,
   })  : _watchVaccinationRecord = watchVaccinationRecord,
         _getVaccineById = getVaccineById,
         _vaccinationSchedulePolicy = vaccinationSchedulePolicy,
-        _influenzaScheduleGenerator = influenzaScheduleGenerator,
         _vaccinationRecordRepository = vaccinationRecordRepository,
         super(const VaccineDetailState());
 
   final WatchVaccinationRecord _watchVaccinationRecord;
   final GetVaccineById _getVaccineById;
   final VaccinationSchedulePolicy _vaccinationSchedulePolicy;
-  final InfluenzaScheduleGenerator _influenzaScheduleGenerator;
   final VaccinationRecordRepository _vaccinationRecordRepository;
 
   StreamSubscription<VaccinationRecord?>? _subscription;
   Vaccine? _vaccine;
   DateTime? _childBirthday;
   List<int> _doseNumbers = const <int>[];
-  List<InfluenzaSeasonDefinition> _influenzaDefinitions =
-      const <InfluenzaSeasonDefinition>[];
-  List<InfluenzaSeasonSchedule> _influenzaSeasonSchedules =
-      const <InfluenzaSeasonSchedule>[];
   bool _initialized = false;
   String? _householdId;
   String? _childId;
@@ -80,7 +71,6 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
       ),
       clearRecommendation: true,
       clearError: true,
-      influenzaSeasons: _influenzaSeasonSchedules,
     );
 
     _prepareDataAndListen(
@@ -109,7 +99,6 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
             pendingDoseNumber:
                 _doseNumbers.isNotEmpty ? _doseNumbers.first : null,
             clearRecommendation: true,
-            influenzaSeasons: _influenzaSeasonSchedules,
           );
         }
       }
@@ -163,7 +152,6 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
       recommendation: recommendation,
       clearRecommendation: recommendation == null,
       clearError: true,
-      influenzaSeasons: _influenzaSeasonSchedules,
     );
   }
 
@@ -299,18 +287,9 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
 
   List<int> _deriveDoseNumbers(Vaccine vaccine) {
     if (vaccine.id == 'influenza') {
-      _influenzaDefinitions =
-          _influenzaScheduleGenerator.defineSeasons(vaccine.schedule);
-      _influenzaSeasonSchedules =
-          _influenzaScheduleGenerator.buildSeasonSchedules(
-        definitions: _influenzaDefinitions,
-        childBirthday: _childBirthday,
-      );
-      return _influenzaScheduleGenerator
-          .collectDoseNumbers(_influenzaDefinitions);
+      // インフルエンザは固定で14回分
+      return List<int>.generate(14, (index) => index + 1);
     }
-    _influenzaDefinitions = const <InfluenzaSeasonDefinition>[];
-    _influenzaSeasonSchedules = const <InfluenzaSeasonSchedule>[];
     final Set<int> result = <int>{};
     for (final VaccineScheduleSlot slot in vaccine.schedule) {
       result.addAll(slot.doseNumbers);
@@ -660,15 +639,12 @@ final vaccineDetailViewModelProvider = StateNotifierProvider.autoDispose
     final watchRecord = ref.watch(watchVaccinationRecordProvider);
     final getVaccineById = ref.watch(getVaccineByIdProvider);
     final schedulePolicy = ref.watch(vaccinationSchedulePolicyProvider);
-    final influenzaScheduleGenerator =
-        ref.watch(influenzaScheduleGeneratorProvider);
     final vaccinationRecordRepository =
         ref.watch(vaccinationRecordRepositoryProvider);
     final viewModel = VaccineDetailViewModel(
       watchVaccinationRecord: watchRecord,
       getVaccineById: getVaccineById,
       vaccinationSchedulePolicy: schedulePolicy,
-      influenzaScheduleGenerator: influenzaScheduleGenerator,
       vaccinationRecordRepository: vaccinationRecordRepository,
     );
     viewModel.initialize(

@@ -13,8 +13,6 @@ class ScheduledDoseBottomSheet extends StatelessWidget {
     required this.statusInfo,
     required this.onMarkAsCompleted,
     required this.onShowDetails,
-    this.influenzaSeasonLabel,
-    this.influenzaDoseOrder,
   });
 
   final VaccineInfo vaccine;
@@ -22,25 +20,11 @@ class ScheduledDoseBottomSheet extends StatelessWidget {
   final DoseStatusInfo statusInfo;
   final VoidCallback onMarkAsCompleted;
   final VoidCallback onShowDetails;
-  final String? influenzaSeasonLabel;
-  final int? influenzaDoseOrder;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final bool isInfluenza = vaccine.id == 'influenza';
-
-    String doseLabel;
-    if (isInfluenza && influenzaDoseOrder != null) {
-      final String seasonPart = (influenzaSeasonLabel != null &&
-              influenzaSeasonLabel!.isNotEmpty &&
-              influenzaSeasonLabel != '未設定')
-          ? '${influenzaSeasonLabel!} '
-          : '';
-      doseLabel = '$seasonPart${influenzaDoseOrder!}回目';
-    } else {
-      doseLabel = '$doseNumber回目';
-    }
+    final String doseLabel = '$doseNumber回目';
 
     return Container(
       decoration: const BoxDecoration(

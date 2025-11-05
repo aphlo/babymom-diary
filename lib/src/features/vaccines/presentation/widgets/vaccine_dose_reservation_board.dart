@@ -92,12 +92,12 @@ class VaccineDoseReservationBoard extends StatelessWidget {
                                     scheduledDate != null);
                         final DateTime? effectiveDate =
                             showDateLabel ? scheduledDate : null;
-                        final String? dateYearLabel = effectiveDate != null
+                        final String dateYearLabel = effectiveDate != null
                             ? DateFormatter.yyyy(effectiveDate)
-                            : null;
-                        final String? dateDateLabel = effectiveDate != null
+                            : '----年';
+                        final String dateDateLabel = effectiveDate != null
                             ? DateFormatter.mmddE(effectiveDate)
-                            : null;
+                            : '--月--日(-)';
                         return Column(
                           children: [
                             DoseStatusBadge(
@@ -129,37 +129,36 @@ class VaccineDoseReservationBoard extends StatelessWidget {
                                               )
                                           : null,
                             ),
-                            if (dateYearLabel != null &&
-                                dateDateLabel != null) ...[
-                              const SizedBox(height: 8),
-                              SizedBox(
-                                width: 88,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      dateYearLabel,
-                                      style:
-                                          theme.textTheme.bodySmall?.copyWith(
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.black87,
-                                      ),
-                                      textAlign: TextAlign.center,
+                            const SizedBox(height: 8),
+                            SizedBox(
+                              width: 88,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    dateYearLabel,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                      color: effectiveDate != null
+                                          ? Colors.black87
+                                          : Colors.grey,
                                     ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      dateDateLabel,
-                                      style:
-                                          theme.textTheme.bodySmall?.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.black87,
-                                      ),
-                                      textAlign: TextAlign.center,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    dateDateLabel,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: effectiveDate != null
+                                          ? Colors.black87
+                                          : Colors.grey,
                                     ),
-                                  ],
-                                ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ],
                         );
                       },

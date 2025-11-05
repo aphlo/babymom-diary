@@ -7,8 +7,6 @@ import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine
     as domain;
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine_master.dart';
-import 'package:babymom_diary/src/features/vaccines/domain/services/influenza_schedule_generator.dart';
-import 'package:babymom_diary/src/features/vaccines/domain/value_objects/influenza_season.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccination_period.dart';
 
 import '../models/vaccine_info.dart';
@@ -16,7 +14,6 @@ import '../viewmodels/vaccines_view_data.dart';
 
 VaccinesViewData mapGuidelineToViewData(
   VaccineMaster guideline, {
-  required InfluenzaScheduleGenerator influenzaScheduleGenerator,
   Map<String, VaccinationRecord>? recordsByVaccine,
   DateTime? childBirthday,
 }) {
@@ -28,7 +25,6 @@ VaccinesViewData mapGuidelineToViewData(
       .map(
         (domain.Vaccine vaccine) => _mapVaccine(
           vaccine,
-          influenzaScheduleGenerator: influenzaScheduleGenerator,
           record: recordsByVaccine?[vaccine.id],
           childBirthday: childBirthday,
           periods: periodLabels,
@@ -46,7 +42,6 @@ VaccinesViewData mapGuidelineToViewData(
 
 VaccineInfo _mapVaccine(
   domain.Vaccine vaccine, {
-  required InfluenzaScheduleGenerator influenzaScheduleGenerator,
   VaccinationRecord? record,
   DateTime? childBirthday,
   List<String>? periods,
@@ -56,38 +51,12 @@ VaccineInfo _mapVaccine(
       <String, domain.VaccinationPeriodHighlight>{};
   final Set<int> expectedDoseNumbers = <int>{};
   final bool isInfluenza = vaccine.id == 'influenza';
-  final bool canResolveActualPeriods =
-      record != null && childBirthday != null && periods != null;
 
-  if (isInfluenza &&
-      record != null &&
-      childBirthday != null &&
-      periods != null) {
-    // 実際の予約データから動的にマッピングを生成
-    final dynamicMapping = _buildDynamicInfluenzaMapping(
-      record: record,
-      childBirthday: childBirthday,
-      periods: periods,
-    );
-    doseSchedules.addAll(dynamicMapping.doseSchedules);
-    expectedDoseNumbers.addAll(dynamicMapping.expectedDoseNumbers);
-
-    // ハイライト情報は既存の処理を使用
-    for (final domain.VaccineScheduleSlot slot in vaccine.schedule) {
-      final domain.VaccinationPeriodHighlight? highlight = slot.highlight;
-      if (highlight != null) {
-        periodHighlights[slot.periodId] = highlight;
-      }
-    }
-  } else if (isInfluenza) {
-    // 既存の固定的な処理（予約データがない場合）
-    final List<InfluenzaSeasonDefinition> definitions =
-        influenzaScheduleGenerator.defineSeasons(vaccine.schedule);
-    doseSchedules.addAll(
-      influenzaScheduleGenerator.buildPeriodDoseMap(definitions),
-    );
-    expectedDoseNumbers
-        .addAll(influenzaScheduleGenerator.collectDoseNumbers(definitions));
+  if (isInfluenza) {
+    // インフルエンザは固定で14回分
+    expectedDoseNumbers.addAll(List<int>.generate(14, (index) => index + 1));
+    // インフルエンザはガイドラインの「一般的な接種期間」がないため、doseSchedulesは空のまま
+    // ただしhighlightは反映する
     for (final domain.VaccineScheduleSlot slot in vaccine.schedule) {
       final domain.VaccinationPeriodHighlight? highlight = slot.highlight;
       if (highlight != null) {
@@ -126,16 +95,17 @@ VaccineInfo _mapVaccine(
   final Map<int, DoseStatus?> doseStatuses = _extractDoseStatuses(
     expectedDoseNumbers: orderedDoseNumbers,
     record: record,
-    isInfluenza: isInfluenza,
   );
 
-  final Map<int, String> doseDisplayOverrides = canResolveActualPeriods
-      ? _buildDoseDisplayOverrides(
-          record: record,
-          childBirthday: childBirthday,
-          periods: periods,
-        )
-      : const <int, String>{};
+  // doseDisplayOverridesを生成（全てのワクチン用）
+  Map<int, String> doseDisplayOverrides = const <int, String>{};
+  if (record != null && childBirthday != null && periods != null) {
+    doseDisplayOverrides = _buildDoseDisplayOverrides(
+      record: record,
+      childBirthday: childBirthday,
+      periods: periods,
+    );
+  }
 
   return VaccineInfo(
     id: vaccine.id,
@@ -154,113 +124,15 @@ VaccineInfo _mapVaccine(
 Map<int, DoseStatus?> _extractDoseStatuses({
   required Iterable<int> expectedDoseNumbers,
   VaccinationRecord? record,
-  bool isInfluenza = false,
 }) {
   final Map<int, DoseStatus?> result = <int, DoseStatus?>{};
 
-  if (isInfluenza && record != null) {
-    // インフルエンザの場合は動的マッピングを使用
-    final scheduledDoses = record.orderedDoses
-      ..sort((a, b) {
-        final dateA = a.scheduledDate;
-        final dateB = b.scheduledDate;
-        if (dateA == null && dateB == null) return 0;
-        if (dateA == null) return 1;
-        if (dateB == null) return -1;
-        return dateA.compareTo(dateB);
-      });
-
-    for (int i = 0; i < scheduledDoses.length; i++) {
-      final newDoseNumber = i + 1;
-      result[newDoseNumber] = scheduledDoses[i].status;
-    }
-  } else {
-    // 既存の処理
-    for (final int doseNumber in expectedDoseNumbers) {
-      final DoseStatus? status = record?.getDoseByNumber(doseNumber)?.status;
-      result[doseNumber] = status;
-    }
+  for (final int doseNumber in expectedDoseNumbers) {
+    final DoseStatus? status = record?.getDoseByNumber(doseNumber)?.status;
+    result[doseNumber] = status;
   }
 
   return result;
-}
-
-class _DynamicInfluenzaMapping {
-  const _DynamicInfluenzaMapping({
-    required this.doseSchedules,
-    required this.expectedDoseNumbers,
-  });
-
-  final Map<String, List<int>> doseSchedules;
-  final Set<int> expectedDoseNumbers;
-}
-
-_DynamicInfluenzaMapping _buildDynamicInfluenzaMapping({
-  required VaccinationRecord record,
-  required DateTime childBirthday,
-  required List<String> periods,
-}) {
-  final Map<String, List<int>> doseSchedules = {};
-  final Set<int> expectedDoseNumbers = {};
-
-  // 予約済みのドーズを日付順にソート
-  final scheduledDoses = record.orderedDoses
-    ..sort((a, b) {
-      final dateA = a.scheduledDate;
-      final dateB = b.scheduledDate;
-      if (dateA == null && dateB == null) return 0;
-      if (dateA == null) return 1;
-      if (dateB == null) return -1;
-      return dateA.compareTo(dateB);
-    });
-
-  // 連番で新しいドーズ番号を割り当て
-  for (int i = 0; i < scheduledDoses.length; i++) {
-    final dose = scheduledDoses[i];
-    final newDoseNumber = i + 1; // 1から開始
-    final doseDate = dose.scheduledDate;
-
-    if (doseDate != null) {
-      // 子供の年齢を計算して適切な期間を特定
-      final ageInMonths = _calculateAgeInMonths(childBirthday, doseDate);
-      final periodLabel = _findPeriodForAge(ageInMonths, periods);
-
-      if (periodLabel != null) {
-        doseSchedules[periodLabel] = (doseSchedules[periodLabel] ?? [])
-          ..add(newDoseNumber);
-        expectedDoseNumbers.add(newDoseNumber);
-      }
-    }
-  }
-
-  return _DynamicInfluenzaMapping(
-    doseSchedules: doseSchedules,
-    expectedDoseNumbers: expectedDoseNumbers,
-  );
-}
-
-Map<int, String> _buildDoseDisplayOverrides({
-  required VaccinationRecord record,
-  required DateTime childBirthday,
-  required List<String> periods,
-}) {
-  final Map<int, String> overrides = <int, String>{};
-
-  for (int i = 0; i < record.orderedDoses.length; i++) {
-    final dose = record.orderedDoses[i];
-    final doseNumber = i + 1; // 1-based indexing for display
-    final DateTime? doseDate = dose.scheduledDate;
-    if (doseDate == null) {
-      continue;
-    }
-    final int ageInMonths = _calculateAgeInMonths(childBirthday, doseDate);
-    final String? periodLabel = _findPeriodForAge(ageInMonths, periods);
-    if (periodLabel != null) {
-      overrides[doseNumber] = periodLabel;
-    }
-  }
-
-  return overrides;
 }
 
 int _calculateAgeInMonths(DateTime birthDate, DateTime targetDate) {
@@ -344,4 +216,28 @@ int? _parsePeriodToMonths(String period) {
   }
 
   return null;
+}
+
+Map<int, String> _buildDoseDisplayOverrides({
+  required VaccinationRecord record,
+  required DateTime childBirthday,
+  required List<String> periods,
+}) {
+  final Map<int, String> overrides = <int, String>{};
+
+  for (int i = 0; i < record.orderedDoses.length; i++) {
+    final dose = record.orderedDoses[i];
+    final doseNumber = i + 1; // 1-based indexing for display
+    final DateTime? doseDate = dose.scheduledDate;
+    if (doseDate == null) {
+      continue;
+    }
+    final int ageInMonths = _calculateAgeInMonths(childBirthday, doseDate);
+    final String? periodLabel = _findPeriodForAge(ageInMonths, periods);
+    if (periodLabel != null) {
+      overrides[doseNumber] = periodLabel;
+    }
+  }
+
+  return overrides;
 }
