@@ -152,11 +152,18 @@ class VaccineNameCell extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text(
-            vaccine.name,
-            style: textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                vaccine.name,
+                style:
+                    textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+                maxLines: 1,
+                softWrap: false,
+              ),
+            ),
           ),
           const SizedBox(height: 4),
           VaccineTypeBadge(
