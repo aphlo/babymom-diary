@@ -5,7 +5,7 @@ import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/firebase/household_service.dart';
-import '../../../children/application/selected_child_provider.dart';
+import '../../../menu/children/application/selected_child_provider.dart';
 import '../../application/vaccine_catalog_providers.dart';
 import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_state.dart';

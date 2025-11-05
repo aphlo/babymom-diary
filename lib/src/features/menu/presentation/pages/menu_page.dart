@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
-import 'package:babymom_diary/src/features/children/data/infrastructure/child_firestore_data_source.dart';
+import 'package:babymom_diary/src/features/menu/children/data/infrastructure/child_firestore_data_source.dart';
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
-import 'package:babymom_diary/src/features/children/application/selected_child_provider.dart';
+import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
 
 class MenuPage extends ConsumerWidget {
   const MenuPage({super.key});

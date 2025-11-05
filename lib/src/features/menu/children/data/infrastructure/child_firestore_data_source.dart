@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../../core/types/gender.dart';
+import '../../../../../core/types/gender.dart';
 
 class ChildFirestoreDataSource {
   ChildFirestoreDataSource(this.db, this.householdId);

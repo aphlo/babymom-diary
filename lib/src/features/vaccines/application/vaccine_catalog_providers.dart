@@ -19,9 +19,9 @@ import 'package:babymom_diary/src/features/vaccines/application/usecases/watch_v
 import 'package:babymom_diary/src/features/vaccines/domain/services/vaccination_schedule_policy.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/services/influenza_schedule_generator.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/services/vaccine_schedule_conflict_validator.dart';
-import 'package:babymom_diary/src/features/household/domain/repositories/vaccine_visibility_settings_repository.dart';
-import 'package:babymom_diary/src/features/household/infrastructure/repositories/vaccine_visibility_settings_repository_impl.dart';
-import 'package:babymom_diary/src/features/household/infrastructure/sources/vaccine_visibility_settings_firestore_data_source.dart';
+import 'package:babymom_diary/src/features/menu/household/domain/repositories/vaccine_visibility_settings_repository.dart';
+import 'package:babymom_diary/src/features/menu/household/infrastructure/repositories/vaccine_visibility_settings_repository_impl.dart';
+import 'package:babymom_diary/src/features/menu/household/infrastructure/sources/vaccine_visibility_settings_firestore_data_source.dart';
 
 final vaccineCatalogRepositoryProvider =
     Provider<VaccineCatalogRepository>((ref) {

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/firebase/household_service.dart';
-import '../../../../core/types/gender.dart';
+import '../../../../../core/firebase/household_service.dart';
+import '../../../../../core/types/gender.dart';
 import '../../application/children_local_provider.dart';
 import '../../application/selected_child_provider.dart';
 import '../../application/selected_child_snapshot_provider.dart';

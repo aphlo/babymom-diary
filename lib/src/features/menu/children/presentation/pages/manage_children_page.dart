@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/firebase/household_service.dart';
-import '../../../../core/types/gender.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../../core/firebase/household_service.dart';
+import '../../../../../core/types/gender.dart';
+import '../../../../../core/theme/app_colors.dart';
 import '../../data/infrastructure/child_firestore_data_source.dart';
 
 class ManageChildrenPage extends ConsumerWidget {

@@ -4,7 +4,7 @@ import '../../application/usecases/get_vaccine_visibility_settings.dart';
 import '../../application/usecases/update_vaccine_visibility_settings.dart';
 import '../../application/usecases/remove_vaccine_from_reservation_groups.dart';
 import '../../domain/entities/vaccine_visibility_settings.dart';
-import '../../../vaccines/domain/repositories/vaccine_master_repository.dart';
+import '../../../../vaccines/domain/repositories/vaccine_master_repository.dart';
 import 'vaccine_visibility_settings_state.dart';
 
 /// ワクチン表示設定画面のViewModel

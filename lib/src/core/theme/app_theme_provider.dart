@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../features/children/application/children_local_provider.dart';
-import '../../features/children/application/children_stream_provider.dart';
-import '../../features/children/application/selected_child_provider.dart';
-import '../../features/children/application/selected_child_snapshot_provider.dart';
-import '../../features/children/domain/entities/child_summary.dart';
+import '../../features/menu/children/application/children_local_provider.dart';
+import '../../features/menu/children/application/children_stream_provider.dart';
+import '../../features/menu/children/application/selected_child_provider.dart';
+import '../../features/menu/children/application/selected_child_snapshot_provider.dart';
+import '../../features/menu/children/domain/entities/child_summary.dart';
 import '../preferences/shared_preferences_provider.dart';
 import 'app_theme.dart';
 

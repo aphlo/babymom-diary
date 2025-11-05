@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_settings.dart';
-import 'package:babymom_diary/src/features/children/domain/entities/child_summary.dart';
+import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
 
 @immutable
 class CalendarUiEvent {

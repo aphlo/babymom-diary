@@ -1,10 +1,10 @@
 import '../../domain/entities/vaccination_record.dart';
 import '../../domain/repositories/vaccine_master_repository.dart';
 import '../../domain/repositories/vaccination_record_repository.dart';
-import '../../../children/domain/entities/child_summary.dart';
+import '../../../menu/children/domain/entities/child_summary.dart';
 import '../../domain/value_objects/vaccine_category.dart' as vo_category;
 import '../../domain/value_objects/vaccine_requirement.dart' as vo_requirement;
-import '../../../household/domain/repositories/vaccine_visibility_settings_repository.dart';
+import '../../../menu/household/domain/repositories/vaccine_visibility_settings_repository.dart';
 
 /// 子供の既存の接種記録に基づいて、予約可能なワクチンを取得するユースケース
 class GetVaccinesForSimultaneousReservation {

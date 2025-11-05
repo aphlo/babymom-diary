@@ -5,7 +5,7 @@ import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../models/vaccine_info.dart';
-import '../../../children/application/selected_child_provider.dart';
+import '../../../menu/children/application/selected_child_provider.dart';
 import '../viewmodels/vaccine_reservation_view_model.dart';
 import '../../domain/value_objects/vaccine_record_type.dart';
 import '../widgets/vaccine_header.dart';

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/firebase/household_service.dart';
-import '../../../vaccines/application/vaccine_catalog_providers.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/firebase/household_service.dart';
+import '../../../../vaccines/application/vaccine_catalog_providers.dart';
 import '../../application/usecases/get_vaccine_visibility_settings.dart';
 import '../../application/usecases/update_vaccine_visibility_settings.dart';
 import '../../application/usecases/remove_vaccine_from_reservation_groups.dart';

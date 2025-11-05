@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/types/gender.dart';
+import '../../../../../core/types/gender.dart';
 
 class ChildFormData {
   final String name;

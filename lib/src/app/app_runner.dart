@@ -10,9 +10,9 @@ import 'package:babymom_diary/src/core/firebase/household_service.dart'
 import 'package:babymom_diary/src/core/preferences/shared_preferences_provider.dart';
 import 'package:babymom_diary/src/core/router/app_router.dart';
 import 'package:babymom_diary/src/core/theme/app_theme_provider.dart';
-import 'package:babymom_diary/src/features/children/application/children_local_provider.dart';
-import 'package:babymom_diary/src/features/children/application/selected_child_snapshot_provider.dart';
-import 'package:babymom_diary/src/features/children/domain/entities/child_summary.dart';
+import 'package:babymom_diary/src/features/menu/children/application/children_local_provider.dart';
+import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
+import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
 
 Future<void> runBabymomDiaryApp({
   required String appTitle,

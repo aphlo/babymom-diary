@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 
-import '../../../children/application/selected_child_provider.dart';
+import '../../../menu/children/application/selected_child_provider.dart';
 import '../../domain/entities/dose_record.dart';
 import '../controllers/vaccine_detail_interactions.dart';
 import '../models/vaccine_detail_callbacks.dart';

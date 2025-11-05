@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/firebase/household_service.dart';
+import '../../../../../core/firebase/household_service.dart';
 import '../../data/infrastructure/child_firestore_data_source.dart';
 import '../widgets/child_form.dart';
 

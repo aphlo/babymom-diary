@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
-import '../../../../core/firebase/household_service.dart';
+import '../../../../../core/firebase/household_service.dart';
 
 class HouseholdSharePage extends ConsumerStatefulWidget {
   const HouseholdSharePage({super.key});

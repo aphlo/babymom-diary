@@ -4,11 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 import 'package:babymom_diary/src/features/child_record/presentation/widgets/app_bar_child_info.dart';
-import 'package:babymom_diary/src/features/children/application/children_local_provider.dart';
-import 'package:babymom_diary/src/features/children/application/children_stream_provider.dart';
-import 'package:babymom_diary/src/features/children/application/selected_child_provider.dart';
-import 'package:babymom_diary/src/features/children/application/selected_child_snapshot_provider.dart';
-import 'package:babymom_diary/src/features/children/domain/entities/child_summary.dart';
+import 'package:babymom_diary/src/features/menu/children/application/children_local_provider.dart';
+import 'package:babymom_diary/src/features/menu/children/application/children_stream_provider.dart';
+import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
+import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
+import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
 
 import '../components/vaccines_schedule_table.dart';
 import '../models/vaccine_info.dart';

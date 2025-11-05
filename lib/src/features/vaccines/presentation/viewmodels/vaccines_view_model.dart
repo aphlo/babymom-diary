@@ -8,12 +8,12 @@ import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine_mast
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_record.dart';
 import 'package:babymom_diary/src/features/vaccines/application/usecases/watch_vaccination_records.dart';
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
-import 'package:babymom_diary/src/features/children/application/selected_child_provider.dart';
-import 'package:babymom_diary/src/features/children/application/selected_child_snapshot_provider.dart';
+import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
+import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/services/influenza_schedule_generator.dart';
-import 'package:babymom_diary/src/features/household/domain/repositories/vaccine_visibility_settings_repository.dart';
-import 'package:babymom_diary/src/features/household/infrastructure/repositories/vaccine_visibility_settings_repository_impl.dart';
-import 'package:babymom_diary/src/features/household/infrastructure/sources/vaccine_visibility_settings_firestore_data_source.dart';
+import 'package:babymom_diary/src/features/menu/household/domain/repositories/vaccine_visibility_settings_repository.dart';
+import 'package:babymom_diary/src/features/menu/household/infrastructure/repositories/vaccine_visibility_settings_repository_impl.dart';
+import 'package:babymom_diary/src/features/menu/household/infrastructure/sources/vaccine_visibility_settings_firestore_data_source.dart';
 
 import '../mappers/vaccine_info_mapper.dart';
 import 'vaccines_view_data.dart';

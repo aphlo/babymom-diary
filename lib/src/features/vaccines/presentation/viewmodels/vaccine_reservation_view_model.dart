@@ -3,9 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/firebase/household_service.dart';
-import '../../../children/application/selected_child_provider.dart';
-import '../../../children/application/children_stream_provider.dart';
-import '../../../children/domain/entities/child_summary.dart';
+import '../../../menu/children/application/selected_child_provider.dart';
+import '../../../menu/children/application/children_stream_provider.dart';
+import '../../../menu/children/domain/entities/child_summary.dart';
 import '../../application/usecases/create_vaccine_reservation.dart';
 import '../../application/usecases/get_vaccines_for_simulataneous_reservation.dart';
 import '../../application/vaccine_catalog_providers.dart';

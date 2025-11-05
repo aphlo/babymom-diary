@@ -11,10 +11,10 @@ import 'package:babymom_diary/src/features/calendar/domain/repositories/calendar
 import 'package:babymom_diary/src/features/calendar/infrastructure/repositories/calendar_settings_repository_impl.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/models/calendar_event_model.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/calendar_state.dart';
-import 'package:babymom_diary/src/features/children/application/children_local_provider.dart';
-import 'package:babymom_diary/src/features/children/application/selected_child_provider.dart';
-import 'package:babymom_diary/src/features/children/application/selected_child_snapshot_provider.dart';
-import 'package:babymom_diary/src/features/children/domain/entities/child_summary.dart';
+import 'package:babymom_diary/src/features/menu/children/application/children_local_provider.dart';
+import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
+import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
+import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
 import 'package:babymom_diary/src/features/vaccines/application/vaccine_catalog_providers.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_record.dart';

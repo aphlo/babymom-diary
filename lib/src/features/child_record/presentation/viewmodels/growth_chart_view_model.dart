@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/firebase/household_service.dart' as fbcore;
-import '../../../children/application/selected_child_snapshot_provider.dart';
-import '../../../children/domain/entities/child_summary.dart';
+import '../../../menu/children/application/selected_child_snapshot_provider.dart';
+import '../../../menu/children/domain/entities/child_summary.dart';
 import '../../child_record.dart';
 import '../../infrastructure/repositories/growth_curve_repository_impl.dart';
 import '../../infrastructure/repositories/growth_record_repository_impl.dart';

@@ -3,11 +3,11 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/firebase/household_service.dart';
-import '../../../children/application/children_local_provider.dart';
-import '../../../children/application/children_stream_provider.dart';
-import '../../../children/application/selected_child_provider.dart';
-import '../../../children/application/selected_child_snapshot_provider.dart';
-import '../../../children/domain/entities/child_summary.dart';
+import '../../../menu/children/application/children_local_provider.dart';
+import '../../../menu/children/application/children_stream_provider.dart';
+import '../../../menu/children/application/selected_child_provider.dart';
+import '../../../menu/children/application/selected_child_snapshot_provider.dart';
+import '../../../menu/children/domain/entities/child_summary.dart';
 import '../viewmodels/record_view_model.dart';
 
 class AppBarChildInfo extends ConsumerWidget {

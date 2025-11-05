@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../vaccines/domain/repositories/vaccination_record_repository.dart';
+import '../../../../vaccines/domain/repositories/vaccination_record_repository.dart';
 
 /// ワクチンをOFFにした時、全てのreservation_groupsから該当ワクチンを削除するユースケース
 class RemoveVaccineFromReservationGroups {
