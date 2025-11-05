@@ -53,6 +53,7 @@ class VaccineReservationViewModel
       final householdId =
           await _householdService.findExistingHouseholdForCurrentUser();
       if (householdId == null) {
+        if (!mounted) return;
         state = state.copyWith(
           isLoading: false,
           error: 'ホームが見つかりません',
@@ -72,11 +73,13 @@ class VaccineReservationViewModel
           .where((vaccine) => vaccine.vaccineId != primaryVaccine.id)
           .toList();
 
+      if (!mounted) return;
       state = state.copyWith(
         isLoading: false,
         availableVaccines: filteredVaccines,
       );
     } catch (error) {
+      if (!mounted) return;
       state = state.copyWith(
         isLoading: false,
         error: 'データの取得に失敗しました: $error',
@@ -126,6 +129,7 @@ class VaccineReservationViewModel
       final householdId =
           await _householdService.findExistingHouseholdForCurrentUser();
       if (householdId == null) {
+        if (!mounted) return false;
         state = state.copyWith(
           isSubmitting: false,
           error: 'ホームが見つかりません',
@@ -136,6 +140,7 @@ class VaccineReservationViewModel
       final requests = state.generateReservationRequests(childId);
 
       if (requests.isEmpty) {
+        if (!mounted) return false;
         state = state.copyWith(
           isSubmitting: false,
           error: '予約情報が不正です',
@@ -159,9 +164,11 @@ class VaccineReservationViewModel
         );
       }
 
+      if (!mounted) return false;
       state = state.copyWith(isSubmitting: false);
       return true;
     } catch (error) {
+      if (!mounted) return false;
       state = state.copyWith(
         isSubmitting: false,
         error: '予約の作成に失敗しました: $error',

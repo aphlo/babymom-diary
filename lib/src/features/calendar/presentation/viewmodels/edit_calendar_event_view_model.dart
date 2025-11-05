@@ -198,9 +198,11 @@ class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
         iconKey: state.selectedIconPath,
       );
 
+      if (!mounted) return false;
       state = state.copyWith(isSubmitting: false);
       return true;
     } catch (error) {
+      if (!mounted) return false;
       state = state.copyWith(
         isSubmitting: false,
         validationMessage: 'イベントの更新に失敗しました: $error',
@@ -224,9 +226,11 @@ class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
         householdId: householdId,
       );
 
+      if (!mounted) return false;
       state = state.copyWith(isDeleting: false);
       return true;
     } catch (error) {
+      if (!mounted) return false;
       state = state.copyWith(
         isDeleting: false,
         validationMessage: 'イベントの削除に失敗しました: $error',

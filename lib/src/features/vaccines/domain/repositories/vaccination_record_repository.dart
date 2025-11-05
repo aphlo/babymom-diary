@@ -48,7 +48,7 @@ abstract class VaccinationRecordRepository {
     required String householdId,
     required String childId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
     required DateTime scheduledDate,
   });
 
@@ -65,7 +65,7 @@ abstract class VaccinationRecordRepository {
     required String householdId,
     required String childId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
   });
 
   /// 同時接種グループをまとめて完了状態に更新
@@ -81,7 +81,7 @@ abstract class VaccinationRecordRepository {
     required String childId,
     required String reservationGroupId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
   });
 
   /// ワクチン接種の予約を削除
@@ -89,7 +89,7 @@ abstract class VaccinationRecordRepository {
     required String householdId,
     required String childId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
   });
 
   /// 同時接種グループの予約をまとめて削除
@@ -105,7 +105,7 @@ abstract class VaccinationRecordRepository {
     required String childId,
     required String reservationGroupId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
   });
 
   /// 予約可能なワクチンの一覧を取得（同時接種選択用）
@@ -126,7 +126,7 @@ abstract class VaccinationRecordRepository {
     required String householdId,
     required String childId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
     required DateTime scheduledDate,
   });
 

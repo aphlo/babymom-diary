@@ -1,3 +1,4 @@
+import '../../domain/entities/dose_record.dart';
 import '../../domain/entities/vaccination_record.dart';
 import '../../domain/entities/vaccine_reservation_request.dart';
 import '../../domain/entities/reservation_group.dart';
@@ -90,14 +91,14 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
     required String householdId,
     required String childId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
     required DateTime scheduledDate,
   }) {
     return _dataSource.updateVaccineReservation(
       householdId: householdId,
       childId: childId,
       vaccineId: vaccineId,
-      doseNumber: doseNumber,
+      doseId: doseId,
       scheduledDate: scheduledDate,
     );
   }
@@ -122,13 +123,13 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
     required String householdId,
     required String childId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
   }) {
     return _dataSource.completeVaccination(
       householdId: householdId,
       childId: childId,
       vaccineId: vaccineId,
-      doseNumber: doseNumber,
+      doseId: doseId,
     );
   }
 
@@ -151,14 +152,14 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
     required String childId,
     required String reservationGroupId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
   }) {
     return _dataSource.completeReservationGroupMember(
       householdId: householdId,
       childId: childId,
       reservationGroupId: reservationGroupId,
       vaccineId: vaccineId,
-      doseNumber: doseNumber,
+      doseId: doseId,
     );
   }
 
@@ -167,13 +168,13 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
     required String householdId,
     required String childId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
   }) {
     return _dataSource.deleteVaccineReservation(
       householdId: householdId,
       childId: childId,
       vaccineId: vaccineId,
-      doseNumber: doseNumber,
+      doseId: doseId,
     );
   }
 
@@ -196,14 +197,14 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
     required String childId,
     required String reservationGroupId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
   }) {
     return _dataSource.deleteReservationGroupMember(
       householdId: householdId,
       childId: childId,
       reservationGroupId: reservationGroupId,
       vaccineId: vaccineId,
-      doseNumber: doseNumber,
+      doseId: doseId,
     );
   }
 
@@ -222,9 +223,8 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
 
     // 予約可能なワクチンをフィルタリング
     return allRecords.where((record) {
-      // 次回接種可能な回数があるかチェック
-      final nextDose = record.nextAvailableDose;
-      return nextDose != null && !record.hasScheduledDose;
+      // 未完了の回数があるかチェック
+      return record.doses.any((dose) => dose.status != DoseStatus.completed);
     }).toList();
   }
 
@@ -246,14 +246,14 @@ class VaccinationRecordRepositoryImpl implements VaccinationRecordRepository {
     required String householdId,
     required String childId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
     required DateTime scheduledDate,
   }) {
     return _dataSource.markDoseAsScheduled(
       householdId: householdId,
       childId: childId,
       vaccineId: vaccineId,
-      doseNumber: doseNumber,
+      doseId: doseId,
       scheduledDate: scheduledDate,
     );
   }

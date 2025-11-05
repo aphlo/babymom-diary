@@ -5,21 +5,21 @@ import 'package:babymom_diary/src/features/vaccines/domain/entities/reservation_
 class ReservationGroupMemberDto {
   const ReservationGroupMemberDto({
     required this.vaccineId,
-    required this.doseNumber,
+    required this.doseId,
   });
 
   final String vaccineId;
-  final int doseNumber;
+  final String doseId;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'vaccineId': vaccineId,
-        'doseNumber': doseNumber,
+        'doseId': doseId,
       };
 
   ReservationGroupMember toDomain() {
     return ReservationGroupMember(
       vaccineId: vaccineId,
-      doseNumber: doseNumber,
+      doseId: doseId,
     );
   }
 }
@@ -60,11 +60,11 @@ class ReservationGroupDto {
         .map((dynamic item) {
           if (item is! Map<String, dynamic>) return null;
           final vaccineId = item['vaccineId'] as String?;
-          final doseNumber = item['doseNumber'];
-          if (vaccineId == null || doseNumber is! int) return null;
+          final doseId = item['doseId'] as String?;
+          if (vaccineId == null || doseId == null) return null;
           return ReservationGroupMemberDto(
             vaccineId: vaccineId,
-            doseNumber: doseNumber,
+            doseId: doseId,
           );
         })
         .whereType<ReservationGroupMemberDto>()
@@ -127,8 +127,6 @@ class ReservationGroupDto {
         return ReservationGroupStatus.scheduled;
       case 'completed':
         return ReservationGroupStatus.completed;
-      case 'cancelled':
-        return ReservationGroupStatus.cancelled;
       default:
         return null;
     }

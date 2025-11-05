@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../domain/entities/dose_record.dart';
 import '../../../domain/entities/reservation_group.dart';
 import '../../../domain/entities/vaccine_reservation_request.dart';
 import '../../../domain/errors/vaccination_persistence_exception.dart';
@@ -37,24 +36,36 @@ class ReservationGroupFirestoreCommands {
         householdId: householdId,
         childId: childId,
         handler: (transaction, refs) async {
-          final membersPayload = requests
+          // 各requestに対してdoseIdを事前に生成・割り当て
+          final requestsWithDoseIds = <_RequestWithDoseId>[];
+          for (final request in requests) {
+            final doseId = request.doseId ?? _ctx.uuid.v4();
+            requestsWithDoseIds.add(_RequestWithDoseId(
+              request: request,
+              doseId: doseId,
+            ));
+          }
+
+          // membersPayloadを生成（事前生成したdoseIdを使用）
+          final membersPayload = requestsWithDoseIds
               .map(
-                (request) => <String, dynamic>{
-                  'vaccineId': request.vaccineId,
-                  'doseNumber': request.doseNumber,
+                (item) => <String, dynamic>{
+                  'vaccineId': item.request.vaccineId,
+                  'doseId': item.doseId,
                 },
               )
               .toList();
 
           final pendingItems = <_ReservationTransactionItem>[];
-          for (final request in requests) {
-            final recordDto =
-                await _ctx.readRecordDto(transaction, refs, request.vaccineId);
+          for (final item in requestsWithDoseIds) {
+            final recordDto = await _ctx.readRecordDto(
+                transaction, refs, item.request.vaccineId);
             pendingItems.add(
               _ReservationTransactionItem(
-                request: request,
+                request: item.request,
                 recordDto: recordDto,
-                docRef: refs.recordDoc(request.vaccineId),
+                docRef: refs.recordDoc(item.request.vaccineId),
+                doseId: item.doseId,
               ),
             );
           }
@@ -72,8 +83,9 @@ class ReservationGroupFirestoreCommands {
 
           for (final item in pendingItems) {
             final itemScheduledDateUtc = item.request.scheduledDate.toUtc();
+            // 事前に生成したdoseIdを使用（新しく生成しない）
             final doseEntry = _ctx.createDoseEntryFromRecordType(
-              doseNumber: item.request.doseNumber,
+              doseId: item.doseId,
               dateUtc: itemScheduledDateUtc,
               recordType: item.request.recordType.name,
               reservationGroupId: groupId,
@@ -90,8 +102,8 @@ class ReservationGroupFirestoreCommands {
               transaction.set(item.docRef, recordDto.toJson());
             } else {
               final updatedDoses =
-                  Map<int, DoseEntryDto>.from(item.recordDto!.doses);
-              updatedDoses[item.request.doseNumber] = doseEntry;
+                  Map<String, DoseEntryDto>.from(item.recordDto!.doses);
+              updatedDoses[item.doseId] = doseEntry;
               recordDto = item.recordDto!.copyWith(
                 doses: updatedDoses,
                 updatedAt: nowUtc,
@@ -160,14 +172,17 @@ class ReservationGroupFirestoreCommands {
             final record = recordDto.toDomain();
             _ctx.reservationGroupService.ensureDoseBelongsToGroup(
               record: record,
-              doseNumber: memberRecord.doseNumber,
+              doseId: memberRecord.doseId,
               groupId: reservationGroupId,
             );
 
-            final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
-            updatedDoses[memberRecord.doseNumber] = _ctx.scheduledDoseEntry(
-              doseNumber: memberRecord.doseNumber,
-              scheduledDateUtc: scheduledDateUtc,
+            final updatedDoses =
+                Map<String, DoseEntryDto>.from(recordDto.doses);
+            updatedDoses[memberRecord.doseId] =
+                _ctx.createDoseEntryFromRecordType(
+              doseId: memberRecord.doseId,
+              dateUtc: scheduledDateUtc,
+              recordType: 'scheduled',
               reservationGroupId: reservationGroupId,
             );
 
@@ -227,16 +242,18 @@ class ReservationGroupFirestoreCommands {
             final record = recordDto.toDomain();
             _ctx.reservationGroupService.ensureDoseBelongsToGroup(
               record: record,
-              doseNumber: memberRecord.doseNumber,
+              doseId: memberRecord.doseId,
               groupId: reservationGroupId,
             );
 
-            final existingDose = recordDto.doses[memberRecord.doseNumber];
-            final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
-            updatedDoses[memberRecord.doseNumber] = DoseEntryDto(
-              doseNumber: memberRecord.doseNumber,
-              status: DoseStatus.completed,
-              scheduledDate: existingDose?.scheduledDate,
+            final existingDose = recordDto.doses[memberRecord.doseId];
+            final updatedDoses =
+                Map<String, DoseEntryDto>.from(recordDto.doses);
+            updatedDoses[memberRecord.doseId] =
+                _ctx.createDoseEntryFromRecordType(
+              doseId: memberRecord.doseId,
+              dateUtc: existingDose?.scheduledDate ?? nowUtc,
+              recordType: 'completed',
               reservationGroupId: reservationGroupId,
             );
 
@@ -258,7 +275,7 @@ class ReservationGroupFirestoreCommands {
     required String childId,
     required String reservationGroupId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
   }) async {
     final nowUtc = DateTime.now().toUtc();
 
@@ -276,19 +293,19 @@ class ReservationGroupFirestoreCommands {
           final groupDocRef = refs.reservationGroupDoc(reservationGroupId);
           final updatedMembers = groupDto.members
               .where(
-                (member) => !(member.vaccineId == vaccineId &&
-                    member.doseNumber == doseNumber),
+                (member) =>
+                    !(member.vaccineId == vaccineId && member.doseId == doseId),
               )
               .map((member) => <String, dynamic>{
                     'vaccineId': member.vaccineId,
-                    'doseNumber': member.doseNumber,
+                    'doseId': member.doseId,
                   })
               .toList();
 
           final memberExists = updatedMembers.length != groupDto.members.length;
           if (!memberExists) {
             throw ReservationGroupIntegrityException(
-              'Group member not found for vaccine=$vaccineId dose=$doseNumber',
+              'Group member not found for vaccine=$vaccineId dose=$doseId',
             );
           }
 
@@ -301,16 +318,16 @@ class ReservationGroupFirestoreCommands {
           final record = recordDto.toDomain();
           _ctx.reservationGroupService.ensureDoseBelongsToGroup(
             record: record,
-            doseNumber: doseNumber,
+            doseId: doseId,
             groupId: reservationGroupId,
           );
 
-          final existingDose = recordDto.doses[doseNumber];
-          final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
-          updatedDoses[doseNumber] = DoseEntryDto(
-            doseNumber: doseNumber,
-            status: DoseStatus.completed,
-            scheduledDate: existingDose?.scheduledDate,
+          final existingDose = recordDto.doses[doseId];
+          final updatedDoses = Map<String, DoseEntryDto>.from(recordDto.doses);
+          updatedDoses[doseId] = _ctx.createDoseEntryFromRecordType(
+            doseId: doseId,
+            dateUtc: existingDose?.scheduledDate ?? nowUtc,
+            recordType: 'completed',
             reservationGroupId: reservationGroupId,
           );
 
@@ -371,12 +388,13 @@ class ReservationGroupFirestoreCommands {
               final record = recordDto.toDomain();
               _ctx.reservationGroupService.ensureDoseBelongsToGroup(
                 record: record,
-                doseNumber: memberRecord.doseNumber,
+                doseId: memberRecord.doseId,
                 groupId: reservationGroupId,
               );
 
-              final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
-              updatedDoses.remove(memberRecord.doseNumber);
+              final updatedDoses =
+                  Map<String, DoseEntryDto>.from(recordDto.doses);
+              updatedDoses.remove(memberRecord.doseId);
 
               if (updatedDoses.isEmpty) {
                 transaction.delete(memberRecord.docRef);
@@ -405,7 +423,7 @@ class ReservationGroupFirestoreCommands {
     required String childId,
     required String reservationGroupId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
   }) async {
     final nowUtc = DateTime.now().toUtc();
 
@@ -429,13 +447,13 @@ class ReservationGroupFirestoreCommands {
           final record = recordDto.toDomain();
           _ctx.reservationGroupService.ensureDoseBelongsToGroup(
             record: record,
-            doseNumber: doseNumber,
+            doseId: doseId,
             groupId: reservationGroupId,
           );
 
           // ワクチン記録から該当の回数を削除
-          final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
-          updatedDoses.remove(doseNumber);
+          final updatedDoses = Map<String, DoseEntryDto>.from(recordDto.doses);
+          updatedDoses.remove(doseId);
 
           if (updatedDoses.isEmpty) {
             transaction.delete(refs.recordDoc(vaccineId));
@@ -453,8 +471,8 @@ class ReservationGroupFirestoreCommands {
 
           // グループから該当メンバーを削除
           final updatedMembers = groupDto.members
-              .where((member) => !(member.vaccineId == vaccineId &&
-                  member.doseNumber == doseNumber))
+              .where((member) =>
+                  !(member.vaccineId == vaccineId && member.doseId == doseId))
               .toList();
 
           if (updatedMembers.isEmpty) {
@@ -465,7 +483,7 @@ class ReservationGroupFirestoreCommands {
             final membersPayload = updatedMembers
                 .map((member) => <String, dynamic>{
                       'vaccineId': member.vaccineId,
-                      'doseNumber': member.doseNumber,
+                      'doseId': member.doseId,
                     })
                 .toList();
 
@@ -541,14 +559,17 @@ class ReservationGroupFirestoreCommands {
             final record = recordDto.toDomain();
             _ctx.reservationGroupService.ensureDoseBelongsToGroup(
               record: record,
-              doseNumber: memberRecord.doseNumber,
+              doseId: memberRecord.doseId,
               groupId: reservationGroupId,
             );
 
-            final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
-            updatedDoses[memberRecord.doseNumber] = _ctx.scheduledDoseEntry(
-              doseNumber: memberRecord.doseNumber,
-              scheduledDateUtc: scheduledDateUtc,
+            final updatedDoses =
+                Map<String, DoseEntryDto>.from(recordDto.doses);
+            updatedDoses[memberRecord.doseId] =
+                _ctx.createDoseEntryFromRecordType(
+              doseId: memberRecord.doseId,
+              dateUtc: scheduledDateUtc,
+              recordType: 'scheduled',
               reservationGroupId: reservationGroupId,
             );
 
@@ -571,9 +592,21 @@ class _ReservationTransactionItem {
     required this.request,
     required this.recordDto,
     required this.docRef,
+    required this.doseId,
   });
 
   final VaccineReservationRequest request;
   final VaccinationRecordDto? recordDto;
   final DocumentReference<Map<String, dynamic>> docRef;
+  final String doseId;
+}
+
+class _RequestWithDoseId {
+  const _RequestWithDoseId({
+    required this.request,
+    required this.doseId,
+  });
+
+  final VaccineReservationRequest request;
+  final String doseId;
 }

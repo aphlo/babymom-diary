@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../application/vaccine_catalog_providers.dart';
 import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_state.dart';
 import '../viewmodels/vaccine_detail_view_model.dart';
 import '../widgets/concurrent_vaccines_confirmation_dialog.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class VaccineDetailInteractions {
   const VaccineDetailInteractions({
@@ -11,12 +13,14 @@ class VaccineDetailInteractions {
     required this.detailState,
     required this.householdId,
     required this.childId,
+    required this.ref,
   });
 
   final VaccineDetailViewModel viewModel;
   final VaccineDetailState detailState;
   final String householdId;
   final String childId;
+  final WidgetRef ref;
 
   Future<void> markDoseAsCompleted(
     BuildContext context,
@@ -27,6 +31,29 @@ class VaccineDetailInteractions {
     bool applyToGroup = true;
 
     if (groupId != null) {
+      // doseIdを取得するためにVaccinationRecordを取得
+      final repository = ref.read(vaccinationRecordRepositoryProvider);
+      final record = await repository.getVaccinationRecord(
+        householdId: householdId,
+        childId: childId,
+        vaccineId: vaccine.id,
+      );
+      final doseRecord = record?.getDoseByNumber(doseNumber);
+
+      if (doseRecord == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('接種記録が見つかりません'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      if (!context.mounted) return;
+
       final bool? userSelection =
           await showConcurrentVaccinesConfirmationDialog(
         context: context,
@@ -34,7 +61,7 @@ class VaccineDetailInteractions {
         childId: childId,
         reservationGroupId: groupId,
         currentVaccineId: vaccine.id,
-        currentDoseNumber: doseNumber,
+        currentDoseId: doseRecord.doseId,
       );
 
       if (userSelection == null) {

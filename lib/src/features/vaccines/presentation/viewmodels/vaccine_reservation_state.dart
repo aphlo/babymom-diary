@@ -55,19 +55,20 @@ class VaccineReservationState {
     requests.add(VaccineReservationRequest(
       childId: childId,
       vaccineId: primaryVaccine!.id,
-      doseNumber: primaryDoseNumber!,
+      doseId: null, // 新規作成時はnull
       scheduledDate: scheduledDate!,
       recordType: recordType,
     ));
 
     // 同時接種のワクチン予約
     for (final vaccine in selectedAdditionalVaccines) {
-      final nextDose = vaccine.nextAvailableDose;
-      if (nextDose != null) {
+      final bool hasAvailableDose = vaccine.canScheduleNextDose;
+
+      if (hasAvailableDose) {
         requests.add(VaccineReservationRequest(
           childId: childId,
           vaccineId: vaccine.vaccineId,
-          doseNumber: nextDose,
+          doseId: null, // 新規作成時はnull
           scheduledDate: scheduledDate!,
           recordType: recordType,
         ));

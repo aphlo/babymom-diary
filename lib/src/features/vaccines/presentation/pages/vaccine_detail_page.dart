@@ -64,6 +64,7 @@ class VaccineDetailPage extends ConsumerWidget {
                 detailState: detailState,
                 householdId: householdId,
                 childId: childId,
+                ref: ref,
               );
 
               return _VaccineDetailContent(

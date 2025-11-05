@@ -76,11 +76,13 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     try {
       final householdId =
           await _ref.read(fbcore.currentHouseholdIdProvider.future);
+      if (!mounted) return;
       state = state.copyWith(householdId: householdId);
       _subscribeToChildren(householdId);
       _refreshEventsSubscription();
       _refreshVaccinationSubscription();
     } catch (error, stackTrace) {
+      if (!mounted) return;
       state = state.copyWith(
         pendingUiEvent: const CalendarUiEvent.showMessage('世帯情報の取得に失敗しました'),
       );
@@ -368,10 +370,12 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
         end: result.end,
         iconKey: result.iconPath,
       );
+      if (!mounted) return;
       state = state.copyWith(
         pendingUiEvent: const CalendarUiEvent.showMessage('予定を保存しました'),
       );
     } catch (error) {
+      if (!mounted) return;
       state = state.copyWith(
         pendingUiEvent: CalendarUiEvent.showMessage(
           '予定の保存に失敗しました: $error',
@@ -390,16 +394,17 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
       return null;
     }
     for (final record in _latestVaccinationRecords) {
-      final doses = record.doses;
-      for (final entry in doses.entries) {
-        final dose = entry.value;
+      final orderedDoses = record.orderedDoses;
+      for (int i = 0; i < orderedDoses.length; i++) {
+        final dose = orderedDoses[i];
         if (dose.status != DoseStatus.scheduled) {
           continue;
         }
+        final doseNumber = i + 1; // 1-based indexing for display
         final expectedId =
-            'vaccination_${childId}_${record.vaccineId}_${entry.key}';
+            'vaccination_${childId}_${record.vaccineId}_${dose.doseId}';
         if (expectedId == eventId) {
-          return (record: record, dose: dose, doseNumber: entry.key);
+          return (record: record, dose: dose, doseNumber: doseNumber);
         }
       }
     }

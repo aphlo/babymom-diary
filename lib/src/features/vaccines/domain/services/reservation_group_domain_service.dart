@@ -21,19 +21,19 @@ class ReservationGroupDomainService {
 
   void ensureDoseBelongsToGroup({
     required VaccinationRecord record,
-    required int doseNumber,
+    required String doseId,
     required String groupId,
   }) {
-    final dose = record.getDose(doseNumber);
+    final dose = record.getDose(doseId);
     if (dose == null) {
       throw ReservationGroupIntegrityException(
-        'Dose $doseNumber not found for vaccine ${record.vaccineId}',
+        'Dose $doseId not found for vaccine ${record.vaccineId}',
       );
     }
 
     if (dose.reservationGroupId != groupId) {
       throw ReservationGroupIntegrityException(
-        'Dose $doseNumber is not linked to reservation group $groupId',
+        'Dose $doseId is not linked to reservation group $groupId',
       );
     }
   }
@@ -45,7 +45,7 @@ class ReservationGroupDomainService {
         .map(
           (request) => ReservationGroupMember(
             vaccineId: request.vaccineId,
-            doseNumber: request.doseNumber,
+            doseId: request.doseId ?? '',
           ),
         )
         .toList();

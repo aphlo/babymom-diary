@@ -99,7 +99,8 @@ class VaccinationSchedulePolicy {
     candidates.sort((a, b) => b.fromDose.compareTo(a.fromDose));
 
     for (final _DoseIntervalConstraint constraint in candidates) {
-      final DoseRecord? baseRecord = record.getDose(constraint.fromDose);
+      final DoseRecord? baseRecord =
+          record.getDoseByNumber(constraint.fromDose);
       final DateTime? baseDate = baseRecord?.scheduledDate;
       if (baseDate == null) {
         continue;

@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/firebase/household_service.dart';
 import '../../../children/application/selected_child_provider.dart';
+import '../../application/vaccine_catalog_providers.dart';
 import '../../domain/entities/dose_record.dart';
 import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_state.dart';
@@ -72,6 +73,21 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
                 return const Center(child: Text('子供が選択されていません'));
               }
 
+              // Watch ViewModel to get live state updates
+              final params = VaccineDetailParams(
+                vaccineId: vaccine.id,
+                doseNumbers: [doseNumber],
+                householdId: householdId,
+                childId: childId,
+                childBirthday: null,
+              );
+              final detailState = ref.watch(vaccineDetailViewModelProvider(params));
+              final currentDoseStatus = detailState.doseStatuses[doseNumber];
+
+              // Get current scheduled date from ViewModel state (live data)
+              final DateTime? currentScheduledDate = currentDoseStatus?.scheduledDate;
+              final String? currentReservationGroupId = currentDoseStatus?.reservationGroupId;
+
               return SingleChildScrollView(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -88,7 +104,7 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
                     const SizedBox(height: 24),
 
                     // 予約日時カード
-                    _ScheduledDateCard(statusInfo: statusInfo),
+                    _ScheduledDateCard(scheduledDate: currentScheduledDate),
                     const SizedBox(height: 24),
 
                     // 同時接種ワクチンカード
@@ -97,7 +113,8 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
                       childId: childId,
                       vaccine: vaccine,
                       currentDoseNumber: doseNumber,
-                      reservationGroupId: statusInfo.reservationGroupId,
+                      reservationGroupId: currentReservationGroupId,
+                      ref: ref,
                     ),
                   ],
                 ),
@@ -183,26 +200,6 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
       return;
     }
 
-    // 同時接種ワクチンがある場合の確認ダイアログ
-    final groupId = statusInfo.reservationGroupId;
-    bool applyToGroup = true;
-
-    if (groupId != null) {
-      final bool? userSelection = await showConcurrentVaccinesDeleteDialog(
-        context: context,
-        householdId: householdId,
-        childId: childId,
-        reservationGroupId: groupId,
-        currentVaccineId: vaccine.id,
-        currentDoseNumber: doseNumber,
-      );
-
-      if (userSelection == null) {
-        return;
-      }
-      applyToGroup = userSelection;
-    }
-
     final params = VaccineDetailParams(
       vaccineId: vaccine.id,
       doseNumbers: [doseNumber],
@@ -210,6 +207,49 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
       childId: childId,
       childBirthday: null,
     );
+
+    // 同時接種ワクチンがある場合の確認ダイアログ
+    final groupId = statusInfo.reservationGroupId;
+    bool applyToGroup = true;
+
+    if (groupId != null) {
+      // doseIdを取得するためにVaccinationRecordを取得
+      final repository = ref.read(vaccinationRecordRepositoryProvider);
+      final record = await repository.getVaccinationRecord(
+        householdId: householdId,
+        childId: childId,
+        vaccineId: vaccine.id,
+      );
+      final doseRecord = record?.getDoseByNumber(doseNumber);
+
+      if (doseRecord == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('接種記録が見つかりません'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      if (!context.mounted) return;
+
+      final bool? userSelection = await showConcurrentVaccinesDeleteDialog(
+        context: context,
+        householdId: householdId,
+        childId: childId,
+        reservationGroupId: groupId,
+        currentVaccineId: vaccine.id,
+        currentDoseId: doseRecord.doseId,
+      );
+
+      if (userSelection == null) {
+        return;
+      }
+      applyToGroup = userSelection;
+    }
 
     try {
       final viewModel =
@@ -275,6 +315,29 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
     bool applyToGroup = true;
 
     if (groupId != null) {
+      // doseIdを取得するためにVaccinationRecordを取得
+      final repository = ref.read(vaccinationRecordRepositoryProvider);
+      final record = await repository.getVaccinationRecord(
+        householdId: householdId,
+        childId: childId,
+        vaccineId: vaccine.id,
+      );
+      final doseRecord = record?.getDoseByNumber(doseNumber);
+
+      if (doseRecord == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('接種記録が見つかりません'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      if (!context.mounted) return;
+
       final bool? userSelection =
           await showConcurrentVaccinesConfirmationDialog(
         context: context,
@@ -282,7 +345,7 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
         childId: childId,
         reservationGroupId: groupId,
         currentVaccineId: vaccine.id,
-        currentDoseNumber: doseNumber,
+        currentDoseId: doseRecord.doseId,
       );
 
       if (userSelection == null) {
@@ -343,13 +406,36 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
     bool applyToGroup = true;
 
     if (groupId != null) {
+      // doseIdを取得するためにVaccinationRecordを取得
+      final repository = ref.read(vaccinationRecordRepositoryProvider);
+      final record = await repository.getVaccinationRecord(
+        householdId: householdId,
+        childId: childId,
+        vaccineId: vaccine.id,
+      );
+      final doseRecord = record?.getDoseByNumber(doseNumber);
+
+      if (doseRecord == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('接種記録が見つかりません'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      if (!context.mounted) return;
+
       final bool? userSelection = await showConcurrentVaccinesRevertDialog(
         context: context,
         householdId: householdId,
         childId: childId,
         reservationGroupId: groupId,
         currentVaccineId: vaccine.id,
-        currentDoseNumber: doseNumber,
+        currentDoseId: doseRecord.doseId,
       );
 
       if (userSelection == null) {
@@ -470,14 +556,13 @@ class _VaccineInfoCard extends StatelessWidget {
 }
 
 class _ScheduledDateCard extends StatelessWidget {
-  const _ScheduledDateCard({required this.statusInfo});
+  const _ScheduledDateCard({required this.scheduledDate});
 
-  final DoseStatusInfo statusInfo;
+  final DateTime? scheduledDate;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final DateTime? scheduledDate = statusInfo.scheduledDate;
 
     return Container(
       width: double.infinity,
@@ -533,7 +618,7 @@ class _ScheduledDateCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          DateFormatter.yyyyMMddE(scheduledDate),
+                          DateFormatter.yyyyMMddE(scheduledDate!),
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: AppColors.reserved,
@@ -566,6 +651,7 @@ class _ConcurrentVaccinesCard extends ConsumerWidget {
     required this.vaccine,
     required this.currentDoseNumber,
     this.reservationGroupId,
+    required this.ref,
   });
 
   final String householdId;
@@ -573,109 +659,127 @@ class _ConcurrentVaccinesCard extends ConsumerWidget {
   final VaccineInfo vaccine;
   final int currentDoseNumber;
   final String? reservationGroupId;
+  final WidgetRef ref;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef buildRef) {
     final theme = Theme.of(context);
     final bool hasGroup =
         reservationGroupId != null && reservationGroupId!.isNotEmpty;
 
-    final ConcurrentVaccinesState? concurrentState = hasGroup
-        ? ref.watch(
-            concurrentVaccinesViewModelProvider(
-              ConcurrentVaccinesParams(
-                householdId: householdId,
-                childId: childId,
-                reservationGroupId: reservationGroupId!,
-                currentVaccineId: vaccine.id,
-                currentDoseNumber: currentDoseNumber,
-              ),
-            ),
-          )
-        : null;
-
-    Widget buildContent() {
-      if (!hasGroup) {
-        return Text(
-          '同時接種するワクチンはありません',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: Colors.grey.shade600,
-          ),
-        );
-      }
-
-      if (concurrentState == null || concurrentState.isLoading) {
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: CircularProgressIndicator(),
-          ),
-        );
-      }
-
-      if (concurrentState.error != null) {
-        return Text(
-          concurrentState.error!,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: Colors.red,
-          ),
-        );
-      }
-
-      if (concurrentState.members.isEmpty) {
-        return Text(
-          '同時接種するワクチンはありません',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: Colors.grey.shade600,
-          ),
-        );
-      }
-
-      final members = concurrentState.members;
-
-      return Column(
-        children: [
-          for (var i = 0; i < members.length; i++)
-            Container(
-              width: double.infinity,
-              margin: EdgeInsets.only(
-                bottom: i == members.length - 1 ? 0 : 12,
-              ),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.vaccines,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      members[i].vaccineName,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '${members[i].doseNumber}回目',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade700,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      );
+    if (!hasGroup) {
+      return _buildCard(theme, _buildEmptyContent(theme));
     }
 
+    // Fetch VaccinationRecord to get actual doseId
+    final repository = ref.read(vaccinationRecordRepositoryProvider);
+    return FutureBuilder(
+      future: repository.getVaccinationRecord(
+        householdId: householdId,
+        childId: childId,
+        vaccineId: vaccine.id,
+      ),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return _buildCard(
+            theme,
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          );
+        }
+
+        final record = snapshot.data;
+        final doseRecord = record?.getDoseByNumber(currentDoseNumber);
+
+        if (doseRecord == null) {
+          return _buildCard(theme, _buildEmptyContent(theme));
+        }
+
+        final concurrentState = ref.watch(
+          concurrentVaccinesViewModelProvider(
+            ConcurrentVaccinesParams(
+              householdId: householdId,
+              childId: childId,
+              reservationGroupId: reservationGroupId!,
+              currentVaccineId: vaccine.id,
+              currentDoseId: doseRecord.doseId, // Use actual UUID
+            ),
+          ),
+        );
+
+        Widget content;
+
+        if (concurrentState.isLoading) {
+          content = const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else if (concurrentState.error != null) {
+          content = Text(
+            concurrentState.error!,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: Colors.red,
+            ),
+          );
+        } else if (concurrentState.members.isEmpty) {
+          content = _buildEmptyContent(theme);
+        } else {
+          final members = concurrentState.members;
+          content = Column(
+            children: [
+              for (var i = 0; i < members.length; i++)
+                Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.only(
+                    bottom: i == members.length - 1 ? 0 : 12,
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.vaccines,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          members[i].vaccineName,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '${members[i].doseNumber}回目',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.grey.shade700,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          );
+        }
+
+        return _buildCard(theme, content);
+      },
+    );
+  }
+
+  Widget _buildCard(ThemeData theme, Widget content) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -710,8 +814,17 @@ class _ConcurrentVaccinesCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          buildContent(),
+          content,
         ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyContent(ThemeData theme) {
+    return Text(
+      '同時接種するワクチンはありません',
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: Colors.grey.shade600,
       ),
     );
   }

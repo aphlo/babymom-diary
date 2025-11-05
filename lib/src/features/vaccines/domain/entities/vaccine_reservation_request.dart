@@ -7,7 +7,7 @@ class VaccineReservationRequest {
   const VaccineReservationRequest({
     required this.childId,
     required this.vaccineId,
-    required this.doseNumber,
+    this.doseId,
     required this.scheduledDate,
     required this.recordType,
     this.reservationGroupId,
@@ -15,7 +15,7 @@ class VaccineReservationRequest {
 
   final String childId;
   final String vaccineId;
-  final int doseNumber;
+  final String? doseId; // 新規作成時はnull、更新時は必須
   final DateTime scheduledDate;
   final VaccineRecordType recordType;
   final String? reservationGroupId;
@@ -24,7 +24,7 @@ class VaccineReservationRequest {
   VaccineReservationRequest copyWith({
     String? childId,
     String? vaccineId,
-    int? doseNumber,
+    String? doseId,
     DateTime? scheduledDate,
     VaccineRecordType? recordType,
     String? reservationGroupId,
@@ -33,7 +33,7 @@ class VaccineReservationRequest {
     return VaccineReservationRequest(
       childId: childId ?? this.childId,
       vaccineId: vaccineId ?? this.vaccineId,
-      doseNumber: doseNumber ?? this.doseNumber,
+      doseId: doseId ?? this.doseId,
       scheduledDate: scheduledDate ?? this.scheduledDate,
       recordType: recordType ?? this.recordType,
       reservationGroupId: clearReservationGroup
@@ -49,7 +49,7 @@ class VaccineReservationRequest {
           runtimeType == other.runtimeType &&
           childId == other.childId &&
           vaccineId == other.vaccineId &&
-          doseNumber == other.doseNumber &&
+          doseId == other.doseId &&
           scheduledDate == other.scheduledDate &&
           recordType == other.recordType &&
           reservationGroupId == other.reservationGroupId;
@@ -58,7 +58,7 @@ class VaccineReservationRequest {
   int get hashCode =>
       childId.hashCode ^
       vaccineId.hashCode ^
-      doseNumber.hashCode ^
+      doseId.hashCode ^
       scheduledDate.hashCode ^
       recordType.hashCode ^
       reservationGroupId.hashCode;
@@ -66,7 +66,7 @@ class VaccineReservationRequest {
   @override
   String toString() {
     return 'VaccineReservationRequest(childId: $childId, vaccineId: $vaccineId, '
-        'doseNumber: $doseNumber, scheduledDate: $scheduledDate, '
+        'doseId: $doseId, scheduledDate: $scheduledDate, '
         'recordType: $recordType, reservationGroupId: $reservationGroupId)';
   }
 }

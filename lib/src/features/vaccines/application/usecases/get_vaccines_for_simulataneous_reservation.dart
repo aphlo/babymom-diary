@@ -52,16 +52,8 @@ class GetVaccinesForSimultaneousReservation {
 
       if (existingRecord != null) {
         // 既存記録がある場合、次回接種可能かチェック
-        final nextDose = existingRecord.nextAvailableDose;
-
-        if (nextDose != null) {
-          // 次回接種が可能な場合は、予約済みの接種があっても同時接種の選択肢に表示
-          // ただし、次回接種自体が既に予約済みでないことを確認
-          final isNextDoseScheduled = existingRecord.isDoseScheduled(nextDose);
-
-          if (!isNextDoseScheduled) {
-            availableVaccines.add(existingRecord);
-          }
+        if (existingRecord.canScheduleNextDose) {
+          availableVaccines.add(existingRecord);
         }
       } else {
         // 新規のワクチンの場合、年齢に関係なく全て表示
@@ -70,7 +62,7 @@ class GetVaccinesForSimultaneousReservation {
           vaccineName: vaccine.name,
           category: _mapVaccineCategory(vaccine.category),
           requirement: _mapVaccineRequirement(vaccine.requirement),
-          doses: const {},
+          doses: const [],
           createdAt: currentDate,
           updatedAt: currentDate,
         );

@@ -44,8 +44,10 @@ class CalendarSettingsViewModel extends StateNotifier<CalendarSettingsState> {
     try {
       state = state.copyWith(isLoading: true, error: null);
       final settings = await _repository.getSettings();
+      if (!mounted) return;
       state = state.copyWith(settings: settings, isLoading: false);
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(
         isLoading: false,
         error: '設定の読み込みに失敗しました: $e',
@@ -60,8 +62,10 @@ class CalendarSettingsViewModel extends StateNotifier<CalendarSettingsState> {
         startingDayOfWeek: startingDayOfWeek,
       );
       await _repository.saveSettings(newSettings);
+      if (!mounted) return;
       state = state.copyWith(settings: newSettings, isLoading: false);
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(
         isLoading: false,
         error: '設定の保存に失敗しました: $e',

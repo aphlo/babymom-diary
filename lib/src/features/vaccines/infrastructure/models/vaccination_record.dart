@@ -7,24 +7,30 @@ import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine
 
 class DoseEntryDto {
   const DoseEntryDto({
-    required this.doseNumber,
+    required this.doseId,
     required this.status,
     this.scheduledDate,
     this.reservationGroupId,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
-  final int doseNumber;
+  final String doseId;
   final DoseStatus status;
   final DateTime? scheduledDate;
   final String? reservationGroupId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
-  factory DoseEntryDto.fromJson(int doseNumber, Map<String, dynamic> json) {
+  factory DoseEntryDto.fromJson(String doseId, Map<String, dynamic> json) {
     final statusString = json['status'] as String?;
     return DoseEntryDto(
-      doseNumber: doseNumber,
+      doseId: doseId,
       status: _parseDoseStatus(statusString) ?? DoseStatus.scheduled,
       scheduledDate: (json['scheduledDate'] as Timestamp?)?.toDate(),
       reservationGroupId: json['reservationGroupId'] as String?,
+      createdAt: (json['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt: (json['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 
@@ -41,19 +47,24 @@ class DoseEntryDto {
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
+      'doseId': doseId,
       'status': status.name,
       if (scheduledDate != null)
         'scheduledDate': Timestamp.fromDate(scheduledDate!),
       if (reservationGroupId != null) 'reservationGroupId': reservationGroupId,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': Timestamp.fromDate(updatedAt),
     };
   }
 
   DoseRecord toDomain() {
     return DoseRecord(
-      doseNumber: doseNumber,
+      doseId: doseId,
       status: status,
       scheduledDate: scheduledDate,
       reservationGroupId: reservationGroupId,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
     );
   }
 }
@@ -75,7 +86,7 @@ class VaccinationRecordDto {
   final String vaccineName;
   final VaccineCategory category;
   final VaccineRequirement requirement;
-  final Map<int, DoseEntryDto> doses;
+  final Map<String, DoseEntryDto> doses;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -84,12 +95,11 @@ class VaccinationRecordDto {
     required String docId,
   }) {
     final rawDoses = Map<String, dynamic>.from(data['doses'] ?? {});
-    final doses = <int, DoseEntryDto>{};
+    final doses = <String, DoseEntryDto>{};
     for (final entry in rawDoses.entries) {
-      final doseNumber = int.tryParse(entry.key);
-      if (doseNumber == null) continue;
+      final doseId = entry.key;
       final entryMap = Map<String, dynamic>.from(entry.value as Map);
-      doses[doseNumber] = DoseEntryDto.fromJson(doseNumber, entryMap);
+      doses[doseId] = DoseEntryDto.fromJson(doseId, entryMap);
     }
 
     return VaccinationRecordDto(
@@ -114,7 +124,7 @@ class VaccinationRecordDto {
       vaccineName: vaccineName,
       category: category,
       requirement: requirement,
-      doses: doses.map((key, value) => MapEntry(key, value.toDomain())),
+      doses: doses.values.map((value) => value.toDomain()).toList(),
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -127,7 +137,7 @@ class VaccinationRecordDto {
       'category': category.name,
       'requirement': requirement.name,
       'doses': doses.map(
-        (key, value) => MapEntry(key.toString(), value.toJson()),
+        (key, value) => MapEntry(key, value.toJson()),
       ),
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
@@ -135,7 +145,7 @@ class VaccinationRecordDto {
   }
 
   VaccinationRecordDto copyWith({
-    Map<int, DoseEntryDto>? doses,
+    Map<String, DoseEntryDto>? doses,
     DateTime? updatedAt,
   }) {
     return VaccinationRecordDto(
@@ -144,24 +154,24 @@ class VaccinationRecordDto {
       vaccineName: vaccineName,
       category: category,
       requirement: requirement,
-      doses: Map<int, DoseEntryDto>.from(doses ?? this.doses),
+      doses: Map<String, DoseEntryDto>.from(doses ?? this.doses),
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
   VaccinationRecordDto upsertDose(DoseEntryDto entry, DateTime updatedAt) {
-    final next = Map<int, DoseEntryDto>.from(doses);
-    next[entry.doseNumber] = entry;
+    final next = Map<String, DoseEntryDto>.from(doses);
+    next[entry.doseId] = entry;
     return copyWith(
       doses: next,
       updatedAt: updatedAt,
     );
   }
 
-  VaccinationRecordDto removeDose(int doseNumber, DateTime updatedAt) {
-    final next = Map<int, DoseEntryDto>.from(doses);
-    next.remove(doseNumber);
+  VaccinationRecordDto removeDose(String doseId, DateTime updatedAt) {
+    final next = Map<String, DoseEntryDto>.from(doses);
+    next.remove(doseId);
     return copyWith(
       doses: next,
       updatedAt: updatedAt,

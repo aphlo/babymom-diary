@@ -21,14 +21,33 @@ class VaccinationRecord {
   final String vaccineName;
   final VaccineCategory category;
   final VaccineRequirement requirement;
-  final Map<int, DoseRecord> doses;
+  final List<DoseRecord> doses;
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  /// 次回接種可能な回数を取得
-  int? get nextAvailableDose {
+  /// scheduledDate → createdAt 順でソートされた接種記録を取得
+  List<DoseRecord> get orderedDoses {
+    final sortedDoses = List<DoseRecord>.from(doses);
+    sortedDoses.sort((a, b) {
+      // scheduledDate が null の場合は末尾に配置
+      if (a.scheduledDate == null && b.scheduledDate == null) {
+        return a.createdAt.compareTo(b.createdAt);
+      }
+      if (a.scheduledDate == null) return 1;
+      if (b.scheduledDate == null) return -1;
+
+      final dateComparison = a.scheduledDate!.compareTo(b.scheduledDate!);
+      if (dateComparison != 0) return dateComparison;
+
+      return a.createdAt.compareTo(b.createdAt);
+    });
+    return sortedDoses;
+  }
+
+  /// 次回接種可能かどうかを判定
+  bool get canScheduleNextDose {
     // 完了済みまたは予約済みの接種回数を取得
-    final existingDoses = doses.values
+    final existingDoses = doses
         .where((dose) =>
             dose.status == DoseStatus.completed ||
             dose.status == DoseStatus.scheduled)
@@ -36,37 +55,73 @@ class VaccinationRecord {
 
     // ワクチンの最大接種回数に基づいて判定
     final maxDoses = _getMaxDosesForVaccine(vaccineId);
-    if (existingDoses >= maxDoses) return null;
-
-    return existingDoses + 1;
+    return existingDoses < maxDoses;
   }
 
   /// 予約済みだが未完了の接種があるかチェック
   bool get hasScheduledDose {
-    return doses.values.any((dose) => dose.status == DoseStatus.scheduled);
+    return doses.any((dose) => dose.status == DoseStatus.scheduled);
   }
 
-  /// 指定された回数の接種が完了しているかチェック
-  bool isDoseCompleted(int doseNumber) {
-    final dose = doses[doseNumber];
-    return dose?.status == DoseStatus.completed;
+  /// 指定されたdoseIdの接種が完了しているかチェック
+  bool isDoseCompleted(String doseId) {
+    final dose = doses.firstWhere((d) => d.doseId == doseId,
+        orElse: () => throw ArgumentError('Dose not found: $doseId'));
+    return dose.status == DoseStatus.completed;
   }
 
-  /// 指定された回数の接種が予約済みかチェック
-  bool isDoseScheduled(int doseNumber) {
-    final dose = doses[doseNumber];
-    return dose?.status == DoseStatus.scheduled;
+  /// 指定されたdoseIdの接種が予約済みかチェック
+  bool isDoseScheduled(String doseId) {
+    final dose = doses.firstWhere((d) => d.doseId == doseId,
+        orElse: () => throw ArgumentError('Dose not found: $doseId'));
+    return dose.status == DoseStatus.scheduled;
   }
 
-  /// 指定された回数の接種記録を取得
-  DoseRecord? getDose(int doseNumber) {
-    return doses[doseNumber];
+  /// 指定されたdoseIdの接種記録を取得
+  DoseRecord? getDose(String doseId) {
+    try {
+      return doses.firstWhere((d) => d.doseId == doseId);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// 指定された回数の接種記録を取得（UI互換性のため）
+  /// orderedDosesから指定された回数（1ベース）の記録を取得
+  DoseRecord? getDoseByNumber(int doseNumber) {
+    final ordered = orderedDoses;
+    if (doseNumber < 1 || doseNumber > ordered.length) {
+      return null;
+    }
+    return ordered[doseNumber - 1];
   }
 
   /// 新しい接種記録を追加したコピーを作成
-  VaccinationRecord copyWithDose(int doseNumber, DoseRecord doseRecord) {
-    final newDoses = Map<int, DoseRecord>.from(doses);
-    newDoses[doseNumber] = doseRecord;
+  VaccinationRecord copyWithDose(DoseRecord doseRecord) {
+    final newDoses = List<DoseRecord>.from(doses);
+    final existingIndex =
+        newDoses.indexWhere((d) => d.doseId == doseRecord.doseId);
+
+    if (existingIndex >= 0) {
+      newDoses[existingIndex] = doseRecord;
+    } else {
+      newDoses.add(doseRecord);
+    }
+
+    return VaccinationRecord(
+      vaccineId: vaccineId,
+      vaccineName: vaccineName,
+      category: category,
+      requirement: requirement,
+      doses: newDoses,
+      createdAt: createdAt,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  /// 接種記録を削除したコピーを作成
+  VaccinationRecord copyWithoutDose(String doseId) {
+    final newDoses = doses.where((d) => d.doseId != doseId).toList();
 
     return VaccinationRecord(
       vaccineId: vaccineId,
@@ -85,7 +140,7 @@ class VaccinationRecord {
     String? vaccineName,
     VaccineCategory? category,
     VaccineRequirement? requirement,
-    Map<int, DoseRecord>? doses,
+    List<DoseRecord>? doses,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -136,18 +191,21 @@ class VaccinationRecord {
 
   /// 予約済みの接種をカレンダーイベントに変換
   List<CalendarEvent> toCalendarEvents(String childId) {
-    return doses.entries
-        .where((entry) => entry.value.status == DoseStatus.scheduled)
-        .map((entry) => CalendarEvent(
-              id: 'vaccination_${childId}_${vaccineId}_${entry.key}',
-              title: '$vaccineName ${entry.key}回目',
-              memo: '$vaccineNameの${entry.key}回目の接種予定です',
-              allDay: true,
-              start: entry.value.scheduledDate!,
-              end: entry.value.scheduledDate!,
-              iconPath: 'assets/icons/vaccination.png',
-            ))
-        .toList();
+    final ordered = orderedDoses;
+    return doses
+        .where((dose) => dose.status == DoseStatus.scheduled)
+        .map((dose) {
+      final sequence = ordered.indexOf(dose) + 1;
+      return CalendarEvent(
+        id: 'vaccination_${childId}_${vaccineId}_${dose.doseId}',
+        title: '$vaccineName $sequence回目',
+        memo: '$vaccineNameの$sequence回目の接種予定です',
+        allDay: true,
+        start: dose.scheduledDate!,
+        end: dose.scheduledDate!,
+        iconPath: 'assets/icons/vaccination.png',
+      );
+    }).toList();
   }
 
   @override
@@ -159,7 +217,7 @@ class VaccinationRecord {
           vaccineName == other.vaccineName &&
           category == other.category &&
           requirement == other.requirement &&
-          _mapEquals(doses, other.doses) &&
+          _listEquals(doses, other.doses) &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt;
 
@@ -180,13 +238,11 @@ class VaccinationRecord {
         'createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
-  /// Mapの等価性をチェック
-  bool _mapEquals(Map<int, DoseRecord> map1, Map<int, DoseRecord> map2) {
-    if (map1.length != map2.length) return false;
-    for (final key in map1.keys) {
-      if (!map2.containsKey(key) || map1[key] != map2[key]) {
-        return false;
-      }
+  /// Listの等価性をチェック
+  bool _listEquals(List<DoseRecord> list1, List<DoseRecord> list2) {
+    if (list1.length != list2.length) return false;
+    for (int i = 0; i < list1.length; i++) {
+      if (list1[i] != list2[i]) return false;
     }
     return true;
   }

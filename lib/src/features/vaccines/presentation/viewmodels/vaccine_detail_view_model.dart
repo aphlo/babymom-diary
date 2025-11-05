@@ -113,6 +113,7 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
         }
       }
     } catch (_) {
+      if (!mounted) return;
       state = state.copyWith(
         error: 'ワクチン情報の取得に失敗しました',
         isLoading: false,
@@ -128,6 +129,7 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
     ).listen(
       _handleRecordUpdate,
       onError: (Object error, StackTrace stackTrace) {
+        if (!mounted) return;
         state = state.copyWith(
           isLoading: false,
           error: '接種状況の取得に失敗しました',
@@ -137,6 +139,7 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
   }
 
   void _handleRecordUpdate(VaccinationRecord? record) {
+    if (!mounted) return;
     if (_doseNumbers.isEmpty) {
       state = state.copyWith(isLoading: false);
       return;
@@ -245,7 +248,7 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
   ) {
     final statuses = <int, DoseStatusInfo>{};
     for (final dose in doseNumbers) {
-      final doseRecord = record?.getDose(dose);
+      final doseRecord = record?.getDoseByNumber(dose);
       statuses[dose] = DoseStatusInfo(
         doseNumber: dose,
         status: doseRecord?.status,
@@ -355,28 +358,58 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
           reservationGroupId: groupId,
         );
       } else if (groupId != null && !applyToGroup) {
+        // doseNumberからdoseIdを取得
+        final record = await _vaccinationRecordRepository.getVaccinationRecord(
+          householdId: _householdId!,
+          childId: _childId!,
+          vaccineId: _vaccineId!,
+        );
+        final doseId = record?.getDoseByNumber(doseNumber)?.doseId;
+        if (doseId == null) {
+          state = state.copyWith(
+            isLoading: false,
+            error: '接種記録が見つかりません',
+          );
+          return;
+        }
         await _vaccinationRecordRepository.completeReservationGroupMember(
           householdId: _householdId!,
           childId: _childId!,
           reservationGroupId: groupId,
           vaccineId: _vaccineId!,
-          doseNumber: doseNumber,
+          doseId: doseId,
         );
       } else {
+        // doseNumberからdoseIdを取得
+        final record = await _vaccinationRecordRepository.getVaccinationRecord(
+          householdId: _householdId!,
+          childId: _childId!,
+          vaccineId: _vaccineId!,
+        );
+        final doseId = record?.getDoseByNumber(doseNumber)?.doseId;
+        if (doseId == null) {
+          state = state.copyWith(
+            isLoading: false,
+            error: '接種記録が見つかりません',
+          );
+          return;
+        }
         await _vaccinationRecordRepository.completeVaccination(
           householdId: _householdId!,
           childId: _childId!,
           vaccineId: _vaccineId!,
-          doseNumber: doseNumber,
+          doseId: doseId,
         );
       }
 
       // 成功時はストリームから自動的に更新される
     } catch (error) {
+      if (!mounted) rethrow;
       state = state.copyWith(
         isLoading: false,
         error: '接種完了の更新に失敗しました: $error',
       );
+      rethrow;
     }
   }
 
@@ -403,7 +436,7 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
           childId: _childId!,
           vaccineId: _vaccineId!,
         );
-        groupId = record?.getDose(doseNumber)?.reservationGroupId;
+        groupId = record?.getDoseByNumber(doseNumber)?.reservationGroupId;
       }
 
       if (groupId != null && applyToGroup) {
@@ -413,30 +446,60 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
           reservationGroupId: groupId,
         );
       } else if (groupId != null && !applyToGroup) {
+        // doseNumberからdoseIdを取得
+        final record = await _vaccinationRecordRepository.getVaccinationRecord(
+          householdId: _householdId!,
+          childId: _childId!,
+          vaccineId: _vaccineId!,
+        );
+        final doseId = record?.getDoseByNumber(doseNumber)?.doseId;
+        if (doseId == null) {
+          state = state.copyWith(
+            isLoading: false,
+            error: '接種記録が見つかりません',
+          );
+          return;
+        }
         // グループ内の個別削除の場合、グループから該当ワクチンのみを削除
         await _vaccinationRecordRepository.deleteReservationGroupMember(
           householdId: _householdId!,
           childId: _childId!,
           reservationGroupId: groupId,
           vaccineId: _vaccineId!,
-          doseNumber: doseNumber,
+          doseId: doseId,
         );
       } else {
+        // doseNumberからdoseIdを取得
+        final record = await _vaccinationRecordRepository.getVaccinationRecord(
+          householdId: _householdId!,
+          childId: _childId!,
+          vaccineId: _vaccineId!,
+        );
+        final doseId = record?.getDoseByNumber(doseNumber)?.doseId;
+        if (doseId == null) {
+          state = state.copyWith(
+            isLoading: false,
+            error: '接種記録が見つかりません',
+          );
+          return;
+        }
         // グループに属さない個別削除
         await _vaccinationRecordRepository.deleteVaccineReservation(
           householdId: _householdId!,
           childId: _childId!,
           vaccineId: _vaccineId!,
-          doseNumber: doseNumber,
+          doseId: doseId,
         );
       }
 
       // 成功時はストリームから自動的に更新される
     } catch (error) {
+      if (!mounted) rethrow;
       state = state.copyWith(
         isLoading: false,
         error: '予約削除に失敗しました: $error',
       );
+      rethrow;
     }
   }
 
@@ -466,21 +529,37 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
           scheduledDate: scheduledDate,
         );
       } else {
+        // doseNumberからdoseIdを取得
+        final record = await _vaccinationRecordRepository.getVaccinationRecord(
+          householdId: _householdId!,
+          childId: _childId!,
+          vaccineId: _vaccineId!,
+        );
+        final doseId = record?.getDoseByNumber(doseNumber)?.doseId;
+        if (doseId == null) {
+          state = state.copyWith(
+            isLoading: false,
+            error: '接種記録が見つかりません',
+          );
+          return;
+        }
         await _vaccinationRecordRepository.updateVaccineReservation(
           householdId: _householdId!,
           childId: _childId!,
           vaccineId: _vaccineId!,
-          doseNumber: doseNumber,
+          doseId: doseId,
           scheduledDate: scheduledDate,
         );
       }
 
       // 成功時はストリームから自動的に更新される
     } catch (error) {
+      if (!mounted) rethrow;
       state = state.copyWith(
         isLoading: false,
         error: '予約更新に失敗しました: $error',
       );
+      rethrow;
     }
   }
 
@@ -508,7 +587,7 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
           childId: _childId!,
           vaccineId: _vaccineId!,
         );
-        groupId = record?.getDose(doseNumber)?.reservationGroupId;
+        groupId = record?.getDoseByNumber(doseNumber)?.reservationGroupId;
       }
 
       if (groupId != null && applyToGroup) {
@@ -519,21 +598,37 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
           scheduledDate: scheduledDate,
         );
       } else {
+        // doseNumberからdoseIdを取得
+        final record = await _vaccinationRecordRepository.getVaccinationRecord(
+          householdId: _householdId!,
+          childId: _childId!,
+          vaccineId: _vaccineId!,
+        );
+        final doseId = record?.getDoseByNumber(doseNumber)?.doseId;
+        if (doseId == null) {
+          state = state.copyWith(
+            isLoading: false,
+            error: '接種記録が見つかりません',
+          );
+          return;
+        }
         await _vaccinationRecordRepository.markDoseAsScheduled(
           householdId: _householdId!,
           childId: _childId!,
           vaccineId: _vaccineId!,
-          doseNumber: doseNumber,
+          doseId: doseId,
           scheduledDate: scheduledDate,
         );
       }
 
       // 成功時はストリームから自動的に更新される
     } catch (error) {
+      if (!mounted) rethrow;
       state = state.copyWith(
         isLoading: false,
         error: '予約済みへの変更に失敗しました: $error',
       );
+      rethrow;
     }
   }
 

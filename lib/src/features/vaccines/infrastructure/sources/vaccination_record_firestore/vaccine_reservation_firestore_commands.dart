@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../domain/entities/dose_record.dart';
 import '../../../domain/entities/vaccine_reservation_request.dart';
 import '../../../domain/errors/vaccination_persistence_exception.dart';
 import '../../models/vaccination_record.dart';
@@ -25,8 +24,12 @@ class VaccineReservationFirestoreCommands {
         handler: (transaction, refs) async {
           final existing =
               await _ctx.readRecordDto(transaction, refs, request.vaccineId);
+
+          // doseIdを生成（新規の場合）または既存のものを使用
+          final doseId = request.doseId ?? _ctx.uuid.v4();
+
           final doseEntry = _ctx.createDoseEntryFromRecordType(
-            doseNumber: request.doseNumber,
+            doseId: doseId,
             dateUtc: scheduledDateUtc,
             recordType: request.recordType.name,
             reservationGroupId: request.reservationGroupId,
@@ -45,8 +48,8 @@ class VaccineReservationFirestoreCommands {
               recordDto.toJson(),
             );
           } else {
-            final updatedDoses = Map<int, DoseEntryDto>.from(existing.doses);
-            updatedDoses[request.doseNumber] = doseEntry;
+            final updatedDoses = Map<String, DoseEntryDto>.from(existing.doses);
+            updatedDoses[doseId] = doseEntry;
             recordDto = existing.copyWith(
               doses: updatedDoses,
               updatedAt: nowUtc,
@@ -97,8 +100,12 @@ class VaccineReservationFirestoreCommands {
 
           for (final item in pendingItems) {
             final scheduledDateUtc = item.request.scheduledDate.toUtc();
+
+            // doseIdを生成（新規の場合）または既存のものを使用
+            final doseId = item.request.doseId ?? _ctx.uuid.v4();
+
             final doseEntry = _ctx.createDoseEntryFromRecordType(
-              doseNumber: item.request.doseNumber,
+              doseId: doseId,
               dateUtc: scheduledDateUtc,
               recordType: item.request.recordType.name,
               reservationGroupId: item.request.reservationGroupId,
@@ -115,8 +122,8 @@ class VaccineReservationFirestoreCommands {
               transaction.set(item.docRef, recordDto.toJson());
             } else {
               final updatedDoses =
-                  Map<int, DoseEntryDto>.from(item.recordDto!.doses);
-              updatedDoses[item.request.doseNumber] = doseEntry;
+                  Map<String, DoseEntryDto>.from(item.recordDto!.doses);
+              updatedDoses[doseId] = doseEntry;
               recordDto = item.recordDto!.copyWith(
                 doses: updatedDoses,
                 updatedAt: nowUtc,
@@ -139,7 +146,7 @@ class VaccineReservationFirestoreCommands {
     required String householdId,
     required String childId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
     required DateTime scheduledDate,
   }) async {
     final nowUtc = DateTime.now().toUtc();
@@ -156,17 +163,18 @@ class VaccineReservationFirestoreCommands {
             throw VaccinationRecordNotFoundException(vaccineId);
           }
 
-          final existingDose = recordDto.doses[doseNumber];
+          final existingDose = recordDto.doses[doseId];
           if (existingDose == null) {
             throw VaccinationPersistenceException(
-              'Dose record not found: $doseNumber',
+              'Dose record not found: $doseId',
             );
           }
 
-          final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
-          updatedDoses[doseNumber] = _ctx.scheduledDoseEntry(
-            doseNumber: doseNumber,
-            scheduledDateUtc: scheduledDateUtc,
+          final updatedDoses = Map<String, DoseEntryDto>.from(recordDto.doses);
+          updatedDoses[doseId] = _ctx.createDoseEntryFromRecordType(
+            doseId: doseId,
+            dateUtc: scheduledDateUtc,
+            recordType: 'scheduled',
             reservationGroupId: existingDose.reservationGroupId,
           );
 
@@ -186,7 +194,7 @@ class VaccineReservationFirestoreCommands {
     required String householdId,
     required String childId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
   }) async {
     final nowUtc = DateTime.now().toUtc();
 
@@ -201,18 +209,18 @@ class VaccineReservationFirestoreCommands {
             throw VaccinationRecordNotFoundException(vaccineId);
           }
 
-          final existingDose = recordDto.doses[doseNumber];
+          final existingDose = recordDto.doses[doseId];
           if (existingDose == null) {
             throw VaccinationPersistenceException(
-              'Dose record not found: $doseNumber',
+              'Dose record not found: $doseId',
             );
           }
 
-          final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
-          updatedDoses[doseNumber] = DoseEntryDto(
-            doseNumber: doseNumber,
-            status: DoseStatus.completed,
-            scheduledDate: existingDose.scheduledDate,
+          final updatedDoses = Map<String, DoseEntryDto>.from(recordDto.doses);
+          updatedDoses[doseId] = _ctx.createDoseEntryFromRecordType(
+            doseId: doseId,
+            dateUtc: existingDose.scheduledDate ?? nowUtc,
+            recordType: 'completed',
             reservationGroupId: existingDose.reservationGroupId,
           );
 
@@ -232,7 +240,7 @@ class VaccineReservationFirestoreCommands {
     required String householdId,
     required String childId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
   }) async {
     final nowUtc = DateTime.now().toUtc();
 
@@ -247,14 +255,14 @@ class VaccineReservationFirestoreCommands {
             throw VaccinationRecordNotFoundException(vaccineId);
           }
 
-          if (!recordDto.doses.containsKey(doseNumber)) {
+          if (!recordDto.doses.containsKey(doseId)) {
             throw VaccinationPersistenceException(
-              'Dose record not found: $doseNumber',
+              'Dose record not found: $doseId',
             );
           }
 
-          final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
-          updatedDoses.remove(doseNumber);
+          final updatedDoses = Map<String, DoseEntryDto>.from(recordDto.doses);
+          updatedDoses.remove(doseId);
 
           if (updatedDoses.isEmpty) {
             transaction.delete(refs.recordDoc(vaccineId));
@@ -276,7 +284,7 @@ class VaccineReservationFirestoreCommands {
     required String householdId,
     required String childId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
     required DateTime scheduledDate,
   }) async {
     final nowUtc = DateTime.now().toUtc();
@@ -293,17 +301,18 @@ class VaccineReservationFirestoreCommands {
             throw VaccinationRecordNotFoundException(vaccineId);
           }
 
-          final existingDose = recordDto.doses[doseNumber];
+          final existingDose = recordDto.doses[doseId];
           if (existingDose == null) {
             throw VaccinationPersistenceException(
-              'Dose record not found: $doseNumber',
+              'Dose record not found: $doseId',
             );
           }
 
-          final updatedDoses = Map<int, DoseEntryDto>.from(recordDto.doses);
-          updatedDoses[doseNumber] = _ctx.scheduledDoseEntry(
-            doseNumber: doseNumber,
-            scheduledDateUtc: scheduledDateUtc,
+          final updatedDoses = Map<String, DoseEntryDto>.from(recordDto.doses);
+          updatedDoses[doseId] = _ctx.createDoseEntryFromRecordType(
+            doseId: doseId,
+            dateUtc: scheduledDateUtc,
+            recordType: 'scheduled',
             reservationGroupId: existingDose.reservationGroupId,
           );
 

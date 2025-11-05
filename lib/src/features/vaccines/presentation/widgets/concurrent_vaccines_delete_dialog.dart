@@ -11,7 +11,7 @@ Future<bool?> showConcurrentVaccinesDeleteDialog({
   required String childId,
   required String reservationGroupId,
   required String currentVaccineId,
-  required int currentDoseNumber,
+  required String currentDoseId,
 }) {
   return showDialog<bool>(
     context: context,
@@ -20,7 +20,7 @@ Future<bool?> showConcurrentVaccinesDeleteDialog({
       childId: childId,
       reservationGroupId: reservationGroupId,
       currentVaccineId: currentVaccineId,
-      currentDoseNumber: currentDoseNumber,
+      currentDoseId: currentDoseId,
     ),
   );
 }
@@ -31,14 +31,14 @@ class _ConcurrentVaccinesDeleteDialog extends ConsumerWidget {
     required this.childId,
     required this.reservationGroupId,
     required this.currentVaccineId,
-    required this.currentDoseNumber,
+    required this.currentDoseId,
   });
 
   final String householdId;
   final String childId;
   final String reservationGroupId;
   final String currentVaccineId;
-  final int currentDoseNumber;
+  final String currentDoseId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,7 +50,7 @@ class _ConcurrentVaccinesDeleteDialog extends ConsumerWidget {
           childId: childId,
           reservationGroupId: reservationGroupId,
           currentVaccineId: currentVaccineId,
-          currentDoseNumber: currentDoseNumber,
+          currentDoseId: currentDoseId,
         ),
       ),
     );

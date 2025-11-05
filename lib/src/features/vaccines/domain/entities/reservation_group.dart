@@ -4,14 +4,14 @@ import 'package:meta/meta.dart';
 class ReservationGroupMember {
   const ReservationGroupMember({
     required this.vaccineId,
-    required this.doseNumber,
+    required this.doseId,
   });
 
   final String vaccineId;
-  final int doseNumber;
+  final String doseId;
 }
 
-enum ReservationGroupStatus { scheduled, completed, cancelled }
+enum ReservationGroupStatus { scheduled, completed }
 
 @immutable
 class VaccinationReservationGroup {

@@ -60,34 +60,40 @@ class VaccinationRecordFirestoreContext {
   }
 
   DoseEntryDto scheduledDoseEntry({
-    required int doseNumber,
+    required String doseId,
     required DateTime scheduledDateUtc,
     String? reservationGroupId,
   }) {
+    final now = DateTime.now();
     return DoseEntryDto(
-      doseNumber: doseNumber,
+      doseId: doseId,
       status: DoseStatus.scheduled,
       scheduledDate: scheduledDateUtc,
       reservationGroupId: reservationGroupId,
+      createdAt: now,
+      updatedAt: now,
     );
   }
 
   DoseEntryDto completedDoseEntry({
-    required int doseNumber,
+    required String doseId,
     required DateTime scheduledDateUtc,
     String? reservationGroupId,
   }) {
+    final now = DateTime.now();
     return DoseEntryDto(
-      doseNumber: doseNumber,
+      doseId: doseId,
       status: DoseStatus.completed,
       scheduledDate: scheduledDateUtc,
       reservationGroupId: reservationGroupId,
+      createdAt: now,
+      updatedAt: now,
     );
   }
 
   /// recordTypeに基づいてDoseEntryDtoを作成
   DoseEntryDto createDoseEntryFromRecordType({
-    required int doseNumber,
+    required String doseId,
     required DateTime dateUtc,
     required String recordType,
     String? reservationGroupId,
@@ -95,28 +101,28 @@ class VaccinationRecordFirestoreContext {
     switch (recordType) {
       case 'scheduled':
         return scheduledDoseEntry(
-          doseNumber: doseNumber,
+          doseId: doseId,
           scheduledDateUtc: dateUtc,
           reservationGroupId: reservationGroupId,
         );
       case 'completed':
         return completedDoseEntry(
-          doseNumber: doseNumber,
+          doseId: doseId,
           scheduledDateUtc: dateUtc,
           reservationGroupId: reservationGroupId,
         );
       default:
         return scheduledDoseEntry(
-          doseNumber: doseNumber,
+          doseId: doseId,
           scheduledDateUtc: dateUtc,
           reservationGroupId: reservationGroupId,
         );
     }
   }
 
-  Map<String, dynamic> serializeDoses(Map<int, DoseEntryDto> doses) {
+  Map<String, dynamic> serializeDoses(Map<String, DoseEntryDto> doses) {
     return doses.map(
-      (key, value) => MapEntry(key.toString(), value.toJson()),
+      (key, value) => MapEntry(key, value.toJson()),
     );
   }
 
@@ -155,7 +161,7 @@ class VaccinationRecordFirestoreContext {
       records.add(
         GroupMemberRecord(
           vaccineId: member.vaccineId,
-          doseNumber: member.doseNumber,
+          doseId: member.doseId,
           docRef: refs.recordDoc(member.vaccineId),
           recordDto: recordDto,
         ),
@@ -183,7 +189,7 @@ class VaccinationRecordFirestoreContext {
       vaccineName: vaccine.name,
       category: _mapCategoryFromEntity(vaccine.category),
       requirement: _mapRequirementFromEntity(vaccine.requirement),
-      doses: {doseEntry.doseNumber: doseEntry},
+      doses: {doseEntry.doseId: doseEntry},
       createdAt: nowUtc,
       updatedAt: nowUtc,
     );
@@ -237,13 +243,13 @@ class VaccinationRecordFirestoreContext {
 class GroupMemberRecord {
   const GroupMemberRecord({
     required this.vaccineId,
-    required this.doseNumber,
+    required this.doseId,
     required this.docRef,
     required this.recordDto,
   });
 
   final String vaccineId;
-  final int doseNumber;
+  final String doseId;
   final DocumentReference<Map<String, dynamic>> docRef;
   final VaccinationRecordDto? recordDto;
 }

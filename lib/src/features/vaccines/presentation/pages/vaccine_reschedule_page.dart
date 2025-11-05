@@ -6,6 +6,7 @@ import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/firebase/household_service.dart';
 import '../../../children/application/selected_child_provider.dart';
+import '../../application/vaccine_catalog_providers.dart';
 import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_state.dart';
 import '../viewmodels/vaccine_detail_view_model.dart';
@@ -135,13 +136,36 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
     bool applyToGroup = true;
 
     if (groupId != null) {
+      // doseIdを取得するためにVaccinationRecordを取得
+      final repository = ref.read(vaccinationRecordRepositoryProvider);
+      final record = await repository.getVaccinationRecord(
+        householdId: householdId,
+        childId: childId,
+        vaccineId: widget.vaccine.id,
+      );
+      final doseRecord = record?.getDoseByNumber(widget.doseNumber);
+
+      if (doseRecord == null) {
+        if (mounted && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('接種記録が見つかりません'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      if (!mounted || !context.mounted) return;
+
       final bool? userSelection = await showConcurrentVaccinesRescheduleDialog(
         context: context,
         householdId: householdId,
         childId: childId,
         reservationGroupId: groupId,
         currentVaccineId: widget.vaccine.id,
-        currentDoseNumber: widget.doseNumber,
+        currentDoseId: doseRecord.doseId,
       );
 
       if (userSelection == null) {
@@ -395,7 +419,7 @@ class _ConcurrentVaccinesCard extends ConsumerWidget {
       childId: childId,
       reservationGroupId: groupId,
       currentVaccineId: vaccine.id,
-      currentDoseNumber: doseNumber,
+      currentDoseId: 'dose_$doseNumber', // doseNumberからdoseIdに変換
     );
 
     final state = ref.watch(concurrentVaccinesViewModelProvider(params));

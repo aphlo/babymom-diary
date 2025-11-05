@@ -160,7 +160,7 @@ Map<int, DoseStatus?> _extractDoseStatuses({
 
   if (isInfluenza && record != null) {
     // インフルエンザの場合は動的マッピングを使用
-    final scheduledDoses = record.doses.values.toList()
+    final scheduledDoses = record.orderedDoses
       ..sort((a, b) {
         final dateA = a.scheduledDate;
         final dateB = b.scheduledDate;
@@ -177,7 +177,7 @@ Map<int, DoseStatus?> _extractDoseStatuses({
   } else {
     // 既存の処理
     for (final int doseNumber in expectedDoseNumbers) {
-      final DoseStatus? status = record?.getDose(doseNumber)?.status;
+      final DoseStatus? status = record?.getDoseByNumber(doseNumber)?.status;
       result[doseNumber] = status;
     }
   }
@@ -204,7 +204,7 @@ _DynamicInfluenzaMapping _buildDynamicInfluenzaMapping({
   final Set<int> expectedDoseNumbers = {};
 
   // 予約済みのドーズを日付順にソート
-  final scheduledDoses = record.doses.values.toList()
+  final scheduledDoses = record.orderedDoses
     ..sort((a, b) {
       final dateA = a.scheduledDate;
       final dateB = b.scheduledDate;
@@ -246,15 +246,17 @@ Map<int, String> _buildDoseDisplayOverrides({
 }) {
   final Map<int, String> overrides = <int, String>{};
 
-  for (final MapEntry<int, DoseRecord> entry in record.doses.entries) {
-    final DateTime? doseDate = entry.value.scheduledDate;
+  for (int i = 0; i < record.orderedDoses.length; i++) {
+    final dose = record.orderedDoses[i];
+    final doseNumber = i + 1; // 1-based indexing for display
+    final DateTime? doseDate = dose.scheduledDate;
     if (doseDate == null) {
       continue;
     }
     final int ageInMonths = _calculateAgeInMonths(childBirthday, doseDate);
     final String? periodLabel = _findPeriodForAge(ageInMonths, periods);
     if (periodLabel != null) {
-      overrides[entry.key] = periodLabel;
+      overrides[doseNumber] = periodLabel;
     }
   }
 

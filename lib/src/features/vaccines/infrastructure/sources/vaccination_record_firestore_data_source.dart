@@ -132,14 +132,14 @@ class VaccinationRecordFirestoreDataSource {
     required String childId,
     required String reservationGroupId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
   }) {
     return _groupCommands.completeReservationGroupMember(
       householdId: householdId,
       childId: childId,
       reservationGroupId: reservationGroupId,
       vaccineId: vaccineId,
-      doseNumber: doseNumber,
+      doseId: doseId,
     );
   }
 
@@ -160,14 +160,14 @@ class VaccinationRecordFirestoreDataSource {
     required String childId,
     required String reservationGroupId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
   }) {
     return _groupCommands.deleteReservationGroupMember(
       householdId: householdId,
       childId: childId,
       reservationGroupId: reservationGroupId,
       vaccineId: vaccineId,
-      doseNumber: doseNumber,
+      doseId: doseId,
     );
   }
 
@@ -187,14 +187,14 @@ class VaccinationRecordFirestoreDataSource {
     required String householdId,
     required String childId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
     required DateTime scheduledDate,
   }) {
     return _reservationCommands.updateVaccineReservation(
       householdId: householdId,
       childId: childId,
       vaccineId: vaccineId,
-      doseNumber: doseNumber,
+      doseId: doseId,
       scheduledDate: scheduledDate,
     );
   }
@@ -203,13 +203,13 @@ class VaccinationRecordFirestoreDataSource {
     required String householdId,
     required String childId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
   }) {
     return _reservationCommands.completeVaccination(
       householdId: householdId,
       childId: childId,
       vaccineId: vaccineId,
-      doseNumber: doseNumber,
+      doseId: doseId,
     );
   }
 
@@ -217,13 +217,13 @@ class VaccinationRecordFirestoreDataSource {
     required String householdId,
     required String childId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
   }) {
     return _reservationCommands.deleteVaccineReservation(
       householdId: householdId,
       childId: childId,
       vaccineId: vaccineId,
-      doseNumber: doseNumber,
+      doseId: doseId,
     );
   }
 
@@ -231,14 +231,14 @@ class VaccinationRecordFirestoreDataSource {
     required String householdId,
     required String childId,
     required String vaccineId,
-    required int doseNumber,
+    required String doseId,
     required DateTime scheduledDate,
   }) {
     return _reservationCommands.markDoseAsScheduled(
       householdId: householdId,
       childId: childId,
       vaccineId: vaccineId,
-      doseNumber: doseNumber,
+      doseId: doseId,
       scheduledDate: scheduledDate,
     );
   }

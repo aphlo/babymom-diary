@@ -469,7 +469,9 @@ class _ConcurrentVaccinesCard extends StatelessWidget {
                   final VaccinationRecord vaccine = availableVaccines[index];
                   final bool isSelected = selectedVaccines
                       .any((v) => v.vaccineId == vaccine.vaccineId);
-                  final int nextDose = vaccine.nextAvailableDose ?? 1;
+                  // 次の利用可能な回数を取得
+                  final orderedDoses = vaccine.orderedDoses;
+                  final int nextDose = orderedDoses.length + 1;
 
                   return CheckboxListTile(
                     value: isSelected,
