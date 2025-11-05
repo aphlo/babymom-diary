@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
@@ -10,27 +11,59 @@ import 'package:babymom_diary/src/features/menu/children/application/selected_ch
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
 
+import '../../domain/entities/dose_record.dart';
+import '../components/vaccines_list_view.dart';
 import '../components/vaccines_schedule_table.dart';
 import '../models/vaccine_info.dart';
+import '../viewmodels/vaccine_detail_state.dart';
 import '../viewmodels/vaccines_view_data.dart';
 import '../viewmodels/vaccines_view_model.dart';
 import '../widgets/vaccines_legend.dart';
 import 'vaccine_detail_page.dart';
 
-class VaccinesPage extends ConsumerWidget {
+enum VaccineViewMode { table, list }
+
+class VaccinesPage extends ConsumerStatefulWidget {
   const VaccinesPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<VaccinesPage> createState() => _VaccinesPageState();
+}
+
+class _VaccinesPageState extends ConsumerState<VaccinesPage> {
+  VaccineViewMode _viewMode = VaccineViewMode.table;
+
+  @override
+  Widget build(BuildContext context) {
     final AsyncValue<VaccinesViewData> state =
         ref.watch(vaccinesViewModelProvider);
     final DateTime? childBirthday = _resolveSelectedChildBirthday(ref);
 
     return Scaffold(
-      appBar: AppBar(title: const AppBarChildInfo()),
+      appBar: AppBar(
+        title: const AppBarChildInfo(),
+        actions: [
+          IconButton(
+            icon: Icon(
+              _viewMode == VaccineViewMode.table
+                  ? Icons.view_list
+                  : Icons.view_timeline_outlined,
+            ),
+            tooltip: _viewMode == VaccineViewMode.table ? 'リスト表示' : '表形式表示',
+            onPressed: () {
+              setState(() {
+                _viewMode = _viewMode == VaccineViewMode.table
+                    ? VaccineViewMode.list
+                    : VaccineViewMode.table;
+              });
+            },
+          ),
+        ],
+      ),
       body: state.when(
         data: (data) => _VaccinesContent(
           data: data,
+          viewMode: _viewMode,
           childBirthday: childBirthday,
           onVaccineTap: (vaccine) {
             Navigator.of(context).push(
@@ -42,6 +75,31 @@ class VaccinesPage extends ConsumerWidget {
               ),
             );
           },
+          onDoseReservationTap: (vaccine, doseNumber) {
+            context.push('/vaccines/reservation', extra: {
+              'vaccine': vaccine,
+              'doseNumber': doseNumber,
+            });
+          },
+          onScheduledDoseTap: (vaccine, doseNumber, statusInfo) {
+            if (statusInfo.status == DoseStatus.completed) {
+              context.push('/vaccines/scheduled-details', extra: {
+                'vaccine': vaccine,
+                'doseNumber': doseNumber,
+                'statusInfo': statusInfo,
+              });
+            } else {
+              // 予約済みの場合は詳細ページに遷移してそこで処理
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => VaccineDetailPage(
+                    vaccine: vaccine,
+                    childBirthday: childBirthday,
+                  ),
+                ),
+              );
+            }
+          },
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) => _VaccinesErrorView(
@@ -51,88 +109,105 @@ class VaccinesPage extends ConsumerWidget {
       bottomNavigationBar: const AppBottomNav(),
     );
   }
+
+  DateTime? _resolveSelectedChildBirthday(WidgetRef ref) {
+    final AsyncValue<String> householdIdAsync =
+        ref.watch(currentHouseholdIdProvider);
+
+    return householdIdAsync.maybeWhen<DateTime?>(
+      data: (householdId) {
+        final AsyncValue<String?> selectedIdAsync =
+            ref.watch(selectedChildControllerProvider);
+        final String? selectedId = selectedIdAsync.value;
+        if (selectedId == null) {
+          return null;
+        }
+
+        final AsyncValue<List<ChildSummary>> localChildren =
+            ref.watch(childrenLocalProvider(householdId));
+        final AsyncValue<List<ChildSummary>> streamChildren =
+            ref.watch(childrenStreamProvider(householdId));
+        final AsyncValue<ChildSummary?> snapshotChild =
+            ref.watch(selectedChildSnapshotProvider(householdId));
+
+        ChildSummary? child;
+        final List<ChildSummary>? local = localChildren.value;
+        if (local != null && local.isNotEmpty) {
+          child = _findChildById(local, selectedId);
+        }
+        if (child == null) {
+          final List<ChildSummary>? streamed = streamChildren.value;
+          if (streamed != null && streamed.isNotEmpty) {
+            child = _findChildById(streamed, selectedId);
+          }
+        }
+        if (child == null) {
+          final ChildSummary? snapshot = snapshotChild.value;
+          if (snapshot != null && snapshot.id == selectedId) {
+            child = snapshot;
+          }
+        }
+
+        return child?.birthday;
+      },
+      orElse: () => null,
+    );
+  }
+
+  ChildSummary? _findChildById(List<ChildSummary> source, String id) {
+    for (final ChildSummary child in source) {
+      if (child.id == id) {
+        return child;
+      }
+    }
+    return null;
+  }
 }
 
 class _VaccinesContent extends StatelessWidget {
   const _VaccinesContent({
     required this.data,
+    required this.viewMode,
     required this.childBirthday,
     required this.onVaccineTap,
+    this.onDoseReservationTap,
+    this.onScheduledDoseTap,
   });
 
   final VaccinesViewData data;
+  final VaccineViewMode viewMode;
   final DateTime? childBirthday;
   final ValueChanged<VaccineInfo> onVaccineTap;
+  final void Function(VaccineInfo vaccine, int doseNumber)?
+      onDoseReservationTap;
+  final void Function(
+          VaccineInfo vaccine, int doseNumber, DoseStatusInfo statusInfo)?
+      onScheduledDoseTap;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
         Expanded(
-          child: VaccinesScheduleTable(
-            periods: data.periodLabels,
-            vaccines: data.vaccines,
-            childBirthday: childBirthday,
-            onVaccineTap: onVaccineTap,
-          ),
+          child: viewMode == VaccineViewMode.table
+              ? VaccinesScheduleTable(
+                  periods: data.periodLabels,
+                  vaccines: data.vaccines,
+                  childBirthday: childBirthday,
+                  onVaccineTap: onVaccineTap,
+                )
+              : VaccinesListView(
+                  vaccines: data.vaccines,
+                  recordsByVaccine: data.recordsByVaccine,
+                  onVaccineTap: onVaccineTap,
+                  onDoseReservationTap: onDoseReservationTap,
+                  onScheduledDoseTap: onScheduledDoseTap,
+                ),
         ),
-        const VaccinesLegend(),
+        if (viewMode == VaccineViewMode.table) const VaccinesLegend(),
       ],
     );
   }
-}
-
-DateTime? _resolveSelectedChildBirthday(WidgetRef ref) {
-  final AsyncValue<String> householdIdAsync =
-      ref.watch(currentHouseholdIdProvider);
-
-  return householdIdAsync.maybeWhen<DateTime?>(
-    data: (householdId) {
-      final AsyncValue<String?> selectedIdAsync =
-          ref.watch(selectedChildControllerProvider);
-      final String? selectedId = selectedIdAsync.value;
-      if (selectedId == null) {
-        return null;
-      }
-
-      final AsyncValue<List<ChildSummary>> localChildren =
-          ref.watch(childrenLocalProvider(householdId));
-      final AsyncValue<List<ChildSummary>> streamChildren =
-          ref.watch(childrenStreamProvider(householdId));
-      final AsyncValue<ChildSummary?> snapshotChild =
-          ref.watch(selectedChildSnapshotProvider(householdId));
-
-      ChildSummary? child;
-      final List<ChildSummary>? local = localChildren.value;
-      if (local != null && local.isNotEmpty) {
-        child = _findChildById(local, selectedId);
-      }
-      if (child == null) {
-        final List<ChildSummary>? streamed = streamChildren.value;
-        if (streamed != null && streamed.isNotEmpty) {
-          child = _findChildById(streamed, selectedId);
-        }
-      }
-      if (child == null) {
-        final ChildSummary? snapshot = snapshotChild.value;
-        if (snapshot != null && snapshot.id == selectedId) {
-          child = snapshot;
-        }
-      }
-
-      return child?.birthday;
-    },
-    orElse: () => null,
-  );
-}
-
-ChildSummary? _findChildById(List<ChildSummary> source, String id) {
-  for (final ChildSummary child in source) {
-    if (child.id == id) {
-      return child;
-    }
-  }
-  return null;
 }
 
 class _VaccinesErrorView extends StatelessWidget {

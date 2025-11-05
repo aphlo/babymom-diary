@@ -38,4 +38,8 @@ class DateFormatter {
     final weekday = _weekdayMap[date.weekday] ?? '';
     return '$formattedDate($weekday)';
   }
+
+  static String yyMMdd(DateTime date) {
+    return DateFormat('yy/MM/dd').format(date);
+  }
 }

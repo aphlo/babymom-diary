@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import '../../domain/entities/vaccination_record.dart';
 import '../models/vaccine_info.dart';
 
 @immutable
@@ -9,10 +10,12 @@ class VaccinesViewData {
     required this.vaccines,
     this.version,
     this.publishedAt,
+    this.recordsByVaccine = const <String, VaccinationRecord>{},
   });
 
   final List<String> periodLabels;
   final List<VaccineInfo> vaccines;
   final String? version;
   final DateTime? publishedAt;
+  final Map<String, VaccinationRecord> recordsByVaccine;
 }

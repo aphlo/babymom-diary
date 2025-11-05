@@ -149,14 +149,31 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
             vaccines: filteredVaccines,
             version: viewData.version,
             publishedAt: viewData.publishedAt,
+            recordsByVaccine: recordMap,
           ),
         );
       } catch (error) {
         // フィルタリングに失敗した場合は全てのワクチンを表示
-        state = AsyncValue.data(viewData);
+        state = AsyncValue.data(
+          VaccinesViewData(
+            periodLabels: viewData.periodLabels,
+            vaccines: viewData.vaccines,
+            version: viewData.version,
+            publishedAt: viewData.publishedAt,
+            recordsByVaccine: recordMap,
+          ),
+        );
       }
     } else {
-      state = AsyncValue.data(viewData);
+      state = AsyncValue.data(
+        VaccinesViewData(
+          periodLabels: viewData.periodLabels,
+          vaccines: viewData.vaccines,
+          version: viewData.version,
+          publishedAt: viewData.publishedAt,
+          recordsByVaccine: recordMap,
+        ),
+      );
     }
   }
 
