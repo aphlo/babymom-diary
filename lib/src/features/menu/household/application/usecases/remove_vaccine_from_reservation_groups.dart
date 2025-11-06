@@ -15,25 +15,25 @@ class RemoveVaccineFromReservationGroups {
 
   /// 指定されたワクチンを全てのreservation_groupsから削除
   ///
-  /// household内の全ての子供のreservation_groupsをチェックし、
+  /// household内の全ての子どものreservation_groupsをチェックし、
   /// 指定されたvaccineIdが含まれている場合は削除します。
   Future<void> call({
     required String householdId,
     required String vaccineId,
   }) async {
     try {
-      // household内の全ての子供を取得
+      // household内の全ての子どもを取得
       final childrenSnapshot = await _firestore
           .collection('households')
           .doc(householdId)
           .collection('children')
           .get();
 
-      // 各子供のreservation_groupsをチェック
+      // 各子どものreservation_groupsをチェック
       for (final childDoc in childrenSnapshot.docs) {
         final childId = childDoc.id;
 
-        // この子供のreservation_groupsを取得
+        // この子どものreservation_groupsを取得
         final reservationGroupsSnapshot = await _firestore
             .collection('households')
             .doc(householdId)

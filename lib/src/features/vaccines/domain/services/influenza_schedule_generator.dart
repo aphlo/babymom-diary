@@ -55,7 +55,7 @@ class InfluenzaScheduleGenerator {
         )
         .toList(growable: false);
 
-    // 子供の誕生日がある場合は7年分に制限
+    // 子どもの誕生日がある場合は7年分に制限
     if (childBirthday != null && allSchedules.length > 7) {
       return allSchedules.take(7).toList(growable: false);
     }

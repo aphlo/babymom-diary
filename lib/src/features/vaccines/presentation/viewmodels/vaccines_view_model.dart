@@ -34,7 +34,7 @@ final vaccinesViewModelProvider = AutoDisposeStateNotifierProvider<
   final String? householdId = ref.watch(currentHouseholdIdProvider).value;
   final String? childId = ref.watch(selectedChildControllerProvider).value;
 
-  // 選択された子供の情報を取得
+  // 選択された子どもの情報を取得
   final selectedChildSnapshot = householdId != null
       ? ref.watch(selectedChildSnapshotProvider(householdId)).value
       : null;

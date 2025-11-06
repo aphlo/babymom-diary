@@ -85,7 +85,7 @@ class VaccineDetailPage extends ConsumerWidget {
             },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stackTrace) =>
-                const _AsyncErrorView(message: '子供情報の取得に失敗しました'),
+                const _AsyncErrorView(message: '子ども情報の取得に失敗しました'),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -354,7 +354,7 @@ class _NoChildSelectedView extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
-          '子供を選択すると接種予定を確認できます',
+          '子どもを選択すると接種予定を確認できます',
           style: theme.textTheme.bodyMedium,
           textAlign: TextAlign.center,
         ),

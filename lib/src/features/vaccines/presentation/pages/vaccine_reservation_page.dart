@@ -170,7 +170,7 @@ class _VaccineReservationPageState
     if (selectedChildId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('子供が選択されていません'),
+          content: Text('子どもが選択されていません'),
           backgroundColor: Colors.red,
         ),
       );

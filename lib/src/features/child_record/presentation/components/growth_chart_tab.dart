@@ -28,8 +28,8 @@ class GrowthChartTab extends ConsumerWidget {
     if (summary == null) {
       return _EmptyPlaceholder(
         icon: Icons.child_care,
-        title: '子どもを選択してください',
-        description: '成長曲線を表示するには、上部のプロフィールから子どもを選択してください。',
+        title: '子どもを登録してください',
+        description: '成長曲線を表示するには、メニューから子どもを登録してください。',
       );
     }
 

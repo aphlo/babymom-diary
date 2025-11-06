@@ -11,7 +11,7 @@ ThemeData buildTheme({Color? childColor}) {
     primary: AppColors.primary,
   );
 
-  // AppBar/NavigationBar用の色（子供の色 or デフォルト）
+  // AppBar/NavigationBar用の色（子どもの色 or デフォルト）
   final appBarColor = childColor ?? AppColors.primary;
 
   final textTheme = base.textTheme.apply(fontFamily: fontFamily);
@@ -31,7 +31,7 @@ ThemeData buildTheme({Color? childColor}) {
       }),
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: appBarColor, // 子供の色を使用
+      backgroundColor: appBarColor, // 子どもの色を使用
       foregroundColor: scheme.onPrimary, // text & icons
       surfaceTintColor: Colors.transparent,
       elevation: 8,
@@ -42,7 +42,7 @@ ThemeData buildTheme({Color? childColor}) {
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: appBarColor, // 子供の色を使用
+      backgroundColor: appBarColor, // 子どもの色を使用
       surfaceTintColor: Colors.transparent,
       indicatorColor: scheme.onPrimary.withOpacity(0.20),
       iconTheme: WidgetStateProperty.resolveWith(

@@ -72,7 +72,7 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
           return selectedChildAsync.when(
             data: (childId) {
               if (childId == null) {
-                return const Center(child: Text('子供が選択されていません'));
+                return const Center(child: Text('子どもが選択されていません'));
               }
 
               // Watch ViewModel to get live state updates
@@ -127,7 +127,7 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
             },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stackTrace) =>
-                const Center(child: Text('子供情報の取得に失敗しました')),
+                const Center(child: Text('子ども情報の取得に失敗しました')),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),

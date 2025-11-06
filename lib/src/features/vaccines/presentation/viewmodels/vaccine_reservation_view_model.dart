@@ -220,7 +220,7 @@ final vaccineReservationViewModelProvider = StateNotifierProvider.autoDispose
           final householdId =
               await householdService.findExistingHouseholdForCurrentUser();
           if (householdId != null) {
-            // 子供のリストから該当する子供を検索
+            // 子どものリストから該当する子どもを検索
             final childrenAsync =
                 ref.watch(childrenStreamProvider(householdId));
 

@@ -3,20 +3,20 @@ import '../entities/vaccine_reservation_request.dart';
 import '../entities/reservation_group.dart';
 
 abstract class VaccinationRecordRepository {
-  /// 指定した子供のワクチン接種記録を監視
+  /// 指定した子どものワクチン接種記録を監視
   Stream<List<VaccinationRecord>> watchVaccinationRecords({
     required String householdId,
     required String childId,
   });
 
-  /// 指定した子供の特定のワクチン接種記録を監視
+  /// 指定した子どもの特定のワクチン接種記録を監視
   Stream<VaccinationRecord?> watchVaccinationRecord({
     required String householdId,
     required String childId,
     required String vaccineId,
   });
 
-  /// 指定した子供の特定のワクチン接種記録を取得
+  /// 指定した子どもの特定のワクチン接種記録を取得
   Future<VaccinationRecord?> getVaccinationRecord({
     required String householdId,
     required String childId,

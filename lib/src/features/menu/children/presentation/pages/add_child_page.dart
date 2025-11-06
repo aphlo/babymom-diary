@@ -23,7 +23,7 @@ class _AddChildPageState extends ConsumerState<AddChildPage> {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('子供を追加'),
+        title: const Text('子どもを追加'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

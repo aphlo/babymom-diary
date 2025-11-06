@@ -6,7 +6,7 @@ import '../../domain/value_objects/vaccine_category.dart' as vo_category;
 import '../../domain/value_objects/vaccine_requirement.dart' as vo_requirement;
 import '../../../menu/household/domain/repositories/vaccine_visibility_settings_repository.dart';
 
-/// 子供の既存の接種記録に基づいて、予約可能なワクチンを取得するユースケース
+/// 子どもの既存の接種記録に基づいて、予約可能なワクチンを取得するユースケース
 class GetVaccinesForSimultaneousReservation {
   GetVaccinesForSimultaneousReservation({
     required VaccineMasterRepository vaccineMasterRepository,
@@ -23,7 +23,7 @@ class GetVaccinesForSimultaneousReservation {
   final VaccineVisibilitySettingsRepository
       _vaccineVisibilitySettingsRepository;
 
-  /// 指定した子供の年齢と接種履歴に基づいて、接種可能なワクチンの一覧を取得
+  /// 指定した子どもの年齢と接種履歴に基づいて、接種可能なワクチンの一覧を取得
   Future<List<VaccinationRecord>> call({
     required String householdId,
     required String childId,
