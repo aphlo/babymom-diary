@@ -14,11 +14,11 @@ end
 
 TASKS = {
   run_prod: {
-    command: "fvm flutter run --flavor prod -t lib/main_prod.dart",
+    command: "fvm flutter run --flavor prod -t lib/main_prod.dart --dart-define=FLAVOR=prod",
     description: "Run app with prod flavor (set ARGS for extra flutter flags)",
   },
   run_local: {
-    command: "fvm flutter run --flavor local -t lib/main_local.dart",
+    command: "fvm flutter run --flavor local -t lib/main_local.dart --dart-define=FLAVOR=local",
     description: "Run app with local flavor (set ARGS for extra flutter flags)",
   },
   format: {

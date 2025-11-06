@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../child_record.dart';
+import '../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../models/record_draft.dart';
 import '../models/record_item_model.dart';
 import '../viewmodels/record_state.dart';
@@ -119,23 +120,30 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
     );
 
     Widget buildRecordTable(List<RecordItemModel> records) {
-      return Stack(
+      return Column(
         children: [
-          RecordTable(
-            records: records,
-            onSlotTap: handleSlotTap,
-            scrollStorageKey: scrollStorageKey,
-          ),
-          if (state.recordsAsync.isLoading || state.isProcessing)
-            const Positioned(
-              right: 16,
-              bottom: 16,
-              child: SizedBox(
-                height: 36,
-                width: 36,
-                child: CircularProgressIndicator(strokeWidth: 3),
-              ),
+          Expanded(
+            child: Stack(
+              children: [
+                RecordTable(
+                  records: records,
+                  onSlotTap: handleSlotTap,
+                  scrollStorageKey: scrollStorageKey,
+                ),
+                if (state.recordsAsync.isLoading || state.isProcessing)
+                  const Positioned(
+                    right: 16,
+                    bottom: 16,
+                    child: SizedBox(
+                      height: 36,
+                      width: 36,
+                      child: CircularProgressIndicator(strokeWidth: 3),
+                    ),
+                  ),
+              ],
             ),
+          ),
+          const BannerAdWidget(),
         ],
       );
     }
