@@ -7,10 +7,11 @@ import '../../features/menu/children/application/selected_child_provider.dart';
 import '../../features/menu/children/application/selected_child_snapshot_provider.dart';
 import '../../features/menu/children/domain/entities/child_summary.dart';
 import '../preferences/shared_preferences_provider.dart';
+import 'app_colors.dart';
 import 'app_theme.dart';
 
 final appThemeProvider = Provider.family<ThemeData, String>((ref, householdId) {
-  const fallbackColor = defaultPrimaryColor;
+  const fallbackColor = AppColors.primary;
 
   final prefs = ref.watch(sharedPreferencesProvider);
 
@@ -65,5 +66,5 @@ final appThemeProvider = Provider.family<ThemeData, String>((ref, householdId) {
 
   selectedColor = parseColor(selectedSummary?.color);
 
-  return buildTheme(primaryColor: selectedColor ?? fallbackColor);
+  return buildTheme(childColor: selectedColor ?? fallbackColor);
 });

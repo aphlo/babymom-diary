@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 
-const Color defaultPrimaryColor = Color(0xFFE54F80);
+import 'package:babymom_diary/src/core/theme/app_colors.dart';
 
-ThemeData buildTheme({Color? primaryColor}) {
+ThemeData buildTheme({Color? childColor}) {
   const fontFamily = 'MPLUSRounded1c';
-  final effectivePrimary = primaryColor ?? defaultPrimaryColor;
+
+  // ColorSchemeは常にAppColors.primaryをベースにする
   final base = ThemeData(useMaterial3: true, fontFamily: fontFamily);
-  final scheme = ColorScheme.fromSeed(seedColor: effectivePrimary).copyWith(
-    primary: effectivePrimary,
+  final scheme = ColorScheme.fromSeed(seedColor: AppColors.primary).copyWith(
+    primary: AppColors.primary,
   );
+
+  // AppBar/NavigationBar用の色（子供の色 or デフォルト）
+  final appBarColor = childColor ?? AppColors.primary;
+
   final textTheme = base.textTheme.apply(fontFamily: fontFamily);
   final primaryTextTheme = base.primaryTextTheme.apply(fontFamily: fontFamily);
 
@@ -18,7 +23,7 @@ ThemeData buildTheme({Color? primaryColor}) {
     primaryTextTheme: primaryTextTheme,
     radioTheme: RadioThemeData(
       fillColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.selected)) return scheme.primary;
+        if (states.contains(WidgetState.selected)) return AppColors.primary;
         if (states.contains(WidgetState.disabled)) {
           return scheme.onSurface.withOpacity(0.38);
         }
@@ -26,7 +31,7 @@ ThemeData buildTheme({Color? primaryColor}) {
       }),
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: effectivePrimary,
+      backgroundColor: appBarColor, // 子供の色を使用
       foregroundColor: scheme.onPrimary, // text & icons
       surfaceTintColor: Colors.transparent,
       elevation: 8,
@@ -37,7 +42,7 @@ ThemeData buildTheme({Color? primaryColor}) {
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: effectivePrimary,
+      backgroundColor: appBarColor, // 子供の色を使用
       surfaceTintColor: Colors.transparent,
       indicatorColor: scheme.onPrimary.withOpacity(0.20),
       iconTheme: WidgetStateProperty.resolveWith(
