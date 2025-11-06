@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../dialogs/mom_record_editor_dialog.dart';
 import '../models/mom_record_ui_model.dart';
 import '../viewmodels/mom_record_view_model.dart';
@@ -49,6 +50,7 @@ class MomRecordOverviewTab extends ConsumerWidget {
             },
           ),
         ),
+        const BannerAdWidget(),
       ],
     );
   }

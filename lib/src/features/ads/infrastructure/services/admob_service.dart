@@ -7,7 +7,8 @@ class AdMobService {
   }
 
   /// 現在のフレーバーを取得
-  static const String _flavor = String.fromEnvironment('FLAVOR', defaultValue: 'local');
+  static const String _flavor =
+      String.fromEnvironment('FLAVOR', defaultValue: 'local');
 
   /// localフレーバーかどうか
   static bool get isLocalFlavor => _flavor == 'local';

@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
+import 'package:babymom_diary/src/features/ads/presentation/widgets/banner_ad_widget.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/models/calendar_event_model.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/pages/add_calendar_event_page.dart';
@@ -124,6 +125,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       ),
       body: Column(
         children: [
+          const BannerAdWidget(),
           Card(
             margin: EdgeInsets.zero,
             elevation: 0,

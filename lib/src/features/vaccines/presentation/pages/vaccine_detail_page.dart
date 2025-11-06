@@ -6,6 +6,7 @@ import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 
 import '../../../menu/children/application/selected_child_provider.dart';
+import '../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../domain/entities/dose_record.dart';
 import '../controllers/vaccine_detail_interactions.dart';
 import '../models/vaccine_detail_callbacks.dart';
@@ -183,120 +184,128 @@ class _VaccineDetailContent extends StatelessWidget {
     final theme = Theme.of(context);
     final bool isInfluenza = vaccine.id.startsWith('influenza');
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x14000000),
-                  offset: Offset(0, 8),
-                  blurRadius: 20,
-                ),
-              ],
-            ),
+    return Column(
+      children: [
+        const BannerAdWidget(),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                VaccineHeader(vaccine: vaccine),
-                if (state.isLoading) ...[
-                  const SizedBox(height: 16),
-                  const LinearProgressIndicator(minHeight: 3),
-                ],
-                const SizedBox(height: 24),
-                if (state.error != null) ...[
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      state.error!,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.red.shade700,
-                        fontWeight: FontWeight.w600,
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x14000000),
+                        offset: Offset(0, 8),
+                        blurRadius: 20,
                       ),
-                    ),
+                    ],
                   ),
-                ],
-                if (state.doseNumbers.isEmpty)
-                  Text(
-                    '接種回数の情報が見つかりませんでした',
-                    style: theme.textTheme.bodyMedium,
-                  )
-                else if (isInfluenza)
-                  InfluenzaDoseReservationBoard(
-                    doseNumbers: state.doseNumbers,
-                    doseStatuses: state.doseStatuses,
-                    activeDoseNumber: state.activeDoseNumber,
-                    pendingDoseNumber: state.pendingDoseNumber,
-                    vaccine: vaccine,
-                    onReservationTap: onReservationTap,
-                    onScheduledDoseTap: onScheduledDoseTap,
-                  )
-                else
-                  VaccineDoseReservationBoard(
-                    doseNumbers: state.doseNumbers,
-                    doseStatuses: state.doseStatuses,
-                    activeDoseNumber: state.activeDoseNumber,
-                    pendingDoseNumber: state.pendingDoseNumber,
-                    recommendationText: state.recommendation?.message,
-                    vaccine: vaccine,
-                    onReservationTap: onReservationTap,
-                    onScheduledDoseTap: onScheduledDoseTap,
-                  ),
-                if (vaccine.notes.isNotEmpty) ...[
-                  const SizedBox(height: 24),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: Colors.blue.shade700,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                '接種時の注意点',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.blue.shade700,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        _VaccineNotesList(notes: vaccine.notes),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      VaccineHeader(vaccine: vaccine),
+                      if (state.isLoading) ...[
+                        const SizedBox(height: 16),
+                        const LinearProgressIndicator(minHeight: 3),
                       ],
-                    ),
+                      const SizedBox(height: 24),
+                      if (state.error != null) ...[
+                        Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            state.error!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.red.shade700,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                      if (state.doseNumbers.isEmpty)
+                        Text(
+                          '接種回数の情報が見つかりませんでした',
+                          style: theme.textTheme.bodyMedium,
+                        )
+                      else if (isInfluenza)
+                        InfluenzaDoseReservationBoard(
+                          doseNumbers: state.doseNumbers,
+                          doseStatuses: state.doseStatuses,
+                          activeDoseNumber: state.activeDoseNumber,
+                          pendingDoseNumber: state.pendingDoseNumber,
+                          vaccine: vaccine,
+                          onReservationTap: onReservationTap,
+                          onScheduledDoseTap: onScheduledDoseTap,
+                        )
+                      else
+                        VaccineDoseReservationBoard(
+                          doseNumbers: state.doseNumbers,
+                          doseStatuses: state.doseStatuses,
+                          activeDoseNumber: state.activeDoseNumber,
+                          pendingDoseNumber: state.pendingDoseNumber,
+                          recommendationText: state.recommendation?.message,
+                          vaccine: vaccine,
+                          onReservationTap: onReservationTap,
+                          onScheduledDoseTap: onScheduledDoseTap,
+                        ),
+                      if (vaccine.notes.isNotEmpty) ...[
+                        const SizedBox(height: 24),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.info_outline,
+                                    color: Colors.blue.shade700,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      '接種時の注意点',
+                                      style:
+                                          theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.blue.shade700,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              _VaccineNotesList(notes: vaccine.notes),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                ],
+                ),
               ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

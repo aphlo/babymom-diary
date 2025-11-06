@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 import 'package:babymom_diary/src/core/utils/date_formatter.dart';
+import '../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../viewmodels/growth_chart_view_model.dart';
 import '../widgets/growth_measurement_sheet.dart';
 
@@ -38,10 +39,17 @@ class GrowthRecordListPage extends ConsumerWidget {
               ),
             )),
         backgroundColor: AppColors.pageBackground,
-        body: TabBarView(
+        body: Column(
           children: [
-            _RecordListView(type: RecordType.height),
-            _RecordListView(type: RecordType.weight),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _RecordListView(type: RecordType.height),
+                  _RecordListView(type: RecordType.weight),
+                ],
+              ),
+            ),
+            const BannerAdWidget(),
           ],
         ),
       ),

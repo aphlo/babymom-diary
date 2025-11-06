@@ -45,15 +45,18 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_isLoaded || _bannerAd == null) {
-      return const SizedBox.shrink();
-    }
+    // バナー広告の標準的な高さ（AdSize.bannerは50px）を最初から確保
+    const double bannerHeight = 50.0;
 
-    return Container(
-      alignment: Alignment.center,
-      width: _bannerAd!.size.width.toDouble(),
-      height: _bannerAd!.size.height.toDouble(),
-      child: AdWidget(ad: _bannerAd!),
+    return SafeArea(
+      child: Container(
+        alignment: Alignment.center,
+        width: double.infinity,
+        height: bannerHeight,
+        child: _isLoaded && _bannerAd != null
+            ? AdWidget(ad: _bannerAd!)
+            : const SizedBox.shrink(),
+      ),
     );
   }
 }

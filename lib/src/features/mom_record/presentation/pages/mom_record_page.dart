@@ -116,7 +116,10 @@ class _MomRecordPageState extends ConsumerState<MomRecordPage>
           MomDiaryOverviewTab(),
         ],
       ),
-      floatingActionButton: const MomSupportFab(),
+      floatingActionButton: const Padding(
+        padding: EdgeInsets.only(bottom: 50),
+        child: MomSupportFab(),
+      ),
       bottomNavigationBar: const AppBottomNav(),
     );
   }

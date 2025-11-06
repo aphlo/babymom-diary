@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
+import 'package:babymom_diary/src/features/ads/presentation/widgets/banner_ad_widget.dart';
 import 'package:babymom_diary/src/features/menu/children/data/infrastructure/child_firestore_data_source.dart';
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
@@ -47,47 +48,54 @@ class MenuPage extends ConsumerWidget {
                 return Center(child: Text('子どもの読み込みに失敗しました\n${snap.error}'));
               }
               final docs = snap.data?.docs ?? const [];
-              return ListView(
+              return Column(
                 children: [
-                  // 子ども一覧セクション
-                  for (final d in docs) ...[
-                    _ChildListTile(
-                      id: d.id,
-                      name: (d.data()['name'] as String?) ?? '未設定',
-                      color: _parseColor(d.data()['color'] as String?),
-                      subtitle:
-                          _formatBirthday(d.data()['birthday'] as Timestamp?),
-                    ),
-                    const Divider(height: 0),
-                  ],
-                  ListTile(
-                    tileColor: Colors.white,
-                    leading: const Icon(Icons.edit),
-                    title: const Text('子どもの追加・編集'),
-                    onTap: () =>
-                        context.push('/children/manage', extra: 'slide'),
-                    trailing: const Icon(Icons.chevron_right),
-                  ),
+                  Expanded(
+                    child: ListView(
+                      children: [
+                        // 子ども一覧セクション
+                        for (final d in docs) ...[
+                          _ChildListTile(
+                            id: d.id,
+                            name: (d.data()['name'] as String?) ?? '未設定',
+                            color: _parseColor(d.data()['color'] as String?),
+                            subtitle: _formatBirthday(
+                                d.data()['birthday'] as Timestamp?),
+                          ),
+                          const Divider(height: 0),
+                        ],
+                        ListTile(
+                          tileColor: Colors.white,
+                          leading: const Icon(Icons.edit),
+                          title: const Text('子どもの追加・編集'),
+                          onTap: () =>
+                              context.push('/children/manage', extra: 'slide'),
+                          trailing: const Icon(Icons.chevron_right),
+                        ),
 
-                  const SizedBox(height: 24),
-                  const Divider(height: 0),
-                  ListTile(
-                    tileColor: Colors.white,
-                    leading: const Icon(Icons.group_add),
-                    title: const Text('世帯の共有'),
-                    subtitle: const Text('招待コードの発行 / コードで参加'),
-                    onTap: () => context.push('/household/share'),
+                        const SizedBox(height: 24),
+                        const Divider(height: 0),
+                        ListTile(
+                          tileColor: Colors.white,
+                          leading: const Icon(Icons.group_add),
+                          title: const Text('世帯の共有'),
+                          subtitle: const Text('招待コードの発行 / コードで参加'),
+                          onTap: () => context.push('/household/share'),
+                        ),
+                        const Divider(height: 0),
+                        ListTile(
+                          tileColor: Colors.white,
+                          leading: const Icon(Icons.vaccines),
+                          title: const Text('ワクチンの表示・非表示'),
+                          subtitle: const Text('表示するワクチンを選択'),
+                          onTap: () => context
+                              .push('/household/vaccine-visibility-settings'),
+                        ),
+                        const Divider(height: 0),
+                      ],
+                    ),
                   ),
-                  const Divider(height: 0),
-                  ListTile(
-                    tileColor: Colors.white,
-                    leading: const Icon(Icons.vaccines),
-                    title: const Text('ワクチンの表示・非表示'),
-                    subtitle: const Text('表示するワクチンを選択'),
-                    onTap: () =>
-                        context.push('/household/vaccine-visibility-settings'),
-                  ),
-                  const Divider(height: 0),
+                  const BannerAdWidget(),
                 ],
               );
             },
