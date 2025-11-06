@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/firebase/household_service.dart';
 import '../models/vaccine_info.dart';
 import '../../../menu/children/application/selected_child_provider.dart';
 import '../viewmodels/vaccine_reservation_view_model.dart';
@@ -44,16 +45,6 @@ class _VaccineReservationPageState
 
   @override
   Widget build(BuildContext context) {
-    final params = VaccineReservationParams(
-      vaccine: widget.vaccine,
-      doseNumber: widget.doseNumber,
-    );
-
-    final viewModel =
-        ref.watch(vaccineReservationViewModelProvider(params).notifier);
-    final state = ref.watch(vaccineReservationViewModelProvider(params));
-    final bool canSubmit = state.canSubmit && !state.isLoading;
-
     // AppBarのタイトル用のラベルを生成
     final bool isInfluenza = widget.vaccine.id.startsWith('influenza');
     String doseLabel;
@@ -67,6 +58,94 @@ class _VaccineReservationPageState
     } else {
       doseLabel = '${widget.doseNumber}回目';
     }
+
+    final AsyncValue<String> householdAsync =
+        ref.watch(currentHouseholdIdProvider);
+    final AsyncValue<String?> selectedChildAsync =
+        ref.watch(selectedChildControllerProvider);
+
+    return householdAsync.when(
+      data: (householdId) {
+        return selectedChildAsync.when(
+          data: (childId) {
+            if (childId == null) {
+              return Scaffold(
+                backgroundColor: AppColors.pageBackground,
+                appBar: AppBar(
+                  title: Text('${widget.vaccine.name} $doseLabel'),
+                ),
+                body: const _NoChildSelectedView(),
+              );
+            }
+
+            return _VaccineReservationContent(
+              vaccine: widget.vaccine,
+              doseNumber: widget.doseNumber,
+              influenzaSeasonLabel: widget.influenzaSeasonLabel,
+              influenzaDoseOrder: widget.influenzaDoseOrder,
+              doseLabel: doseLabel,
+            );
+          },
+          loading: () => Scaffold(
+            backgroundColor: AppColors.pageBackground,
+            appBar: AppBar(
+              title: Text('${widget.vaccine.name} $doseLabel'),
+            ),
+            body: const Center(child: CircularProgressIndicator()),
+          ),
+          error: (error, stackTrace) => Scaffold(
+            backgroundColor: AppColors.pageBackground,
+            appBar: AppBar(
+              title: Text('${widget.vaccine.name} $doseLabel'),
+            ),
+            body: const _AsyncErrorView(message: '子ども情報の取得に失敗しました'),
+          ),
+        );
+      },
+      loading: () => Scaffold(
+        backgroundColor: AppColors.pageBackground,
+        appBar: AppBar(
+          title: Text('${widget.vaccine.name} $doseLabel'),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stackTrace) => Scaffold(
+        backgroundColor: AppColors.pageBackground,
+        appBar: AppBar(
+          title: Text('${widget.vaccine.name} $doseLabel'),
+        ),
+        body: const _AsyncErrorView(message: 'ホーム情報の取得に失敗しました'),
+      ),
+    );
+  }
+}
+
+class _VaccineReservationContent extends ConsumerWidget {
+  const _VaccineReservationContent({
+    required this.vaccine,
+    required this.doseNumber,
+    required this.doseLabel,
+    this.influenzaSeasonLabel,
+    this.influenzaDoseOrder,
+  });
+
+  final VaccineInfo vaccine;
+  final int doseNumber;
+  final String doseLabel;
+  final String? influenzaSeasonLabel;
+  final int? influenzaDoseOrder;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final params = VaccineReservationParams(
+      vaccine: vaccine,
+      doseNumber: doseNumber,
+    );
+
+    final viewModel =
+        ref.watch(vaccineReservationViewModelProvider(params).notifier);
+    final state = ref.watch(vaccineReservationViewModelProvider(params));
+    final bool canSubmit = state.canSubmit && !state.isLoading;
 
     // エラー表示
     ref.listen(vaccineReservationViewModelProvider(params), (previous, next) {
@@ -96,7 +175,7 @@ class _VaccineReservationPageState
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
       appBar: AppBar(
-        title: Text('${widget.vaccine.name} $doseLabel'),
+        title: Text('${vaccine.name} $doseLabel'),
       ),
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -106,17 +185,17 @@ class _VaccineReservationPageState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _VaccineInfoCard(
-                    vaccine: widget.vaccine,
-                    doseNumber: widget.doseNumber,
-                    influenzaSeasonLabel: widget.influenzaSeasonLabel,
-                    influenzaDoseOrder: widget.influenzaDoseOrder,
+                    vaccine: vaccine,
+                    doseNumber: doseNumber,
+                    influenzaSeasonLabel: influenzaSeasonLabel,
+                    influenzaDoseOrder: influenzaDoseOrder,
                   ),
                   const SizedBox(height: 24),
                   _DateSelectionCard(
                     selectedDate: state.scheduledDate,
                     onDateSelected: viewModel.setScheduledDate,
-                    vaccine: widget.vaccine,
-                    doseNumber: widget.doseNumber,
+                    vaccine: vaccine,
+                    doseNumber: doseNumber,
                     recordType: state.recordType,
                     onRecordTypeChanged: viewModel.setRecordType,
                   ),
@@ -140,7 +219,7 @@ class _VaccineReservationPageState
             height: 52,
             child: ElevatedButton(
               onPressed: canSubmit
-                  ? () => _submitReservation(context, viewModel)
+                  ? () => _submitReservation(context, viewModel, ref)
                   : null,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
@@ -154,7 +233,7 @@ class _VaccineReservationPageState
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : Text('保存'),
+                  : const Text('保存'),
             ),
           ),
         ),
@@ -165,6 +244,7 @@ class _VaccineReservationPageState
   Future<void> _submitReservation(
     BuildContext context,
     VaccineReservationViewModel viewModel,
+    WidgetRef ref,
   ) async {
     final selectedChildId = ref.read(selectedChildControllerProvider).value;
     if (selectedChildId == null) {
@@ -181,6 +261,46 @@ class _VaccineReservationPageState
     if (success && context.mounted) {
       context.pop();
     }
+  }
+}
+
+class _NoChildSelectedView extends StatelessWidget {
+  const _NoChildSelectedView();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          '子どもを選択すると接種予定を確認できます',
+          style: theme.textTheme.bodyMedium,
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+}
+
+class _AsyncErrorView extends StatelessWidget {
+  const _AsyncErrorView({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          message,
+          style: theme.textTheme.bodyMedium?.copyWith(color: Colors.red),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
   }
 }
 

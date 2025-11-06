@@ -1,3 +1,4 @@
+import 'package:babymom_diary/src/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/types/gender.dart';
@@ -45,10 +46,8 @@ class ChildForm extends StatefulWidget {
 
 class _ChildFormState extends State<ChildForm> {
   static const List<Color> _palette = <Color>[
-    Colors.redAccent,
-    Colors.pinkAccent,
+    AppColors.primary,
     Colors.orangeAccent,
-    Colors.amber,
     Colors.lightBlueAccent,
     Colors.purpleAccent,
     Colors.teal,
@@ -61,7 +60,7 @@ class _ChildFormState extends State<ChildForm> {
   late Gender _gender;
   DateTime? _birthday;
   DateTime? _dueDate;
-  Color _pickedColor = Colors.blueAccent;
+  Color _pickedColor = AppColors.primary;
 
   @override
   void initState() {
@@ -81,10 +80,10 @@ class _ChildFormState extends State<ChildForm> {
     }
     // no measurement fields
     if (widget.initial == null) {
-      _pickedColor = Colors.redAccent;
+      _pickedColor = AppColors.primary;
     } else {
       final inPalette = _palette.any((c) => c.value == i.color.value);
-      _pickedColor = inPalette ? i.color : Colors.redAccent;
+      _pickedColor = inPalette ? i.color : AppColors.primary;
     }
   }
 
