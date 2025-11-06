@@ -88,23 +88,24 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextFormField(
-                controller: _titleController,
-                cursorColor: AppColors.primary,
-                decoration: const InputDecoration(
-                  labelText: 'タイトル',
-                  border: OutlineInputBorder(),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primary, width: 2),
+                  controller: _titleController,
+                  cursorColor: AppColors.primary,
+                  decoration: const InputDecoration(
+                    labelText: 'タイトル',
+                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    floatingLabelStyle: TextStyle(color: AppColors.primary),
                   ),
-                  floatingLabelStyle: TextStyle(color: AppColors.primary),
-                ),
-                onChanged: viewModel.updateTitle,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'タイトルを入力してください';
-                  }
-                  return null;
-                },
+                  onChanged: viewModel.updateTitle,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'タイトルを入力してください';
+                    }
+                    return null;
+                  },
                 ),
               ),
               const SizedBox(height: 16),
@@ -119,7 +120,8 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
                     labelText: 'メモ',
                     border: OutlineInputBorder(),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                      borderSide:
+                          BorderSide(color: AppColors.primary, width: 2),
                     ),
                     floatingLabelStyle: TextStyle(color: AppColors.primary),
                   ),
@@ -294,7 +296,8 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
                     labelText: 'タイトル',
                     border: OutlineInputBorder(),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                      borderSide:
+                          BorderSide(color: AppColors.primary, width: 2),
                     ),
                     floatingLabelStyle: TextStyle(color: AppColors.primary),
                   ),
@@ -319,7 +322,8 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
                     labelText: 'メモ',
                     border: OutlineInputBorder(),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                      borderSide:
+                          BorderSide(color: AppColors.primary, width: 2),
                     ),
                     floatingLabelStyle: TextStyle(color: AppColors.primary),
                   ),

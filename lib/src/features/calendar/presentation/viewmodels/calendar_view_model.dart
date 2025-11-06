@@ -262,9 +262,6 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     if (requiresRefresh) {
       _refreshEventsSubscription();
       _refreshVaccinationSubscription();
-      _refreshVaccinationSubscription();
-      _refreshVaccinationSubscription();
-      _refreshVaccinationSubscription();
     }
   }
 

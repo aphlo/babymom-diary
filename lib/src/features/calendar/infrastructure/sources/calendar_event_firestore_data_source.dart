@@ -48,9 +48,33 @@ class CalendarEventFirestoreDataSource {
       });
     }).toList();
 
-    // 単一ストリームの場合はそのまま返す
+    // 単一ストリームの場合も distinct を適用
     if (streams.length == 1) {
-      return streams.first;
+      return streams.first.distinct((prev, next) {
+        if (prev.length != next.length) return false;
+
+        // IDでソートして順序を統一
+        final sortedPrev = prev.toList()..sort((a, b) => a.id.compareTo(b.id));
+        final sortedNext = next.toList()..sort((a, b) => a.id.compareTo(b.id));
+
+        // 各イベントのすべてのプロパティを比較
+        for (int i = 0; i < sortedPrev.length; i++) {
+          final eventPrev = sortedPrev[i];
+          final eventNext = sortedNext[i];
+
+          if (eventPrev.id != eventNext.id ||
+              eventPrev.title != eventNext.title ||
+              eventPrev.memo != eventNext.memo ||
+              eventPrev.allDay != eventNext.allDay ||
+              eventPrev.start != eventNext.start ||
+              eventPrev.end != eventNext.end ||
+              eventPrev.iconPath != eventNext.iconPath) {
+            return false; // 異なるイベントが見つかった
+          }
+        }
+
+        return true; // すべて同じ
+      });
     }
 
     // 複数のストリームを効率的に結合
@@ -65,10 +89,28 @@ class CalendarEventFirestoreDataSource {
         ..sort((a, b) => a.start.compareTo(b.start));
     }).distinct((prev, next) {
       if (prev.length != next.length) return false;
-      final prevIds = prev.map((e) => e.id).toSet();
-      final nextIds = next.map((e) => e.id).toSet();
-      return prevIds.difference(nextIds).isEmpty &&
-          nextIds.difference(prevIds).isEmpty;
+
+      // IDでソートして順序を統一
+      final sortedPrev = prev.toList()..sort((a, b) => a.id.compareTo(b.id));
+      final sortedNext = next.toList()..sort((a, b) => a.id.compareTo(b.id));
+
+      // 各イベントのすべてのプロパティを比較
+      for (int i = 0; i < sortedPrev.length; i++) {
+        final eventPrev = sortedPrev[i];
+        final eventNext = sortedNext[i];
+
+        if (eventPrev.id != eventNext.id ||
+            eventPrev.title != eventNext.title ||
+            eventPrev.memo != eventNext.memo ||
+            eventPrev.allDay != eventNext.allDay ||
+            eventPrev.start != eventNext.start ||
+            eventPrev.end != eventNext.end ||
+            eventPrev.iconPath != eventNext.iconPath) {
+          return false; // 異なるイベントが見つかった
+        }
+      }
+
+      return true; // すべて同じ
     });
   }
 
