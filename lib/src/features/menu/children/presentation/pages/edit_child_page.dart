@@ -44,11 +44,13 @@ class _EditChildPageState extends ConsumerState<EditChildPage> {
     if (data != null) {
       final ts = data['birthday'] as Timestamp?;
       final due = data['dueDate'] as Timestamp?;
+      final birthday = ts?.toDate() ?? DateTime.now();
+      final dueDate = due?.toDate() ?? DateTime.now();
       _initial = ChildFormData(
         name: (data['name'] as String?) ?? '',
         gender: genderFromKey(data['gender'] as String?),
-        birthday: ts?.toDate(),
-        dueDate: due?.toDate(),
+        birthday: birthday,
+        dueDate: dueDate,
         color: _parseColor(data['color'] as String?),
       );
     }
@@ -96,8 +98,9 @@ class _EditChildPageState extends ConsumerState<EditChildPage> {
                         id: widget.childId,
                         name: form.name,
                         birthday: form.birthday,
-                        color: colorHex,
+                        dueDate: form.dueDate,
                         gender: form.gender,
+                        color: colorHex,
                       );
                       await ref
                           .read(childrenLocalProvider(hid).notifier)

@@ -14,12 +14,15 @@ final childrenStreamProvider = StreamProvider.autoDispose
   return ds.childrenQuery().snapshots().map((snapshot) {
     return snapshot.docs.map((doc) {
       final data = doc.data();
+      final birthday = (data['birthday'] as Timestamp?)?.toDate() ?? DateTime.now();
+      final dueDate = (data['dueDate'] as Timestamp?)?.toDate() ?? DateTime.now();
       return ChildSummary(
         id: doc.id,
         name: (data['name'] as String?) ?? '未設定',
-        birthday: (data['birthday'] as Timestamp?)?.toDate(),
-        color: data['color'] as String?,
+        birthday: birthday,
+        dueDate: dueDate,
         gender: genderFromKey(data['gender'] as String?),
+        color: data['color'] as String?,
       );
     }).toList();
   });

@@ -7,33 +7,18 @@ import '../../../../../core/types/gender.dart';
 class ChildFormData {
   final String name;
   final Gender gender;
-  final DateTime? birthday;
-  final DateTime? dueDate;
+  final DateTime birthday;
+  final DateTime dueDate;
   final Color color;
 
   const ChildFormData({
-    this.name = '',
-    this.gender = Gender.unknown,
-    this.birthday,
-    this.dueDate,
+    required this.name,
+    required this.gender,
+    required this.birthday,
+    required this.dueDate,
     this.color = Colors.blueAccent,
   });
 
-  ChildFormData copyWith({
-    String? name,
-    Gender? gender,
-    DateTime? birthday,
-    DateTime? dueDate,
-    Color? color,
-  }) {
-    return ChildFormData(
-      name: name ?? this.name,
-      gender: gender ?? this.gender,
-      birthday: birthday ?? this.birthday,
-      dueDate: dueDate ?? this.dueDate,
-      color: color ?? this.color,
-    );
-  }
 }
 
 class ChildForm extends StatefulWidget {
@@ -66,25 +51,25 @@ class _ChildFormState extends State<ChildForm> {
   @override
   void initState() {
     super.initState();
-    final i = widget.initial ?? const ChildFormData();
-    _nameCtrl.text = i.name;
-    _gender = i.gender;
-    _birthday = i.birthday;
-    if (_birthday != null) {
+    if (widget.initial != null) {
+      final i = widget.initial!;
+      _nameCtrl.text = i.name;
+      _gender = i.gender;
+      _birthday = i.birthday;
       _birthdayCtrl.text =
-          '${_birthday!.year}/${_birthday!.month}/${_birthday!.day}';
-    }
-    _dueDate = i.dueDate;
-    if (_dueDate != null) {
+          '${i.birthday.year}/${i.birthday.month}/${i.birthday.day}';
+      _dueDate = i.dueDate;
       _dueDateCtrl.text =
-          '${_dueDate!.year}/${_dueDate!.month}/${_dueDate!.day}';
-    }
-    // no measurement fields
-    if (widget.initial == null) {
-      _pickedColor = AppColors.primary;
-    } else {
+          '${i.dueDate.year}/${i.dueDate.month}/${i.dueDate.day}';
       final inPalette = _palette.any((c) => c.value == i.color.value);
       _pickedColor = inPalette ? i.color : AppColors.primary;
+    } else {
+      // 新規追加の場合、デフォルト値を設定
+      _nameCtrl.text = '';
+      _gender = Gender.unknown;
+      _birthday = null;
+      _dueDate = null;
+      _pickedColor = AppColors.primary;
     }
   }
 
@@ -137,11 +122,12 @@ class _ChildFormState extends State<ChildForm> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // バリデーションが通った後なので、_birthdayと_dueDateは必ずnon-null
     final data = ChildFormData(
       name: _nameCtrl.text.trim(),
       gender: _gender,
-      birthday: _birthday,
-      dueDate: _dueDate,
+      birthday: _birthday!,
+      dueDate: _dueDate!,
       color: _pickedColor,
     );
 
@@ -172,6 +158,8 @@ class _ChildFormState extends State<ChildForm> {
               DropdownMenuItem(value: Gender.male, child: Text('男の子')),
               DropdownMenuItem(value: Gender.female, child: Text('女の子')),
             ],
+            validator: (v) =>
+                (v == null || v == Gender.unknown) ? '性別を選択してください' : null,
             onChanged: (v) => setState(() => _gender = v ?? Gender.unknown),
           ),
           const SizedBox(height: 12),
@@ -179,21 +167,12 @@ class _ChildFormState extends State<ChildForm> {
             controller: _birthdayCtrl,
             readOnly: true,
             showCursor: false,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: '誕生日',
-              hintText: '未選択',
-              suffixIcon: _birthday != null
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        setState(() {
-                          _birthday = null;
-                          _birthdayCtrl.clear();
-                        });
-                      },
-                    )
-                  : null,
+              hintText: '選択してください',
             ),
+            validator: (v) =>
+                _birthday == null ? '誕生日を選択してください' : null,
             onTap: _pickBirthday,
           ),
           const SizedBox(height: 12),
@@ -201,21 +180,12 @@ class _ChildFormState extends State<ChildForm> {
             controller: _dueDateCtrl,
             readOnly: true,
             showCursor: false,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: '出産予定日',
-              hintText: '未選択',
-              suffixIcon: _dueDate != null
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        setState(() {
-                          _dueDate = null;
-                          _dueDateCtrl.clear();
-                        });
-                      },
-                    )
-                  : null,
+              hintText: '選択してください',
             ),
+            validator: (v) =>
+                _dueDate == null ? '出産予定日を選択してください' : null,
             onTap: _pickDueDate,
           ),
           // measurement fields removed

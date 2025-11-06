@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/firebase/household_service.dart';
+import '../../application/selected_child_provider.dart';
 import '../../data/infrastructure/child_firestore_data_source.dart';
 import '../widgets/child_form.dart';
 
@@ -36,26 +37,33 @@ class _AddChildPageState extends ConsumerState<AddChildPage> {
               final ds = ChildFirestoreDataSource(db, householdId);
 
               try {
-                await ds.addChild(
+                final childId = await ds.addChild(
                   name: data.name,
                   gender: data.gender,
                   birthday: data.birthday,
                   dueDate: data.dueDate,
                   color: _toHex(data.color),
                 );
+
+                // 追加した子供を自動的に選択状態にする
+                await ref
+                    .read(selectedChildControllerProvider.notifier)
+                    .select(childId);
+
+                if (context.mounted) {
+                  context.pop();
+                }
               } on FirebaseException catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('保存に失敗しました: ${e.message}')),
                   );
-                  context.pop();
                 }
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('保存に失敗しました: $e')),
                   );
-                  context.pop();
                 }
               }
             },

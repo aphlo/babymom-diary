@@ -14,21 +14,22 @@ class ChildFirestoreDataSource {
 
   Query<Map<String, dynamic>> childrenQuery() => _col.orderBy('birthday');
 
-  Future<void> addChild({
+  Future<String> addChild({
     required String name,
     required Gender gender,
-    DateTime? birthday,
-    DateTime? dueDate,
+    required DateTime birthday,
+    required DateTime dueDate,
     required String color,
   }) async {
-    await _col.add({
+    final docRef = await _col.add({
       'name': name,
       'gender': gender.key,
-      'birthday': birthday != null ? Timestamp.fromDate(birthday) : null,
-      'dueDate': dueDate != null ? Timestamp.fromDate(dueDate) : null,
+      'birthday': Timestamp.fromDate(birthday),
+      'dueDate': Timestamp.fromDate(dueDate),
       'color': color, // hex string like #RRGGBB
       'createdAt': FieldValue.serverTimestamp(),
     });
+    return docRef.id;
   }
 
   Future<DocumentSnapshot<Map<String, dynamic>>> getChild(String id) =>
@@ -38,15 +39,15 @@ class ChildFirestoreDataSource {
     required String id,
     required String name,
     required Gender gender,
-    DateTime? birthday,
-    DateTime? dueDate,
+    required DateTime birthday,
+    required DateTime dueDate,
     required String color,
   }) async {
     await _col.doc(id).set({
       'name': name,
       'gender': gender.key,
-      'birthday': birthday != null ? Timestamp.fromDate(birthday) : null,
-      'dueDate': dueDate != null ? Timestamp.fromDate(dueDate) : null,
+      'birthday': Timestamp.fromDate(birthday),
+      'dueDate': Timestamp.fromDate(dueDate),
       'color': color,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
