@@ -116,6 +116,7 @@ class AddCalendarEventViewModel extends StateNotifier<AddCalendarEventState> {
     DatePicker.showTimePicker(
       context,
       showTitleActions: true,
+      showSecondsColumn: false,
       onConfirm: (time) {
         updateStartTime(TimeOfDay.fromDateTime(time));
       },
@@ -134,6 +135,7 @@ class AddCalendarEventViewModel extends StateNotifier<AddCalendarEventState> {
     DatePicker.showTimePicker(
       context,
       showTitleActions: true,
+      showSecondsColumn: false,
       onConfirm: (time) {
         updateEndTime(TimeOfDay.fromDateTime(time));
       },

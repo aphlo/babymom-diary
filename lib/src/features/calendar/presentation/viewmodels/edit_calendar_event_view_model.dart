@@ -142,6 +142,7 @@ class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
     DatePicker.showTimePicker(
       context,
       showTitleActions: true,
+      showSecondsColumn: false,
       onConfirm: (time) {
         updateStartTime(TimeOfDay.fromDateTime(time));
       },
@@ -160,6 +161,7 @@ class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
     DatePicker.showTimePicker(
       context,
       showTitleActions: true,
+      showSecondsColumn: false,
       onConfirm: (time) {
         updateEndTime(TimeOfDay.fromDateTime(time));
       },
