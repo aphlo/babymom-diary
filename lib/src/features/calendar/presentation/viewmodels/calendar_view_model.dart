@@ -246,8 +246,10 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     if (a.length != b.length) return false;
 
     // IDでソートして、各イベントの内容を比較
-    final aSorted = List<CalendarEvent>.from(a)..sort((x, y) => x.id.compareTo(y.id));
-    final bSorted = List<CalendarEvent>.from(b)..sort((x, y) => x.id.compareTo(y.id));
+    final aSorted = List<CalendarEvent>.from(a)
+      ..sort((x, y) => x.id.compareTo(y.id));
+    final bSorted = List<CalendarEvent>.from(b)
+      ..sort((x, y) => x.id.compareTo(y.id));
 
     for (var i = 0; i < aSorted.length; i++) {
       if (aSorted[i] != bSorted[i]) {
