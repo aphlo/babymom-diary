@@ -51,7 +51,7 @@ class VaccinesLegend extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
         border: Border(top: borderSide),
@@ -62,8 +62,8 @@ class VaccinesLegend extends StatelessWidget {
           Wrap(
             alignment: WrapAlignment.start,
             crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 24,
-            runSpacing: 12,
+            spacing: 20,
+            runSpacing: 8,
             children: <Widget>[
               _DoseSequenceLegend(
                 label: '一般的な接種時期',
@@ -87,12 +87,12 @@ class VaccinesLegend extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Wrap(
             alignment: WrapAlignment.start,
             crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 16,
-            runSpacing: 12,
+            spacing: 12,
+            runSpacing: 8,
             children: <Widget>[
               _ColorLegend(
                 label: '標準的な\n接種期間',
@@ -167,7 +167,7 @@ class _DoseSequenceLegend extends StatelessWidget {
               )
               .toList(),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 4),
         _LegendLabel(
           text: label,
           style: textStyle?.copyWith(fontWeight: FontWeight.w500),
@@ -233,7 +233,7 @@ class _ColorLegend extends StatelessWidget {
           height: 18,
           decoration: decoration,
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 4),
         _LegendLabel(
           text: label,
           style: textStyle?.copyWith(fontWeight: FontWeight.w500),
@@ -276,7 +276,7 @@ class _StatusLegend extends StatelessWidget {
                   ? Colors.white
                   : null,
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 4),
         _LegendLabel(
           text: label,
           style: resolvedStyle,
