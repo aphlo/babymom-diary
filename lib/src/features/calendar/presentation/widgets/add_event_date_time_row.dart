@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/app_colors.dart';
+
 class AddEventDateTimeRow extends StatelessWidget {
   const AddEventDateTimeRow({
     required this.label,
@@ -76,7 +78,7 @@ class _PickerButton extends StatelessWidget {
       onPressed: onTap,
       child: Row(
         children: [
-          Icon(icon, size: 20),
+          Icon(icon, size: 20, color: AppColors.primary),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

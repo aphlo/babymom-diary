@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/app_colors.dart';
+
 class AddEventIconPicker extends StatelessWidget {
   const AddEventIconPicker({
     required this.iconPaths,
@@ -63,7 +65,7 @@ class _IconChoice extends StatelessWidget {
         decoration: BoxDecoration(
           border: selected
               ? Border.all(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: AppColors.primary,
                   width: 2,
                 )
               : null,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:babymom_diary/src/core/theme/app_colors.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/add_calendar_event_view_model.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/edit_calendar_event_view_model.dart';
@@ -75,24 +76,6 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('予定を追加'),
-        actions: [
-          TextButton(
-            onPressed: state.canSubmit && !state.isSubmitting
-                ? () {
-                    if (_formKey.currentState!.validate()) {
-                      final result = viewModel.buildResult();
-                      if (result != null) {
-                        Navigator.of(context).pop(result);
-                      }
-                    }
-                  }
-                : null,
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('保存'),
-          ),
-        ],
       ),
       body: Form(
         key: _formKey,
@@ -104,9 +87,14 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
               // タイトル入力
               TextFormField(
                 controller: _titleController,
+                cursorColor: AppColors.primary,
                 decoration: const InputDecoration(
                   labelText: 'タイトル',
                   border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.primary, width: 2),
+                  ),
+                  floatingLabelStyle: TextStyle(color: AppColors.primary),
                 ),
                 onChanged: viewModel.updateTitle,
                 validator: (value) {
@@ -121,9 +109,14 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
               // メモ入力
               TextFormField(
                 controller: _memoController,
+                cursorColor: AppColors.primary,
                 decoration: const InputDecoration(
                   labelText: 'メモ',
                   border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.primary, width: 2),
+                  ),
+                  floatingLabelStyle: TextStyle(color: AppColors.primary),
                 ),
                 maxLines: 3,
                 onChanged: viewModel.updateMemo,
@@ -139,6 +132,7 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
                     value: state.allDay,
                     onChanged:
                         state.isSubmitting ? null : viewModel.updateAllDay,
+                    activeTrackColor: AppColors.primary,
                   ),
                 ],
               ),
@@ -192,18 +186,44 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.errorContainer,
+                    color: AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     state.validationMessage!,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onErrorContainer,
+                    style: const TextStyle(
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
               ],
             ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: state.canSubmit && !state.isSubmitting
+                  ? () {
+                      if (_formKey.currentState!.validate()) {
+                        final result = viewModel.buildResult();
+                        if (result != null) {
+                          Navigator.of(context).pop(result);
+                        }
+                      }
+                    }
+                  : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('保存'),
+            ),
           ),
         ),
       ),
@@ -233,16 +253,6 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
                   )
                 : const Icon(Icons.delete),
           ),
-          // 保存ボタン
-          TextButton(
-            onPressed: state.canSubmit && !state.isSubmitting
-                ? () => _handleUpdate(context, viewModel)
-                : null,
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('保存'),
-          ),
         ],
       ),
       body: Form(
@@ -255,9 +265,14 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
               // タイトル入力
               TextFormField(
                 controller: _titleController,
+                cursorColor: AppColors.primary,
                 decoration: const InputDecoration(
                   labelText: 'タイトル',
                   border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.primary, width: 2),
+                  ),
+                  floatingLabelStyle: TextStyle(color: AppColors.primary),
                 ),
                 onChanged: viewModel.updateTitle,
                 validator: (value) {
@@ -272,9 +287,14 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
               // メモ入力
               TextFormField(
                 controller: _memoController,
+                cursorColor: AppColors.primary,
                 decoration: const InputDecoration(
                   labelText: 'メモ',
                   border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.primary, width: 2),
+                  ),
+                  floatingLabelStyle: TextStyle(color: AppColors.primary),
                 ),
                 maxLines: 3,
                 onChanged: viewModel.updateMemo,
@@ -291,6 +311,7 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
                     onChanged: state.isSubmitting || state.isDeleting
                         ? null
                         : viewModel.updateAllDay,
+                    activeTrackColor: AppColors.primary,
                   ),
                 ],
               ),
@@ -344,18 +365,33 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.errorContainer,
+                    color: AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     state.validationMessage!,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onErrorContainer,
+                    style: const TextStyle(
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
               ],
             ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: state.canSubmit && !state.isSubmitting
+                  ? () => _handleUpdate(context, viewModel)
+                  : null,
+              child: const Text('保存'),
+            ),
           ),
         ),
       ),
@@ -441,7 +477,7 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
               }
             },
             style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: AppColors.primary,
             ),
             child: const Text('削除'),
           ),
