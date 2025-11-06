@@ -1,4 +1,4 @@
-package com.example.babymom_diary
+package com.aphlo.babymomdiary
 
 import io.flutter.embedding.android.FlutterActivity
 
