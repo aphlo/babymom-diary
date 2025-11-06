@@ -80,12 +80,14 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 16),
               // タイトル入力
-              TextFormField(
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextFormField(
                 controller: _titleController,
                 cursorColor: AppColors.primary,
                 decoration: const InputDecoration(
@@ -103,73 +105,89 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
                   }
                   return null;
                 },
+                ),
               ),
               const SizedBox(height: 16),
 
               // メモ入力
-              TextFormField(
-                controller: _memoController,
-                cursorColor: AppColors.primary,
-                decoration: const InputDecoration(
-                  labelText: 'メモ',
-                  border: OutlineInputBorder(),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primary, width: 2),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextFormField(
+                  controller: _memoController,
+                  cursorColor: AppColors.primary,
+                  decoration: const InputDecoration(
+                    labelText: 'メモ',
+                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    floatingLabelStyle: TextStyle(color: AppColors.primary),
                   ),
-                  floatingLabelStyle: TextStyle(color: AppColors.primary),
+                  maxLines: 3,
+                  onChanged: viewModel.updateMemo,
                 ),
-                maxLines: 3,
-                onChanged: viewModel.updateMemo,
               ),
               const SizedBox(height: 16),
 
               // 終日フラグ
-              Row(
-                children: [
-                  const Text('終日'),
-                  const Spacer(),
-                  Switch(
-                    value: state.allDay,
-                    onChanged:
-                        state.isSubmitting ? null : viewModel.updateAllDay,
-                    activeTrackColor: AppColors.primary,
-                  ),
-                ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    const Text('終日'),
+                    const Spacer(),
+                    Switch(
+                      value: state.allDay,
+                      onChanged:
+                          state.isSubmitting ? null : viewModel.updateAllDay,
+                      activeTrackColor: AppColors.primary,
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
 
               // 開始日時
-              AddEventDateTimeRow(
-                label: '開始',
-                dateLabel: DateFormat('yyyy/MM/dd').format(state.startDate),
-                onDateTap: () => viewModel.showStartDatePicker(context),
-                timeLabel: state.allDay
-                    ? null
-                    : '${state.startTime.hour.toString().padLeft(2, '0')}:${state.startTime.minute.toString().padLeft(2, '0')}',
-                onTimeTap: state.allDay
-                    ? null
-                    : () => viewModel.showStartTimePicker(context),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: AddEventDateTimeRow(
+                  label: '開始',
+                  dateLabel: DateFormat('yyyy/MM/dd').format(state.startDate),
+                  onDateTap: () => viewModel.showStartDatePicker(context),
+                  timeLabel: state.allDay
+                      ? null
+                      : '${state.startTime.hour.toString().padLeft(2, '0')}:${state.startTime.minute.toString().padLeft(2, '0')}',
+                  onTimeTap: state.allDay
+                      ? null
+                      : () => viewModel.showStartTimePicker(context),
+                ),
               ),
               const SizedBox(height: 8),
 
               // 終了日時（終日の場合は非表示）
               if (!state.allDay)
-                AddEventDateTimeRow(
-                  label: '終了',
-                  dateLabel: DateFormat('yyyy/MM/dd').format(state.endDate),
-                  onDateTap: () => viewModel.showEndDatePicker(context),
-                  timeLabel:
-                      '${state.endTime.hour.toString().padLeft(2, '0')}:${state.endTime.minute.toString().padLeft(2, '0')}',
-                  onTimeTap: () => viewModel.showEndTimePicker(context),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: AddEventDateTimeRow(
+                    label: '終了',
+                    dateLabel: DateFormat('yyyy/MM/dd').format(state.endDate),
+                    onDateTap: () => viewModel.showEndDatePicker(context),
+                    timeLabel:
+                        '${state.endTime.hour.toString().padLeft(2, '0')}:${state.endTime.minute.toString().padLeft(2, '0')}',
+                    onTimeTap: () => viewModel.showEndTimePicker(context),
+                  ),
                 ),
               const SizedBox(height: 24),
 
               // アイコン選択
-              const Text(
-                'アイコン',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: const Text(
+                  'アイコン',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -183,20 +201,24 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
               // エラーメッセージ
               if (state.validationMessage != null) ...[
                 const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    state.validationMessage!,
-                    style: const TextStyle(
-                      color: AppColors.primary,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      state.validationMessage!,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                      ),
                     ),
                   ),
                 ),
               ],
+              const SizedBox(height: 16),
             ],
           ),
         ),
@@ -258,97 +280,115 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 16),
               // タイトル入力
-              TextFormField(
-                controller: _titleController,
-                cursorColor: AppColors.primary,
-                decoration: const InputDecoration(
-                  labelText: 'タイトル',
-                  border: OutlineInputBorder(),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primary, width: 2),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextFormField(
+                  controller: _titleController,
+                  cursorColor: AppColors.primary,
+                  decoration: const InputDecoration(
+                    labelText: 'タイトル',
+                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    floatingLabelStyle: TextStyle(color: AppColors.primary),
                   ),
-                  floatingLabelStyle: TextStyle(color: AppColors.primary),
+                  onChanged: viewModel.updateTitle,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'タイトルを入力してください';
+                    }
+                    return null;
+                  },
                 ),
-                onChanged: viewModel.updateTitle,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'タイトルを入力してください';
-                  }
-                  return null;
-                },
               ),
               const SizedBox(height: 16),
 
               // メモ入力
-              TextFormField(
-                controller: _memoController,
-                cursorColor: AppColors.primary,
-                decoration: const InputDecoration(
-                  labelText: 'メモ',
-                  border: OutlineInputBorder(),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primary, width: 2),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextFormField(
+                  controller: _memoController,
+                  cursorColor: AppColors.primary,
+                  decoration: const InputDecoration(
+                    labelText: 'メモ',
+                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    floatingLabelStyle: TextStyle(color: AppColors.primary),
                   ),
-                  floatingLabelStyle: TextStyle(color: AppColors.primary),
+                  maxLines: 3,
+                  onChanged: viewModel.updateMemo,
                 ),
-                maxLines: 3,
-                onChanged: viewModel.updateMemo,
               ),
               const SizedBox(height: 16),
 
               // 終日フラグ
-              Row(
-                children: [
-                  const Text('終日'),
-                  const Spacer(),
-                  Switch(
-                    value: state.allDay,
-                    onChanged: state.isSubmitting || state.isDeleting
-                        ? null
-                        : viewModel.updateAllDay,
-                    activeTrackColor: AppColors.primary,
-                  ),
-                ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    const Text('終日'),
+                    const Spacer(),
+                    Switch(
+                      value: state.allDay,
+                      onChanged: state.isSubmitting || state.isDeleting
+                          ? null
+                          : viewModel.updateAllDay,
+                      activeTrackColor: AppColors.primary,
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
 
               // 開始日時
-              AddEventDateTimeRow(
-                label: '開始',
-                dateLabel: DateFormat('yyyy/MM/dd').format(state.startDate),
-                onDateTap: () => viewModel.showStartDatePicker(context),
-                timeLabel: state.allDay
-                    ? null
-                    : '${state.startTime.hour.toString().padLeft(2, '0')}:${state.startTime.minute.toString().padLeft(2, '0')}',
-                onTimeTap: state.allDay
-                    ? null
-                    : () => viewModel.showStartTimePicker(context),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: AddEventDateTimeRow(
+                  label: '開始',
+                  dateLabel: DateFormat('yyyy/MM/dd').format(state.startDate),
+                  onDateTap: () => viewModel.showStartDatePicker(context),
+                  timeLabel: state.allDay
+                      ? null
+                      : '${state.startTime.hour.toString().padLeft(2, '0')}:${state.startTime.minute.toString().padLeft(2, '0')}',
+                  onTimeTap: state.allDay
+                      ? null
+                      : () => viewModel.showStartTimePicker(context),
+                ),
               ),
               const SizedBox(height: 8),
 
               // 終了日時（終日の場合は非表示）
               if (!state.allDay)
-                AddEventDateTimeRow(
-                  label: '終了',
-                  dateLabel: DateFormat('yyyy/MM/dd').format(state.endDate),
-                  onDateTap: () => viewModel.showEndDatePicker(context),
-                  timeLabel:
-                      '${state.endTime.hour.toString().padLeft(2, '0')}:${state.endTime.minute.toString().padLeft(2, '0')}',
-                  onTimeTap: () => viewModel.showEndTimePicker(context),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: AddEventDateTimeRow(
+                    label: '終了',
+                    dateLabel: DateFormat('yyyy/MM/dd').format(state.endDate),
+                    onDateTap: () => viewModel.showEndDatePicker(context),
+                    timeLabel:
+                        '${state.endTime.hour.toString().padLeft(2, '0')}:${state.endTime.minute.toString().padLeft(2, '0')}',
+                    onTimeTap: () => viewModel.showEndTimePicker(context),
+                  ),
                 ),
               const SizedBox(height: 24),
 
               // アイコン選択
-              const Text(
-                'アイコン',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: const Text(
+                  'アイコン',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -362,20 +402,24 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
               // エラーメッセージ
               if (state.validationMessage != null) ...[
                 const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    state.validationMessage!,
-                    style: const TextStyle(
-                      color: AppColors.primary,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      state.validationMessage!,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                      ),
                     ),
                   ),
                 ),
               ],
+              const SizedBox(height: 16),
             ],
           ),
         ),

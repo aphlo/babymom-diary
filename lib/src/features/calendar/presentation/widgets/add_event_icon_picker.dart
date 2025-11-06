@@ -21,7 +21,7 @@ class AddEventIconPicker extends StatelessWidget {
     return SizedBox(
       height: 112,
       child: ListView.separated(
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(
           parent: AlwaysScrollableScrollPhysics(),
