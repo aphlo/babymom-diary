@@ -9,6 +9,7 @@ class CalendarDayCell extends StatelessWidget {
     required this.isToday,
     required this.isSelected,
     required this.isOutside,
+    this.isHoliday = false,
     super.key,
   });
 
@@ -17,6 +18,7 @@ class CalendarDayCell extends StatelessWidget {
   final bool isToday;
   final bool isSelected;
   final bool isOutside;
+  final bool isHoliday;
 
   Color _borderColor(BuildContext context) {
     if (isSelected) {
@@ -42,17 +44,24 @@ class CalendarDayCell extends StatelessWidget {
     final base = Theme.of(context).textTheme.bodyLarge?.color ??
         Theme.of(context).colorScheme.onSurface;
     Color color;
-    switch (day.weekday) {
-      case DateTime.sunday:
-        color = Colors.red;
-        break;
-      case DateTime.saturday:
-        color = Colors.blue;
-        break;
-      default:
-        color = base;
-        break;
+
+    // 祝日は赤色
+    if (isHoliday) {
+      color = Colors.red;
+    } else {
+      switch (day.weekday) {
+        case DateTime.sunday:
+          color = Colors.red;
+          break;
+        case DateTime.saturday:
+          color = Colors.blue;
+          break;
+        default:
+          color = base;
+          break;
+      }
     }
+
     if (isOutside) {
       return color.withOpacity(0.35);
     }

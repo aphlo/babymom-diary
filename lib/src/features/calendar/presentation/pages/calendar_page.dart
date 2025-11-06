@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:holiday_jp/holiday_jp.dart' as holiday_jp;
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -141,6 +142,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
               locale: 'ja_JP',
               availableGestures: AvailableGestures.horizontalSwipe,
               rowHeight: 54,
+              sixWeekMonthsEnforced: true,
               eventLoader: (day) => state.eventsForDay(day),
               headerStyle: const HeaderStyle(
                 formatButtonVisible: false,
@@ -208,42 +210,50 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                 },
                 defaultBuilder: (context, day, focusedDay) {
                   final events = state.eventsForDay(day);
+                  final isHoliday = holiday_jp.isHoliday(day);
                   return CalendarDayCell(
                     day: day,
                     events: events,
                     isToday: isSameDay(day, DateTime.now()),
                     isSelected: isSameDay(day, state.selectedDay),
                     isOutside: false,
+                    isHoliday: isHoliday,
                   );
                 },
                 todayBuilder: (context, day, focusedDay) {
                   final events = state.eventsForDay(day);
+                  final isHoliday = holiday_jp.isHoliday(day);
                   return CalendarDayCell(
                     day: day,
                     events: events,
                     isToday: true,
                     isSelected: isSameDay(day, state.selectedDay),
                     isOutside: false,
+                    isHoliday: isHoliday,
                   );
                 },
                 selectedBuilder: (context, day, focusedDay) {
                   final events = state.eventsForDay(day);
+                  final isHoliday = holiday_jp.isHoliday(day);
                   return CalendarDayCell(
                     day: day,
                     events: events,
                     isToday: isSameDay(day, DateTime.now()),
                     isSelected: true,
                     isOutside: false,
+                    isHoliday: isHoliday,
                   );
                 },
                 outsideBuilder: (context, day, focusedDay) {
                   final events = state.eventsForDay(day);
+                  final isHoliday = holiday_jp.isHoliday(day);
                   return CalendarDayCell(
                     day: day,
                     events: events,
                     isToday: isSameDay(day, DateTime.now()),
                     isSelected: isSameDay(day, state.selectedDay),
                     isOutside: true,
+                    isHoliday: isHoliday,
                   );
                 },
               ),
@@ -259,9 +269,36 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  headerFormatter.format(state.selectedDay),
-                  style: Theme.of(context).textTheme.titleMedium,
+                Expanded(
+                  child: Builder(
+                    builder: (context) {
+                      final holiday = holiday_jp.getHoliday(state.selectedDay);
+                      return FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          children: [
+                            Text(
+                              headerFormatter.format(state.selectedDay),
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            if (holiday != null) ...[
+                              const SizedBox(width: 8),
+                              Text(
+                                '(${holiday.name})',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      color: Colors.red,
+                                    ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.settings),
