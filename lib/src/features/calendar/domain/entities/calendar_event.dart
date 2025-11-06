@@ -52,4 +52,31 @@ class CalendarEvent {
     final d = DateTime(date.year, date.month, date.day);
     return !d.isBefore(startDateOnly) && !d.isAfter(endDateOnly);
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is CalendarEvent &&
+        other.id == id &&
+        other.title == title &&
+        other.memo == memo &&
+        other.allDay == allDay &&
+        other.start == start &&
+        other.end == end &&
+        other.iconPath == iconPath &&
+        other.householdId == householdId;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        title.hashCode ^
+        memo.hashCode ^
+        allDay.hashCode ^
+        start.hashCode ^
+        end.hashCode ^
+        iconPath.hashCode ^
+        householdId.hashCode;
+  }
 }

@@ -275,8 +275,7 @@ class CalendarEventFirestoreDataSource {
           }
 
           final currentData = doc.data() as Map<String, dynamic>;
-          final events =
-              Map<String, dynamic>.from(currentData['events'] ?? {});
+          final events = Map<String, dynamic>.from(currentData['events'] ?? {});
 
           if (!events.containsKey(eventId)) {
             throw Exception('Event not found: $eventId');

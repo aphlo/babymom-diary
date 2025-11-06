@@ -101,13 +101,48 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
                   ),
                   onChanged: viewModel.updateTitle,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'タイトルを入力してください';
+                    if (state.titleError != null) {
+                      return state.titleError;
                     }
                     return null;
                   },
                 ),
               ),
+
+              // タイトルエラーメッセージ
+              if (state.titleError != null) ...[
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            state.titleError!,
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 16),
 
               // メモ入力
@@ -166,19 +201,56 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
               ),
               const SizedBox(height: 8),
 
-              // 終了日時（終日の場合は非表示）
-              if (!state.allDay)
+              // 終了日時
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: AddEventDateTimeRow(
+                  label: '終了',
+                  dateLabel: DateFormat('yyyy/MM/dd').format(state.endDate),
+                  onDateTap: () => viewModel.showEndDatePicker(context),
+                  timeLabel: state.allDay
+                      ? null
+                      : '${state.endTime.hour.toString().padLeft(2, '0')}:${state.endTime.minute.toString().padLeft(2, '0')}',
+                  onTimeTap: state.allDay
+                      ? null
+                      : () => viewModel.showEndTimePicker(context),
+                ),
+              ),
+
+              // エラーメッセージ（終了日時の直下に表示）
+              if (state.dateTimeError != null) ...[
+                const SizedBox(height: 8),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: AddEventDateTimeRow(
-                    label: '終了',
-                    dateLabel: DateFormat('yyyy/MM/dd').format(state.endDate),
-                    onDateTap: () => viewModel.showEndDatePicker(context),
-                    timeLabel:
-                        '${state.endTime.hour.toString().padLeft(2, '0')}:${state.endTime.minute.toString().padLeft(2, '0')}',
-                    onTimeTap: () => viewModel.showEndTimePicker(context),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            state.dateTimeError!,
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
+              ],
+
               const SizedBox(height: 24),
 
               // アイコン選択
@@ -198,28 +270,6 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
                 selectedPath: state.selectedIconPath,
                 onChanged: viewModel.selectIcon,
               ),
-              const SizedBox(height: 32),
-
-              // エラーメッセージ
-              if (state.validationMessage != null) ...[
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      state.validationMessage!,
-                      style: const TextStyle(
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
               const SizedBox(height: 16),
             ],
           ),
@@ -232,13 +282,13 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              onPressed: state.canSubmit && !state.isSubmitting
+              onPressed: !state.isSubmitting
                   ? () {
-                      if (_formKey.currentState!.validate()) {
-                        final result = viewModel.buildResult();
-                        if (result != null) {
-                          Navigator.of(context).pop(result);
-                        }
+                      final result = viewModel.buildResult();
+                      // タイトルのバリデーションエラーを表示
+                      _formKey.currentState!.validate();
+                      if (result != null) {
+                        Navigator.of(context).pop(result);
                       }
                     }
                   : null,
@@ -303,13 +353,48 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
                   ),
                   onChanged: viewModel.updateTitle,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'タイトルを入力してください';
+                    if (state.titleError != null) {
+                      return state.titleError;
                     }
                     return null;
                   },
                 ),
               ),
+
+              // タイトルエラーメッセージ
+              if (state.titleError != null) ...[
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            state.titleError!,
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 16),
 
               // メモ入力
@@ -369,19 +454,56 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
               ),
               const SizedBox(height: 8),
 
-              // 終了日時（終日の場合は非表示）
-              if (!state.allDay)
+              // 終了日時
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: AddEventDateTimeRow(
+                  label: '終了',
+                  dateLabel: DateFormat('yyyy/MM/dd').format(state.endDate),
+                  onDateTap: () => viewModel.showEndDatePicker(context),
+                  timeLabel: state.allDay
+                      ? null
+                      : '${state.endTime.hour.toString().padLeft(2, '0')}:${state.endTime.minute.toString().padLeft(2, '0')}',
+                  onTimeTap: state.allDay
+                      ? null
+                      : () => viewModel.showEndTimePicker(context),
+                ),
+              ),
+
+              // エラーメッセージ（終了日時の直下に表示）
+              if (state.dateTimeError != null) ...[
+                const SizedBox(height: 8),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: AddEventDateTimeRow(
-                    label: '終了',
-                    dateLabel: DateFormat('yyyy/MM/dd').format(state.endDate),
-                    onDateTap: () => viewModel.showEndDatePicker(context),
-                    timeLabel:
-                        '${state.endTime.hour.toString().padLeft(2, '0')}:${state.endTime.minute.toString().padLeft(2, '0')}',
-                    onTimeTap: () => viewModel.showEndTimePicker(context),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            state.dateTimeError!,
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
+              ],
+
               const SizedBox(height: 24),
 
               // アイコン選択
@@ -401,28 +523,6 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
                 selectedPath: state.selectedIconPath,
                 onChanged: viewModel.selectIcon,
               ),
-              const SizedBox(height: 32),
-
-              // エラーメッセージ
-              if (state.validationMessage != null) ...[
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      state.validationMessage!,
-                      style: const TextStyle(
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
               const SizedBox(height: 16),
             ],
           ),
@@ -435,9 +535,13 @@ class _AddCalendarEventPageState extends ConsumerState<AddCalendarEventPage> {
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              onPressed: state.canSubmit && !state.isSubmitting
+              onPressed: !state.isSubmitting
                   ? () => _handleUpdate(context, viewModel)
                   : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
               child: const Text('保存'),
             ),
           ),

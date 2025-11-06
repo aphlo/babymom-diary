@@ -13,14 +13,47 @@ class CalendarEventTile extends StatelessWidget {
   final CalendarEvent event;
   final VoidCallback? onTap;
 
+  String _buildSubtitle({
+    required bool isMultiDay,
+    required DateFormat timeFormatter,
+    required DateFormat dateFormatter,
+    required DateFormat dateTimeFormatter,
+  }) {
+    if (isMultiDay) {
+      if (event.allDay) {
+        // 複数日の終日: 「1/1 - 1/3」
+        return '${dateFormatter.format(event.start)} - ${dateFormatter.format(event.end)}';
+      } else {
+        // 複数日の時間指定: 「1/1 09:00 - 1/3 18:00」
+        return '${dateTimeFormatter.format(event.start)} - ${dateTimeFormatter.format(event.end)}';
+      }
+    } else {
+      if (event.allDay) {
+        // 単一日の終日: 「終日」
+        return '終日';
+      } else {
+        // 単一日の時間指定: 「09:00 - 18:00」
+        return '${timeFormatter.format(event.start)} - ${timeFormatter.format(event.end)}';
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final timeFormatter = DateFormat('HH:mm');
+    final dateFormatter = DateFormat('M/d');
+    final dateTimeFormatter = DateFormat('M/d HH:mm');
     final isVaccination = event.id.startsWith('vaccination_');
 
-    final subtitle = event.allDay
-        ? '終日'
-        : '${timeFormatter.format(event.start)} - ${timeFormatter.format(event.end)}';
+    // 複数日にまたがるかチェック
+    final isMultiDay = event.startDateOnly != event.endDateOnly;
+
+    final subtitle = _buildSubtitle(
+      isMultiDay: isMultiDay,
+      timeFormatter: timeFormatter,
+      dateFormatter: dateFormatter,
+      dateTimeFormatter: dateTimeFormatter,
+    );
 
     Widget? icon;
     if (event.iconPath.isNotEmpty) {

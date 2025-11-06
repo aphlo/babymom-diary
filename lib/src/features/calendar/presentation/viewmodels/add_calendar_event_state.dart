@@ -11,7 +11,8 @@ class AddCalendarEventState {
     required this.endTime,
     required this.selectedIconPath,
     required this.isSubmitting,
-    required this.validationMessage,
+    required this.titleError,
+    required this.dateTimeError,
     required List<String> availableIconPaths,
   }) : availableIconPaths = List<String>.unmodifiable(availableIconPaths);
 
@@ -24,18 +25,17 @@ class AddCalendarEventState {
   final TimeOfDay endTime;
   final String selectedIconPath;
   final bool isSubmitting;
-  final String? validationMessage;
+  final String? titleError;
+  final String? dateTimeError;
   final List<String> availableIconPaths;
 
   bool get canSubmit {
     if (title.trim().isEmpty) return false;
 
-    // 終日でない場合は時間の整合性をチェック
-    if (!allDay) {
-      final start = effectiveStart;
-      final end = effectiveEnd;
-      if (!end.isAfter(start)) return false;
-    }
+    // 終了日時が開始日時より後であることをチェック
+    final start = effectiveStart;
+    final end = effectiveEnd;
+    if (!end.isAfter(start)) return false;
 
     return true;
   }
@@ -70,7 +70,8 @@ class AddCalendarEventState {
     TimeOfDay? endTime,
     String? selectedIconPath,
     bool? isSubmitting,
-    String? validationMessage,
+    String? titleError,
+    String? dateTimeError,
     List<String>? availableIconPaths,
   }) {
     return AddCalendarEventState(
@@ -83,7 +84,8 @@ class AddCalendarEventState {
       endTime: endTime ?? this.endTime,
       selectedIconPath: selectedIconPath ?? this.selectedIconPath,
       isSubmitting: isSubmitting ?? this.isSubmitting,
-      validationMessage: validationMessage,
+      titleError: titleError,
+      dateTimeError: dateTimeError,
       availableIconPaths: availableIconPaths ?? this.availableIconPaths,
     );
   }

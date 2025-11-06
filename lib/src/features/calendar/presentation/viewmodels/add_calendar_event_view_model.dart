@@ -47,13 +47,14 @@ class AddCalendarEventViewModel extends StateNotifier<AddCalendarEventState> {
       endTime: const TimeOfDay(hour: 10, minute: 0),
       selectedIconPath: _noIconPath,
       isSubmitting: false,
-      validationMessage: null,
+      titleError: null,
+      dateTimeError: null,
       availableIconPaths: _availableIconPaths,
     );
   }
 
   void updateTitle(String title) {
-    state = state.copyWith(title: title);
+    state = state.copyWith(title: title, titleError: null);
   }
 
   void updateMemo(String memo) {
@@ -61,23 +62,23 @@ class AddCalendarEventViewModel extends StateNotifier<AddCalendarEventState> {
   }
 
   void updateAllDay(bool allDay) {
-    state = state.copyWith(allDay: allDay);
+    state = state.copyWith(allDay: allDay, dateTimeError: null);
   }
 
   void updateStartDate(DateTime startDate) {
-    state = state.copyWith(startDate: startDate);
+    state = state.copyWith(startDate: startDate, dateTimeError: null);
   }
 
   void updateEndDate(DateTime endDate) {
-    state = state.copyWith(endDate: endDate);
+    state = state.copyWith(endDate: endDate, dateTimeError: null);
   }
 
   void updateStartTime(TimeOfDay startTime) {
-    state = state.copyWith(startTime: startTime);
+    state = state.copyWith(startTime: startTime, dateTimeError: null);
   }
 
   void updateEndTime(TimeOfDay endTime) {
-    state = state.copyWith(endTime: endTime);
+    state = state.copyWith(endTime: endTime, dateTimeError: null);
   }
 
   void selectIcon(String iconPath) {
@@ -151,14 +152,32 @@ class AddCalendarEventViewModel extends StateNotifier<AddCalendarEventState> {
   }
 
   CalendarEventModel? buildResult() {
-    if (!state.canSubmit) {
+    String? titleError;
+    String? dateTimeError;
+
+    // タイトルのバリデーション
+    if (state.title.trim().isEmpty) {
+      titleError = 'タイトルを入力してください';
+    }
+
+    // 時間のバリデーション
+    final start = state.effectiveStart;
+    final end = state.effectiveEnd;
+    if (!end.isAfter(start)) {
+      dateTimeError = '終了時間は開始時間より後にしてください';
+    }
+
+    // エラーがある場合はstateを更新してnullを返す
+    if (titleError != null || dateTimeError != null) {
       state = state.copyWith(
-        validationMessage: _getValidationMessage(),
+        titleError: titleError,
+        dateTimeError: dateTimeError,
       );
       return null;
     }
 
-    state = state.copyWith(validationMessage: null);
+    // エラーがない場合は成功
+    state = state.copyWith(titleError: null, dateTimeError: null);
     return CalendarEventModel(
       title: state.title.trim(),
       memo: state.memo.trim(),
@@ -167,22 +186,6 @@ class AddCalendarEventViewModel extends StateNotifier<AddCalendarEventState> {
       end: state.effectiveEnd,
       iconPath: state.selectedIconPath,
     );
-  }
-
-  String _getValidationMessage() {
-    if (state.title.trim().isEmpty) {
-      return 'タイトルを入力してください';
-    }
-
-    if (!state.allDay) {
-      final start = state.effectiveStart;
-      final end = state.effectiveEnd;
-      if (!end.isAfter(start)) {
-        return '終了時間は開始時間より後にしてください';
-      }
-    }
-
-    return '入力内容を確認してください';
   }
 
   static DateTime _normalizeDate(DateTime date) {

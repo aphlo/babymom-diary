@@ -79,7 +79,7 @@ class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
   }
 
   void updateTitle(String title) {
-    state = state.copyWith(title: title);
+    state = state.copyWith(title: title, titleError: null);
   }
 
   void updateMemo(String memo) {
@@ -87,23 +87,23 @@ class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
   }
 
   void updateAllDay(bool allDay) {
-    state = state.copyWith(allDay: allDay);
+    state = state.copyWith(allDay: allDay, dateTimeError: null);
   }
 
   void updateStartDate(DateTime startDate) {
-    state = state.copyWith(startDate: startDate);
+    state = state.copyWith(startDate: startDate, dateTimeError: null);
   }
 
   void updateEndDate(DateTime endDate) {
-    state = state.copyWith(endDate: endDate);
+    state = state.copyWith(endDate: endDate, dateTimeError: null);
   }
 
   void updateStartTime(TimeOfDay startTime) {
-    state = state.copyWith(startTime: startTime);
+    state = state.copyWith(startTime: startTime, dateTimeError: null);
   }
 
   void updateEndTime(TimeOfDay endTime) {
-    state = state.copyWith(endTime: endTime);
+    state = state.copyWith(endTime: endTime, dateTimeError: null);
   }
 
   void selectIcon(String iconPath) {
@@ -177,14 +177,32 @@ class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
   }
 
   Future<bool> updateEvent() async {
-    if (!state.canSubmit) {
+    String? titleError;
+    String? dateTimeError;
+
+    // タイトルのバリデーション
+    if (state.title.trim().isEmpty) {
+      titleError = 'タイトルを入力してください';
+    }
+
+    // 時間のバリデーション
+    final start = state.effectiveStart;
+    final end = state.effectiveEnd;
+    if (!end.isAfter(start)) {
+      dateTimeError = '終了時間は開始時間より後にしてください';
+    }
+
+    // エラーがある場合はstateを更新してfalseを返す
+    if (titleError != null || dateTimeError != null) {
       state = state.copyWith(
-        validationMessage: _getValidationMessage(),
+        titleError: titleError,
+        dateTimeError: dateTimeError,
       );
       return false;
     }
 
-    state = state.copyWith(isSubmitting: true, validationMessage: null);
+    state = state.copyWith(
+        isSubmitting: true, titleError: null, dateTimeError: null);
 
     try {
       final householdId = await _ref.read(currentHouseholdIdProvider.future);
@@ -207,7 +225,7 @@ class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
       if (!mounted) return false;
       state = state.copyWith(
         isSubmitting: false,
-        validationMessage: 'イベントの更新に失敗しました: $error',
+        dateTimeError: 'イベントの更新に失敗しました: $error',
       );
       return false;
     }
@@ -218,7 +236,8 @@ class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
       return false;
     }
 
-    state = state.copyWith(isDeleting: true, validationMessage: null);
+    state =
+        state.copyWith(isDeleting: true, titleError: null, dateTimeError: null);
 
     try {
       final householdId = await _ref.read(currentHouseholdIdProvider.future);
@@ -236,21 +255,39 @@ class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
       if (!mounted) return false;
       state = state.copyWith(
         isDeleting: false,
-        validationMessage: 'イベントの削除に失敗しました: $error',
+        dateTimeError: 'イベントの削除に失敗しました: $error',
       );
       return false;
     }
   }
 
   CalendarEventModel? buildResult() {
-    if (!state.canSubmit) {
+    String? titleError;
+    String? dateTimeError;
+
+    // タイトルのバリデーション
+    if (state.title.trim().isEmpty) {
+      titleError = 'タイトルを入力してください';
+    }
+
+    // 時間のバリデーション
+    final start = state.effectiveStart;
+    final end = state.effectiveEnd;
+    if (!end.isAfter(start)) {
+      dateTimeError = '終了時間は開始時間より後にしてください';
+    }
+
+    // エラーがある場合はstateを更新してnullを返す
+    if (titleError != null || dateTimeError != null) {
       state = state.copyWith(
-        validationMessage: _getValidationMessage(),
+        titleError: titleError,
+        dateTimeError: dateTimeError,
       );
       return null;
     }
 
-    state = state.copyWith(validationMessage: null);
+    // エラーがない場合は成功
+    state = state.copyWith(titleError: null, dateTimeError: null);
     return CalendarEventModel(
       title: state.title.trim(),
       memo: state.memo.trim(),
@@ -259,22 +296,6 @@ class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
       end: state.effectiveEnd,
       iconPath: state.selectedIconPath,
     );
-  }
-
-  String _getValidationMessage() {
-    if (state.title.trim().isEmpty) {
-      return 'タイトルを入力してください';
-    }
-
-    if (!state.allDay) {
-      final start = state.effectiveStart;
-      final end = state.effectiveEnd;
-      if (!end.isAfter(start)) {
-        return '終了時間は開始時間より後にしてください';
-      }
-    }
-
-    return '入力内容を確認してください';
   }
 
   static DateTime _normalizeDate(DateTime date) {

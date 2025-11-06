@@ -13,7 +13,8 @@ class EditCalendarEventState {
     required this.endTime,
     required this.selectedIconPath,
     required this.availableIconPaths,
-    this.validationMessage,
+    this.titleError,
+    this.dateTimeError,
     this.isSubmitting = false,
     this.isDeleting = false,
   });
@@ -28,11 +29,21 @@ class EditCalendarEventState {
   final TimeOfDay endTime;
   final String selectedIconPath;
   final List<String> availableIconPaths;
-  final String? validationMessage;
+  final String? titleError;
+  final String? dateTimeError;
   final bool isSubmitting;
   final bool isDeleting;
 
-  bool get canSubmit => title.trim().isNotEmpty && !isSubmitting && !isDeleting;
+  bool get canSubmit {
+    if (title.trim().isEmpty || isSubmitting || isDeleting) {
+      return false;
+    }
+
+    // 終了日時が開始日時より後であることをチェック
+    final start = effectiveStart;
+    final end = effectiveEnd;
+    return end.isAfter(start);
+  }
 
   bool get canDelete => !isSubmitting && !isDeleting;
 
@@ -73,7 +84,8 @@ class EditCalendarEventState {
     TimeOfDay? endTime,
     String? selectedIconPath,
     List<String>? availableIconPaths,
-    String? validationMessage,
+    String? titleError,
+    String? dateTimeError,
     bool? isSubmitting,
     bool? isDeleting,
   }) {
@@ -88,7 +100,8 @@ class EditCalendarEventState {
       endTime: endTime ?? this.endTime,
       selectedIconPath: selectedIconPath ?? this.selectedIconPath,
       availableIconPaths: availableIconPaths ?? this.availableIconPaths,
-      validationMessage: validationMessage,
+      titleError: titleError,
+      dateTimeError: dateTimeError,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       isDeleting: isDeleting ?? this.isDeleting,
     );
