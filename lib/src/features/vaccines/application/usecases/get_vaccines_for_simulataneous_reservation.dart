@@ -31,11 +31,6 @@ class GetVaccinesForSimultaneousReservation {
     DateTime? referenceDate,
   }) async {
     final currentDate = referenceDate ?? DateTime.now();
-    final birthday = child.birthday;
-
-    if (birthday == null) {
-      return [];
-    }
 
     // 全てのワクチンマスタデータを取得
     final allVaccines = await _vaccineMasterRepository.getAllVaccines();

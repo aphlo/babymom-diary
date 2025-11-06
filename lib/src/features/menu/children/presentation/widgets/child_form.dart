@@ -18,7 +18,6 @@ class ChildFormData {
     required this.dueDate,
     this.color = Colors.blueAccent,
   });
-
 }
 
 class ChildForm extends StatefulWidget {
@@ -171,8 +170,7 @@ class _ChildFormState extends State<ChildForm> {
               labelText: '誕生日',
               hintText: '選択してください',
             ),
-            validator: (v) =>
-                _birthday == null ? '誕生日を選択してください' : null,
+            validator: (v) => _birthday == null ? '誕生日を選択してください' : null,
             onTap: _pickBirthday,
           ),
           const SizedBox(height: 12),
@@ -184,8 +182,7 @@ class _ChildFormState extends State<ChildForm> {
               labelText: '出産予定日',
               hintText: '選択してください',
             ),
-            validator: (v) =>
-                _dueDate == null ? '出産予定日を選択してください' : null,
+            validator: (v) => _dueDate == null ? '出産予定日を選択してください' : null,
             onTap: _pickDueDate,
           ),
           // measurement fields removed

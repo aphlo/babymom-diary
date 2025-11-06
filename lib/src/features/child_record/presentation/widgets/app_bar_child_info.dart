@@ -62,8 +62,7 @@ class AppBarChildInfo extends ConsumerWidget {
           final d = children[index];
           final name = d.name;
           final birthday = d.birthday;
-          final age =
-              birthday == null ? '' : _ageString(birthday, selectedDate);
+          final age = _ageString(birthday, selectedDate);
 
           final snapshotValue = snapshotState.value;
           final shouldSaveSnapshot =
