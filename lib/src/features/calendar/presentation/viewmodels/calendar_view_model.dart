@@ -337,12 +337,6 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
       return;
     }
     final children = state.availableChildren;
-    if (children.isEmpty) {
-      state = state.copyWith(
-        pendingUiEvent: const CalendarUiEvent.showMessage('先に子どもを登録してください'),
-      );
-      return;
-    }
     final request = AddEventRequest(
       initialDate: state.selectedDay,
       children: children,
