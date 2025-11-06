@@ -31,5 +31,6 @@ abstract class CalendarEventRepository {
   Future<void> deleteEvent({
     required String eventId,
     required String householdId,
+    required DateTime eventDate,
   });
 }

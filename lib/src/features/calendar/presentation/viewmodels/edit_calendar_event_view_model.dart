@@ -226,6 +226,7 @@ class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
       await _deleteUseCase(
         eventId: state.eventId,
         householdId: householdId,
+        eventDate: state.startDate,
       );
 
       if (!mounted) return false;

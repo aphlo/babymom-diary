@@ -65,10 +65,12 @@ class CalendarEventRepositoryImpl implements CalendarEventRepository {
   Future<void> deleteEvent({
     required String eventId,
     required String householdId,
+    required DateTime eventDate,
   }) {
     return _remote.deleteEvent(
       eventId: eventId,
       householdId: householdId,
+      eventDate: eventDate,
     );
   }
 

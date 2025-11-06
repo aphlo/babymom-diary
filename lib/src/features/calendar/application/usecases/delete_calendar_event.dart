@@ -8,10 +8,12 @@ class DeleteCalendarEvent {
   Future<void> call({
     required String eventId,
     required String householdId,
+    required DateTime eventDate,
   }) {
     return _repository.deleteEvent(
       eventId: eventId,
       householdId: householdId,
+      eventDate: eventDate,
     );
   }
 }
