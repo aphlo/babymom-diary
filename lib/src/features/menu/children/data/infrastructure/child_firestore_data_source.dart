@@ -17,14 +17,14 @@ class ChildFirestoreDataSource {
   Future<void> addChild({
     required String name,
     required Gender gender,
-    required DateTime birthday,
+    DateTime? birthday,
     DateTime? dueDate,
     required String color,
   }) async {
     await _col.add({
       'name': name,
       'gender': gender.key,
-      'birthday': Timestamp.fromDate(birthday),
+      'birthday': birthday != null ? Timestamp.fromDate(birthday) : null,
       'dueDate': dueDate != null ? Timestamp.fromDate(dueDate) : null,
       'color': color, // hex string like #RRGGBB
       'createdAt': FieldValue.serverTimestamp(),
@@ -38,14 +38,14 @@ class ChildFirestoreDataSource {
     required String id,
     required String name,
     required Gender gender,
-    required DateTime birthday,
+    DateTime? birthday,
     DateTime? dueDate,
     required String color,
   }) async {
     await _col.doc(id).set({
       'name': name,
       'gender': gender.key,
-      'birthday': Timestamp.fromDate(birthday),
+      'birthday': birthday != null ? Timestamp.fromDate(birthday) : null,
       'dueDate': dueDate != null ? Timestamp.fromDate(dueDate) : null,
       'color': color,
       'updatedAt': FieldValue.serverTimestamp(),

@@ -1,4 +1,5 @@
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/core/widgets/bottom_save_button.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/types/gender.dart';
@@ -135,12 +136,6 @@ class _ChildFormState extends State<ChildForm> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_birthday == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('誕生日を選択してください')),
-      );
-      return;
-    }
 
     final data = ChildFormData(
       name: _nameCtrl.text.trim(),
@@ -252,14 +247,9 @@ class _ChildFormState extends State<ChildForm> {
             ],
           ),
           const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: _submit,
-              icon: const Icon(Icons.save),
-              label: const Text('保存'),
-            ),
-          )
+          SaveButton(
+            onPressed: _submit,
+          ),
         ],
       ),
     );

@@ -5,6 +5,7 @@ import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/firebase/household_service.dart';
+import '../../../../core/widgets/bottom_save_button.dart';
 import '../models/vaccine_info.dart';
 import '../../../menu/children/application/selected_child_provider.dart';
 import '../viewmodels/vaccine_reservation_view_model.dart';
@@ -210,33 +211,11 @@ class _VaccineReservationContent extends ConsumerWidget {
                 ],
               ),
             ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton(
-              onPressed: canSubmit
-                  ? () => _submitReservation(context, viewModel, ref)
-                  : null,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-              ),
-              child: state.isSubmitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : const Text('保存'),
-            ),
-          ),
-        ),
+      bottomNavigationBar: BottomSaveButton(
+        onPressed: canSubmit
+            ? () => _submitReservation(context, viewModel, ref)
+            : null,
+        isLoading: state.isSubmitting,
       ),
     );
   }

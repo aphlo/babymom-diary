@@ -39,7 +39,7 @@ class _AddChildPageState extends ConsumerState<AddChildPage> {
                 await ds.addChild(
                   name: data.name,
                   gender: data.gender,
-                  birthday: data.birthday!,
+                  birthday: data.birthday,
                   dueDate: data.dueDate,
                   color: _toHex(data.color),
                 );

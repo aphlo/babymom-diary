@@ -87,7 +87,7 @@ class _EditChildPageState extends ConsumerState<EditChildPage> {
                         id: widget.childId,
                         name: form.name,
                         gender: form.gender,
-                        birthday: form.birthday!,
+                        birthday: form.birthday,
                         dueDate: form.dueDate,
                         color: colorHex,
                       );
