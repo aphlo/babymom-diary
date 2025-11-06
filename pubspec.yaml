@@ -13,6 +13,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_riverpod: ^2.5.1
+  flutter_launcher_icons: ^0.13.1
   go_router: ^15.1.2
   firebase_core: ^4.2.0
   cloud_firestore: ^6.0.3
@@ -45,3 +46,13 @@ flutter:
     - family: MPLUSRounded1c
       fonts:
         - asset: assets/fonts/MPLUSRounded1c-Regular.ttf
+
+flutter_icons: 
+  image_path_android: assets/launcher_icon/milu_android_icon.png
+  adaptive_icon_background: '#BD4F6B'
+  adaptive_icon_foreground: assets/launcher_icon/milu_android_icon.png
+  image_path_ios: assets/launcher_icon/milu_ios_icon.png
+  android: true
+  adaptive_icon_padding: true
+  min_sdk_android: 30
+  ios: true   
