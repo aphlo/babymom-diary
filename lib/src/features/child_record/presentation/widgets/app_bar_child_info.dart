@@ -52,7 +52,10 @@ class AppBarChildInfo extends ConsumerWidget {
 
         Widget buildWithChildren(List<ChildSummary> children) {
           if (children.isEmpty) {
-            return const Text('子ども未登録');
+            return const Text(
+              '子ども未登録',
+              style: TextStyle(fontSize: 10),
+            );
           }
           int index = children.indexWhere((d) => d.id == selectedId);
           if (index < 0) index = 0; // default to first
@@ -117,11 +120,17 @@ class AppBarChildInfo extends ConsumerWidget {
             localChildrenState is AsyncData<List<ChildSummary>>;
 
         if (streamHasValue && streamEmptyLoaded) {
-          return const Text('子ども未登録');
+          return const Text(
+            '子ども未登録',
+            style: TextStyle(fontSize: 10),
+          );
         }
 
         if (localHasValue && localEmptyLoaded && !streamChildren.isLoading) {
-          return const Text('子ども未登録');
+          return const Text(
+            '子ども未登録',
+            style: TextStyle(fontSize: 10),
+          );
         }
 
         return const SizedBox.shrink();
