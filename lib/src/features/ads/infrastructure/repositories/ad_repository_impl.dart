@@ -11,16 +11,29 @@ class AdRepositoryImpl implements AdRepository {
 
   @override
   Future<BannerAd> loadBannerAd(String adUnitId) async {
+    bool isDisposed = false;
+
     final ad = BannerAd(
       adUnitId: adUnitId,
       size: AdSize.banner,
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
-          // Ad loaded successfully
+          if (!isDisposed) {
+            // Ad loaded successfully
+          }
         },
         onAdFailedToLoad: (ad, error) {
-          ad.dispose();
+          if (!isDisposed) {
+            isDisposed = true;
+            ad.dispose();
+          }
+        },
+        onAdImpression: (ad) {
+          // Impression recorded
+        },
+        onPaidEvent: (ad, valueMicros, precision, currencyCode) {
+          // Paid event recorded
         },
       ),
     );
