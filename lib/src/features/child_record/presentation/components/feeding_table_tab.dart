@@ -44,8 +44,31 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
     if (!mounted) return;
 
     if (event.message != null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(event.message!)));
+      // 子供未登録のメッセージの場合はダイアログを表示
+      if (event.message == '記録を行うには、メニューから子どもを登録してください。') {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text(
+              '子どもを登録してください',
+              style: TextStyle(fontSize: 16),
+            ),
+            content: Text(
+              event.message!,
+              style: const TextStyle(fontSize: 14),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(event.message!)));
+      }
     }
     if (event.openSlot != null) {
       showRecordSlotSheet(

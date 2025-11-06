@@ -383,6 +383,17 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     required int hour,
     required RecordType type,
   }) {
+    // 子供が登録されているかチェック
+    final childId = state.selectedChildId;
+    if (childId == null || childId.isEmpty) {
+      state = state.copyWith(
+        pendingUiEvent: const RecordUiEvent.showMessage(
+          '記録を行うには、メニューから子どもを登録してください。',
+        ),
+      );
+      return;
+    }
+
     final records = state.records
         .where((record) => record.type == type && record.at.hour == hour)
         .toList(growable: false)

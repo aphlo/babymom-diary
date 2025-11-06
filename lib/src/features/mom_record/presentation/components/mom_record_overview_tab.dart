@@ -43,8 +43,14 @@ class MomRecordOverviewTab extends ConsumerWidget {
           await showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('お知らせ'),
-              content: const Text('記録を行うには、まず赤ちゃんの情報を登録してください。'),
+              title: const Text(
+                '子どもを登録してください',
+                style: TextStyle(fontSize: 16),
+              ),
+              content: const Text(
+                '記録を行うには、メニューから子どもを登録してください。',
+                style: TextStyle(fontSize: 14),
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
