@@ -244,9 +244,18 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
 
   bool _eventsEqual(List<CalendarEvent> a, List<CalendarEvent> b) {
     if (a.length != b.length) return false;
-    final aIds = a.map((e) => e.id).toSet();
-    final bIds = b.map((e) => e.id).toSet();
-    return aIds.difference(bIds).isEmpty && bIds.difference(aIds).isEmpty;
+
+    // IDでソートして、各イベントの内容を比較
+    final aSorted = List<CalendarEvent>.from(a)..sort((x, y) => x.id.compareTo(y.id));
+    final bSorted = List<CalendarEvent>.from(b)..sort((x, y) => x.id.compareTo(y.id));
+
+    for (var i = 0; i < aSorted.length; i++) {
+      if (aSorted[i] != bSorted[i]) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   void onDaySelected(DateTime selectedDay, DateTime focusedDay) {
