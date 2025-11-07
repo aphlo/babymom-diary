@@ -53,6 +53,10 @@ class MenuPage extends ConsumerWidget {
                     child: ListView(
                       children: [
                         // 子ども一覧セクション
+                        if (docs.isEmpty) ...[
+                          const _ChildrenEmptyState(),
+                          const SizedBox(height: 16),
+                        ],
                         for (final d in docs) ...[
                           _ChildListTile(
                             id: d.id,
@@ -99,6 +103,41 @@ class MenuPage extends ConsumerWidget {
             },
           );
         },
+      ),
+    );
+  }
+}
+
+class _ChildrenEmptyState extends StatelessWidget {
+  const _ChildrenEmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+      child: Column(
+        children: [
+          Icon(
+            Icons.child_care_outlined,
+            size: 64,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '子どもが登録されていません',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.grey[600],
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '下のボタンから子どもを追加してください',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[500],
+                ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
