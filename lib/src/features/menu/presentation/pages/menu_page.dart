@@ -73,6 +73,9 @@ class MenuPage extends ConsumerWidget {
                           title: const Text('子どもの追加'),
                           onTap: () => context.push('/children/add'),
                           trailing: const Icon(Icons.chevron_right),
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 16),
+                          minLeadingWidth: 40,
                         ),
 
                         const SizedBox(height: 24),
@@ -163,33 +166,52 @@ class _ChildListTile extends ConsumerWidget {
     return ListTile(
       key: ValueKey('child-$id'),
       tileColor: isSelected ? scheme.primaryContainer : Colors.white,
-      leading: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          InkWell(
-            onTap: () =>
-                ref.read(selectedChildControllerProvider.notifier).select(id),
-            borderRadius: BorderRadius.circular(20),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Icon(
-                isSelected ? Icons.check_circle : Icons.circle_outlined,
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.grey,
-                size: 28,
-              ),
-            ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      minLeadingWidth: 40,
+      leading: InkWell(
+        onTap: () =>
+            ref.read(selectedChildControllerProvider.notifier).select(id),
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 8.0),
+          child: Icon(
+            isSelected ? Icons.check_circle : Icons.circle_outlined,
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Colors.grey,
+            size: 28,
           ),
-          const SizedBox(width: 8),
+        ),
+      ),
+      title: Row(
+        children: [
           CircleAvatar(
             backgroundColor: color,
+            radius: 16,
             child: const Icon(Icons.child_care, color: Colors.white),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  name,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
-      title: Text(name),
-      subtitle: Text(subtitle),
       trailing: const Icon(Icons.chevron_right),
       onTap: () => context.push('/children/edit/$id'),
     );
