@@ -287,7 +287,6 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     }
     state = state.copyWith(
       focusedDay: normalizedFocused,
-      selectedDay: normalizedFocused,
       pendingUiEvent: null,
     );
     _refreshEventsSubscription();
@@ -301,7 +300,6 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
 
     state = state.copyWith(
       focusedDay: normalizedPrevious,
-      selectedDay: normalizedPrevious,
       pendingUiEvent: null,
     );
     _refreshEventsSubscription();
@@ -315,7 +313,6 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
 
     state = state.copyWith(
       focusedDay: normalizedNext,
-      selectedDay: normalizedNext,
       pendingUiEvent: null,
     );
     _refreshEventsSubscription();
