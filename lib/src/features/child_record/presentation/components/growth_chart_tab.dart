@@ -111,10 +111,7 @@ class _ChartContent extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: const _Legend(isInline: true),
-        ),
+        const _LegendWithSource(),
         const SizedBox(height: 8),
         _ChartActions(
           initialDate: initialDate,
@@ -212,6 +209,35 @@ class _AgeRangeTabs extends StatelessWidget {
           }).toList(),
         ),
       ),
+    );
+  }
+}
+
+class _LegendWithSource extends StatelessWidget {
+  const _LegendWithSource();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const _Legend(isInline: true),
+        Flexible(
+          child: Text(
+            'こども家庭庁「令和5年乳幼児身体発育調査」より作成',
+            style: (theme.textTheme.labelSmall ?? theme.textTheme.labelMedium)
+                ?.copyWith(
+              fontSize: 9,
+              color: Colors.grey.shade600,
+            ),
+            textAlign: TextAlign.right,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+          ),
+        ),
+      ],
     );
   }
 }
