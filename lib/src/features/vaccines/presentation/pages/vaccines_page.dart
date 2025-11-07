@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
-import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 import 'package:babymom_diary/src/features/child_record/presentation/widgets/app_bar_child_info.dart';
 import 'package:babymom_diary/src/features/menu/children/application/children_local_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/application/children_stream_provider.dart';
@@ -107,7 +106,6 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage> {
           onRetry: () => ref.read(vaccinesViewModelProvider.notifier).refresh(),
         ),
       ),
-      bottomNavigationBar: const AppBottomNav(),
     );
   }
 

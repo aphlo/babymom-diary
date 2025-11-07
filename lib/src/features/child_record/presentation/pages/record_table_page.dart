@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
-
 import '../components/feeding_table_tab.dart';
 import '../components/growth_chart_tab.dart';
 import '../viewmodels/record_view_model.dart';
@@ -141,7 +139,6 @@ class _RecordTablePageState extends ConsumerState<RecordTablePage>
           GrowthChartTab(),
         ],
       ),
-      bottomNavigationBar: const AppBottomNav(),
     );
   }
 }

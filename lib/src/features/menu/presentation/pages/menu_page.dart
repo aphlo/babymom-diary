@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:babymom_diary/src/core/widgets/app_bottom_nav.dart';
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/features/ads/presentation/widgets/banner_ad_widget.dart';
 import 'package:babymom_diary/src/features/menu/children/data/infrastructure/child_firestore_data_source.dart';
@@ -102,7 +101,6 @@ class MenuPage extends ConsumerWidget {
           );
         },
       ),
-      bottomNavigationBar: const AppBottomNav(),
     );
   }
 }

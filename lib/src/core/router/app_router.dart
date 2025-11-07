@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/child_record/presentation/pages/record_table_page.dart';
@@ -19,63 +20,114 @@ import '../../features/vaccines/presentation/pages/vaccine_reschedule_page.dart'
 import '../../features/vaccines/presentation/models/vaccine_info.dart';
 import '../../features/vaccines/presentation/viewmodels/vaccine_detail_state.dart';
 
+final _rootNavigatorKey = GlobalKey<NavigatorState>();
+final _shellNavigatorKeyBaby =
+    GlobalKey<NavigatorState>(debugLabel: 'shellBaby');
+final _shellNavigatorKeyVaccines =
+    GlobalKey<NavigatorState>(debugLabel: 'shellVaccines');
+final _shellNavigatorKeyMom = GlobalKey<NavigatorState>(debugLabel: 'shellMom');
+final _shellNavigatorKeyCalendar =
+    GlobalKey<NavigatorState>(debugLabel: 'shellCalendar');
+final _shellNavigatorKeyMenu =
+    GlobalKey<NavigatorState>(debugLabel: 'shellMenu');
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
+    navigatorKey: _rootNavigatorKey,
     initialLocation: '/baby',
     routes: [
-      GoRoute(
-        path: '/',
-        redirect: (_, __) => '/baby',
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return _ScaffoldWithNavBar(navigationShell: navigationShell);
+        },
+        branches: [
+          // ベビーの記録タブ
+          StatefulShellBranch(
+            navigatorKey: _shellNavigatorKeyBaby,
+            routes: [
+              GoRoute(
+                path: '/baby',
+                name: 'baby',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: RecordTablePage()),
+              ),
+            ],
+          ),
+          // 予防接種タブ
+          StatefulShellBranch(
+            navigatorKey: _shellNavigatorKeyVaccines,
+            routes: [
+              GoRoute(
+                path: '/vaccines',
+                name: 'vaccines',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: VaccinesPage()),
+              ),
+            ],
+          ),
+          // ママの記録タブ
+          StatefulShellBranch(
+            navigatorKey: _shellNavigatorKeyMom,
+            routes: [
+              GoRoute(
+                path: '/mom',
+                name: 'mom',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: MomRecordPage()),
+              ),
+            ],
+          ),
+          // カレンダータブ
+          StatefulShellBranch(
+            navigatorKey: _shellNavigatorKeyCalendar,
+            routes: [
+              GoRoute(
+                path: '/calendar',
+                name: 'calendar',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: CalendarPage()),
+                routes: [
+                  GoRoute(
+                    path: 'settings',
+                    name: 'calendar_settings',
+                    pageBuilder: (context, state) =>
+                        const CupertinoPage(child: CalendarSettingsPage()),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          // メニュータブ
+          StatefulShellBranch(
+            navigatorKey: _shellNavigatorKeyMenu,
+            routes: [
+              GoRoute(
+                path: '/menu',
+                name: 'menu',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: MenuPage()),
+              ),
+            ],
+          ),
+        ],
       ),
+      // ルートレベルのルート（タブ外のページ）
       GoRoute(
-        path: '/baby',
-        name: 'baby',
-        pageBuilder: (context, state) =>
-            const NoTransitionPage(child: RecordTablePage()),
-      ),
-      GoRoute(
-        path: '/vaccines',
-        name: 'vaccines',
-        pageBuilder: (context, state) =>
-            const NoTransitionPage(child: VaccinesPage()),
-      ),
-      GoRoute(
-        path: '/mom',
-        name: 'mom',
-        pageBuilder: (context, state) =>
-            const NoTransitionPage(child: MomRecordPage()),
-      ),
-      GoRoute(
-        path: '/calendar',
-        name: 'calendar',
-        pageBuilder: (context, state) =>
-            const NoTransitionPage(child: CalendarPage()),
-      ),
-      GoRoute(
-        path: '/calendar/settings',
-        name: 'calendar_settings',
-        pageBuilder: (context, state) =>
-            const CupertinoPage(child: CalendarSettingsPage()),
-      ),
-      GoRoute(
-        path: '/menu',
-        name: 'menu',
-        pageBuilder: (context, state) =>
-            const NoTransitionPage(child: MenuPage()),
-      ),
-      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/children/add',
         name: 'children_add',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: AddChildPage()),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/children/manage',
         name: 'children_manage',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: ManageChildrenPage()),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/children/edit/:id',
         name: 'children_edit',
         pageBuilder: (context, state) {
@@ -84,18 +136,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/household/share',
         name: 'household_share',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: HouseholdSharePage()),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/household/vaccine-visibility-settings',
         name: 'vaccine_visibility_settings',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: VaccineVisibilitySettingsPage()),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/vaccines/detail',
         name: 'vaccine_detail',
         pageBuilder: (context, state) {
@@ -106,6 +161,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/vaccines/reservation',
         name: 'vaccine_reservation',
         pageBuilder: (context, state) {
@@ -126,6 +182,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/vaccines/scheduled-details',
         name: 'vaccine_scheduled_details',
         pageBuilder: (context, state) {
@@ -148,6 +205,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/vaccines/reschedule',
         name: 'vaccine_reschedule',
         pageBuilder: (context, state) {
@@ -172,3 +230,48 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+// StatefulNavigationShellを使用したスキャフォールドウィジェット
+class _ScaffoldWithNavBar extends StatelessWidget {
+  const _ScaffoldWithNavBar({required this.navigationShell});
+
+  final StatefulNavigationShell navigationShell;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: navigationShell,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: navigationShell.currentIndex,
+        onDestinationSelected: (index) {
+          navigationShell.goBranch(
+            index,
+            initialLocation: index == navigationShell.currentIndex,
+          );
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.child_care),
+            label: 'ベビーの記録',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.vaccines),
+            label: '予防接種',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.face_4),
+            label: 'ママの記録',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.calendar_today),
+            label: 'カレンダー',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.menu),
+            label: 'メニュー',
+          ),
+        ],
+      ),
+    );
+  }
+}
