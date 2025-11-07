@@ -329,6 +329,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'calendar_fab',
         onPressed: viewModel.requestAddEvent,
         child: const Icon(Icons.add),
       ),

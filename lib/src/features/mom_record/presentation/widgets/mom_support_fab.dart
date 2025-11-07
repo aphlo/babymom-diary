@@ -83,6 +83,7 @@ class _MomSupportFabState extends State<MomSupportFab> {
               focusColor: Colors.transparent,
             ),
             child: FloatingActionButton(
+              heroTag: 'mom_support_fab',
               onPressed: _handleTap,
               backgroundColor: Colors.transparent,
               splashColor: Colors.transparent,
