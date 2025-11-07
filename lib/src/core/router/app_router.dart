@@ -237,18 +237,36 @@ class _ScaffoldWithNavBar extends StatelessWidget {
 
   final StatefulNavigationShell navigationShell;
 
+  void _onDestinationSelected(int index) {
+    // 同じタブを再度タップした場合、ルートページに戻る
+    if (index == navigationShell.currentIndex) {
+      // 現在のブランチのナビゲーターキーを取得してポップ
+      final navigatorKeys = [
+        _shellNavigatorKeyBaby,
+        _shellNavigatorKeyVaccines,
+        _shellNavigatorKeyMom,
+        _shellNavigatorKeyCalendar,
+        _shellNavigatorKeyMenu,
+      ];
+
+      final currentNavigator = navigatorKeys[index].currentState;
+      if (currentNavigator != null && currentNavigator.canPop()) {
+        // ネストされたルートがある場合、ルートまでポップバック
+        currentNavigator.popUntil((route) => route.isFirst);
+      }
+    } else {
+      // 別のタブに切り替え
+      navigationShell.goBranch(index);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: (index) {
-          navigationShell.goBranch(
-            index,
-            initialLocation: index == navigationShell.currentIndex,
-          );
-        },
+        onDestinationSelected: _onDestinationSelected,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.child_care),
