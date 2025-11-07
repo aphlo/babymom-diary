@@ -95,6 +95,8 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
   List<GrowthRecord> _records = const <GrowthRecord>[];
   List<GrowthMeasurementPoint> _measurementPoints =
       const <GrowthMeasurementPoint>[];
+  List<GrowthMeasurementPoint> _allMeasurementPoints =
+      const <GrowthMeasurementPoint>[];
   List<GrowthCurvePoint> _heightCurve = const <GrowthCurvePoint>[];
   List<GrowthCurvePoint> _weightCurve = const <GrowthCurvePoint>[];
   bool _curvesLoaded = false;
@@ -167,6 +169,7 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
       _recordsSubscription = null;
       _records = const <GrowthRecord>[];
       _measurementPoints = const <GrowthMeasurementPoint>[];
+      _allMeasurementPoints = const <GrowthMeasurementPoint>[];
       _heightCurve = const <GrowthCurvePoint>[];
       _weightCurve = const <GrowthCurvePoint>[];
       _curvesLoaded = false;
@@ -198,6 +201,7 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
     final watchUseCase = _ref.read(watchGrowthRecordsUseCaseProvider(hid));
     _records = const <GrowthRecord>[];
     _measurementPoints = const <GrowthMeasurementPoint>[];
+    _allMeasurementPoints = const <GrowthMeasurementPoint>[];
     _recordsSubscription = watchUseCase(childId).listen(
       (records) {
         _records = records;
@@ -259,6 +263,12 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
       useCorrectedAge: useCorrectedAge,
       dueDate: dueDate,
     );
+    _allMeasurementPoints = _mapper.toAllMeasurementPoints(
+      records: _records,
+      birthday: birthday,
+      useCorrectedAge: useCorrectedAge,
+      dueDate: dueDate,
+    );
     _emitChartData();
   }
 
@@ -270,10 +280,15 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
       _measurementPoints,
       state.selectedAgeRange,
     );
+    final allFilteredMeasurements = _mapper.filterMeasurementsByRange(
+      _allMeasurementPoints,
+      state.selectedAgeRange,
+    );
     final data = GrowthChartData(
       heightCurve: _heightCurve,
       weightCurve: _weightCurve,
       measurements: filteredMeasurements,
+      allMeasurements: allFilteredMeasurements,
     );
     state = state.copyWith(
       chartData: AsyncValue.data(data),

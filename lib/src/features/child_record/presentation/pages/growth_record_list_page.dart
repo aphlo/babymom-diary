@@ -154,8 +154,8 @@ class _RecordListView extends ConsumerWidget {
     return chartData.when(
       data: (data) {
         final records = (type == RecordType.height)
-            ? data.measurements.where((m) => m.hasHeight).toList()
-            : data.measurements.where((m) => m.hasWeight).toList();
+            ? data.allMeasurements.where((m) => m.hasHeight).toList()
+            : data.allMeasurements.where((m) => m.hasWeight).toList();
 
         records.sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
 

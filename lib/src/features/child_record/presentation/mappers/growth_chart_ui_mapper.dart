@@ -4,6 +4,8 @@ import '../models/growth_measurement_point.dart';
 class GrowthChartUiMapper {
   const GrowthChartUiMapper();
 
+  /// Maps records to measurement points with corrected age filtering applied
+  /// (excludes records before dueDate when using corrected age)
   List<GrowthMeasurementPoint> toMeasurementPoints({
     required List<GrowthRecord> records,
     required DateTime? birthday,
@@ -39,6 +41,38 @@ class GrowthChartUiMapper {
         .toList(growable: false);
   }
 
+  /// Maps all records to measurement points without corrected age filtering
+  /// (includes all records regardless of dueDate)
+  List<GrowthMeasurementPoint> toAllMeasurementPoints({
+    required List<GrowthRecord> records,
+    required DateTime? birthday,
+    required bool useCorrectedAge,
+    required DateTime? dueDate,
+  }) {
+    final sorted = List<GrowthRecord>.from(records)
+      ..sort((a, b) => a.recordedAt.compareTo(b.recordedAt));
+
+    // Determine baseline date for age calculation
+    final baselineDate = _determineBaseline(
+      birthday: birthday,
+      dueDate: dueDate,
+      useCorrectedAge: useCorrectedAge,
+    );
+
+    return sorted
+        .map(
+          (record) => GrowthMeasurementPoint(
+            id: record.id,
+            ageInMonths: _ageInMonths(baselineDate, record.recordedAt),
+            recordedAt: record.recordedAt,
+            height: record.height,
+            weight: _normalizedWeight(record.weight),
+            note: record.note,
+          ),
+        )
+        .toList(growable: false);
+  }
+
   List<GrowthMeasurementPoint> filterMeasurementsByRange(
     List<GrowthMeasurementPoint> points,
     AgeRange range,
@@ -54,7 +88,7 @@ class GrowthChartUiMapper {
     }
     final diff = recordedAt.difference(birthday);
     final months = diff.inDays / 30.4375;
-    return months.isFinite ? months.clamp(0, double.infinity) as double : 0;
+    return months.isFinite ? months.clamp(0.0, double.infinity) : 0.0;
   }
 
   double? _normalizedWeight(double? value) {
