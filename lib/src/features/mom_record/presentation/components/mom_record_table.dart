@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/mom_record_ui_model.dart';
 import 'shared_table_components.dart';
 
-class MomRecordTable extends StatelessWidget {
+class MomRecordTable extends StatefulWidget {
   const MomRecordTable({
     super.key,
     required this.records,
@@ -14,9 +14,87 @@ class MomRecordTable extends StatelessWidget {
   final ValueChanged<MomDailyRecordUiModel>? onRecordTap;
 
   @override
+  State<MomRecordTable> createState() => _MomRecordTableState();
+}
+
+class _MomRecordTableState extends State<MomRecordTable> {
+  final ScrollController _scrollController = ScrollController();
+  bool _hasScrolled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToToday();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToToday() {
+    if (_hasScrolled) return;
+    if (!mounted) return;
+    if (!_scrollController.hasClients) return;
+    if (widget.records.isEmpty) return;
+
+    // 月の識別子を作成（年月を使用）
+    final firstRecord = widget.records.first;
+    final monthKey = ValueKey(
+        'mom_record_${firstRecord.date.year}_${firstRecord.date.month}_scrolled');
+
+    // PageStorageに「初期スクロール済み」フラグがあるかチェック
+    final bucket = PageStorage.of(context);
+    final hasBeenScrolled = bucket.readState(context, identifier: monthKey);
+    if (hasBeenScrolled == true) {
+      // 既に初期スクロール済みの場合はスクロールしない
+      _hasScrolled = true;
+      return;
+    }
+
+    final today = DateTime.now();
+    final todayIndex = widget.records.indexWhere((record) {
+      final date = record.date;
+      return date.year == today.year &&
+          date.month == today.month &&
+          date.day == today.day;
+    });
+
+    if (todayIndex == -1) {
+      // 今日のデータがない場合も、フラグを設定して次回スクロールしないようにする
+      bucket.writeState(context, true, identifier: monthKey);
+      _hasScrolled = true;
+      return;
+    }
+
+    // 各行の高さを推定（パディング含めて約60px）
+    const estimatedRowHeight = 60.0;
+    final targetOffset = todayIndex * estimatedRowHeight;
+
+    _scrollController.jumpTo(targetOffset.clamp(
+      0.0,
+      _scrollController.position.maxScrollExtent,
+    ));
+
+    // PageStorageに「初期スクロール済み」フラグを保存
+    bucket.writeState(context, true, identifier: monthKey);
+    _hasScrolled = true;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final borderColor = theme.dividerColor.withOpacity(0.6);
+
+    // スクロール位置保存用のキーを作成
+    final firstRecord = widget.records.isNotEmpty ? widget.records.first : null;
+    final scrollKey = firstRecord != null
+        ? PageStorageKey<String>(
+            'mom_record_${firstRecord.date.year}_${firstRecord.date.month}')
+        : null;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -30,16 +108,19 @@ class MomRecordTable extends StatelessWidget {
             const Divider(height: 1, thickness: 1),
             Expanded(
               child: ListView.separated(
+                key: scrollKey,
+                controller: _scrollController,
                 padding: EdgeInsets.zero,
-                itemCount: records.length,
+                itemCount: widget.records.length,
                 separatorBuilder: (_, __) =>
                     Divider(height: 1, thickness: 0.8, color: borderColor),
                 itemBuilder: (context, index) {
-                  final record = records[index];
+                  final record = widget.records[index];
                   return _TableRow(
                     record: record,
-                    onTap:
-                        onRecordTap != null ? () => onRecordTap!(record) : null,
+                    onTap: widget.onRecordTap != null
+                        ? () => widget.onRecordTap!(record)
+                        : null,
                   );
                 },
               ),
