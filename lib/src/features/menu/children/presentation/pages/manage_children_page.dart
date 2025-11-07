@@ -6,18 +6,11 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/firebase/household_service.dart';
 import '../../../../../core/types/gender.dart';
 import '../../../../../core/theme/app_colors.dart';
+import '../../application/child_color_provider.dart';
 import '../../data/infrastructure/child_firestore_data_source.dart';
 
 class ManageChildrenPage extends ConsumerWidget {
   const ManageChildrenPage({super.key});
-
-  Color _parseColor(String? hex) {
-    if (hex == null || hex.isEmpty) return Colors.grey;
-    final cleaned = hex.replaceFirst('#', '');
-    final value = int.tryParse(cleaned, radix: 16);
-    if (value == null) return Colors.grey;
-    return Color(0xFF000000 | value);
-  }
 
   String _formatBirthday(Timestamp? ts) {
     if (ts == null) return '';
@@ -61,7 +54,10 @@ class ManageChildrenPage extends ConsumerWidget {
                   }
                   final d = docs[index];
                   final data = d.data();
-                  final color = _parseColor(data['color'] as String?);
+                  // SharedPreferencesから色を取得
+                  final color = ref
+                      .read(childColorProvider.notifier)
+                      .getColor(d.id, defaultColor: AppColors.primary);
                   return ListTile(
                     tileColor: Colors.white,
                     leading: CircleAvatar(

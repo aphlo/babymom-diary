@@ -23,7 +23,6 @@ final childrenStreamProvider = StreamProvider.autoDispose
         birthday: birthday,
         dueDate: dueDate,
         gender: genderFromKey(data['gender'] as String?),
-        color: data['color'] as String?,
       );
     }).toList();
   });

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/menu/children/application/child_color_provider.dart';
 import '../../features/menu/children/application/children_local_provider.dart';
 import '../../features/menu/children/application/children_stream_provider.dart';
 import '../../features/menu/children/application/selected_child_provider.dart';
@@ -31,14 +32,6 @@ final appThemeProvider = Provider.family<ThemeData, String>((ref, householdId) {
     return null;
   }
 
-  Color? parseColor(String? hex) {
-    if (hex == null || hex.isEmpty) return null;
-    final cleaned = hex.replaceFirst('#', '').padLeft(6, '0');
-    final value = int.tryParse(cleaned, radix: 16);
-    if (value == null) return null;
-    return Color(0xFF000000 | value);
-  }
-
   final selectedChildAsync = ref.watch(selectedChildControllerProvider);
   final selectedId = selectedChildAsync.value;
 
@@ -64,7 +57,12 @@ final appThemeProvider = Provider.family<ThemeData, String>((ref, householdId) {
     selectedSummary = findById(streamChildren, selectedId);
   }
 
-  selectedColor = parseColor(selectedSummary?.color);
+  // SharedPreferencesから色を取得
+  if (selectedSummary != null) {
+    selectedColor = ref
+        .read(childColorProvider.notifier)
+        .getColor(selectedSummary.id, defaultColor: fallbackColor);
+  }
 
   return buildTheme(childColor: selectedColor ?? fallbackColor);
 });

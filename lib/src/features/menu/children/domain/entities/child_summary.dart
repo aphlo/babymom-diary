@@ -7,14 +7,12 @@ class ChildSummary {
     required this.birthday,
     this.dueDate,
     required this.gender,
-    this.color,
   });
 
   final String id;
   final String name;
   final DateTime birthday;
   final DateTime? dueDate;
-  final String? color;
   final Gender gender;
 
   ChildSummary copyWith({
@@ -22,7 +20,6 @@ class ChildSummary {
     String? name,
     DateTime? birthday,
     DateTime? dueDate,
-    String? color,
     Gender? gender,
   }) {
     return ChildSummary(
@@ -30,7 +27,6 @@ class ChildSummary {
       name: name ?? this.name,
       birthday: birthday ?? this.birthday,
       dueDate: dueDate ?? this.dueDate,
-      color: color ?? this.color,
       gender: gender ?? this.gender,
     );
   }
@@ -40,7 +36,6 @@ class ChildSummary {
         'name': name,
         'birthday': birthday.toIso8601String(),
         if (dueDate != null) 'dueDate': dueDate!.toIso8601String(),
-        'color': color,
         'gender': gender.key,
       };
 
@@ -54,7 +49,6 @@ class ChildSummary {
           ? DateTime.parse(birthdayRaw)
           : DateTime.now(), // フォールバック
       dueDate: dueDateRaw is String ? DateTime.parse(dueDateRaw) : null,
-      color: json['color'] as String?,
       gender: genderFromKey(json['gender'] as String?),
     );
   }
@@ -64,7 +58,6 @@ class ChildSummary {
         name == other.name &&
         birthday == other.birthday &&
         dueDate == other.dueDate &&
-        color == other.color &&
         gender == other.gender;
   }
 
@@ -75,5 +68,5 @@ class ChildSummary {
   }
 
   @override
-  int get hashCode => Object.hash(id, name, birthday, dueDate, color, gender);
+  int get hashCode => Object.hash(id, name, birthday, dueDate, gender);
 }

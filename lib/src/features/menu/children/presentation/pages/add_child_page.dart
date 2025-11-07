@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/firebase/household_service.dart';
+import '../../application/child_color_provider.dart';
 import '../../application/selected_child_provider.dart';
 import '../../data/infrastructure/child_firestore_data_source.dart';
 import '../widgets/child_form.dart';
@@ -16,9 +17,6 @@ class AddChildPage extends ConsumerStatefulWidget {
 }
 
 class _AddChildPageState extends ConsumerState<AddChildPage> {
-  String _toHex(Color c) =>
-      '#${c.value.toRadixString(16).padLeft(8, '0').substring(2)}';
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,8 +40,12 @@ class _AddChildPageState extends ConsumerState<AddChildPage> {
                   gender: data.gender,
                   birthday: data.birthday,
                   dueDate: data.dueDate,
-                  color: _toHex(data.color),
                 );
+
+                // 色をSharedPreferencesに保存
+                await ref
+                    .read(childColorProvider.notifier)
+                    .setColor(childId, data.color);
 
                 // 追加した子供を自動的に選択状態にする
                 await ref

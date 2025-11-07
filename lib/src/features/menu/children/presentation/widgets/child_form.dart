@@ -231,6 +231,15 @@ class _ChildFormState extends State<ChildForm> {
                 ),
             ],
           ),
+          Padding(
+            padding: const EdgeInsets.only(top: 8, left: 12),
+            child: Text(
+              'カラーの設定は共有されません。',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).hintColor,
+                  ),
+            ),
+          ),
           const SizedBox(height: 24),
           SaveButton(
             onPressed: _submit,

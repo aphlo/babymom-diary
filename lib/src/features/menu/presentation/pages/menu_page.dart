@@ -6,18 +6,11 @@ import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/features/ads/presentation/widgets/banner_ad_widget.dart';
 import 'package:babymom_diary/src/features/menu/children/data/infrastructure/child_firestore_data_source.dart';
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/features/menu/children/application/child_color_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
 
 class MenuPage extends ConsumerWidget {
   const MenuPage({super.key});
-
-  Color _parseColor(String? hex) {
-    if (hex == null || hex.isEmpty) return Colors.grey;
-    final cleaned = hex.replaceFirst('#', '');
-    final value = int.tryParse(cleaned, radix: 16);
-    if (value == null) return Colors.grey;
-    return Color(0xFF000000 | value);
-  }
 
   String _formatBirthday(Timestamp? ts) {
     if (ts == null) return '';
@@ -61,7 +54,6 @@ class MenuPage extends ConsumerWidget {
                           _ChildListTile(
                             id: d.id,
                             name: (d.data()['name'] as String?) ?? '未設定',
-                            color: _parseColor(d.data()['color'] as String?),
                             subtitle: _formatBirthday(
                                 d.data()['birthday'] as Timestamp?),
                           ),
@@ -147,14 +139,13 @@ class _ChildrenEmptyState extends StatelessWidget {
 }
 
 class _ChildListTile extends ConsumerWidget {
-  const _ChildListTile(
-      {required this.id,
-      required this.name,
-      required this.color,
-      required this.subtitle});
+  const _ChildListTile({
+    required this.id,
+    required this.name,
+    required this.subtitle,
+  });
   final String id;
   final String name;
-  final Color color;
   final String subtitle;
 
   @override
@@ -162,6 +153,11 @@ class _ChildListTile extends ConsumerWidget {
     final isSelected = ref.watch(
       selectedChildControllerProvider.select((v) => v.value == id),
     );
+    // SharedPreferencesから色を取得
+    final color = ref
+        .watch(childColorProvider.notifier)
+        .getColor(id, defaultColor: AppColors.primary);
+
     final scheme = Theme.of(context).colorScheme;
     return ListTile(
       key: ValueKey('child-$id'),

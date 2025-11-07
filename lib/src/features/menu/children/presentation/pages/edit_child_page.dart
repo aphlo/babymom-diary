@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/firebase/household_service.dart';
 import '../../../../../core/types/gender.dart';
+import '../../application/child_color_provider.dart';
 import '../../application/children_local_provider.dart';
 import '../../application/selected_child_provider.dart';
 import '../../application/selected_child_snapshot_provider.dart';
@@ -23,15 +24,6 @@ class EditChildPage extends ConsumerStatefulWidget {
 class _EditChildPageState extends ConsumerState<EditChildPage> {
   bool _loading = true;
   ChildFormData? _initial;
-  String _toHex(Color c) =>
-      '#${c.value.toRadixString(16).padLeft(8, '0').substring(2)}';
-  Color _parseColor(String? hex) {
-    if (hex == null || hex.isEmpty) return Colors.blueAccent;
-    final cleaned = hex.replaceFirst('#', '');
-    final value = int.tryParse(cleaned, radix: 16);
-    if (value == null) return Colors.blueAccent;
-    return Color(0xFF000000 | value);
-  }
 
   Future<void> _load() async {
     final hid = await ref.read(currentHouseholdIdProvider.future);
@@ -46,12 +38,17 @@ class _EditChildPageState extends ConsumerState<EditChildPage> {
       final due = data['dueDate'] as Timestamp?;
       final birthday = ts?.toDate() ?? DateTime.now();
       final dueDate = due?.toDate();
+
+      // 色をSharedPreferencesから取得
+      final color =
+          ref.read(childColorProvider.notifier).getColor(widget.childId);
+
       _initial = ChildFormData(
         name: (data['name'] as String?) ?? '',
         gender: genderFromKey(data['gender'] as String?),
         birthday: birthday,
         dueDate: dueDate,
-        color: _parseColor(data['color'] as String?),
+        color: color,
       );
     }
     if (!mounted) return;
@@ -84,15 +81,18 @@ class _EditChildPageState extends ConsumerState<EditChildPage> {
                     final ds = ChildFirestoreDataSource(
                         ref.read(firebaseFirestoreProvider), hid);
                     try {
-                      final colorHex = _toHex(form.color);
                       await ds.updateChild(
                         id: widget.childId,
                         name: form.name,
                         gender: form.gender,
                         birthday: form.birthday,
                         dueDate: form.dueDate,
-                        color: colorHex,
                       );
+
+                      // 色をSharedPreferencesに保存
+                      await ref
+                          .read(childColorProvider.notifier)
+                          .setColor(widget.childId, form.color);
 
                       final summary = ChildSummary(
                         id: widget.childId,
@@ -100,7 +100,6 @@ class _EditChildPageState extends ConsumerState<EditChildPage> {
                         birthday: form.birthday,
                         dueDate: form.dueDate,
                         gender: form.gender,
-                        color: colorHex,
                       );
                       await ref
                           .read(childrenLocalProvider(hid).notifier)
