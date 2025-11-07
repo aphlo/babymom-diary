@@ -11,6 +11,7 @@ class AdRepositoryImpl implements AdRepository {
 
   @override
   Future<BannerAd> loadBannerAd(String adUnitId) async {
+    final completer = Completer<BannerAd>();
     bool isDisposed = false;
 
     final ad = BannerAd(
@@ -19,14 +20,17 @@ class AdRepositoryImpl implements AdRepository {
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
-          if (!isDisposed) {
-            // Ad loaded successfully
+          if (!isDisposed && !completer.isCompleted) {
+            completer.complete(ad as BannerAd);
           }
         },
         onAdFailedToLoad: (ad, error) {
           if (!isDisposed) {
             isDisposed = true;
             ad.dispose();
+            if (!completer.isCompleted) {
+              completer.completeError(error);
+            }
           }
         },
         onAdImpression: (ad) {
@@ -38,8 +42,8 @@ class AdRepositoryImpl implements AdRepository {
       ),
     );
 
-    await ad.load();
-    return ad;
+    ad.load();
+    return completer.future;
   }
 
   @override
