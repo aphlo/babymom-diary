@@ -15,6 +15,7 @@ import '../../application/usecases/delete_growth_record.dart';
 import '../../application/usecases/get_growth_curves.dart';
 import '../../application/usecases/update_growth_record.dart';
 import '../../application/usecases/watch_growth_records.dart';
+import '../../application/growth_chart_settings_provider.dart';
 import '../mappers/growth_chart_ui_mapper.dart';
 import '../models/growth_chart_data.dart';
 import '../models/growth_measurement_point.dart';
@@ -108,6 +109,7 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
         }
         _householdId = hid;
         _listenToSelectedChild(hid);
+        _listenToSettingsChanges();
       } catch (error, stackTrace) {
         if (!mounted) {
           return;
@@ -118,6 +120,19 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
         );
       }
     });
+  }
+
+  void _listenToSettingsChanges() {
+    _ref.listen<bool>(
+      growthChartSettingsProvider,
+      (previous, next) {
+        if (!mounted || previous == next) {
+          return;
+        }
+        // Rebuild measurements when corrected age setting changes
+        _rebuildMeasurements();
+      },
+    );
   }
 
   void _listenToSelectedChild(String householdId) {
@@ -139,6 +154,7 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
     final childChanged = summary?.id != previous?.id;
     final genderChanged = summary?.gender != previous?.gender;
     final birthdayChanged = summary?.birthday != previous?.birthday;
+    final dueDateChanged = summary?.dueDate != previous?.dueDate;
 
     state = state.copyWith(
       childSummary: summary,
@@ -164,7 +180,7 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
 
     if (childChanged) {
       _subscribeToGrowthRecords(summary.id);
-    } else if (birthdayChanged) {
+    } else if (birthdayChanged || dueDateChanged) {
       _rebuildMeasurements();
     }
 
@@ -232,10 +248,16 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
   }
 
   void _rebuildMeasurements() {
-    final birthday = state.childSummary?.birthday;
+    final summary = state.childSummary;
+    final birthday = summary?.birthday;
+    final dueDate = summary?.dueDate;
+    final useCorrectedAge = _ref.read(growthChartSettingsProvider);
+
     _measurementPoints = _mapper.toMeasurementPoints(
       records: _records,
       birthday: birthday,
+      useCorrectedAge: useCorrectedAge,
+      dueDate: dueDate,
     );
     _emitChartData();
   }

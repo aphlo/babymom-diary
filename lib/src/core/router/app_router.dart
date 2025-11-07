@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/child_record/presentation/pages/record_table_page.dart';
+import '../../features/child_record/presentation/pages/growth_chart_settings_page.dart';
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
 import '../../features/mom_record/presentation/pages/mom_record_page.dart';
 import '../../features/calendar/presentation/pages/calendar_page.dart';
@@ -148,6 +149,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'vaccine_visibility_settings',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: VaccineVisibilitySettingsPage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/growth-chart/settings',
+        name: 'growth_chart_settings',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: GrowthChartSettingsPage()),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

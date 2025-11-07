@@ -71,6 +71,7 @@ class MenuPage extends ConsumerWidget {
                         ),
 
                         const SizedBox(height: 24),
+
                         const Divider(height: 0),
                         ListTile(
                           tileColor: Colors.white,
@@ -78,6 +79,16 @@ class MenuPage extends ConsumerWidget {
                           title: const Text('世帯の共有'),
                           subtitle: const Text('招待コードの発行 / コードで参加'),
                           onTap: () => context.push('/household/share'),
+                          trailing: const Icon(Icons.chevron_right),
+                        ),
+                        const Divider(height: 0),
+                        ListTile(
+                          tileColor: Colors.white,
+                          leading: const Icon(Icons.show_chart),
+                          title: const Text('成長曲線の設定'),
+                          subtitle: const Text('修正月齢での表示設定'),
+                          onTap: () => context.push('/growth-chart/settings'),
+                          trailing: const Icon(Icons.chevron_right),
                         ),
                         const Divider(height: 0),
                         ListTile(
@@ -87,6 +98,7 @@ class MenuPage extends ConsumerWidget {
                           subtitle: const Text('表示するワクチンを選択'),
                           onTap: () => context
                               .push('/household/vaccine-visibility-settings'),
+                          trailing: const Icon(Icons.chevron_right),
                         ),
                         const Divider(height: 0),
                       ],
