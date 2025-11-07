@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../child_record.dart';
 import '../models/growth_chart_data.dart';
 import '../viewmodels/record_view_model.dart';
@@ -33,35 +34,44 @@ class GrowthChartTab extends ConsumerWidget {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _Header(
-            ageRange: state.selectedAgeRange,
-            onSelectRange: (range) => notifier.changeAgeRange(range),
-          ),
-          const SizedBox(height: 6),
-          Expanded(
-            child: state.chartData.when(
-              data: (data) => _ChartContent(
-                data: data,
-                ageRange: state.selectedAgeRange,
-                theme: theme,
-                initialDate: selectedDate,
-                childBirthday: summary.birthday,
-              ),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => _EmptyPlaceholder(
-                icon: Icons.error_outline,
-                title: '読み込みに失敗しました',
-                description: error.toString(),
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _Header(
+                  ageRange: state.selectedAgeRange,
+                  onSelectRange: (range) => notifier.changeAgeRange(range),
+                ),
+                const SizedBox(height: 6),
+                Expanded(
+                  child: state.chartData.when(
+                    data: (data) => _ChartContent(
+                      data: data,
+                      ageRange: state.selectedAgeRange,
+                      theme: theme,
+                      initialDate: selectedDate,
+                      childBirthday: summary.birthday,
+                    ),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (error, stack) => _EmptyPlaceholder(
+                      icon: Icons.error_outline,
+                      title: '読み込みに失敗しました',
+                      description: error.toString(),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+        const BannerAdWidget(),
+      ],
     );
   }
 }
