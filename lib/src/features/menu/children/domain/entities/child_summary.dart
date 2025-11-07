@@ -5,7 +5,7 @@ class ChildSummary {
     required this.id,
     required this.name,
     required this.birthday,
-    required this.dueDate,
+    this.dueDate,
     required this.gender,
     this.color,
   });
@@ -13,7 +13,7 @@ class ChildSummary {
   final String id;
   final String name;
   final DateTime birthday;
-  final DateTime dueDate;
+  final DateTime? dueDate;
   final String? color;
   final Gender gender;
 
@@ -39,7 +39,7 @@ class ChildSummary {
         'id': id,
         'name': name,
         'birthday': birthday.toIso8601String(),
-        'dueDate': dueDate.toIso8601String(),
+        if (dueDate != null) 'dueDate': dueDate!.toIso8601String(),
         'color': color,
         'gender': gender.key,
       };
@@ -53,9 +53,7 @@ class ChildSummary {
       birthday: birthdayRaw is String
           ? DateTime.parse(birthdayRaw)
           : DateTime.now(), // フォールバック
-      dueDate: dueDateRaw is String
-          ? DateTime.parse(dueDateRaw)
-          : DateTime.now(), // フォールバック
+      dueDate: dueDateRaw is String ? DateTime.parse(dueDateRaw) : null,
       color: json['color'] as String?,
       gender: genderFromKey(json['gender'] as String?),
     );

@@ -16,8 +16,7 @@ final childrenStreamProvider = StreamProvider.autoDispose
       final data = doc.data();
       final birthday =
           (data['birthday'] as Timestamp?)?.toDate() ?? DateTime.now();
-      final dueDate =
-          (data['dueDate'] as Timestamp?)?.toDate() ?? DateTime.now();
+      final dueDate = (data['dueDate'] as Timestamp?)?.toDate();
       return ChildSummary(
         id: doc.id,
         name: (data['name'] as String?) ?? '未設定',

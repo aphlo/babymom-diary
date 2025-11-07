@@ -22,7 +22,7 @@ class ManageChildrenPage extends ConsumerWidget {
   String _formatBirthday(Timestamp? ts) {
     if (ts == null) return '';
     final d = ts.toDate();
-    return '${d.year}年${d.month}月${d.day}日';
+    return '${d.year}年${d.month}月${d.day}日生';
   }
 
   String _formatGender(String? g) => genderFromKey(g).labelJa;

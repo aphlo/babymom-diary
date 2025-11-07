@@ -45,7 +45,7 @@ class _EditChildPageState extends ConsumerState<EditChildPage> {
       final ts = data['birthday'] as Timestamp?;
       final due = data['dueDate'] as Timestamp?;
       final birthday = ts?.toDate() ?? DateTime.now();
-      final dueDate = due?.toDate() ?? DateTime.now();
+      final dueDate = due?.toDate();
       _initial = ChildFormData(
         name: (data['name'] as String?) ?? '',
         gender: genderFromKey(data['gender'] as String?),

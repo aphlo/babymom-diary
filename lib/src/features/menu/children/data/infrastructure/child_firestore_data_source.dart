@@ -18,14 +18,14 @@ class ChildFirestoreDataSource {
     required String name,
     required Gender gender,
     required DateTime birthday,
-    required DateTime dueDate,
+    DateTime? dueDate,
     required String color,
   }) async {
     final docRef = await _col.add({
       'name': name,
       'gender': gender.key,
       'birthday': Timestamp.fromDate(birthday),
-      'dueDate': Timestamp.fromDate(dueDate),
+      if (dueDate != null) 'dueDate': Timestamp.fromDate(dueDate),
       'color': color, // hex string like #RRGGBB
       'createdAt': FieldValue.serverTimestamp(),
     });
@@ -40,14 +40,14 @@ class ChildFirestoreDataSource {
     required String name,
     required Gender gender,
     required DateTime birthday,
-    required DateTime dueDate,
+    DateTime? dueDate,
     required String color,
   }) async {
     await _col.doc(id).set({
       'name': name,
       'gender': gender.key,
       'birthday': Timestamp.fromDate(birthday),
-      'dueDate': Timestamp.fromDate(dueDate),
+      if (dueDate != null) 'dueDate': Timestamp.fromDate(dueDate),
       'color': color,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));

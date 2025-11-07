@@ -8,14 +8,14 @@ class ChildFormData {
   final String name;
   final Gender gender;
   final DateTime birthday;
-  final DateTime dueDate;
+  final DateTime? dueDate;
   final Color color;
 
   const ChildFormData({
     required this.name,
     required this.gender,
     required this.birthday,
-    required this.dueDate,
+    this.dueDate,
     this.color = Colors.blueAccent,
   });
 }
@@ -42,7 +42,7 @@ class _ChildFormState extends State<ChildForm> {
   final _birthdayCtrl = TextEditingController();
   final _dueDateCtrl = TextEditingController();
 
-  late Gender _gender;
+  Gender? _gender;
   DateTime? _birthday;
   DateTime? _dueDate;
   Color _pickedColor = AppColors.primary;
@@ -58,14 +58,16 @@ class _ChildFormState extends State<ChildForm> {
       _birthdayCtrl.text =
           '${i.birthday.year}/${i.birthday.month}/${i.birthday.day}';
       _dueDate = i.dueDate;
-      _dueDateCtrl.text =
-          '${i.dueDate.year}/${i.dueDate.month}/${i.dueDate.day}';
+      if (i.dueDate != null) {
+        _dueDateCtrl.text =
+            '${i.dueDate!.year}/${i.dueDate!.month}/${i.dueDate!.day}';
+      }
       final inPalette = _palette.any((c) => c.value == i.color.value);
       _pickedColor = inPalette ? i.color : AppColors.primary;
     } else {
       // 新規追加の場合、デフォルト値を設定
       _nameCtrl.text = '';
-      _gender = Gender.unknown;
+      _gender = null;
       _birthday = null;
       _dueDate = null;
       _pickedColor = AppColors.primary;
@@ -121,12 +123,12 @@ class _ChildFormState extends State<ChildForm> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // バリデーションが通った後なので、_birthdayと_dueDateは必ずnon-null
+    // バリデーションが通った後なので、_birthdayと_genderは必ずnon-null（dueDateはoptional）
     final data = ChildFormData(
       name: _nameCtrl.text.trim(),
-      gender: _gender,
+      gender: _gender!,
       birthday: _birthday!,
-      dueDate: _dueDate!,
+      dueDate: _dueDate,
       color: _pickedColor,
     );
 
@@ -153,13 +155,11 @@ class _ChildFormState extends State<ChildForm> {
             value: _gender,
             decoration: const InputDecoration(labelText: '性別'),
             items: const [
-              DropdownMenuItem(value: Gender.unknown, child: Text('未選択')),
               DropdownMenuItem(value: Gender.male, child: Text('男の子')),
               DropdownMenuItem(value: Gender.female, child: Text('女の子')),
             ],
-            validator: (v) =>
-                (v == null || v == Gender.unknown) ? '性別を選択してください' : null,
-            onChanged: (v) => setState(() => _gender = v ?? Gender.unknown),
+            validator: (v) => v == null ? '性別を選択してください' : null,
+            onChanged: (v) => setState(() => _gender = v),
           ),
           const SizedBox(height: 12),
           TextFormField(
@@ -178,14 +178,32 @@ class _ChildFormState extends State<ChildForm> {
             controller: _dueDateCtrl,
             readOnly: true,
             showCursor: false,
-            decoration: const InputDecoration(
-              labelText: '出産予定日',
+            decoration: InputDecoration(
+              labelText: '出産予定日（任意）',
               hintText: '選択してください',
+              suffixIcon: _dueDate != null
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          _dueDate = null;
+                          _dueDateCtrl.clear();
+                        });
+                      },
+                    )
+                  : null,
             ),
-            validator: (v) => _dueDate == null ? '出産予定日を選択してください' : null,
             onTap: _pickDueDate,
           ),
-          // measurement fields removed
+          Padding(
+            padding: const EdgeInsets.only(top: 8, left: 12),
+            child: Text(
+              '出産予定日は修正月齢で早産児の成長曲線を表示するために使用します。',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).hintColor,
+                  ),
+            ),
+          ),
           const SizedBox(height: 16),
           Text('カラー', style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 8),

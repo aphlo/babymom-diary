@@ -22,7 +22,7 @@ class MenuPage extends ConsumerWidget {
   String _formatBirthday(Timestamp? ts) {
     if (ts == null) return '';
     final d = ts.toDate();
-    return '${d.year}年${d.month}月${d.day}日';
+    return '${d.year}年${d.month}月${d.day}日生';
   }
 
   @override
@@ -65,10 +65,9 @@ class MenuPage extends ConsumerWidget {
                         ],
                         ListTile(
                           tileColor: Colors.white,
-                          leading: const Icon(Icons.edit),
-                          title: const Text('子どもの追加・編集'),
-                          onTap: () =>
-                              context.push('/children/manage', extra: 'slide'),
+                          leading: const Icon(Icons.add),
+                          title: const Text('子どもの追加'),
+                          onTap: () => context.push('/children/add'),
                           trailing: const Icon(Icons.chevron_right),
                         ),
 
@@ -128,12 +127,20 @@ class _ChildListTile extends ConsumerWidget {
       leading: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Radio<String?>.adaptive(
-            value: id,
-            groupValue: isSelected ? id : null,
-            activeColor: Theme.of(context).colorScheme.primary,
-            onChanged: (v) =>
-                ref.read(selectedChildControllerProvider.notifier).select(v),
+          InkWell(
+            onTap: () =>
+                ref.read(selectedChildControllerProvider.notifier).select(id),
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(
+                isSelected ? Icons.check_circle : Icons.circle_outlined,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.grey,
+                size: 28,
+              ),
+            ),
           ),
           const SizedBox(width: 8),
           CircleAvatar(
@@ -144,8 +151,8 @@ class _ChildListTile extends ConsumerWidget {
       ),
       title: Text(name),
       subtitle: Text(subtitle),
-      onTap: () =>
-          ref.read(selectedChildControllerProvider.notifier).select(id),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => context.push('/children/edit/$id'),
     );
   }
 }
