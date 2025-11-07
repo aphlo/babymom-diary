@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../child_record.dart';
 import '../models/growth_measurement_point.dart';
 import '../viewmodels/growth_chart_view_model.dart';
 
@@ -151,6 +152,26 @@ class _HeightRecordSheetState extends ConsumerState<HeightRecordSheet> {
       if (mounted) {
         Navigator.of(context).maybePop();
       }
+    } on DuplicateGrowthRecordException catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isSaving = false;
+      });
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('記録の重複'),
+          content: Text(error.message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     } catch (error) {
       if (!mounted) {
         return;
@@ -370,6 +391,26 @@ class _WeightRecordSheetState extends ConsumerState<WeightRecordSheet> {
       if (mounted) {
         Navigator.of(context).maybePop();
       }
+    } on DuplicateGrowthRecordException catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isSaving = false;
+      });
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('記録の重複'),
+          content: Text(error.message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     } catch (error) {
       if (!mounted) {
         return;

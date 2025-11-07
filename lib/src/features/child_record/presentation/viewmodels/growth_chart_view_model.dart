@@ -313,10 +313,23 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
     if (householdId == null || child == null) {
       throw StateError('Cannot add height record without household and child.');
     }
+
+    // Check for duplicate height record on the same date
+    final normalizedDate = _normalizeDate(recordedAt);
+    final hasDuplicate = _records.any((record) =>
+        record.recordedAt == normalizedDate && record.height != null);
+
+    if (hasDuplicate) {
+      throw DuplicateGrowthRecordException(
+        recordType: GrowthRecordType.height,
+        recordedAt: normalizedDate,
+      );
+    }
+
     final sanitizedNote = _sanitizeNote(note);
     final record = GrowthRecord(
       childId: child.id,
-      recordedAt: _normalizeDate(recordedAt),
+      recordedAt: normalizedDate,
       height: heightCm,
       note: sanitizedNote,
       createdAt: DateTime.now(),
@@ -336,10 +349,23 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
     if (householdId == null || child == null) {
       throw StateError('Cannot add weight record without household and child.');
     }
+
+    // Check for duplicate weight record on the same date
+    final normalizedDate = _normalizeDate(recordedAt);
+    final hasDuplicate = _records.any((record) =>
+        record.recordedAt == normalizedDate && record.weight != null);
+
+    if (hasDuplicate) {
+      throw DuplicateGrowthRecordException(
+        recordType: GrowthRecordType.weight,
+        recordedAt: normalizedDate,
+      );
+    }
+
     final sanitizedNote = _sanitizeNote(note);
     final record = GrowthRecord(
       childId: child.id,
-      recordedAt: _normalizeDate(recordedAt),
+      recordedAt: normalizedDate,
       weight: weightGrams,
       note: sanitizedNote,
       createdAt: DateTime.now(),
@@ -360,9 +386,22 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
     if (householdId == null) {
       throw StateError('Cannot update height record without household.');
     }
+
+    // Check for duplicate height record on the same date (excluding current record)
+    final normalizedDate = _normalizeDate(recordedAt);
+    final hasDuplicate = _records.any((r) =>
+        r.id != recordId && r.recordedAt == normalizedDate && r.height != null);
+
+    if (hasDuplicate) {
+      throw DuplicateGrowthRecordException(
+        recordType: GrowthRecordType.height,
+        recordedAt: normalizedDate,
+      );
+    }
+
     final sanitizedNote = _sanitizeNote(note ?? record.note);
     final updated = record.copyWith(
-      recordedAt: _normalizeDate(recordedAt),
+      recordedAt: normalizedDate,
       height: heightCm,
       note: sanitizedNote,
       updatedAt: DateTime.now(),
@@ -384,9 +423,22 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
     if (householdId == null) {
       throw StateError('Cannot update weight record without household.');
     }
+
+    // Check for duplicate weight record on the same date (excluding current record)
+    final normalizedDate = _normalizeDate(recordedAt);
+    final hasDuplicate = _records.any((r) =>
+        r.id != recordId && r.recordedAt == normalizedDate && r.weight != null);
+
+    if (hasDuplicate) {
+      throw DuplicateGrowthRecordException(
+        recordType: GrowthRecordType.weight,
+        recordedAt: normalizedDate,
+      );
+    }
+
     final sanitizedNote = _sanitizeNote(note ?? record.note);
     final updated = record.copyWith(
-      recordedAt: _normalizeDate(recordedAt),
+      recordedAt: normalizedDate,
       weight: weightGrams,
       note: sanitizedNote,
       updatedAt: DateTime.now(),

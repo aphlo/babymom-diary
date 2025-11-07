@@ -9,3 +9,4 @@ export 'domain/value/excretion_volume.dart';
 export 'domain/value/age_range.dart';
 export 'domain/value/measurement_type.dart';
 export 'domain/value/percentile.dart';
+export 'domain/errors/duplicate_growth_record_exception.dart';
