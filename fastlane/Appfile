@@ -1,3 +1,0 @@
-apple_id ENV["APPLE_ID"] || "your-apple-id@example.com"
-itc_team_id ENV["ITC_TEAM_ID"] if ENV["ITC_TEAM_ID"]
-team_id ENV["DEV_TEAM_ID"] if ENV["DEV_TEAM_ID"]
