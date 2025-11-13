@@ -4,12 +4,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**babymom-diary** (branded as "Milu") is a Flutter application for tracking baby care activities including vaccinations, growth records, calendar events, and maternal health records. The codebase follows strict Domain-Driven Design (DDD) principles combined with MVVM architecture.
+**babymom-diary** (branded as "Milu") is a monorepo containing:
+- **Flutter app**: Baby care activity tracking (vaccinations, growth records, calendar, maternal health)
+- **Cloud Functions**: Backend logic for household sharing and other server-side features
+- **Terraform**: Infrastructure as Code for GCP resource management
+
+The Flutter codebase follows strict Domain-Driven Design (DDD) principles combined with MVVM architecture.
+
+## Repository Structure
+
+```
+babymom-diary/
+├── flutter/           # Flutter application
+├── cloud-functions/   # Firebase Cloud Functions (Node.js/TypeScript)
+├── terraform/         # Infrastructure as Code
+├── docs/             # Project-wide documentation
+├── firestore.rules   # Firestore security rules
+├── firestore.indexes.json
+└── firebase.json     # Firebase configuration (gitignored - contains secrets)
+```
 
 ## Essential Commands
 
 ### Development (via Rake)
+
+**NOTE:** All Rake commands must be run from the `flutter/` directory.
+
 ```bash
+cd flutter
 rake run_local      # Run with local flavor (Firebase emulator)
 rake run_prod       # Run with prod flavor (production Firebase)
 rake format         # Format code: fvm dart format lib test
@@ -19,12 +41,15 @@ rake test           # Run tests: fvm flutter test
 
 Pass extra Flutter flags via `ARGS` environment variable:
 ```bash
+cd flutter
 ARGS="--device-id emulator-5554" rake run_prod
 ARGS="--dart-define=BABYMOM_FIREBASE_EMULATOR_HOST=10.0.2.2" rake run_local
 ```
 
 ### Direct Flutter Commands (via FVM)
+
 ```bash
+cd flutter
 fvm use                     # Install/switch to pinned Flutter version
 fvm flutter pub get         # Install dependencies
 fvm flutter test test/path/to/test_file.dart  # Run single test file
@@ -33,18 +58,18 @@ fvm flutter run --flavor local -t lib/main_local.dart --device-id <device>
 ```
 
 ### Testing
-- Unit tests mirror feature structure: `test/features/{feature}/{layer}/{file}_test.dart`
+- Unit tests mirror feature structure: `flutter/test/features/{feature}/{layer}/{file}_test.dart`
 - Focus on domain services and use cases for business logic validation
-- Run specific test: `fvm flutter test test/features/vaccines/domain/services/vaccination_schedule_policy_test.dart`
+- Run specific test: `cd flutter && fvm flutter test test/features/vaccines/domain/services/vaccination_schedule_policy_test.dart`
 
 ## Architecture
 
 ### Layer Structure (DDD + MVVM)
 
-The codebase strictly separates concerns into four layers:
+The Flutter app strictly separates concerns into four layers:
 
 ```
-lib/src/features/{feature}/
+flutter/lib/src/features/{feature}/
   domain/           # Business logic (NO Flutter/Firebase dependencies)
     entities/       # Immutable core business objects
     repositories/   # Repository interfaces (abstract)
@@ -176,18 +201,37 @@ class FeatureViewModel extends StateNotifier<FeatureState> {
 - **local:** Firebase emulator (default host: `localhost` for iOS, `10.0.2.2` for Android)
 - **prod:** Production Firebase
 
-Entry points: `lib/main_local.dart` and `lib/main_prod.dart`
+Entry points: `flutter/lib/main_local.dart` and `flutter/lib/main_prod.dart`
 
 ### Firebase Setup
-- Copy `.example` files to their non-example counterparts
-- Run `flutterfire configure` for each flavor
-- Android: `google-services.json` per flavor in `android/app/src/{flavor}/`
-- iOS: Xcode schemes target `Debug-local` or `Release-prod`
+
+**IMPORTANT:** Firebase configuration files contain secrets and are gitignored. After cloning or migration, you need to regenerate them.
+
+See detailed instructions: `docs/firebase_config_regeneration.md`
+
+Quick setup:
+```bash
+cd flutter
+flutterfire configure --project=babymom-diary --out=lib/firebase_options_local.dart
+flutterfire configure --project=babymom-diary --out=lib/firebase_options_prod.dart
+```
+
+Required files (all gitignored):
+- `flutter/lib/firebase_options_local.dart`
+- `flutter/lib/firebase_options_prod.dart`
+- `flutter/lib/firebase_options.dart`
+- `flutter/android/app/src/local/google-services.json`
+- `flutter/android/app/src/prod/google-services.json`
+- `flutter/ios/Runner/GoogleService-Info-*.plist`
+- `flutter/fastlane/.env.local`
+- `flutter/fastlane/.env.prod`
 
 ### Development Tools
-- **FVM:** Flutter Version Manager (pinned via `.fvmrc`)
-- **Fastlane:** Deployment automation (`fastlane local --env local`)
+- **FVM:** Flutter Version Manager (pinned via `flutter/.fvmrc`)
+- **Fastlane:** Deployment automation (run from `flutter/` directory)
 - **Widgetbook:** Component catalog for UI development
+- **Terraform:** Infrastructure management (in `terraform/` directory)
+- **Firebase CLI:** Emulator and deployment (run from root directory)
 
 ## Key Design Decisions
 
@@ -208,6 +252,13 @@ Entry points: `lib/main_local.dart` and `lib/main_prod.dart`
 
 ## Documentation References
 
-See `AGENTS.md` (Japanese) for detailed MVVM/DDD guidelines with CalendarPage examples.
-See `docs/dose.md` (Japanese) for dose system design rationale and migration strategy.
-See `README.md` for quick start, FVM setup, and Firebase configuration.
+- `README.md` - Monorepo overview and quick start
+- `flutter/README.md` - Flutter app specific documentation
+- `cloud-functions/README.md` - Cloud Functions documentation
+- `terraform/README.md` - Infrastructure management guide
+- `AGENTS.md` (Japanese) - Detailed MVVM/DDD guidelines with CalendarPage examples
+- `docs/household_sharing.md` (Japanese) - Household sharing feature design
+- `docs/terraform_setup.md` (Japanese) - Terraform setup guide
+- `docs/monorepo_migration.md` (Japanese) - Monorepo migration guide
+- `docs/firebase_config_regeneration.md` (Japanese) - Firebase config regeneration steps
+- `docs/dose.md` (Japanese) - Dose system design rationale and migration strategy
