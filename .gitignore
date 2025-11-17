@@ -40,6 +40,7 @@ flutter/.flutter-plugins-dependencies
 flutter/.fvm/
 
 # Secrets (Additional safeguard - also in subdirectory .gitignore files)
+*.zip
 *.env
 *.key
 *.p12
