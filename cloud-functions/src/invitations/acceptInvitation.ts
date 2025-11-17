@@ -14,19 +14,8 @@ interface AcceptInvitationResult {
 
 export const acceptInvitation = functions
   .region("asia-northeast1")
-  .runWith({
-    enforceAppCheck: true, // Reject requests without valid App Check token
-  })
   .https.onCall(async (data: AcceptInvitationData, context): Promise<AcceptInvitationResult> => {
-    // 1. App Check validation
-    if (!context.app) {
-      throw new functions.https.HttpsError(
-        "failed-precondition",
-        "不正なクライアントからのリクエストです"
-      );
-    }
-
-    // 2. Authentication check
+    // 1. Authentication check
     if (!context.auth) {
       throw new functions.https.HttpsError("unauthenticated", "認証が必要です");
     }
@@ -92,20 +81,20 @@ export const acceptInvitation = functions
           throw new functions.https.HttpsError("not-found", "世帯が見つかりません");
         }
 
-        const household = householdSnapshot.data()!;
+        // 4-5. Check if already a member (members are in subcollection)
+        const memberRef = householdRef.collection("members").doc(userId);
+        const memberSnapshot = await transaction.get(memberRef);
 
-        // 4-5. Check if already a member
-        if (household.members?.[userId]) {
+        if (memberSnapshot.exists) {
           throw new functions.https.HttpsError("already-exists", "既にこの世帯のメンバーです");
         }
 
-        // 4-6. Add as member
-        transaction.update(householdRef, {
-          [`members.${userId}`]: {
-            role: "member",
-            joinedAt: admin.firestore.FieldValue.serverTimestamp(),
-          },
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        // 4-6. Add as member (to subcollection)
+        transaction.set(memberRef, {
+          role: "member",
+          joinedAt: admin.firestore.FieldValue.serverTimestamp(),
+          joinToken: invitationDoc.id,
+          uid: userId,
         });
 
         // 4-7. Update invitation status
@@ -114,27 +103,6 @@ export const acceptInvitation = functions
           acceptedBy: userId,
           acceptedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
-
-        // 4-8. Update user document
-        const userRef = db.doc(`users/${userId}`);
-        const userSnapshot = await transaction.get(userRef);
-
-        if (!userSnapshot.exists) {
-          // Create if first time
-          transaction.set(userRef, {
-            currentHouseholdId: householdId,
-            households: [householdId],
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-        } else {
-          // Update if existing
-          transaction.update(userRef, {
-            currentHouseholdId: householdId,
-            households: admin.firestore.FieldValue.arrayUnion(householdId),
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-        }
 
         return {
           householdId,

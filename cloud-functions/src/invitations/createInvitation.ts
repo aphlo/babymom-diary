@@ -14,27 +14,20 @@ interface CreateInvitationResult {
 
 export const createInvitation = functions
   .region("asia-northeast1")
-  .runWith({
-    enforceAppCheck: true, // Reject requests without valid App Check token
-  })
   .https.onCall(async (data: CreateInvitationData, context): Promise<CreateInvitationResult> => {
-    // 1. App Check validation
-    if (!context.app) {
-      throw new functions.https.HttpsError(
-        "failed-precondition",
-        "不正なクライアントからのリクエストです"
-      );
-    }
-
-    // 2. Authentication check
+    // 1. Authentication check
     if (!context.auth) {
+      functions.logger.error("createInvitation: Unauthenticated request");
       throw new functions.https.HttpsError("unauthenticated", "認証が必要です");
     }
 
     const userId = context.auth.uid;
     const { householdId } = data;
 
+    functions.logger.info("createInvitation: Starting", { userId, householdId });
+
     if (!householdId) {
+      functions.logger.error("createInvitation: Missing householdId", { userId });
       throw new functions.https.HttpsError("invalid-argument", "世帯IDが必要です");
     }
 
@@ -45,13 +38,36 @@ export const createInvitation = functions
     const householdSnapshot = await householdRef.get();
 
     if (!householdSnapshot.exists) {
+      functions.logger.error("createInvitation: Household not found", {
+        userId,
+        householdId,
+        path: householdRef.path
+      });
       throw new functions.https.HttpsError("not-found", "世帯が見つかりません");
     }
 
-    const household = householdSnapshot.data()!;
+    // Check if user is a member with admin role (members are in subcollection)
+    const memberRef = householdRef.collection("members").doc(userId);
+    const memberSnapshot = await memberRef.get();
 
-    // Only owner can create invitation codes
-    if (household.members?.[userId]?.role !== "owner") {
+    if (!memberSnapshot.exists) {
+      functions.logger.error("createInvitation: User is not a member", {
+        userId,
+        householdId,
+        memberPath: memberRef.path
+      });
+      throw new functions.https.HttpsError("permission-denied", "この世帯のメンバーではありません");
+    }
+
+    const member = memberSnapshot.data()!;
+
+    // Only admin can create invitation codes
+    if (member.role !== "admin") {
+      functions.logger.error("createInvitation: User lacks admin role", {
+        userId,
+        householdId,
+        role: member.role
+      });
       throw new functions.https.HttpsError("permission-denied", "招待コードの作成権限がありません");
     }
 
@@ -76,6 +92,11 @@ export const createInvitation = functions
     }
 
     if (!isUnique) {
+      functions.logger.error("createInvitation: Failed to generate unique code", {
+        userId,
+        householdId,
+        attempts: maxAttempts
+      });
       throw new functions.https.HttpsError("internal", "招待コードの生成に失敗しました");
     }
 
@@ -91,6 +112,13 @@ export const createInvitation = functions
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       expiresAt,
       status: "pending",
+    });
+
+    functions.logger.info("createInvitation: Success", {
+      userId,
+      householdId,
+      invitationId: invitationRef.id,
+      code
     });
 
     return {

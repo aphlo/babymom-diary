@@ -20,7 +20,7 @@ class DuplicateGrowthRecordException implements Exception {
 
   String get message {
     final dateStr = '${recordedAt.year}年${recordedAt.month}月${recordedAt.day}日';
-    return '${dateStr}には既に${_typeName}の記録があります。\n同じ日付に複数の記録を保存することはできません。';
+    return '$dateStrには既に$_typeNameの記録があります。\n同じ日付に複数の記録を保存することはできません。';
   }
 
   @override
