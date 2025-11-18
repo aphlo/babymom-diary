@@ -13,6 +13,8 @@ import '../../features/menu/children/presentation/pages/add_child_page.dart';
 import '../../features/menu/children/presentation/pages/manage_children_page.dart';
 import '../../features/menu/children/presentation/pages/edit_child_page.dart';
 import '../../features/menu/household/presentation/pages/household_share_page.dart';
+import '../../features/menu/household/presentation/pages/household_invitation_create_page.dart';
+import '../../features/menu/household/presentation/pages/household_invitation_join_page.dart';
 import '../../features/menu/household/presentation/pages/vaccine_visibility_settings_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_detail_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_reservation_page.dart';
@@ -142,6 +144,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'household_share',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: HouseholdSharePage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/household/share/create',
+        name: 'household_share_create',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: HouseholdInvitationCreatePage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/household/share/join',
+        name: 'household_share_join',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: HouseholdInvitationJoinPage()),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
