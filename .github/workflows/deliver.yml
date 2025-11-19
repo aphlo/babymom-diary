@@ -1,0 +1,85 @@
+name: deliver
+
+on:
+  push:
+    tags:
+      - v*
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ios:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run pre-process script
+        shell: bash
+        env:
+          PREPROCESS_SCRIPT_BASE64: ${{ secrets.PREPROCESS_SCRIPT_BASE64 }}
+        run: |
+          if [ -n "$PREPROCESS_SCRIPT_BASE64" ]; then
+            echo $PREPROCESS_SCRIPT_BASE64 | base64 --decode > ./pre-process.sh && bash ./pre-process.sh
+          fi
+
+      - name: Import Provisioning Profile
+        env:
+          IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo -n "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/distribution.mobileprovision
+
+      - name: Import Certificate
+        env:
+          IOS_CERTIFICATE_P12_BASE64: ${{ secrets.IOS_CERTIFICATE_P12_BASE64 }}
+          IOS_CERTIFICATE_P12_P12_PASSWORD: ${{ secrets.IOS_CERTIFICATE_P12_PASSWORD }}
+          IOS_KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+        run: |
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # import certificate from secrets
+          echo -n "$IOS_CERTIFICATE_P12_BASE64" | base64 --decode --output $CERTIFICATE_PATH
+
+          # create temporary keychain
+          security create-keychain -p "$IOS_KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$IOS_KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$IOS_CERTIFICATE_P12_P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Run flutter version
+        run: flutter --version
+        working-directory: flutter
+
+      - name: Run flutter pub get
+        run: flutter pub get
+        working-directory: flutter
+
+      - name: Build ipa
+        id: build
+        run: flutter build ipa --export-options-plist=./ios/ExportOptions.plist
+        working-directory: flutter
+
+      - name: Detect path for ipa file
+        run: |
+          echo "IPA_PATH=$(find flutter/build/ios/ipa -type f -name '*.ipa')" >> $GITHUB_ENV
+
+      - name: Upload to App Store Connect
+        id: upload
+        env:
+          APPLE_APPLE_ID: ${{ secrets.APPLE_APPLE_ID }}
+          APPLE_APP_PASS: ${{ secrets.APPLE_APP_PASS }}
+        run: xcrun altool --upload-app --type ios -f "$IPA_PATH" -u "$APPLE_APPLE_ID" -p "$APPLE_APP_PASS"
