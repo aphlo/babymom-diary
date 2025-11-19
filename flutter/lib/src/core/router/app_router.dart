@@ -8,6 +8,8 @@ import '../../features/vaccines/presentation/pages/vaccines_page.dart';
 import '../../features/mom_record/presentation/pages/mom_record_page.dart';
 import '../../features/calendar/presentation/pages/calendar_page.dart';
 import '../../features/calendar/presentation/pages/calendar_settings_page.dart';
+import '../../features/calendar/presentation/pages/add_calendar_event_page.dart';
+import '../../features/calendar/domain/entities/calendar_event.dart';
 import '../../features/menu/presentation/pages/menu_page.dart';
 import '../../features/menu/children/presentation/pages/add_child_page.dart';
 import '../../features/menu/children/presentation/pages/manage_children_page.dart';
@@ -280,6 +282,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               influenzaSeasonLabel: influenzaSeasonLabel,
               influenzaDoseOrder: influenzaDoseOrder,
             ),
+          );
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/calendar/add',
+        name: 'calendar_add',
+        pageBuilder: (context, state) {
+          final initialDate = state.extra as DateTime?;
+          return CupertinoPage(
+            child: AddCalendarEventPage(initialDate: initialDate),
+          );
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/calendar/edit',
+        name: 'calendar_edit',
+        pageBuilder: (context, state) {
+          final existingEvent = state.extra as CalendarEvent;
+          return CupertinoPage(
+            child: AddCalendarEventPage(existingEvent: existingEvent),
           );
         },
       ),

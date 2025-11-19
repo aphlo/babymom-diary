@@ -7,7 +7,6 @@ import 'package:table_calendar/table_calendar.dart';
 
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/models/calendar_event_model.dart';
-import 'package:babymom_diary/src/features/calendar/presentation/pages/add_calendar_event_page.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/pages/calendar_settings_page.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/calendar_state.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/calendar_view_model.dart';
@@ -68,12 +67,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             return;
           }
           viewModel.clearUiEvent();
-          final result = await navigator.push<CalendarEventModel>(
-            MaterialPageRoute(
-              builder: (_) => AddCalendarEventPage(
-                initialDate: request.initialDate,
-              ),
-            ),
+          final result = await context.push<CalendarEventModel>(
+            '/calendar/add',
+            extra: request.initialDate,
           );
           if (!mounted) {
             return;
@@ -342,15 +338,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     }
 
     // 通常のイベントの場合は編集ページに遷移
-    Navigator.of(context)
-        .push(
-      MaterialPageRoute(
-        builder: (_) => AddCalendarEventPage(
-          existingEvent: event,
-        ),
-      ),
-    )
-        .then((result) {
+    context.push('/calendar/edit', extra: event).then((result) {
       // 編集・削除が成功した場合はリフレッシュ
       if (result == true) {
         // ViewModelが自動的にリフレッシュするため、特別な処理は不要

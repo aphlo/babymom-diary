@@ -77,38 +77,34 @@ class CalendarDayCell extends StatelessWidget {
         final padding = EdgeInsets.all(size.shortestSide * 0.12);
         final CalendarEvent? primaryEvent =
             events.isEmpty ? null : events.first;
-        final borderRadius = BorderRadius.circular(size.shortestSide * 0.2);
-        final dayReservedHeight = dayFontSize + padding.top * 0.6;
-        final iconAreaPadding = EdgeInsets.only(
-          top: dayReservedHeight,
-          left: size.shortestSide * 0.06,
-          right: size.shortestSide * 0.06,
-          bottom: size.shortestSide * 0.06,
-        );
+        final borderRadius = BorderRadius.circular(size.shortestSide * 0.15);
+
+        // アイコンのサイズと位置を計算
+        final iconSize = size.shortestSide * 0.85; // アイコンをさらに大きくする
+        final iconPadding = size.shortestSide * 0.03;
+        final iconBottom = size.shortestSide * 0.02;
+        final iconRight = size.shortestSide * 0.02;
 
         Widget buildEventIcon(CalendarEvent event) {
-          final paddingValue = size.shortestSide * 0.04;
           Widget child;
           if (event.iconPath.isEmpty) {
-            child = Center(
-              child: Icon(
-                Icons.task_alt,
-                size: size.shortestSide * 0.5,
-                color: Colors.grey,
-              ),
+            child = Icon(
+              Icons.task_alt,
+              size: iconSize * 0.7,
+              color: Colors.grey,
             );
           } else {
             child = Image.asset(
               event.iconPath,
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
             );
           }
 
           Widget icon = Padding(
-            padding: EdgeInsets.all(paddingValue),
+            padding: EdgeInsets.all(iconPadding),
             child: ClipRRect(
               borderRadius: borderRadius,
-              child: SizedBox.expand(child: child),
+              child: child,
             ),
           );
 
@@ -133,11 +129,12 @@ class CalendarDayCell extends StatelessWidget {
           child: Stack(
             children: [
               if (primaryEvent != null)
-                Positioned.fill(
-                  child: Padding(
-                    padding: iconAreaPadding,
-                    child: buildEventIcon(primaryEvent),
-                  ),
+                Positioned(
+                  right: iconRight,
+                  bottom: iconBottom,
+                  width: iconSize,
+                  height: iconSize,
+                  child: buildEventIcon(primaryEvent),
                 ),
               Positioned(
                 top: padding.top - 2,
