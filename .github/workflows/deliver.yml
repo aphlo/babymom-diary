@@ -17,6 +17,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: read flutter version from fvmrc
+        id: fvm
+        run: |
+          FLUTTER_VERSION=$(cat flutter/.fvmrc | grep flutter | cut -d'"' -f4)
+          echo "version=$FLUTTER_VERSION" >> $GITHUB_OUTPUT
+
       - name: Run pre-process script
         shell: bash
         env:
@@ -57,7 +63,7 @@ jobs:
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          flutter-version: ${{ steps.fvm.outputs.version }}
           cache: true
 
       - name: Run flutter version
