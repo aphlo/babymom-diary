@@ -41,6 +41,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         if (event == null || event == previous?.pendingUiEvent) {
           return;
         }
+        final router = GoRouter.of(context);
         Future.microtask(() async {
           if (!mounted) {
             return;
@@ -67,7 +68,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             return;
           }
           viewModel.clearUiEvent();
-          final result = await context.push<CalendarEventModel>(
+          if (!mounted) {
+            return;
+          }
+          final result = await router.push<CalendarEventModel>(
             '/calendar/add',
             extra: request.initialDate,
           );

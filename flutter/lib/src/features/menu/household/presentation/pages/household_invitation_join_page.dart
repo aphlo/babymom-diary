@@ -108,6 +108,8 @@ class _HouseholdInvitationJoinPageState
       await acceptInvitation(code);
       ref.invalidate(currentHouseholdIdProvider);
 
+      if (!mounted) return;
+
       _joinCodeCtrl.clear();
       await showDialog<void>(
         context: context,
