@@ -1,14 +1,6 @@
 {
   "indexes": [
     {
-      "collectionGroup": "joinTokens",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
-        { "fieldPath": "code", "order": "ASCENDING" },
-        { "fieldPath": "expireAt", "order": "ASCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "events",
       "queryScope": "COLLECTION_GROUP",
       "fields": [

@@ -3,8 +3,15 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function authed() { return request.auth != null; }
 
+    function activeHouseholdMatches(hid) {
+      return authed() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.activeHouseholdId == hid;
+    }
+
     function isMember(hid) {
       return authed() &&
+             activeHouseholdMatches(hid) &&
              exists(/databases/$(database)/documents/households/$(hid)/members/$(request.auth.uid));
     }
 
@@ -12,13 +19,6 @@ service cloud.firestore {
     function isCreator(hid) {
       return authed() &&
              get(/databases/$(database)/documents/households/$(hid)).data.createdBy == request.auth.uid;
-    }
-
-    // households/{hid} の joinTokens/{tokenId} が生きているか検証
-    function validToken(hid) {
-      return request.resource.data.joinToken is string
-        && exists(/databases/$(database)/documents/households/$(hid)/joinTokens/$(request.resource.data.joinToken))
-        && get(/databases/$(database)/documents/households/$(hid)/joinTokens/$(request.resource.data.joinToken)).data.expireAt > request.time;
     }
 
     match /households/{hid} {
@@ -31,15 +31,9 @@ service cloud.firestore {
       // 非メンバーが自分のメンバードキュメントを作成できるようにする（作成者 or 有効トークン）
       match /members/{uid} {
         allow read: if isMember(hid);
-        allow create: if authed() && request.auth.uid == uid && (isCreator(hid) || validToken(hid));
+        allow create: if authed() && request.auth.uid == uid && isCreator(hid);
         // 既存メンバーなら自由に更新/削除可（下の包括ルールでも許可されるが明示）
         allow update, delete: if isMember(hid);
-      }
-
-      // 招待トークン：メンバーは自由に書き込み、読み取りは有効なものは誰でも
-      match /joinTokens/{tokenId} {
-        allow read: if resource.data.expireAt > request.time || isMember(hid);
-        allow write: if isMember(hid);
       }
 
       match /children/{childId}/events/{eventId} {
@@ -58,16 +52,15 @@ service cloud.firestore {
       }
     }
 
-    // collectionGroup('joinTokens') 検索のための読み取り許可（有効なもののみ）
-    match /{path=**}/joinTokens/{tokenId} {
-      allow read: if resource.data.expireAt > request.time;
-    }
-
     // collectionGroup('members') から "自分の" メンバーシップだけ読めるようにする
     // クエリ互換のため、ドキュメントID(uid)ではなく resource.data.uid で判定する
     // → クライアントは必ず where('uid', '==', request.auth.uid) を付与する必要がある
     match /{path=**}/members/{uid} {
       allow read: if authed() && resource.data.uid == request.auth.uid;
+    }
+
+    match /users/{uid} {
+      allow read, write: if authed() && request.auth.uid == uid;
     }
 
     // カレンダーイベントを collectionGroup クエリで取得できるようにする

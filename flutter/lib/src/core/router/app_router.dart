@@ -16,6 +16,9 @@ import '../../features/menu/household/presentation/pages/household_share_page.da
 import '../../features/menu/household/presentation/pages/household_invitation_create_page.dart';
 import '../../features/menu/household/presentation/pages/household_invitation_join_page.dart';
 import '../../features/menu/household/presentation/pages/vaccine_visibility_settings_page.dart';
+import '../../features/onboarding/application/onboarding_status_provider.dart';
+import '../../features/onboarding/presentation/pages/onboarding_child_info_page.dart';
+import '../../features/onboarding/presentation/pages/onboarding_greeting_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_detail_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_reservation_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_scheduled_details_page.dart';
@@ -35,10 +38,39 @@ final _shellNavigatorKeyMenu =
     GlobalKey<NavigatorState>(debugLabel: 'shellMenu');
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  final hasCompletedOnboarding = ref.watch(onboardingStatusProvider);
+
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/baby',
+    redirect: (context, state) {
+      final isOnboardingRoute = state.uri.path.startsWith('/onboarding');
+
+      if (!hasCompletedOnboarding && !isOnboardingRoute) {
+        return '/onboarding/greeting';
+      }
+
+      if (hasCompletedOnboarding && isOnboardingRoute) {
+        return '/baby';
+      }
+
+      return null;
+    },
     routes: [
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/onboarding/greeting',
+        name: 'onboarding_greeting',
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: OnboardingGreetingPage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/onboarding/child-info',
+        name: 'onboarding_child_info',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: OnboardingChildInfoPage()),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return _ScaffoldWithNavBar(navigationShell: navigationShell);

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/firebase/household_service.dart';
 import '../../domain/errors/invitation_errors.dart'
     show
         AlreadyMemberException,
         InvitationException,
         InvitationExpiredException,
         InvitationNotFoundException;
+import '../providers/invitation_providers.dart';
 import '../widgets/invitation_loading_dialog.dart';
 
 class HouseholdInvitationJoinPage extends ConsumerStatefulWidget {
@@ -101,6 +103,10 @@ class _HouseholdInvitationJoinPageState
     _showLoadingDialog();
     try {
       if (!mounted) return;
+
+      final acceptInvitation = ref.read(acceptInvitationUseCaseProvider);
+      await acceptInvitation(code);
+      ref.invalidate(currentHouseholdIdProvider);
 
       _joinCodeCtrl.clear();
       await showDialog<void>(

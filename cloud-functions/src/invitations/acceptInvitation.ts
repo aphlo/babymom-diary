@@ -55,6 +55,16 @@ export const acceptInvitation = functions
         const invitation = invitationDoc.data();
         const householdId = invitationDoc.ref.parent.parent!.id;
 
+        const userRef = db.doc(`users/${userId}`);
+        const userSnapshot = await transaction.get(userRef);
+        if (!userSnapshot.exists) {
+          transaction.set(userRef, {
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+        }
+        const userData = userSnapshot.data() as { activeHouseholdId?: string } | undefined;
+        const previousHouseholdId = userData?.activeHouseholdId;
+
         // 4-2. Check expiration
         const now = admin.firestore.Timestamp.now();
         if (invitation.expiresAt.toMillis() < now.toMillis()) {
@@ -89,6 +99,12 @@ export const acceptInvitation = functions
           throw new functions.https.HttpsError("already-exists", "既にこの世帯のメンバーです");
         }
 
+        if (previousHouseholdId && previousHouseholdId !== householdId) {
+          const previousMemberRef = db
+            .doc(`households/${previousHouseholdId}/members/${userId}`);
+          transaction.delete(previousMemberRef);
+        }
+
         // 4-6. Add as member (to subcollection)
         transaction.set(memberRef, {
           role: "member",
@@ -96,6 +112,17 @@ export const acceptInvitation = functions
           joinToken: invitationDoc.id,
           uid: userId,
         });
+
+        transaction.set(
+          userRef,
+          {
+            activeHouseholdId: householdId,
+            membershipType: "member",
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            lastInvitationId: invitationDoc.id,
+          },
+          { merge: true }
+        );
 
         // 4-7. Update invitation status
         transaction.update(invitationDoc.ref, {
