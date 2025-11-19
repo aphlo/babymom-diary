@@ -1,4 +1,4 @@
-# Milu - Flutter App
+# milu - Flutter App
 
 赤ちゃんのケア活動記録アプリ。
 

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**babymom-diary** (branded as "Milu") is a monorepo containing:
+**babymom-diary** (branded as "milu") is a monorepo containing:
 - **Flutter app**: Baby care activity tracking (vaccinations, growth records, calendar, maternal health)
 - **Cloud Functions**: Backend logic for household sharing and other server-side features
 - **Terraform**: Infrastructure as Code for GCP resource management

@@ -1,7 +1,7 @@
 {
   "name": "babymom-diary-functions",
   "version": "1.0.0",
-  "description": "Cloud Functions for Babymom Diary (Milu)",
+  "description": "Cloud Functions for Babymom Diary (milu)",
   "main": "lib/index.js",
   "scripts": {
     "build": "tsc",

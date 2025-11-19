@@ -15,5 +15,5 @@ Future<void> main() async {
   // AdMob初期化
   await AdMobService.initialize();
 
-  await runBabymomDiaryApp(appTitle: 'Milu (Local)');
+  await runBabymomDiaryApp(appTitle: 'milu (Local)');
 }
