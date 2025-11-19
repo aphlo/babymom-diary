@@ -139,18 +139,14 @@ void showRecordSlotSheet({
                         ),
                 ),
                 const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    OutlinedButton.icon(
-                      onPressed: () => detailedAdd(request.type),
-                      icon: const Icon(Icons.add),
-                      label: const Text('記録を追加'),
-                    ),
-                  ],
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => detailedAdd(request.type),
+                    icon: const Icon(Icons.add),
+                    label: const Text('記録を追加'),
+                  ),
                 ),
-                const SizedBox(height: 24),
               ],
             ),
           );

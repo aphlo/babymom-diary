@@ -5,7 +5,8 @@ import 'package:babymom_diary/src/features/menu/data_management/infrastructure/r
 import 'package:babymom_diary/src/features/menu/data_management/application/usecases/delete_all_household_data.dart';
 
 /// Provider for DataManagementRepository
-final dataManagementRepositoryProvider = Provider<DataManagementRepository>((ref) {
+final dataManagementRepositoryProvider =
+    Provider<DataManagementRepository>((ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
   return DataManagementRepositoryImpl(firestore);
 });

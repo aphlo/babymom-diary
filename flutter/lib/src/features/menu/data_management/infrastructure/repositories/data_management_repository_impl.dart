@@ -37,10 +37,12 @@ class DataManagementRepositoryImpl implements DataManagementRepository {
 
     for (final childDoc in childrenSnapshot.docs) {
       // Delete child's vaccination_records
-      await _deleteCollection(childDoc.reference.collection('vaccination_records'));
+      await _deleteCollection(
+          childDoc.reference.collection('vaccination_records'));
 
       // Delete child's reservation_groups
-      await _deleteCollection(childDoc.reference.collection('reservation_groups'));
+      await _deleteCollection(
+          childDoc.reference.collection('reservation_groups'));
 
       // Delete child's daily records (childRecords)
       await _deleteCollection(childDoc.reference.collection('childRecords'));
