@@ -49,7 +49,6 @@ flutter/.fvm/
 serviceAccount*.json
 **/google-services.json
 **/GoogleService-Info*.plist
-**/ExportOptions.plist
 flutter/lib/firebase_options.dart
 flutter/lib/firebase_options_local.dart
 flutter/lib/firebase_options_prod.dart
