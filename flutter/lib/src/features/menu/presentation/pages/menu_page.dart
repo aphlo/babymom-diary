@@ -8,6 +8,8 @@ import 'package:babymom_diary/src/features/menu/children/data/infrastructure/chi
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 import 'package:babymom_diary/src/features/menu/children/application/child_color_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
+import 'package:babymom_diary/src/features/menu/data_management/application/providers/data_management_providers.dart';
+import 'package:babymom_diary/src/features/menu/data_management/presentation/widgets/delete_data_confirmation_dialog.dart';
 
 class MenuPage extends ConsumerWidget {
   const MenuPage({super.key});
@@ -101,6 +103,22 @@ class MenuPage extends ConsumerWidget {
                           trailing: const Icon(Icons.chevron_right),
                         ),
                         const Divider(height: 0),
+
+                        const SizedBox(height: 24),
+
+                        const Divider(height: 0),
+                        ListTile(
+                          tileColor: Colors.white,
+                          leading: const Icon(Icons.delete_forever, color: Colors.red),
+                          title: const Text(
+                            'データの削除',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                          subtitle: const Text('すべてのデータを削除'),
+                          onTap: () => _handleDeleteData(context, ref, hid),
+                          trailing: const Icon(Icons.chevron_right),
+                        ),
+                        const Divider(height: 0),
                       ],
                     ),
                   ),
@@ -113,6 +131,70 @@ class MenuPage extends ConsumerWidget {
       ),
     );
   }
+
+  Future<void> _handleDeleteData(
+      BuildContext context, WidgetRef ref, String householdId) async {
+    // Show confirmation dialog
+    final confirmed = await DeleteDataConfirmationDialog.show(context);
+    if (!confirmed) return;
+
+    if (!context.mounted) return;
+
+    // Show loading snackbar instead of dialog to avoid Navigator issues
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ),
+            SizedBox(width: 16),
+            Text('データを削除しています...'),
+          ],
+        ),
+        duration: Duration(days: 1), // Will be dismissed manually
+      ),
+    );
+
+    try {
+      // Execute deletion
+      final deleteUseCase = ref.read(deleteAllHouseholdDataProvider);
+      await deleteUseCase.execute(householdId);
+
+      if (!context.mounted) return;
+
+      // Clear the loading snackbar
+      ScaffoldMessenger.of(context).clearSnackBars();
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('データを削除しました'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+
+      // Clear the loading snackbar
+      ScaffoldMessenger.of(context).clearSnackBars();
+
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('削除に失敗しました: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
+  }
 }
 
 class _ChildrenEmptyState extends StatelessWidget {
@@ -121,7 +203,7 @@ class _ChildrenEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
       child: Column(
         children: [
           Icon(
