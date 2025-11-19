@@ -33,6 +33,7 @@ dependencies:
   holiday_jp: ^0.0.8
   google_mobile_ads: ^5.3.1
   cider: ^0.1.1
+  package_info_plus: ^8.0.0
 
 dev_dependencies:
   flutter_test:

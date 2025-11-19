@@ -10,6 +10,7 @@ import 'package:babymom_diary/src/features/menu/children/application/child_color
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
 import 'package:babymom_diary/src/features/menu/data_management/application/providers/data_management_providers.dart';
 import 'package:babymom_diary/src/features/menu/data_management/presentation/widgets/delete_data_confirmation_dialog.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class MenuPage extends ConsumerWidget {
   const MenuPage({super.key});
@@ -109,7 +110,8 @@ class MenuPage extends ConsumerWidget {
                         const Divider(height: 0),
                         ListTile(
                           tileColor: Colors.white,
-                          leading: const Icon(Icons.delete_forever, color: Colors.red),
+                          leading: const Icon(Icons.delete_forever,
+                              color: Colors.red),
                           title: const Text(
                             'データの削除',
                             style: TextStyle(color: Colors.red),
@@ -119,6 +121,7 @@ class MenuPage extends ConsumerWidget {
                           trailing: const Icon(Icons.chevron_right),
                         ),
                         const Divider(height: 0),
+                        const _AppVersionFooter(),
                       ],
                     ),
                   ),
@@ -304,6 +307,36 @@ class _ChildListTile extends ConsumerWidget {
       ),
       trailing: const Icon(Icons.chevron_right),
       onTap: () => context.push('/children/edit/$id'),
+    );
+  }
+}
+
+class _AppVersionFooter extends StatelessWidget {
+  const _AppVersionFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const SizedBox.shrink();
+        }
+
+        final packageInfo = snapshot.data!;
+        final version = packageInfo.version;
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          alignment: Alignment.centerRight,
+          child: Text(
+            'バージョン $version',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.black,
+                ),
+          ),
+        );
+      },
     );
   }
 }
