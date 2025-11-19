@@ -12,7 +12,7 @@ permissions:
 jobs:
   ios:
     runs-on: macos-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v3
