@@ -36,45 +36,9 @@ babymom-diary/
 - **技術スタック**: Terraform, GCP
 - **詳細**: [terraform/README.md](./terraform/README.md)
 
-## 開発環境セットアップ
-
-### 必要なツール
-
-- Flutter SDK (via FVM)
-- Node.js 20+
-- Terraform 1.5+
-- Firebase CLI
-- Google Cloud SDK
-
-### クイックスタート
-
-```bash
-# Flutterアプリの起動
-cd flutter
-fvm flutter pub get
-rake run_local
-
-# Cloud Functionsのエミュレーター起動
-firebase emulators:start
-
-# Terraformの初期化
-cd terraform/environments/local
-terraform init
-```
-
 ## Firebase設定
 
 - **Firestore Rules**: `firestore.rules`
 - **Firestore Indexes**: `firestore.indexes.json`
 - **Firebase設定**: `firebase.json` (gitignored - 秘匿情報を含む)
 
-## ドキュメント
-
-- [世帯共有機能の設計](./docs/household_sharing.md)
-- [Terraform導入ガイド](./docs/terraform_setup.md)
-- [モノレポ移行ガイド](./docs/monorepo_migration.md)
-- [Firebase設定ファイル再生成手順](./docs/firebase_config_regeneration.md)
-
-## ライセンス
-
-[LICENSE](./LICENSE)
