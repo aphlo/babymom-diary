@@ -280,15 +280,12 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
       _measurementPoints,
       state.selectedAgeRange,
     );
-    final allFilteredMeasurements = _mapper.filterMeasurementsByRange(
-      _allMeasurementPoints,
-      state.selectedAgeRange,
-    );
+    // allMeasurementsは一覧画面で全ての記録を表示するため、フィルタリングしない
     final data = GrowthChartData(
       heightCurve: _heightCurve,
       weightCurve: _weightCurve,
       measurements: filteredMeasurements,
-      allMeasurements: allFilteredMeasurements,
+      allMeasurements: _allMeasurementPoints,
     );
     state = state.copyWith(
       chartData: AsyncValue.data(data),
