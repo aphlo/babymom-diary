@@ -16,6 +16,7 @@ Future<void> showHeightRecordSheet({
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    backgroundColor: Colors.white,
     builder: (ctx) => HeightRecordSheet(
       initialDate: initialDate,
       minimumDate: minimumDate,
@@ -35,6 +36,7 @@ Future<void> showWeightRecordSheet({
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    backgroundColor: Colors.white,
     builder: (ctx) => WeightRecordSheet(
       initialDate: initialDate,
       minimumDate: minimumDate,

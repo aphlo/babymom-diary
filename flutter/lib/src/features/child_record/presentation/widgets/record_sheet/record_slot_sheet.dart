@@ -70,6 +70,7 @@ void showRecordSlotSheet({
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    backgroundColor: Colors.white,
     builder: (ctx) {
       final records = request.records.toList()
         ..sort((a, b) => a.at.compareTo(b.at));

@@ -90,6 +90,7 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
       context: context,
       barrierDismissible: true,
       builder: (_) => Dialog(
+        backgroundColor: Colors.white,
         insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
