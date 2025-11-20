@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/firebase/household_service.dart';
+import '../../../../../core/theme/app_colors.dart';
 import '../../application/usecases/create_invitation.dart';
 import '../../domain/entities/invitation.dart';
 import '../../domain/errors/invitation_errors.dart'
@@ -75,6 +76,10 @@ class _HouseholdInvitationCreatePageState
             ElevatedButton.icon(
               onPressed:
                   _isProcessing ? null : () => _createInvitation(householdId),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
               icon: const Icon(Icons.add),
               label: const Text('新しい招待コードを発行'),
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/firebase/household_service.dart';
+import '../../../../../core/theme/app_colors.dart';
 import '../../domain/errors/invitation_errors.dart'
     show
         AlreadyMemberException,
@@ -75,6 +76,10 @@ class _HouseholdInvitationJoinPageState
                       child: ElevatedButton(
                         onPressed:
                             _isProcessing ? null : () => _acceptInvitation(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                        ),
                         child: const Text('参加'),
                       ),
                     ),
