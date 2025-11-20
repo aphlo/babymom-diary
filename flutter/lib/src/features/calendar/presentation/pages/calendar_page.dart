@@ -5,6 +5,7 @@ import 'package:holiday_jp/holiday_jp.dart' as holiday_jp;
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import 'package:babymom_diary/src/core/theme/app_colors.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/models/calendar_event_model.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/pages/calendar_settings_page.dart';
@@ -329,7 +330,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       floatingActionButton: FloatingActionButton(
         heroTag: 'calendar_fab',
         onPressed: viewModel.requestAddEvent,
-        child: const Icon(Icons.add),
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
