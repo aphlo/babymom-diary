@@ -121,11 +121,13 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     try {
       final householdId =
           await _ref.read(fbcore.currentHouseholdIdProvider.future);
+      if (!mounted) return;
       state = state.copyWith(householdId: householdId);
       final childId = await _ensureActiveChild(
         householdId: householdId,
         watchSelected: true,
       );
+      if (!mounted) return;
       if (childId != null) {
         await _fetchRecords(
           householdId: householdId,
@@ -141,6 +143,7 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
       }
       await _loadOtherTags(householdId);
     } catch (error, stackTrace) {
+      if (!mounted) return;
       state = state.copyWith(
         recordsAsync: AsyncValue.error(error, stackTrace),
         pendingUiEvent: const RecordUiEvent.showMessage('記録の読み込みに失敗しました'),
@@ -219,14 +222,17 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
         : null;
     try {
       await upsert(childId, record);
+      if (!mounted) return;
       if (shouldDeletePrevious && deleteUseCase != null) {
         await deleteUseCase(childId, previousId);
+        if (!mounted) return;
       }
       await _fetchRecords(
         householdId: householdId,
         childId: childId,
         date: state.selectedDate,
       );
+      if (!mounted) return;
       state = state.copyWith(
         isProcessing: false,
         pendingUiEvent: RecordUiEvent.showMessage(
@@ -234,6 +240,7 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
         ),
       );
     } catch (_) {
+      if (!mounted) return;
       state = state.copyWith(
         isProcessing: false,
       );
@@ -263,16 +270,19 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     final delete = _ref.read(deleteRecordUseCaseProvider(householdId));
     try {
       await delete(childId, recordId);
+      if (!mounted) return;
       await _fetchRecords(
         householdId: householdId,
         childId: childId,
         date: state.selectedDate,
       );
+      if (!mounted) return;
       state = state.copyWith(
         isProcessing: false,
         pendingUiEvent: const RecordUiEvent.showMessage('記録を削除しました'),
       );
     } catch (_) {
+      if (!mounted) return;
       state = state.copyWith(
         isProcessing: false,
         pendingUiEvent: const RecordUiEvent.showMessage('記録の削除に失敗しました'),
@@ -308,6 +318,7 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
         'name': normalized,
         'createdAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
+      if (!mounted) return;
       currentTags.add(normalized);
       currentTags.sort();
       state = state.copyWith(
@@ -316,6 +327,7 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
         ),
       );
     } catch (_) {
+      if (!mounted) return;
       state = state.copyWith(
         pendingUiEvent: const RecordUiEvent.showMessage('タグの追加に失敗しました'),
       );
@@ -334,6 +346,7 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     }
     try {
       await _tagCollection(householdId).doc(tag).delete();
+      if (!mounted) return;
       currentTags.remove(tag);
       state = state.copyWith(
         otherTagsAsync: AsyncValue.data(
@@ -341,6 +354,7 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
         ),
       );
     } catch (_) {
+      if (!mounted) return;
       state = state.copyWith(
         pendingUiEvent: const RecordUiEvent.showMessage('タグの削除に失敗しました'),
       );

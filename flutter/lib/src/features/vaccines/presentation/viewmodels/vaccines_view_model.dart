@@ -89,9 +89,11 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
     state = const AsyncValue.loading();
     try {
       final VaccineMaster guideline = await _getGuideline();
+      if (!mounted) return;
       _guideline = guideline;
       _emitViewData();
     } catch (error, stackTrace) {
+      if (!mounted) return;
       state = AsyncValue.error(error, stackTrace);
     }
   }
@@ -105,10 +107,12 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
       childId: childId!,
     ).listen(
       (List<VaccinationRecord> records) {
+        if (!mounted) return;
         _records = records;
         _emitViewData();
       },
       onError: (Object error, StackTrace stackTrace) {
+        if (!mounted) return;
         state = AsyncValue.error(error, stackTrace);
       },
     );
@@ -138,6 +142,8 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
           householdId: householdId!,
         );
 
+        if (!mounted) return;
+
         // 表示されるべきワクチンのみをフィルタリング
         final filteredVaccines = viewData.vaccines
             .where((vaccine) => settings.isVisible(vaccine.id))
@@ -153,6 +159,7 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
           ),
         );
       } catch (error) {
+        if (!mounted) return;
         // フィルタリングに失敗した場合は全てのワクチンを表示
         state = AsyncValue.data(
           VaccinesViewData(
