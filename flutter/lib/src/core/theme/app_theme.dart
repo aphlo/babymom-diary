@@ -65,5 +65,11 @@ ThemeData buildTheme({Color? childColor}) {
     inputDecorationTheme: const InputDecorationTheme(
       border: OutlineInputBorder(),
     ),
+    datePickerTheme: DatePickerThemeData(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      headerBackgroundColor: AppColors.primary,
+      headerForegroundColor: Colors.white,
+    ),
   );
 }
