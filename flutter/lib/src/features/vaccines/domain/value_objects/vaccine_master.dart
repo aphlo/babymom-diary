@@ -692,6 +692,9 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
         VaccineNote(
           message: '13才未満は年に2回接種。接種間隔は4週間空ける',
         ),
+        VaccineNote(
+          message: '生後6ヶ月以降に接種可能',
+        ),
       ],
     ),
     Vaccine(
@@ -725,6 +728,9 @@ const VaccineMaster japaneseNationalVaccinationMaster = VaccineMaster(
       notes: <VaccineNote>[
         VaccineNote(
           message: '年に1回摂取してください',
+        ),
+        VaccineNote(
+          message: '2才以降に接種可能',
         ),
       ],
     ),
