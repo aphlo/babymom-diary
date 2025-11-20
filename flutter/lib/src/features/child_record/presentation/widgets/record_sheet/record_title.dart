@@ -312,6 +312,10 @@ String _formatBreastDuration(RecordItemModel record) {
   if (amount != null) {
     if (amount <= 0) return '';
     if (amount > 0) {
+      // 整数の場合は小数点なしで表示
+      if (amount == amount.roundToDouble()) {
+        return '${amount.toInt()}分';
+      }
       return '$amount分';
     }
   }

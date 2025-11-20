@@ -114,7 +114,11 @@ class EditableRecordSheetViewModel
     required bool isNew,
   }) {
     final initial = initialDraft.at.toLocal();
-    final initialMinute = isNew ? DateTime.now().minute : initial.minute;
+    final now = DateTime.now();
+    // 新規作成時: 現在時刻の時間（hour）であれば現在の分、それ以外は0分
+    // 編集時: 元の時間をそのまま使用
+    final initialMinute =
+        isNew ? (initial.hour == now.hour ? now.minute : 0) : initial.minute;
     final timeOfDay = TimeOfDay(hour: initial.hour, minute: initialMinute);
 
     final recordType = initialDraft.type;
@@ -158,8 +162,8 @@ class EditableRecordSheetViewModel
   }
 
   static String _formatMinutes(double? minutes) {
-    if (minutes == null) {
-      return '0';
+    if (minutes == null || minutes == 0) {
+      return '';
     }
     if (minutes == minutes.roundToDouble()) {
       return minutes.toInt().toString();
