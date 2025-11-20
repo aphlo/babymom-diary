@@ -4,12 +4,6 @@ import '../../domain/repositories/ad_repository.dart';
 import '../../infrastructure/repositories/ad_repository_impl.dart';
 import '../../infrastructure/services/admob_service.dart';
 
-// AdMob初期化プロバイダー
-final adInitializationProvider = FutureProvider<void>((ref) async {
-  final repository = ref.read(adRepositoryProvider);
-  await repository.initialize();
-});
-
 // AdRepositoryプロバイダー
 final adRepositoryProvider = Provider<AdRepository>((ref) {
   return AdRepositoryImpl();

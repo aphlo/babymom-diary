@@ -4,7 +4,27 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 
 class AdMobService {
-  static Future<void> initialize() async {
+  static bool _mobileAdsInitialized = false;
+  static bool _attRequested = false;
+
+  /// MobileAds SDKの初期化（main関数で呼ぶ）
+  static Future<void> initializeMobileAds() async {
+    if (_mobileAdsInitialized) return;
+
+    await MobileAds.instance.initialize();
+    _mobileAdsInitialized = true;
+    debugPrint('AdMob: MobileAds SDK initialized');
+  }
+
+  /// ATT許可リクエスト（最初の画面表示後に呼ぶ）
+  static Future<void> requestATTPermission() async {
+    if (_attRequested) {
+      debugPrint('AdMob: ATT permission already requested');
+      return;
+    }
+
+    _attRequested = true;
+
     // iOS: App Tracking Transparencyの許可をリクエスト
     if (Platform.isIOS) {
       try {
@@ -47,8 +67,6 @@ class AdMobService {
         debugPrint('AdMob: ℹ️  Falling back to non-personalized ads');
       }
     }
-
-    await MobileAds.instance.initialize();
   }
 
   /// 現在のフレーバーを取得

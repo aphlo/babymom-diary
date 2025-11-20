@@ -1,14 +1,8 @@
 import 'dart:async';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../domain/repositories/ad_repository.dart';
-import '../services/admob_service.dart';
 
 class AdRepositoryImpl implements AdRepository {
-  @override
-  Future<void> initialize() async {
-    await AdMobService.initialize();
-  }
-
   @override
   Future<BannerAd> loadBannerAd(String adUnitId) async {
     final completer = Completer<BannerAd>();

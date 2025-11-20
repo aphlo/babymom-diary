@@ -10,6 +10,7 @@ import 'package:babymom_diary/src/core/firebase/household_service.dart'
 import 'package:babymom_diary/src/core/preferences/shared_preferences_provider.dart';
 import 'package:babymom_diary/src/core/router/app_router.dart';
 import 'package:babymom_diary/src/core/theme/app_theme_provider.dart';
+import 'package:babymom_diary/src/features/ads/infrastructure/services/admob_service.dart';
 import 'package:babymom_diary/src/features/menu/children/application/children_local_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
@@ -59,7 +60,7 @@ Future<void> runBabymomDiaryApp({
   );
 }
 
-class App extends ConsumerWidget {
+class App extends ConsumerStatefulWidget {
   const App({
     super.key,
     required this.appTitle,
@@ -70,16 +71,30 @@ class App extends ConsumerWidget {
   final String initialHouseholdId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<App> createState() => _AppState();
+}
+
+class _AppState extends ConsumerState<App> {
+  @override
+  void initState() {
+    super.initState();
+    // 最初のフレームが描画された後にATT許可をリクエスト
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AdMobService.requestATTPermission();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final householdAsync = ref.watch(fbcore.currentHouseholdIdProvider);
-    final householdId = householdAsync.value ?? initialHouseholdId;
+    final householdId = householdAsync.value ?? widget.initialHouseholdId;
     final router = ref.watch(appRouterProvider);
     final theme = ref.watch(appThemeProvider(householdId));
 
     if (householdAsync.hasError) {
       final e = householdAsync.error;
       return MaterialApp(
-        title: appTitle,
+        title: widget.appTitle,
         theme: theme,
         debugShowCheckedModeBanner: false,
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
@@ -101,7 +116,7 @@ class App extends ConsumerWidget {
     }
 
     return MaterialApp.router(
-      title: appTitle,
+      title: widget.appTitle,
       theme: theme,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
