@@ -23,6 +23,11 @@ class AppBarChildInfo extends ConsumerWidget {
       anchor = DateTime(birthday.year, birthday.month + months, birthday.day);
     }
     final days = on.difference(anchor).inDays;
+    final years = months ~/ 12;
+    if (years > 0) {
+      final remainingMonths = months % 12;
+      return '$years才$remainingMonthsヶ月$days日目';
+    }
     return '$monthsか月$days日目';
   }
 
