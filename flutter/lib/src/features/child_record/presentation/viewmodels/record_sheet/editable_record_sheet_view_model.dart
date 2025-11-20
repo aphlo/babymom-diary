@@ -130,7 +130,8 @@ class EditableRecordSheetViewModel
     };
     final amountInput = switch (recordType) {
       RecordType.formula ||
-      RecordType.pump =>
+      RecordType.pump ||
+      RecordType.temperature =>
         _formatAmount(initialDraft.amount),
       _ => '',
     };
