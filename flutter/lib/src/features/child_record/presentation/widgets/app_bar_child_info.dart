@@ -26,7 +26,7 @@ class AppBarChildInfo extends ConsumerWidget {
     final years = months ~/ 12;
     if (years > 0) {
       final remainingMonths = months % 12;
-      return '$years才$remainingMonthsヶ月$days日目';
+      return '$years才$remainingMonthsヶ月';
     }
     return '$monthsか月$days日目';
   }
