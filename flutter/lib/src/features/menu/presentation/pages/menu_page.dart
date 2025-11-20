@@ -11,9 +11,14 @@ import 'package:babymom_diary/src/features/menu/children/application/selected_ch
 import 'package:babymom_diary/src/features/menu/data_management/application/providers/data_management_providers.dart';
 import 'package:babymom_diary/src/features/menu/data_management/presentation/widgets/delete_data_confirmation_dialog.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MenuPage extends ConsumerWidget {
   const MenuPage({super.key});
+  static const _termsUrl =
+      'https://striped-polonium-ee6.notion.site/milu-2b1de238aa6080acb2a3cbe274d05564?source=copy_link';
+  static const _privacyUrl =
+      'https://striped-polonium-ee6.notion.site/milu-2b1de238aa60803697b1f06f3c32d2ec?source=copy_link';
 
   String _formatBirthday(Timestamp? ts) {
     if (ts == null) return '';
@@ -72,6 +77,7 @@ class MenuPage extends ConsumerWidget {
                               const EdgeInsets.symmetric(horizontal: 16),
                           minLeadingWidth: 40,
                         ),
+                        const Divider(height: 0),
 
                         const SizedBox(height: 24),
 
@@ -106,7 +112,6 @@ class MenuPage extends ConsumerWidget {
                         const Divider(height: 0),
 
                         const SizedBox(height: 24),
-
                         const Divider(height: 0),
                         ListTile(
                           tileColor: Colors.white,
@@ -121,6 +126,38 @@ class MenuPage extends ConsumerWidget {
                           trailing: const Icon(Icons.chevron_right),
                         ),
                         const Divider(height: 0),
+                        const SizedBox(height: 24),
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'アプリの情報',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const Divider(height: 0),
+                        ListTile(
+                          tileColor: Colors.white,
+                          leading: const Icon(Icons.description_outlined),
+                          title: const Text('利用規約'),
+                          onTap: () => _launchExternalUrl(context, _termsUrl),
+                          trailing: const Icon(Icons.open_in_new),
+                        ),
+                        const Divider(height: 0),
+                        ListTile(
+                          tileColor: Colors.white,
+                          leading: const Icon(Icons.privacy_tip_outlined),
+                          title: const Text('プライバシーポリシー'),
+                          onTap: () => _launchExternalUrl(context, _privacyUrl),
+                          trailing: const Icon(Icons.open_in_new),
+                        ),
+                        const Divider(height: 0),
                         const _AppVersionFooter(),
                       ],
                     ),
@@ -133,6 +170,19 @@ class MenuPage extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  Future<void> _launchExternalUrl(BuildContext context, String url) async {
+    final uri = Uri.parse(url);
+    final launched = await launchUrl(
+      uri,
+      mode: LaunchMode.inAppWebView,
+    );
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('外部サイトを開けませんでした')),
+      );
+    }
   }
 
   Future<void> _handleDeleteData(

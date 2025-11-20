@@ -34,6 +34,7 @@ dependencies:
   google_mobile_ads: ^5.3.1
   cider: ^0.1.1
   package_info_plus: ^8.0.0
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:
