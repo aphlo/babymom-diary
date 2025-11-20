@@ -6,7 +6,6 @@ import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 
 import '../../../menu/children/application/selected_child_provider.dart';
-import '../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../domain/entities/dose_record.dart';
 import '../controllers/vaccine_detail_interactions.dart';
 import '../models/vaccine_detail_callbacks.dart';
@@ -186,7 +185,6 @@ class _VaccineDetailContent extends StatelessWidget {
 
     return Column(
       children: [
-        const BannerAdWidget(),
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
