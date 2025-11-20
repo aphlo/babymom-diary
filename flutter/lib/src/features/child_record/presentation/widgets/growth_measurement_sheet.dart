@@ -268,8 +268,6 @@ class _HeightRecordSheetState extends ConsumerState<HeightRecordSheet> {
   }
 }
 
-enum _WeightUnit { kg, g }
-
 class WeightRecordSheet extends ConsumerStatefulWidget {
   const WeightRecordSheet({
     super.key,
@@ -291,21 +289,19 @@ class WeightRecordSheet extends ConsumerStatefulWidget {
 class _WeightRecordSheetState extends ConsumerState<WeightRecordSheet> {
   late DateTime _selectedDate = widget.initialDate;
   final TextEditingController _weightController = TextEditingController();
-  _WeightUnit _unit = _WeightUnit.kg;
+  WeightUnit _unit = WeightUnit.kilograms;
   bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
     _selectedDate = widget.record?.recordedAt ?? widget.initialDate;
-    if (widget.record?.weight != null) {
-      final weight = widget.record!.weight!;
-      if (weight > 20) {
-        _weightController.text = (weight / 1000).toStringAsFixed(3);
-        _unit = _WeightUnit.kg;
-      } else {
-        _weightController.text = weight.toStringAsFixed(3);
-        _unit = _WeightUnit.kg;
+    final record = widget.record;
+    if (record?.hasWeight ?? false) {
+      _unit = record!.resolvedWeightUnit;
+      final value = record.weightDisplayValue;
+      if (value != null) {
+        _weightController.text = _formatWeightInputValue(value);
       }
     }
   }
@@ -341,9 +337,9 @@ class _WeightRecordSheetState extends ConsumerState<WeightRecordSheet> {
       return null;
     }
     switch (_unit) {
-      case _WeightUnit.kg:
+      case WeightUnit.kilograms:
         return value * 1000;
-      case _WeightUnit.g:
+      case WeightUnit.grams:
         return value;
     }
   }
@@ -381,11 +377,12 @@ class _WeightRecordSheetState extends ConsumerState<WeightRecordSheet> {
           recordId: widget.record!.id,
           recordedAt: _selectedDate,
           weightGrams: weight,
+          weightUnit: _unit,
           note: widget.record?.note,
         );
       } else {
         await notifier.addWeightRecord(
-            recordedAt: _selectedDate, weightGrams: weight);
+            recordedAt: _selectedDate, weightGrams: weight, weightUnit: _unit);
       }
 
       if (mounted) {
@@ -430,6 +427,7 @@ class _WeightRecordSheetState extends ConsumerState<WeightRecordSheet> {
     final padding = MediaQuery.of(context).viewInsets.bottom;
     final dateFormat = DateFormat('yyyy/MM/dd');
     final canSubmit = !_isSaving && _parsedWeightGrams != null;
+    final unitOptions = WeightUnit.values;
 
     return SafeArea(
       top: false,
@@ -497,29 +495,20 @@ class _WeightRecordSheetState extends ConsumerState<WeightRecordSheet> {
                       ? null
                       : (index) {
                           setState(() {
-                            _unit = _WeightUnit.values[index];
+                            _unit = unitOptions[index];
                           });
                         },
-                  children: const [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Text('kg'),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Text('g'),
-                    ),
-                  ],
+                  children: unitOptions
+                      .map(
+                        (unit) => Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(unit.label),
+                        ),
+                      )
+                      .toList(),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
-            if (_unit == _WeightUnit.kg)
-              Text(
-                '保存時に g に変換されます',
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-              ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -541,6 +530,14 @@ class _WeightRecordSheetState extends ConsumerState<WeightRecordSheet> {
   }
 
   List<bool> get _weightUnitSelection {
-    return _WeightUnit.values.map((unit) => unit == _unit).toList();
+    return WeightUnit.values.map((unit) => unit == _unit).toList();
+  }
+
+  String _formatWeightInputValue(double value) {
+    var text = value.toStringAsFixed(3);
+    if (text.contains('.')) {
+      text = text.replaceFirst(RegExp('\\.?0+\$'), '');
+    }
+    return text;
   }
 }

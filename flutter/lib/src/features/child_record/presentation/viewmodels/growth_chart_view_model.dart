@@ -342,6 +342,7 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
   Future<void> addWeightRecord({
     required DateTime recordedAt,
     required double weightGrams,
+    required WeightUnit weightUnit,
     String? note,
   }) async {
     final householdId = _householdId;
@@ -367,6 +368,7 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
       childId: child.id,
       recordedAt: normalizedDate,
       weight: weightGrams,
+      weightUnit: weightUnit,
       note: sanitizedNote,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
@@ -416,6 +418,7 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
     required String recordId,
     required DateTime recordedAt,
     required double weightGrams,
+    required WeightUnit weightUnit,
     String? note,
   }) async {
     final record = _requireRecord(recordId);
@@ -440,6 +443,7 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
     final updated = record.copyWith(
       recordedAt: normalizedDate,
       weight: weightGrams,
+      weightUnit: weightUnit,
       note: sanitizedNote,
       updatedAt: DateTime.now(),
     );

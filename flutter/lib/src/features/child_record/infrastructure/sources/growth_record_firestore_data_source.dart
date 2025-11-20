@@ -61,6 +61,7 @@ class GrowthRecordFirestoreDataSource {
       'recordedAt': Timestamp.fromDate(record.recordedAt.toUtc()),
       'height': record.height,
       'weight': record.weight,
+      'weightUnit': record.weightUnit?.storageValue,
       'note': record.note,
       'createdAt': record.createdAt != null
           ? Timestamp.fromDate(record.createdAt!)
@@ -94,6 +95,8 @@ class GrowthRecordFirestoreDataSource {
 
     final height = (data['height'] as num?)?.toDouble();
     final weight = (data['weight'] as num?)?.toDouble();
+    final weightUnit =
+        WeightUnit.fromStorageValue(data['weightUnit'] as String?);
 
     if (height == null && weight == null) {
       return null;
@@ -105,6 +108,7 @@ class GrowthRecordFirestoreDataSource {
       recordedAt: recordedAt,
       height: height,
       weight: weight,
+      weightUnit: weightUnit,
       note: data['note'] as String?,
       createdAt: parseTimestamp(data['createdAt']),
       updatedAt: parseTimestamp(data['updatedAt']),

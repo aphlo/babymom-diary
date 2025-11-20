@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 import 'package:babymom_diary/src/core/utils/date_formatter.dart';
 import '../../../ads/presentation/widgets/banner_ad_widget.dart';
+import '../../child_record.dart';
+import '../models/growth_measurement_point.dart';
 import '../viewmodels/growth_chart_view_model.dart';
 import '../widgets/growth_measurement_sheet.dart';
 
@@ -71,12 +73,27 @@ class _RecordListView extends ConsumerWidget {
     return '${value.toStringAsFixed(1)} cm';
   }
 
-  String _formatWeight(double? value) {
+  String _formatWeight(GrowthMeasurementPoint record) {
+    if (!record.hasWeight) {
+      return '-';
+    }
+    final unit = record.resolvedWeightUnit;
+    final value = record.weightDisplayValue;
     if (value == null) {
       return '-';
     }
-    final normalized = value > 20 ? value / 1000 : value;
-    return '${normalized.toStringAsFixed(2)} kg';
+    final fractionDigits =
+        unit == WeightUnit.kilograms ? 2 : (value % 1 == 0 ? 0 : 2);
+    final text = _formatNumber(value, fractionDigits);
+    return '$text ${unit.label}';
+  }
+
+  String _formatNumber(double value, int fractionDigits) {
+    var text = value.toStringAsFixed(fractionDigits);
+    if (fractionDigits > 0) {
+      text = text.replaceFirst(RegExp('\\.?0+\$'), '');
+    }
+    return text;
   }
 
   String? _formatElapsedSinceBirth(DateTime? birthday, DateTime recordedAt) {
@@ -204,7 +221,7 @@ class _RecordListView extends ConsumerWidget {
             final formattedDate = DateFormatter.ddE(record.recordedAt);
             final value = (type == RecordType.height)
                 ? _formatHeight(record.height)
-                : _formatWeight(record.weight);
+                : _formatWeight(record);
             final ageText =
                 _formatElapsedSinceBirth(childBirthday, record.recordedAt);
             final theme = Theme.of(context);

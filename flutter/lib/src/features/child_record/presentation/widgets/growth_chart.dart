@@ -109,7 +109,7 @@ class GrowthChart extends StatelessWidget {
         .where((m) => m.hasWeight)
         .map((m) => FlSpot(
               m.ageInMonths,
-              math.min(maxY, math.max(0, weightToY(m.weight!))),
+              math.min(maxY, math.max(0, weightToY(m.weightKg!))),
             ))
         .toList(growable: false);
 

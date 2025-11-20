@@ -29,7 +29,8 @@ class GrowthChartUiMapper {
             ageInMonths: _ageInMonths(baselineDate, record.recordedAt),
             recordedAt: record.recordedAt,
             height: record.height,
-            weight: _normalizedWeight(record.weight),
+            weightGrams: _weightInGrams(record.weight, record.weightUnit),
+            weightUnit: record.weightUnit,
             note: record.note,
           ),
         )
@@ -66,7 +67,8 @@ class GrowthChartUiMapper {
             ageInMonths: _ageInMonths(baselineDate, record.recordedAt),
             recordedAt: record.recordedAt,
             height: record.height,
-            weight: _normalizedWeight(record.weight),
+            weightGrams: _weightInGrams(record.weight, record.weightUnit),
+            weightUnit: record.weightUnit,
             note: record.note,
           ),
         )
@@ -91,12 +93,12 @@ class GrowthChartUiMapper {
     return months.isFinite ? months.clamp(0.0, double.infinity) : 0.0;
   }
 
-  double? _normalizedWeight(double? value) {
+  double? _weightInGrams(double? value, WeightUnit? unit) {
     if (value == null) {
       return null;
     }
-    if (value > 20) {
-      return value / 1000;
+    if (unit == null && value <= 20) {
+      return value * 1000;
     }
     return value;
   }

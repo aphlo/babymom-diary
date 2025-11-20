@@ -1,3 +1,5 @@
+import '../value/weight_unit.dart';
+
 class GrowthRecord {
   factory GrowthRecord({
     String? id,
@@ -5,6 +7,7 @@ class GrowthRecord {
     required DateTime recordedAt,
     double? height,
     double? weight,
+    WeightUnit? weightUnit,
     String? note,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -26,6 +29,7 @@ class GrowthRecord {
       recordedAt: recordedAt,
       height: height,
       weight: weight,
+      weightUnit: weight != null ? weightUnit : null,
       note: note,
       createdAt: createdAt ?? DateTime.now(),
       updatedAt: updatedAt ?? DateTime.now(),
@@ -38,6 +42,7 @@ class GrowthRecord {
     required this.recordedAt,
     this.height,
     this.weight,
+    this.weightUnit,
     this.note,
     this.createdAt,
     this.updatedAt,
@@ -48,6 +53,7 @@ class GrowthRecord {
   final DateTime recordedAt;
   final double? height;
   final double? weight;
+  final WeightUnit? weightUnit;
   final String? note;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -61,6 +67,7 @@ class GrowthRecord {
     DateTime? recordedAt,
     double? height,
     double? weight,
+    WeightUnit? weightUnit,
     bool clearHeight = false,
     bool clearWeight = false,
     String? note,
@@ -69,6 +76,8 @@ class GrowthRecord {
   }) {
     final resolvedHeight = clearHeight ? null : height ?? this.height;
     final resolvedWeight = clearWeight ? null : weight ?? this.weight;
+    final resolvedWeightUnit =
+        resolvedWeight == null ? null : weightUnit ?? this.weightUnit;
 
     if (resolvedHeight == null && resolvedWeight == null) {
       throw ArgumentError(
@@ -82,6 +91,7 @@ class GrowthRecord {
       recordedAt: recordedAt ?? this.recordedAt,
       height: resolvedHeight,
       weight: resolvedWeight,
+      weightUnit: resolvedWeightUnit,
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
