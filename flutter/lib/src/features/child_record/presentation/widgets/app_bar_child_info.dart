@@ -79,15 +79,18 @@ class AppBarChildInfo extends ConsumerWidget {
           }
 
           void toNext() {
-            if (children.isEmpty) return;
+            if (children.isEmpty || children.length <= 1) return;
             final next = (index + 1) % children.length;
             ref
                 .read(selectedChildControllerProvider.notifier)
                 .select(children[next].id);
           }
 
+          // 複数子供がいる場合のみタップ可能
+          final canTap = children.length > 1;
+
           return InkWell(
-            onTap: toNext,
+            onTap: canTap ? toNext : null,
             borderRadius: BorderRadius.circular(8),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),

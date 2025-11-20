@@ -17,15 +17,15 @@ class RecordTablePage extends ConsumerStatefulWidget {
 class _RecordTablePageState extends ConsumerState<RecordTablePage>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  String? _previousChildId;
 
   @override
   void initState() {
     super.initState();
-    final initialIndex = ref.read(recordViewModelProvider).selectedTabIndex;
     _tabController = TabController(
       length: 2,
       vsync: this,
-      initialIndex: initialIndex,
+      initialIndex: 0,
     );
     _tabController.addListener(_onTabChanged);
   }
@@ -38,12 +38,7 @@ class _RecordTablePageState extends ConsumerState<RecordTablePage>
   }
 
   void _onTabChanged() {
-    if (_tabController.indexIsChanging) {
-      return;
-    }
-    ref
-        .read(recordViewModelProvider.notifier)
-        .onSelectTab(_tabController.index);
+    // TabControllerの変更を検知するだけ（何もしない）
   }
 
   @override
@@ -53,12 +48,11 @@ class _RecordTablePageState extends ConsumerState<RecordTablePage>
     final notifier = ref.read(recordViewModelProvider.notifier);
     final selectedDate = state.selectedDate;
 
-    final tabIndex = state.selectedTabIndex;
-    if (tabIndex >= 0 &&
-        tabIndex < _tabController.length &&
-        _tabController.index != tabIndex &&
-        !_tabController.indexIsChanging) {
-      _tabController.animateTo(tabIndex);
+    // 子供の変更を検知して、TabControllerのインデックスを保持
+    final currentChildId = state.selectedChildId;
+    if (_previousChildId != currentChildId) {
+      // 子供が変更された - TabControllerのインデックスはそのまま保持
+      _previousChildId = currentChildId;
     }
 
     final today = DateTime.now();
