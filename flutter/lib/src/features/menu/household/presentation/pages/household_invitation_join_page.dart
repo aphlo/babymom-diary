@@ -35,6 +35,7 @@ class _HouseholdInvitationJoinPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.pageBackground,
       appBar: AppBar(
         leading: BackButton(onPressed: () => Navigator.of(context).maybePop()),
         title: const Text('招待コードで参加'),

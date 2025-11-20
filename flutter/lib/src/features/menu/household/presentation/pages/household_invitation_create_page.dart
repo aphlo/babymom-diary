@@ -30,6 +30,7 @@ class _HouseholdInvitationCreatePageState
     final householdIdAsync = ref.watch(currentHouseholdIdProvider);
 
     return Scaffold(
+      backgroundColor: AppColors.pageBackground,
       appBar: AppBar(
         leading: BackButton(onPressed: () => Navigator.of(context).maybePop()),
         title: const Text('招待コードを発行'),
