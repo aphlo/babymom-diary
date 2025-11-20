@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
-import 'package:babymom_diary/src/features/ads/presentation/widgets/banner_ad_widget.dart';
 import 'package:babymom_diary/src/features/menu/children/data/infrastructure/child_firestore_data_source.dart';
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 import 'package:babymom_diary/src/features/menu/children/application/child_color_provider.dart';
@@ -48,121 +47,113 @@ class MenuPage extends ConsumerWidget {
                 return Center(child: Text('子どもの読み込みに失敗しました\n${snap.error}'));
               }
               final docs = snap.data?.docs ?? const [];
-              return Column(
+              return ListView(
                 children: [
-                  Expanded(
-                    child: ListView(
-                      children: [
-                        // 子ども一覧セクション
-                        if (docs.isEmpty) ...[
-                          const _ChildrenEmptyState(),
-                          const SizedBox(height: 16),
-                        ],
-                        for (final d in docs) ...[
-                          _ChildListTile(
-                            id: d.id,
-                            name: (d.data()['name'] as String?) ?? '未設定',
-                            subtitle: _formatBirthday(
-                                d.data()['birthday'] as Timestamp?),
-                          ),
-                          const Divider(height: 0),
-                        ],
-                        ListTile(
-                          tileColor: Colors.white,
-                          leading: const Icon(Icons.add),
-                          title: const Text('子どもの追加'),
-                          onTap: () => context.push('/children/add'),
-                          trailing: const Icon(Icons.chevron_right),
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 16),
-                          minLeadingWidth: 40,
-                        ),
-                        const Divider(height: 0),
+                  // 子ども一覧セクション
+                  if (docs.isEmpty) ...[
+                    const _ChildrenEmptyState(),
+                    const SizedBox(height: 16),
+                  ],
+                  for (final d in docs) ...[
+                    _ChildListTile(
+                      id: d.id,
+                      name: (d.data()['name'] as String?) ?? '未設定',
+                      subtitle:
+                          _formatBirthday(d.data()['birthday'] as Timestamp?),
+                    ),
+                    const Divider(height: 0),
+                  ],
+                  ListTile(
+                    tileColor: Colors.white,
+                    leading: const Icon(Icons.add),
+                    title: const Text('子どもの追加'),
+                    onTap: () => context.push('/children/add'),
+                    trailing: const Icon(Icons.chevron_right),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    minLeadingWidth: 40,
+                  ),
+                  const Divider(height: 0),
 
-                        const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                        const Divider(height: 0),
-                        ListTile(
-                          tileColor: Colors.white,
-                          leading: const Icon(Icons.group_add),
-                          title: const Text('世帯の共有'),
-                          subtitle: const Text('招待コードの発行 / コードで参加'),
-                          onTap: () => context.push('/household/share'),
-                          trailing: const Icon(Icons.chevron_right),
-                        ),
-                        const Divider(height: 0),
-                        ListTile(
-                          tileColor: Colors.white,
-                          leading: const Icon(Icons.show_chart),
-                          title: const Text('成長曲線の設定'),
-                          subtitle: const Text('修正月齢での表示設定'),
-                          onTap: () => context.push('/growth-chart/settings'),
-                          trailing: const Icon(Icons.chevron_right),
-                        ),
-                        const Divider(height: 0),
-                        ListTile(
-                          tileColor: Colors.white,
-                          leading: const Icon(Icons.vaccines),
-                          title: const Text('ワクチンの表示・非表示'),
-                          subtitle: const Text('表示するワクチンを選択'),
-                          onTap: () => context
-                              .push('/household/vaccine-visibility-settings'),
-                          trailing: const Icon(Icons.chevron_right),
-                        ),
-                        const Divider(height: 0),
+                  const Divider(height: 0),
+                  ListTile(
+                    tileColor: Colors.white,
+                    leading: const Icon(Icons.group_add),
+                    title: const Text('世帯の共有'),
+                    subtitle: const Text('招待コードの発行 / コードで参加'),
+                    onTap: () => context.push('/household/share'),
+                    trailing: const Icon(Icons.chevron_right),
+                  ),
+                  const Divider(height: 0),
+                  ListTile(
+                    tileColor: Colors.white,
+                    leading: const Icon(Icons.show_chart),
+                    title: const Text('成長曲線の設定'),
+                    subtitle: const Text('修正月齢での表示設定'),
+                    onTap: () => context.push('/growth-chart/settings'),
+                    trailing: const Icon(Icons.chevron_right),
+                  ),
+                  const Divider(height: 0),
+                  ListTile(
+                    tileColor: Colors.white,
+                    leading: const Icon(Icons.vaccines),
+                    title: const Text('ワクチンの表示・非表示'),
+                    subtitle: const Text('表示するワクチンを選択'),
+                    onTap: () =>
+                        context.push('/household/vaccine-visibility-settings'),
+                    trailing: const Icon(Icons.chevron_right),
+                  ),
+                  const Divider(height: 0),
 
-                        const SizedBox(height: 24),
-                        const Divider(height: 0),
-                        ListTile(
-                          tileColor: Colors.white,
-                          leading: const Icon(Icons.delete_forever,
-                              color: Colors.red),
-                          title: const Text(
-                            'データの削除',
-                            style: TextStyle(color: Colors.red),
-                          ),
-                          subtitle: const Text('すべてのデータを削除'),
-                          onTap: () => _handleDeleteData(context, ref, hid),
-                          trailing: const Icon(Icons.chevron_right),
+                  const SizedBox(height: 24),
+                  const Divider(height: 0),
+                  ListTile(
+                    tileColor: Colors.white,
+                    leading:
+                        const Icon(Icons.delete_forever, color: Colors.red),
+                    title: const Text(
+                      'データの削除',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                    subtitle: const Text('すべてのデータを削除'),
+                    onTap: () => _handleDeleteData(context, ref, hid),
+                    trailing: const Icon(Icons.chevron_right),
+                  ),
+                  const Divider(height: 0),
+                  const SizedBox(height: 24),
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'アプリの情報',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black54,
                         ),
-                        const Divider(height: 0),
-                        const SizedBox(height: 24),
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'アプリの情報',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const Divider(height: 0),
-                        ListTile(
-                          tileColor: Colors.white,
-                          leading: const Icon(Icons.description_outlined),
-                          title: const Text('利用規約'),
-                          onTap: () => _launchExternalUrl(context, _termsUrl),
-                          trailing: const Icon(Icons.open_in_new),
-                        ),
-                        const Divider(height: 0),
-                        ListTile(
-                          tileColor: Colors.white,
-                          leading: const Icon(Icons.privacy_tip_outlined),
-                          title: const Text('プライバシーポリシー'),
-                          onTap: () => _launchExternalUrl(context, _privacyUrl),
-                          trailing: const Icon(Icons.open_in_new),
-                        ),
-                        const Divider(height: 0),
-                        const _AppVersionFooter(),
-                      ],
+                      ),
                     ),
                   ),
-                  const BannerAdWidget(),
+                  const Divider(height: 0),
+                  ListTile(
+                    tileColor: Colors.white,
+                    leading: const Icon(Icons.description_outlined),
+                    title: const Text('利用規約'),
+                    onTap: () => _launchExternalUrl(context, _termsUrl),
+                    trailing: const Icon(Icons.open_in_new),
+                  ),
+                  const Divider(height: 0),
+                  ListTile(
+                    tileColor: Colors.white,
+                    leading: const Icon(Icons.privacy_tip_outlined),
+                    title: const Text('プライバシーポリシー'),
+                    onTap: () => _launchExternalUrl(context, _privacyUrl),
+                    trailing: const Icon(Icons.open_in_new),
+                  ),
+                  const Divider(height: 0),
+                  const _AppVersionFooter(),
                 ],
               );
             },
