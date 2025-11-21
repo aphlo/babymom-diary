@@ -81,9 +81,9 @@ class CalendarDayCell extends StatelessWidget {
 
         // アイコンのサイズと位置を計算
         final iconSize = size.shortestSide * 0.85; // アイコンをさらに大きくする
-        final iconPadding = size.shortestSide * 0.03;
-        final iconBottom = size.shortestSide * 0.02;
-        final iconRight = size.shortestSide * 0.02;
+        final iconPadding = size.shortestSide * 0.01;
+        final iconBottom = size.shortestSide * -0.06;
+        final iconRight = size.shortestSide * -0.06;
 
         Widget buildEventIcon(CalendarEvent event) {
           Widget child;
