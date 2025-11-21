@@ -158,7 +158,7 @@ class GrowthChart extends StatelessWidget {
             sideTitles: SideTitles(
               showTitles: true,
               interval: 1,
-              reservedSize: 28,
+              reservedSize: 34,
               getTitlesWidget: (value, meta) {
                 final weight = yToWeight(value);
                 final snapped = _snapToStep(weight, axis.weightStepKg);
@@ -169,23 +169,29 @@ class GrowthChart extends StatelessWidget {
                     (theme.textTheme.labelSmall ?? const TextStyle())
                         .copyWith(color: weightLabelColor);
                 if (maxWeightLabel != null && snapped == maxWeightLabel) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text('(kg)', style: textStyle),
-                      Text(
-                        snapped.toStringAsFixed(0),
-                        style: textStyle,
-                        textAlign: TextAlign.right,
-                      ),
-                    ],
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text('(kg)', style: textStyle),
+                        Text(
+                          snapped.toStringAsFixed(0),
+                          style: textStyle,
+                          textAlign: TextAlign.right,
+                        ),
+                      ],
+                    ),
                   );
                 }
-                return Text(
-                  snapped.toStringAsFixed(0),
-                  style: textStyle,
-                  textAlign: TextAlign.right,
+                return Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: Text(
+                    snapped.toStringAsFixed(0),
+                    style: textStyle,
+                    textAlign: TextAlign.right,
+                  ),
                 );
               },
             ),
@@ -194,7 +200,7 @@ class GrowthChart extends StatelessWidget {
             sideTitles: SideTitles(
               showTitles: true,
               interval: 1,
-              reservedSize: 28,
+              reservedSize: 34,
               getTitlesWidget: (value, meta) {
                 final height = yToHeight(value);
                 final snapped = _snapToStep(
@@ -209,21 +215,27 @@ class GrowthChart extends StatelessWidget {
                     (theme.textTheme.labelSmall ?? const TextStyle())
                         .copyWith(color: heightLabelColor);
                 if (maxHeightLabel != null && snapped == maxHeightLabel) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('(cm)', style: textStyle),
-                      Text(
-                        snapped.toStringAsFixed(0),
-                        style: textStyle,
-                      ),
-                    ],
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('(cm)', style: textStyle),
+                        Text(
+                          snapped.toStringAsFixed(0),
+                          style: textStyle,
+                        ),
+                      ],
+                    ),
                   );
                 }
-                return Text(
-                  snapped.toStringAsFixed(0),
-                  style: textStyle,
+                return Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: Text(
+                    snapped.toStringAsFixed(0),
+                    style: textStyle,
+                  ),
                 );
               },
             ),

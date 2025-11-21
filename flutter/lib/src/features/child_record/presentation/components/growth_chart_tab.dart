@@ -225,16 +225,20 @@ class _LegendWithSource extends StatelessWidget {
       children: [
         const _Legend(isInline: true),
         Flexible(
-          child: Text(
-            'こども家庭庁「令和5年乳幼児身体発育調査」より作成',
-            style: (theme.textTheme.labelSmall ?? theme.textTheme.labelMedium)
-                ?.copyWith(
-              fontSize: 9,
-              color: Colors.grey.shade600,
+          child: FittedBox(
+            alignment: Alignment.centerRight,
+            fit: BoxFit.scaleDown,
+            child: Text(
+              'こども家庭庁「令和5年乳幼児身体発育調査」より作成',
+              style: (theme.textTheme.labelSmall ?? theme.textTheme.labelMedium)
+                  ?.copyWith(
+                fontSize: 9,
+                color: Colors.grey.shade600,
+              ),
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              softWrap: false,
             ),
-            textAlign: TextAlign.right,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 2,
           ),
         ),
       ],
