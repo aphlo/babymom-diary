@@ -213,8 +213,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('メンバ一覧',
-                  style: Theme.of(context).textTheme.titleMedium),
+              Text('メンバ一覧', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               Column(
                 children: otherMembers

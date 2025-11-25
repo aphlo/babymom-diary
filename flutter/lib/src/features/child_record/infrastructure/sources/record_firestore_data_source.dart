@@ -22,6 +22,23 @@ class RecordFirestoreDataSource {
     final docId = _docIdForDay(normalizedDay);
 
     final snapshot = await _collection(childId).doc(docId).get();
+    return _parseRecordsFromSnapshot(snapshot, normalizedDay);
+  }
+
+  /// リアルタイム更新用のStream版
+  Stream<List<Record>> watchForDay(String childId, DateTime day) {
+    final normalizedDay = _normalizeDay(day);
+    final docId = _docIdForDay(normalizedDay);
+
+    return _collection(childId).doc(docId).snapshots().map((snapshot) {
+      return _parseRecordsFromSnapshot(snapshot, normalizedDay);
+    });
+  }
+
+  List<Record> _parseRecordsFromSnapshot(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+    DateTime normalizedDay,
+  ) {
     final data = snapshot.data();
     if (data == null) {
       return const [];

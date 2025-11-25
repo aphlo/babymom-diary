@@ -28,7 +28,8 @@ class VaccineDetailInteractions {
     int doseNumber,
   ) async {
     final groupId = detailState.doseStatuses[doseNumber]?.reservationGroupId;
-    bool applyToGroup = true;
+    // groupIdがnullの場合は単独ワクチンとして処理
+    bool applyToGroup = groupId != null;
 
     if (groupId != null) {
       // doseIdを取得するためにVaccinationRecordを取得

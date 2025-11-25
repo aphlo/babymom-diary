@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/usecases/add_record.dart';
 import '../../application/usecases/delete_record.dart';
-import '../../application/usecases/get_records_for_day.dart';
 import '../../child_record.dart';
 import '../../infrastructure/repositories/child_record_repository_impl.dart';
 import '../../infrastructure/sources/record_firestore_data_source.dart';
@@ -37,9 +36,6 @@ final childRecordRepositoryProvider =
 
 final addRecordUseCaseProvider = Provider.family<AddRecord, String>(
     (ref, hid) => AddRecord(ref.watch(childRecordRepositoryProvider(hid))));
-final getRecordsForDayUseCaseProvider =
-    Provider.family<GetRecordsForDay, String>((ref, hid) =>
-        GetRecordsForDay(ref.watch(childRecordRepositoryProvider(hid))));
 final deleteRecordUseCaseProvider = Provider.family<DeleteRecord, String>(
     (ref, hid) => DeleteRecord(ref.watch(childRecordRepositoryProvider(hid))));
 
@@ -56,8 +52,15 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
 
   final Ref _ref;
   final RecordUiMapper _mapper;
+  StreamSubscription<List<Record>>? _recordsSubscription;
 
   FirebaseFirestore get _db => _ref.read(fbcore.firebaseFirestoreProvider);
+
+  @override
+  void dispose() {
+    _recordsSubscription?.cancel();
+    super.dispose();
+  }
 
   void _initialize() {
     _listenToSelectedChild();
@@ -81,18 +84,17 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
           return;
         }
         if (newId == null || newId.isEmpty) {
+          _recordsSubscription?.cancel();
           state = state.copyWith(
             recordsAsync: const AsyncValue<List<RecordItemModel>>.data(
                 <RecordItemModel>[]),
           );
           return;
         }
-        unawaited(
-          _fetchRecords(
-            householdId: hid,
-            childId: newId,
-            date: state.selectedDate,
-          ),
+        _subscribeToRecords(
+          householdId: hid,
+          childId: newId,
+          date: state.selectedDate,
         );
       },
       fireImmediately: true,
@@ -129,7 +131,7 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
       );
       if (!mounted) return;
       if (childId != null) {
-        await _fetchRecords(
+        _subscribeToRecords(
           householdId: householdId,
           childId: childId,
           date: state.selectedDate,
@@ -167,14 +169,13 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
       );
       return;
     }
-    await Future.wait([
-      _fetchRecords(
-        householdId: householdId,
-        childId: childId,
-        date: state.selectedDate,
-      ),
-      _loadOtherTags(householdId),
-    ]);
+    // Streamを再購読してリフレッシュ
+    _subscribeToRecords(
+      householdId: householdId,
+      childId: childId,
+      date: state.selectedDate,
+    );
+    await _loadOtherTags(householdId);
   }
 
   Future<void> onSelectDate(DateTime date) async {
@@ -189,7 +190,7 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     final householdId = await _requireHouseholdId();
     final childId = state.selectedChildId;
     if (householdId != null && childId != null && childId.isNotEmpty) {
-      await _fetchRecords(
+      _subscribeToRecords(
         householdId: householdId,
         childId: childId,
         date: normalized,
@@ -227,12 +228,7 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
         await deleteUseCase(childId, previousId);
         if (!mounted) return;
       }
-      await _fetchRecords(
-        householdId: householdId,
-        childId: childId,
-        date: state.selectedDate,
-      );
-      if (!mounted) return;
+      // Streamが自動的に更新されるので_fetchRecordsは不要
       state = state.copyWith(
         isProcessing: false,
         pendingUiEvent: RecordUiEvent.showMessage(
@@ -243,11 +239,8 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
       if (!mounted) return;
       state = state.copyWith(
         isProcessing: false,
-      );
-      state = state.copyWith(
         pendingUiEvent: const RecordUiEvent.showMessage('記録の保存に失敗しました'),
       );
-      // Optionally log error with stackTrace
     }
   }
 
@@ -271,12 +264,7 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     try {
       await delete(childId, recordId);
       if (!mounted) return;
-      await _fetchRecords(
-        householdId: householdId,
-        childId: childId,
-        date: state.selectedDate,
-      );
-      if (!mounted) return;
+      // Streamが自動的に更新されるので_fetchRecordsは不要
       state = state.copyWith(
         isProcessing: false,
         pendingUiEvent: const RecordUiEvent.showMessage('記録を削除しました'),
@@ -287,7 +275,6 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
         isProcessing: false,
         pendingUiEvent: const RecordUiEvent.showMessage('記録の削除に失敗しました'),
       );
-      // Optionally log error with stackTrace
     }
   }
 
@@ -474,34 +461,40 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     return firstId;
   }
 
-  Future<void> _fetchRecords({
+  void _subscribeToRecords({
     required String householdId,
     required String childId,
     required DateTime date,
     bool keepPrevious = true,
-  }) async {
+  }) {
+    // 既存の購読をキャンセル
+    _recordsSubscription?.cancel();
+
     if (!mounted) return;
     final previous = state.recordsAsync;
     const loading = AsyncValue<List<RecordItemModel>>.loading();
-    if (!mounted) return;
     state = state.copyWith(
       recordsAsync: keepPrevious ? loading.copyWithPrevious(previous) : loading,
     );
-    final getRecords = _ref.read(getRecordsForDayUseCaseProvider(householdId));
-    try {
-      final records = await getRecords(childId, date);
-      final items = records.map(_mapper.toUiModel).toList(growable: false);
-      if (!mounted) return;
-      state = state.copyWith(
-        recordsAsync: AsyncValue.data(items),
-      );
-    } catch (error, stackTrace) {
-      if (!mounted) return;
-      state = state.copyWith(
-        recordsAsync: AsyncValue.error(error, stackTrace),
-        pendingUiEvent: const RecordUiEvent.showMessage('記録の取得に失敗しました'),
-      );
-    }
+
+    final dataSource =
+        _ref.read(_recordFirestoreDataSourceProvider(householdId));
+    _recordsSubscription = dataSource.watchForDay(childId, date).listen(
+      (records) {
+        if (!mounted) return;
+        final items = records.map(_mapper.toUiModel).toList(growable: false);
+        state = state.copyWith(
+          recordsAsync: AsyncValue.data(items),
+        );
+      },
+      onError: (error, stackTrace) {
+        if (!mounted) return;
+        state = state.copyWith(
+          recordsAsync: AsyncValue.error(error, stackTrace),
+          pendingUiEvent: const RecordUiEvent.showMessage('記録の取得に失敗しました'),
+        );
+      },
+    );
   }
 
   Future<void> _loadOtherTags(String householdId) async {

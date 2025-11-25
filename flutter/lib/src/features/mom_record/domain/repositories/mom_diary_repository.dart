@@ -7,5 +7,11 @@ abstract class MomDiaryRepository {
     required int month,
   });
 
+  /// リアルタイム更新用のStream版
+  Stream<MomDiaryMonth> watchMonthlyDiary({
+    required int year,
+    required int month,
+  });
+
   Future<void> saveDiaryEntry(MomDiaryEntry entry);
 }

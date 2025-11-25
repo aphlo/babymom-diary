@@ -15,8 +15,8 @@ class MomRecordOverviewTab extends ConsumerWidget {
     final state = ref.watch(momRecordViewModelProvider);
     final notifier = ref.read(momRecordViewModelProvider.notifier);
 
-    Future<void> handleRetry() async {
-      await notifier.loadForMonth(state.focusMonth);
+    void handleRetry() {
+      notifier.reloadCurrentMonth();
     }
 
     Future<void> handleRecordTap(MomDailyRecordUiModel record) async {

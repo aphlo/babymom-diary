@@ -9,6 +9,7 @@ import '../../application/mom_record_controller.dart';
 import '../../application/usecases/get_mom_monthly_records.dart';
 import '../../application/usecases/save_mom_daily_record.dart';
 import '../../domain/entities/mom_daily_record.dart';
+import '../../domain/entities/mom_monthly_records.dart';
 import '../models/mom_record_ui_model.dart';
 import 'mom_record_page_state.dart';
 
@@ -21,48 +22,67 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
   MomRecordViewModel(this._ref)
       : _keepAliveLink = _ref.keepAlive(),
         super(MomRecordPageState.initial()) {
-    unawaited(loadForMonth(state.focusMonth));
+    _subscribeToRecords(state.focusMonth);
   }
 
   final Ref _ref;
   final KeepAliveLink _keepAliveLink;
-  GetMomMonthlyRecords? _fetchUseCase;
+  WatchMomMonthlyRecords? _watchUseCase;
   SaveMomDailyRecord? _saveUseCase;
+  StreamSubscription<MomMonthlyRecords>? _recordsSubscription;
 
-  Future<void> loadForMonth(DateTime month) async {
+  void _subscribeToRecords(DateTime month) {
+    _recordsSubscription?.cancel();
+
     final normalized = _normalizeMonth(month);
+    if (!mounted) return;
     state = state.copyWith(
       focusMonth: normalized,
       monthlyRecords: const AsyncValue.loading(),
     );
 
+    unawaited(_startSubscription(normalized));
+  }
+
+  Future<void> _startSubscription(DateTime month) async {
     try {
-      final useCase = await _requireFetchUseCase();
-      final result = await useCase(
-        year: normalized.year,
-        month: normalized.month,
-      );
-      final uiModel = MomMonthlyRecordUiModel.fromDomain(result);
-      state = state.copyWith(
-        monthlyRecords: AsyncValue.data(uiModel),
+      final useCase = await _requireWatchUseCase();
+      _recordsSubscription = useCase(
+        year: month.year,
+        month: month.month,
+      ).listen(
+        (result) {
+          if (!mounted) return;
+          final uiModel = MomMonthlyRecordUiModel.fromDomain(result);
+          state = state.copyWith(
+            monthlyRecords: AsyncValue.data(uiModel),
+          );
+        },
+        onError: (error, stackTrace) {
+          if (!mounted) return;
+          state = state.copyWith(
+            monthlyRecords: AsyncValue.error(error, stackTrace),
+          );
+        },
       );
     } catch (error, stackTrace) {
+      if (!mounted) return;
       state = state.copyWith(
         monthlyRecords: AsyncValue.error(error, stackTrace),
       );
     }
   }
 
-  Future<void> goToPreviousMonth() {
+  void goToPreviousMonth() {
     final current = state.focusMonth;
     final previousMonth = DateTime(current.year, current.month - 1);
-    return loadForMonth(previousMonth);
+    _subscribeToRecords(previousMonth);
   }
 
-  Future<void> goToNextMonth() {
+  void goToNextMonth() {
     final current = state.focusMonth;
     final nextMonth = DateTime(current.year, current.month + 1);
-    return loadForMonth(nextMonth);
+    _subscribeToRecords(nextMonth);
   }
 
   void onSelectTab(int index) {
@@ -72,20 +92,26 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
     state = state.copyWith(selectedTabIndex: index);
   }
 
+  /// エラー時の再読み込み用
+  void reloadCurrentMonth() {
+    _subscribeToRecords(state.focusMonth);
+  }
+
   Future<void> saveRecord(MomDailyRecord record) async {
     final saveUseCase = await _requireSaveUseCase();
     await saveUseCase(record);
-    await loadForMonth(record.date);
+    // Streamが自動更新するため手動リロードは不要
   }
 
-  Future<GetMomMonthlyRecords> _requireFetchUseCase() async {
-    final existing = _fetchUseCase;
+  Future<WatchMomMonthlyRecords> _requireWatchUseCase() async {
+    final existing = _watchUseCase;
     if (existing != null) {
       return existing;
     }
     final householdId = await _ensureHouseholdId();
-    final useCase = _ref.read(getMomMonthlyRecordsUseCaseProvider(householdId));
-    _fetchUseCase = useCase;
+    final useCase =
+        _ref.read(watchMomMonthlyRecordsUseCaseProvider(householdId));
+    _watchUseCase = useCase;
     return useCase;
   }
 
@@ -117,6 +143,7 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
 
   @override
   void dispose() {
+    _recordsSubscription?.cancel();
     _keepAliveLink.close();
     super.dispose();
   }

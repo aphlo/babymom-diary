@@ -24,8 +24,8 @@ class MomDiaryOverviewTab extends ConsumerWidget {
       }
     }
 
-    Future<void> handleRetry() async {
-      await notifier.loadForMonth(state.focusMonth, keepState: false);
+    void handleRetry() {
+      notifier.reloadCurrentMonth();
     }
 
     return Column(

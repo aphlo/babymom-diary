@@ -7,5 +7,11 @@ abstract class MomRecordRepository {
     required int month,
   });
 
+  /// リアルタイム更新用のStream版
+  Stream<MomMonthlyRecords> watchMonthlyRecords({
+    required int year,
+    required int month,
+  });
+
   Future<void> saveRecord(MomDailyRecord record);
 }

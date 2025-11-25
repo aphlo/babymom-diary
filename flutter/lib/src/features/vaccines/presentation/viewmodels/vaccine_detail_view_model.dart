@@ -327,13 +327,8 @@ class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
 
       final groupId = state.doseStatuses[doseNumber]?.reservationGroupId;
 
-      if (applyToGroup && groupId == null) {
-        state = state.copyWith(
-          isLoading: false,
-          error: '同時接種グループ情報の取得に失敗しました',
-        );
-        return;
-      }
+      // groupIdがnullの場合は単独ワクチンとして処理を続行
+      // (applyToGroupがtrueでもgroupIdがnullなら単独処理にフォールバック)
 
       if (groupId != null && applyToGroup) {
         await _vaccinationRecordRepository.completeReservationGroup(

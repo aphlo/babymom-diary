@@ -45,6 +45,35 @@ class MomDiaryFirestoreDataSource {
     return snapshot.docs.map(MomDiaryDto.fromFirestore).toList(growable: false);
   }
 
+  /// リアルタイム更新用のStream版
+  Stream<List<MomDiaryDto>> watchMonthlyDiary({
+    required int year,
+    required int month,
+  }) {
+    final start = DateTime(year, month, 1);
+    final endExclusive = DateTime(year, month + 1, 1);
+
+    final query = _collection
+        .where(
+          'date',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(start),
+        )
+        .where(
+          'date',
+          isLessThan: Timestamp.fromDate(endExclusive),
+        )
+        .orderBy('date');
+
+    return query.snapshots().map((snapshot) {
+      if (snapshot.docs.isEmpty) {
+        return const <MomDiaryDto>[];
+      }
+      return snapshot.docs
+          .map(MomDiaryDto.fromFirestore)
+          .toList(growable: false);
+    });
+  }
+
   Future<void> upsertDiary(MomDiaryDto dto) async {
     final docId = DateFormat('yyyy-MM-dd').format(dto.date);
     final data = dto.toFirestoreMap();

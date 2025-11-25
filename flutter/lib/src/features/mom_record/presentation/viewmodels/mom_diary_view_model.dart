@@ -9,6 +9,7 @@ import '../../application/mom_record_controller.dart';
 import '../../application/usecases/get_mom_diary_monthly_entries.dart';
 import '../../application/usecases/save_mom_diary_entry.dart';
 import '../../domain/entities/mom_diary_entry.dart';
+import '../../domain/entities/mom_diary_month.dart';
 import '../models/mom_diary_ui_model.dart';
 import 'mom_diary_page_state.dart';
 import 'mom_record_page_state.dart';
@@ -25,12 +26,13 @@ class MomDiaryViewModel extends StateNotifier<MomDiaryPageState> {
   }
 
   final Ref _ref;
-  GetMomDiaryMonthlyEntries? _fetchUseCase;
+  WatchMomDiaryMonthlyEntries? _watchUseCase;
   SaveMomDiaryEntry? _saveUseCase;
+  StreamSubscription<MomDiaryMonth>? _diarySubscription;
 
   void _initialize() {
     final recordState = _ref.read(momRecordViewModelProvider);
-    unawaited(loadForMonth(recordState.focusMonth, keepState: true));
+    _subscribeToMonth(recordState.focusMonth);
 
     _ref.listen<MomRecordPageState>(
       momRecordViewModelProvider,
@@ -38,35 +40,48 @@ class MomDiaryViewModel extends StateNotifier<MomDiaryPageState> {
         if (previous?.focusMonth == next.focusMonth) {
           return;
         }
-        unawaited(loadForMonth(next.focusMonth));
+        _subscribeToMonth(next.focusMonth);
       },
       fireImmediately: false,
     );
   }
 
-  Future<void> loadForMonth(
-    DateTime month, {
-    bool keepState = false,
-  }) async {
+  void _subscribeToMonth(DateTime month) {
+    _diarySubscription?.cancel();
+
     final normalized = _normalizeMonth(month);
-    final previous = keepState
-        ? state.monthlyDiary
-        : const AsyncValue<MomDiaryMonthlyUiModel>.loading();
+    if (!mounted) return;
     state = state.copyWith(
       focusMonth: normalized,
-      monthlyDiary: previous,
+      monthlyDiary: const AsyncValue.loading(),
     );
+
+    unawaited(_startSubscription(normalized));
+  }
+
+  Future<void> _startSubscription(DateTime month) async {
     try {
-      final useCase = await _requireFetchUseCase();
-      final result = await useCase(
-        year: normalized.year,
-        month: normalized.month,
-      );
-      final uiModel = MomDiaryMonthlyUiModel.fromDomain(result);
-      state = state.copyWith(
-        monthlyDiary: AsyncValue.data(uiModel),
+      final useCase = await _requireWatchUseCase();
+      _diarySubscription = useCase(
+        year: month.year,
+        month: month.month,
+      ).listen(
+        (result) {
+          if (!mounted) return;
+          final uiModel = MomDiaryMonthlyUiModel.fromDomain(result);
+          state = state.copyWith(
+            monthlyDiary: AsyncValue.data(uiModel),
+          );
+        },
+        onError: (error, stackTrace) {
+          if (!mounted) return;
+          state = state.copyWith(
+            monthlyDiary: AsyncValue.error(error, stackTrace),
+          );
+        },
       );
     } catch (error, stackTrace) {
+      if (!mounted) return;
       state = state.copyWith(
         monthlyDiary: AsyncValue.error(error, stackTrace),
       );
@@ -76,18 +91,23 @@ class MomDiaryViewModel extends StateNotifier<MomDiaryPageState> {
   Future<void> saveEntry(MomDiaryEntry entry) async {
     final saveUseCase = await _requireSaveUseCase();
     await saveUseCase(entry);
-    await loadForMonth(entry.date);
+    // Streamが自動更新するため手動リロードは不要
   }
 
-  Future<GetMomDiaryMonthlyEntries> _requireFetchUseCase() async {
-    final existing = _fetchUseCase;
+  /// エラー時の再読み込み用
+  void reloadCurrentMonth() {
+    _subscribeToMonth(state.focusMonth);
+  }
+
+  Future<WatchMomDiaryMonthlyEntries> _requireWatchUseCase() async {
+    final existing = _watchUseCase;
     if (existing != null) {
       return existing;
     }
     final householdId = await _ensureHouseholdId();
     final useCase =
-        _ref.read(getMomDiaryMonthlyEntriesUseCaseProvider(householdId));
-    _fetchUseCase = useCase;
+        _ref.read(watchMomDiaryMonthlyEntriesUseCaseProvider(householdId));
+    _watchUseCase = useCase;
     return useCase;
   }
 
@@ -115,5 +135,11 @@ class MomDiaryViewModel extends StateNotifier<MomDiaryPageState> {
 
   static DateTime _normalizeMonth(DateTime date) {
     return DateTime(date.year, date.month);
+  }
+
+  @override
+  void dispose() {
+    _diarySubscription?.cancel();
+    super.dispose();
   }
 }
