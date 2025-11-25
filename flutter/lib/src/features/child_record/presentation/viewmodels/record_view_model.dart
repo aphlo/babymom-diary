@@ -63,8 +63,82 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
   }
 
   void _initialize() {
+    _listenToHouseholdChange();
     _listenToSelectedChild();
     unawaited(_loadInitialData());
+  }
+
+  void _listenToHouseholdChange() {
+    _ref.listen<AsyncValue<String>>(
+      fbcore.currentHouseholdIdProvider,
+      (previous, next) {
+        final newHouseholdId = next.valueOrNull;
+        final previousHouseholdId = previous?.valueOrNull;
+
+        // 世帯IDが変更された場合、データを再読み込み
+        if (newHouseholdId != null &&
+            previousHouseholdId != null &&
+            newHouseholdId != previousHouseholdId) {
+          // 世帯が変わったので、選択中の子どもをリセットしてデータを再読み込み
+          _recordsSubscription?.cancel();
+          state = state.copyWith(
+            householdId: newHouseholdId,
+            selectedChildId: null,
+            recordsAsync: const AsyncValue<List<RecordItemModel>>.loading(),
+          );
+          // 次のフレームでリロードを実行（Riverpodの状態が安定した後）
+          Future.microtask(() => _reloadForNewHousehold(newHouseholdId));
+        }
+      },
+    );
+  }
+
+  Future<void> _reloadForNewHousehold(String householdId) async {
+    if (!mounted) return;
+
+    try {
+      // Providerを使わずに直接Firestoreから子どもを取得
+      final ds = ChildFirestoreDataSource(_db, householdId);
+      final snap = await ds.childrenQuery().limit(1).get();
+
+      if (!mounted) return;
+
+      String? childId;
+      if (snap.docs.isNotEmpty) {
+        childId = snap.docs.first.id;
+        // SharedPreferencesに保存（selectedChildControllerProviderを経由）
+        await _ref
+            .read(selectedChildControllerProvider.notifier)
+            .select(childId);
+        state = state.copyWith(selectedChildId: childId);
+      } else {
+        await _ref.read(selectedChildControllerProvider.notifier).select(null);
+        state = state.copyWith(selectedChildId: null);
+      }
+
+      if (!mounted) return;
+
+      if (childId != null) {
+        _subscribeToRecords(
+          householdId: householdId,
+          childId: childId,
+          date: state.selectedDate,
+          keepPrevious: false,
+        );
+      } else {
+        state = state.copyWith(
+          recordsAsync:
+              const AsyncValue<List<RecordItemModel>>.data(<RecordItemModel>[]),
+        );
+      }
+      await _loadOtherTags(householdId);
+    } catch (error, stackTrace) {
+      if (!mounted) return;
+      state = state.copyWith(
+        recordsAsync: AsyncValue.error(error, stackTrace),
+        pendingUiEvent: const RecordUiEvent.showMessage('記録の読み込みに失敗しました'),
+      );
+    }
   }
 
   void _listenToSelectedChild() {
@@ -441,17 +515,30 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     final selected = watchSelected
         ? await _ref.watch(selectedChildControllerProvider.future)
         : await _ref.read(selectedChildControllerProvider.future);
-    if (selected != null && selected.isNotEmpty) {
-      state = state.copyWith(selectedChildId: selected);
-      return selected;
-    }
 
     final ds = ChildFirestoreDataSource(
       _db,
       householdId,
     );
+
+    // 選択されている子どもが現在の世帯に存在するか確認
+    if (selected != null && selected.isNotEmpty) {
+      final childDoc = await ds
+          .childrenQuery()
+          .where(FieldPath.documentId, isEqualTo: selected)
+          .limit(1)
+          .get();
+      if (childDoc.docs.isNotEmpty) {
+        state = state.copyWith(selectedChildId: selected);
+        return selected;
+      }
+      // 子どもが現在の世帯に存在しない場合はリセット
+    }
+
+    // 世帯内の最初の子どもを選択
     final snap = await ds.childrenQuery().limit(1).get();
     if (snap.docs.isEmpty) {
+      await _ref.read(selectedChildControllerProvider.notifier).select(null);
       state = state.copyWith(selectedChildId: null);
       return null;
     }
@@ -489,9 +576,16 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
       },
       onError: (error, stackTrace) {
         if (!mounted) return;
+        // Firestore権限エラーの場合はスナックバーを表示しない
+        // （世帯変更時に一時的に発生する可能性があるため）
+        final isPermissionError =
+            error.toString().contains('permission-denied') ||
+                error.toString().contains('PERMISSION_DENIED');
         state = state.copyWith(
           recordsAsync: AsyncValue.error(error, stackTrace),
-          pendingUiEvent: const RecordUiEvent.showMessage('記録の取得に失敗しました'),
+          pendingUiEvent: isPermissionError
+              ? null
+              : const RecordUiEvent.showMessage('記録の取得に失敗しました'),
         );
       },
     );
