@@ -183,12 +183,46 @@ final householdServiceProvider = Provider<HouseholdService>((ref) {
   );
 });
 
-final currentHouseholdIdProvider = FutureProvider<String>((ref) async {
+/// Provider for initial household ID (used at app startup)
+/// This ensures a household exists and returns its ID synchronously after initial load
+final initialHouseholdIdProvider = FutureProvider<String>((ref) async {
   final svc = ref.watch(householdServiceProvider);
   return svc.ensureHousehold();
 });
 
-final currentMembershipTypeProvider = FutureProvider<String?>((ref) async {
-  final svc = ref.watch(householdServiceProvider);
-  return svc.getMembershipType();
+/// Stream provider that watches users/{uid} document for activeHouseholdId changes
+/// This allows real-time updates when user joins/leaves a household
+final currentHouseholdIdProvider = StreamProvider<String>((ref) {
+  final auth = ref.watch(firebaseAuthProvider);
+  final firestore = ref.watch(firebaseFirestoreProvider);
+  final uid = auth.currentUser?.uid;
+
+  if (uid == null) {
+    return Stream.error(StateError('User is not signed in.'));
+  }
+
+  return firestore.collection('users').doc(uid).snapshots().map((snapshot) {
+    final data = snapshot.data();
+    final activeHouseholdId = data?['activeHouseholdId'] as String?;
+    if (activeHouseholdId == null) {
+      throw StateError('No active household found.');
+    }
+    return activeHouseholdId;
+  });
+});
+
+/// Stream provider that watches users/{uid} document for membershipType changes
+final currentMembershipTypeProvider = StreamProvider<String?>((ref) {
+  final auth = ref.watch(firebaseAuthProvider);
+  final firestore = ref.watch(firebaseFirestoreProvider);
+  final uid = auth.currentUser?.uid;
+
+  if (uid == null) {
+    return Stream.value(null);
+  }
+
+  return firestore.collection('users').doc(uid).snapshots().map((snapshot) {
+    final data = snapshot.data();
+    return data?['membershipType'] as String?;
+  });
 });

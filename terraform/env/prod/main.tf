@@ -107,18 +107,14 @@ resource "google_storage_bucket_object" "functions_source" {
   source = data.archive_file.functions_source.output_path
 }
 
-# Cloud Function: acceptInvitation
-module "accept_invitation_function" {
-  source = "../../modules/cloud-function"
+# Household sharing Cloud Functions (acceptInvitation, removeMember)
+module "household_sharing_functions" {
+  source = "../../modules/household-sharing-functions"
 
-  function_name         = "accept-invitation"
   location              = var.region
-  description           = "Accept household invitation and add user as member"
-  entry_point           = "acceptInvitation"
   source_bucket         = module.functions_source_bucket.bucket_name
   source_object         = google_storage_bucket_object.functions_source.name
   service_account_email = module.cloud_functions_service_account.email
-  allow_unauthenticated = true
 
   max_instance_count = 10
   min_instance_count = 0
@@ -141,4 +137,3 @@ module "accept_invitation_function" {
     google_project_service.artifactregistry,
   ]
 }
-

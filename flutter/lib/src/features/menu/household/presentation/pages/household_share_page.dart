@@ -107,13 +107,23 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
     final membersAsync = ref.watch(householdMembersProvider(householdId));
     final currentUid = ref.watch(firebaseAuthProvider).currentUser?.uid;
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        _buildHouseholdIdSection(householdId),
-        _buildMembersSection(membersAsync, currentUid),
-        _buildJoinInvitationSection(),
-      ],
+    return membersAsync.when(
+      data: (members) {
+        final otherMembers = members.where((m) => m.uid != currentUid).toList();
+        final hasOtherMembers = otherMembers.isNotEmpty;
+
+        return ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            _buildHouseholdIdSection(householdId),
+            if (hasOtherMembers)
+              _buildMembersSectionContent(otherMembers, householdId),
+            if (!hasOtherMembers) _buildJoinInvitationSection(),
+          ],
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(child: Text('エラー: $error')),
     );
   }
 
@@ -190,55 +200,35 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
     );
   }
 
-  Widget _buildMembersSection(
-    AsyncValue<List<HouseholdMember>> membersAsync,
-    String? currentUid,
+  Widget _buildMembersSectionContent(
+    List<HouseholdMember> otherMembers,
+    String householdId,
   ) {
-    return membersAsync.when(
-      data: (members) {
-        // Filter out current user
-        final otherMembers = members.where((m) => m.uid != currentUid).toList();
-
-        // Don't show the card if there are no other members
-        if (otherMembers.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
-        return Padding(
-          padding: const EdgeInsets.only(top: 16),
-          child: Card(
-            color: Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('メンバー一覧',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  Column(
-                    children: otherMembers
-                        .map((member) => _buildMemberCard(member))
-                        .toList(),
-                  ),
-                ],
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Card(
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('メンバ一覧',
+                  style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Column(
+                children: otherMembers
+                    .map((member) => _buildMemberCard(member, householdId))
+                    .toList(),
               ),
-            ),
+            ],
           ),
-        );
-      },
-      loading: () => const Padding(
-        padding: EdgeInsets.only(top: 16),
-        child: Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, _) => Padding(
-        padding: const EdgeInsets.only(top: 16),
-        child: Text('読み込みエラー: $error'),
+        ),
       ),
     );
   }
 
-  Widget _buildMemberCard(HouseholdMember member) {
+  Widget _buildMemberCard(HouseholdMember member, String householdId) {
     final dateFormat = DateFormat('yyyy/MM/dd');
 
     return Card(
@@ -255,6 +245,10 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
         ),
         title: Text(member.displayName),
         subtitle: Text('${dateFormat.format(member.joinedAt)}に参加'),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete_outline, color: Colors.red),
+          onPressed: () => _showRemoveMemberDialog(member, householdId),
+        ),
       ),
     );
   }
@@ -346,12 +340,12 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
     final displayName = _displayNameCtrl.text.trim();
 
     if (displayName.isEmpty) {
-      _showError('表示名を入力してください');
+      await _showErrorDialog('表示名を入力してください');
       return;
     }
 
     if (householdId.isEmpty) {
-      _showError('世帯IDを入力してください');
+      await _showErrorDialog('世帯IDを入力してください');
       return;
     }
 
@@ -366,40 +360,22 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
         displayName: displayName,
       );
 
-      // Invalidate providers to force refresh
-      ref.invalidate(currentHouseholdIdProvider);
-      ref.invalidate(currentMembershipTypeProvider);
-
       if (!mounted) return;
 
       _householdIdCtrl.clear();
       _displayNameCtrl.clear();
 
-      await showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          title: const Text('参加完了'),
-          content: const Text('世帯への参加が完了しました'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('世帯への参加が完了しました')),
       );
-      if (!mounted) return;
-
-      Navigator.of(context).pop();
     } on InvitationNotFoundException {
-      _showError('世帯が見つかりません');
+      await _showErrorDialog('世帯が見つかりません');
     } on AlreadyMemberException {
-      _showError('既にこの世帯のメンバーです');
+      await _showErrorDialog('既にこの世帯のメンバーです');
     } on InvitationException catch (e) {
-      _showError(e.message);
+      await _showErrorDialog(e.message);
     } catch (e) {
-      _showError('参加に失敗しました: $e');
+      await _showErrorDialog('参加に失敗しました: $e');
     } finally {
       if (mounted) {
         setState(() => _isProcessing = false);
@@ -408,10 +384,20 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
     }
   }
 
-  void _showError(String message) {
+  Future<void> _showErrorDialog(String message) async {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('エラー'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -430,6 +416,58 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
   void _hideLoadingDialog() {
     if (_loadingDialogVisible && mounted) {
       Navigator.of(context, rootNavigator: true).pop();
+    }
+  }
+
+  Future<void> _showRemoveMemberDialog(
+    HouseholdMember member,
+    String householdId,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('メンバーを削除'),
+        content: Text('${member.displayName}さんを世帯から削除しますか？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('削除'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _isProcessing = true);
+    _showLoadingDialog();
+
+    try {
+      final removeMember = ref.read(removeMemberUseCaseProvider);
+      await removeMember(
+        householdId: householdId,
+        memberUid: member.uid,
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${member.displayName}さんを削除しました')),
+      );
+    } on InvitationException catch (e) {
+      await _showErrorDialog(e.message);
+    } catch (e) {
+      await _showErrorDialog('削除に失敗しました: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
+      _hideLoadingDialog();
     }
   }
 }

@@ -12,6 +12,7 @@ import 'package:babymom_diary/src/core/router/app_router.dart';
 import 'package:babymom_diary/src/core/theme/app_theme_provider.dart';
 import 'package:babymom_diary/src/features/ads/infrastructure/services/admob_service.dart';
 import 'package:babymom_diary/src/features/menu/children/application/children_local_provider.dart';
+import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
 
@@ -41,7 +42,6 @@ Future<void> runBabymomDiaryApp({
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
-        fbcore.currentHouseholdIdProvider.overrideWith((ref) async => hid),
         childrenLocalProvider(hid).overrideWith((ref) {
           return ChildrenLocalNotifier.withInitial(hid, initialChildren);
         }),
@@ -75,9 +75,12 @@ class App extends ConsumerStatefulWidget {
 }
 
 class _AppState extends ConsumerState<App> {
+  String? _previousHouseholdId;
+
   @override
   void initState() {
     super.initState();
+    _previousHouseholdId = widget.initialHouseholdId;
     // 最初のフレームが描画された後にATT許可をリクエスト
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AdMobService.requestATTPermission();
@@ -90,6 +93,14 @@ class _AppState extends ConsumerState<App> {
     final householdId = householdAsync.value ?? widget.initialHouseholdId;
     final router = ref.watch(appRouterProvider);
     final theme = ref.watch(appThemeProvider(householdId));
+
+    // 世帯IDが変更されたら選択中の子供をリセット
+    if (_previousHouseholdId != null && _previousHouseholdId != householdId) {
+      _previousHouseholdId = householdId;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _resetSelectedChildForHousehold(householdId);
+      });
+    }
 
     if (householdAsync.hasError) {
       final e = householdAsync.error;
@@ -126,5 +137,29 @@ class _AppState extends ConsumerState<App> {
         Locale('en'),
       ],
     );
+  }
+
+  /// 世帯が変わったときに、新しい世帯の子供リストを取得し、
+  /// 最初の子供を選択状態にする（子供がいなければnull）
+  Future<void> _resetSelectedChildForHousehold(String householdId) async {
+    // Firestoreから直接子供リストを取得
+    final firestore = ref.read(fbcore.firebaseFirestoreProvider);
+    final snapshot = await firestore
+        .collection('households')
+        .doc(householdId)
+        .collection('children')
+        .orderBy('birthday')
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      // 新しい世帯に子供がいれば最初の子供を選択
+      await ref
+          .read(selectedChildControllerProvider.notifier)
+          .select(snapshot.docs.first.id);
+    } else {
+      // 子供がいなければ選択を解除
+      await ref.read(selectedChildControllerProvider.notifier).select(null);
+    }
   }
 }

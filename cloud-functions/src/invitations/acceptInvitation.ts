@@ -92,16 +92,18 @@ export const acceptInvitation = functions
           throw new functions.https.HttpsError("already-exists", "既にこの世帯のメンバーです");
         }
 
-        // 3-4. Check if user is admin with other members in current household
+        // 3-4. Check if user is owner of current household with other members
         if (previousHouseholdId && previousMembershipType === "owner") {
           // Check if there are other members in the current household
+          // Get all members and filter out current user (avoids != query which requires index)
           const currentMembersSnapshot = await db
             .collection(`households/${previousHouseholdId}/members`)
-            .where("uid", "!=", userId)
-            .limit(1)
+            .limit(2)
             .get();
 
-          if (!currentMembersSnapshot.empty) {
+          const hasOtherMembers = currentMembersSnapshot.docs.some((doc) => doc.id !== userId);
+
+          if (hasOtherMembers) {
             throw new functions.https.HttpsError(
               "failed-precondition",
               "他のメンバーがいる世帯の管理者は、別の世帯に参加できません"
@@ -109,13 +111,11 @@ export const acceptInvitation = functions
           }
         }
 
-        // 3-5. Remove from previous household if exists
-        if (previousHouseholdId && previousHouseholdId !== householdId) {
-          const previousMemberRef = db.doc(`households/${previousHouseholdId}/members/${userId}`);
-          transaction.delete(previousMemberRef);
-        }
+        // Note: We do NOT remove the user from previous household here.
+        // The user's original household data is preserved so they can return to it
+        // if they are removed from the joined household later.
 
-        // 3-6. Add as member with display name
+        // 3-5. Add as member with display name
         transaction.set(memberRef, {
           role: "member",
           displayName: displayName,
@@ -123,7 +123,7 @@ export const acceptInvitation = functions
           uid: userId,
         });
 
-        // 3-7. Update user document
+        // 3-6. Update user document
         transaction.set(
           userRef,
           {

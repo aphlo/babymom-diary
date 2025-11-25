@@ -1,6 +1,11 @@
 output "accept_invitation_url" {
   description = "URL for acceptInvitation Cloud Function"
-  value       = module.accept_invitation_function.function_uri
+  value       = module.household_sharing_functions.accept_invitation_uri
+}
+
+output "remove_member_url" {
+  description = "URL for removeMember Cloud Function"
+  value       = module.household_sharing_functions.remove_member_uri
 }
 
 output "functions_source_bucket" {
