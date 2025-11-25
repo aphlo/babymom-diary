@@ -290,19 +290,11 @@ class ReservationGroupFirestoreCommands {
             throw ReservationGroupNotFoundException(reservationGroupId);
           }
 
-          final groupDocRef = refs.reservationGroupDoc(reservationGroupId);
-          final updatedMembers = groupDto.members
-              .where(
-                (member) =>
-                    !(member.vaccineId == vaccineId && member.doseId == doseId),
-              )
-              .map((member) => <String, dynamic>{
-                    'vaccineId': member.vaccineId,
-                    'doseId': member.doseId,
-                  })
-              .toList();
-
-          final memberExists = updatedMembers.length != groupDto.members.length;
+          // メンバーが存在するか確認
+          final memberExists = groupDto.members.any(
+            (member) =>
+                member.vaccineId == vaccineId && member.doseId == doseId,
+          );
           if (!memberExists) {
             throw ReservationGroupIntegrityException(
               'Group member not found for vaccine=$vaccineId dose=$doseId',
@@ -339,15 +331,13 @@ class ReservationGroupFirestoreCommands {
             },
           );
 
-          if (updatedMembers.isEmpty) {
-            transaction.delete(groupDocRef);
-          } else {
-            transaction.update(groupDocRef, <String, dynamic>{
-              'members': updatedMembers,
-              'status': 'scheduled',
+          // グループからメンバーを削除せず、グループのupdatedAtのみ更新
+          transaction.update(
+            refs.reservationGroupDoc(reservationGroupId),
+            <String, dynamic>{
               'updatedAt': Timestamp.fromDate(nowUtc),
-            });
-          }
+            },
+          );
         },
       );
     });

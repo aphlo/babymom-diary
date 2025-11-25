@@ -156,12 +156,13 @@ class VaccinationRecord {
   }
 
   /// ワクチンの最大接種回数を取得
+  /// ワクチンマスタのIDに基づいて最大接種回数を返す
   int _getMaxDosesForVaccine(String vaccineId) {
     switch (vaccineId) {
       // 4回接種
-      case 'hib':
-      case 'pneumococcal':
-      case 'dpt_ipv':
+      case 'hib': // ヒブ
+      case 'pneumococcal': // 肺炎球菌
+      case 'tetravalent': // 4種混合
       case 'pentavalent': // 5種混合
         return 4;
 

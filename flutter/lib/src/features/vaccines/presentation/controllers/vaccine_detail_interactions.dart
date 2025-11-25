@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/vaccine_catalog_providers.dart';
+import '../../domain/entities/dose_record.dart';
 import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_state.dart';
 import '../viewmodels/vaccine_detail_view_model.dart';
 import '../widgets/concurrent_vaccines_confirmation_dialog.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class VaccineDetailInteractions {
   const VaccineDetailInteractions({
@@ -53,22 +54,68 @@ class VaccineDetailInteractions {
         return;
       }
 
-      if (!context.mounted) return;
-
-      final bool? userSelection =
-          await showConcurrentVaccinesConfirmationDialog(
-        context: context,
+      // グループ内に他の予約済み（未接種）メンバーがいるかチェック
+      final getReservationGroup = ref.read(getReservationGroupProvider);
+      final group = await getReservationGroup(
         householdId: householdId,
         childId: childId,
         reservationGroupId: groupId,
-        currentVaccineId: vaccine.id,
-        currentDoseId: doseRecord.doseId,
       );
 
-      if (userSelection == null) {
-        return;
+      // 他のメンバーで予約済み（未接種）のものがあるかチェック
+      bool hasOtherScheduledMembers = false;
+      if (group != null) {
+        for (final member in group.members) {
+          // 自分自身はスキップ
+          if (member.vaccineId == vaccine.id &&
+              member.doseId == doseRecord.doseId) {
+            continue;
+          }
+
+          // 他のメンバーの接種状況を確認
+          final memberRecord = await repository.getVaccinationRecord(
+            householdId: householdId,
+            childId: childId,
+            vaccineId: member.vaccineId,
+          );
+          if (memberRecord != null) {
+            final memberDoseIndex = memberRecord.orderedDoses.indexWhere(
+              (dose) => dose.doseId == member.doseId,
+            );
+            if (memberDoseIndex != -1) {
+              final memberDose = memberRecord.orderedDoses[memberDoseIndex];
+              // 予約済み（scheduled）のメンバーがいればフラグを立てる
+              if (memberDose.status == DoseStatus.scheduled) {
+                hasOtherScheduledMembers = true;
+                break;
+              }
+            }
+          }
+        }
       }
-      applyToGroup = userSelection;
+
+      if (hasOtherScheduledMembers) {
+        // 他の予約済みメンバーがいる場合のみダイアログを表示
+        if (!context.mounted) return;
+
+        final bool? userSelection =
+            await showConcurrentVaccinesConfirmationDialog(
+          context: context,
+          householdId: householdId,
+          childId: childId,
+          reservationGroupId: groupId,
+          currentVaccineId: vaccine.id,
+          currentDoseId: doseRecord.doseId,
+        );
+
+        if (userSelection == null) {
+          return;
+        }
+        applyToGroup = userSelection;
+      } else {
+        // 他の予約済みメンバーがいない場合は単独処理
+        applyToGroup = false;
+      }
     }
 
     try {
