@@ -142,37 +142,3 @@ module "accept_invitation_function" {
   ]
 }
 
-# Cloud Function: createInvitation
-module "create_invitation_function" {
-  source = "../../modules/cloud-function"
-
-  function_name         = "create-invitation"
-  location              = var.region
-  description           = "Create household invitation code"
-  entry_point           = "createInvitation"
-  source_bucket         = module.functions_source_bucket.bucket_name
-  source_object         = google_storage_bucket_object.functions_source.name
-  service_account_email = module.cloud_functions_service_account.email
-  allow_unauthenticated = true
-
-  max_instance_count = 10
-  min_instance_count = 0
-  available_memory   = "256M"
-  timeout_seconds    = 60
-
-  environment_variables = {
-    NODE_ENV = "production"
-  }
-
-  labels = {
-    environment = "production"
-    feature     = "household-sharing"
-  }
-
-  depends_on = [
-    google_project_service.cloudfunctions,
-    google_project_service.cloudbuild,
-    google_project_service.run,
-    google_project_service.artifactregistry,
-  ]
-}

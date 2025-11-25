@@ -1,9 +1,9 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import { isValidInvitationCode } from "./utils";
 
 interface AcceptInvitationData {
-  code: string;
+  householdId: string;
+  displayName: string;
 }
 
 interface AcceptInvitationResult {
@@ -21,69 +21,49 @@ export const acceptInvitation = functions
     }
 
     const userId = context.auth.uid;
-    const code = data.code?.toUpperCase()?.trim();
+    const householdId = data.householdId?.trim();
+    const displayName = data.displayName?.trim();
 
-    // 3. Input validation
-    if (!code || !isValidInvitationCode(code)) {
+    // 2. Input validation
+    if (!householdId) {
+      throw new functions.https.HttpsError("invalid-argument", "世帯IDを入力してください");
+    }
+
+    if (!displayName || displayName.length === 0) {
+      throw new functions.https.HttpsError("invalid-argument", "表示名を入力してください");
+    }
+
+    if (displayName.length > 50) {
       throw new functions.https.HttpsError(
         "invalid-argument",
-        "招待コードは6桁の英数字である必要があります"
+        "表示名は50文字以内で入力してください"
       );
     }
 
     const db = admin.firestore();
 
     try {
-      // 4. Execute transaction
+      // 3. Execute transaction
       return await db.runTransaction(async (transaction) => {
-        // 4-1. Search for invitation code
-        const invitationsSnapshot = await db
-          .collectionGroup("invitations")
-          .where("code", "==", code)
-          .where("status", "==", "pending")
-          .limit(1)
-          .get();
-
-        if (invitationsSnapshot.empty) {
-          throw new functions.https.HttpsError(
-            "not-found",
-            "招待コードが見つからないか、既に使用されています"
-          );
-        }
-
-        const invitationDoc = invitationsSnapshot.docs[0];
-        const invitation = invitationDoc.data();
-        const householdId = invitationDoc.ref.parent.parent!.id;
-
         const userRef = db.doc(`users/${userId}`);
         const userSnapshot = await transaction.get(userRef);
+
         if (!userSnapshot.exists) {
           transaction.set(userRef, {
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
           });
         }
-        const userData = userSnapshot.data() as { activeHouseholdId?: string } | undefined;
+
+        const userData = userSnapshot.data() as
+          | {
+              activeHouseholdId?: string;
+              membershipType?: string;
+            }
+          | undefined;
         const previousHouseholdId = userData?.activeHouseholdId;
+        const previousMembershipType = userData?.membershipType;
 
-        // 4-2. Check expiration
-        const now = admin.firestore.Timestamp.now();
-        if (invitation.expiresAt.toMillis() < now.toMillis()) {
-          transaction.update(invitationDoc.ref, { status: "expired" });
-          throw new functions.https.HttpsError(
-            "failed-precondition",
-            "招待コードの有効期限が切れています"
-          );
-        }
-
-        // 4-3. Self-invitation check
-        if (invitation.createdBy === userId) {
-          throw new functions.https.HttpsError(
-            "invalid-argument",
-            "自分自身を招待することはできません"
-          );
-        }
-
-        // 4-4. Get household document
+        // 3-1. Get target household document
         const householdRef = db.doc(`households/${householdId}`);
         const householdSnapshot = await transaction.get(householdRef);
 
@@ -91,7 +71,20 @@ export const acceptInvitation = functions
           throw new functions.https.HttpsError("not-found", "世帯が見つかりません");
         }
 
-        // 4-5. Check if already a member (members are in subcollection)
+        const householdData = householdSnapshot.data();
+        if (!householdData) {
+          throw new functions.https.HttpsError("not-found", "世帯データが見つかりません");
+        }
+
+        // 3-2. Self-invitation check
+        if (householdData.createdBy === userId) {
+          throw new functions.https.HttpsError(
+            "invalid-argument",
+            "自分が作成した世帯には参加できません"
+          );
+        }
+
+        // 3-3. Check if already a member
         const memberRef = householdRef.collection("members").doc(userId);
         const memberSnapshot = await transaction.get(memberRef);
 
@@ -99,37 +92,47 @@ export const acceptInvitation = functions
           throw new functions.https.HttpsError("already-exists", "既にこの世帯のメンバーです");
         }
 
+        // 3-4. Check if user is admin with other members in current household
+        if (previousHouseholdId && previousMembershipType === "owner") {
+          // Check if there are other members in the current household
+          const currentMembersSnapshot = await db
+            .collection(`households/${previousHouseholdId}/members`)
+            .where("uid", "!=", userId)
+            .limit(1)
+            .get();
+
+          if (!currentMembersSnapshot.empty) {
+            throw new functions.https.HttpsError(
+              "failed-precondition",
+              "他のメンバーがいる世帯の管理者は、別の世帯に参加できません"
+            );
+          }
+        }
+
+        // 3-5. Remove from previous household if exists
         if (previousHouseholdId && previousHouseholdId !== householdId) {
-          const previousMemberRef = db
-            .doc(`households/${previousHouseholdId}/members/${userId}`);
+          const previousMemberRef = db.doc(`households/${previousHouseholdId}/members/${userId}`);
           transaction.delete(previousMemberRef);
         }
 
-        // 4-6. Add as member (to subcollection)
+        // 3-6. Add as member with display name
         transaction.set(memberRef, {
           role: "member",
+          displayName: displayName,
           joinedAt: admin.firestore.FieldValue.serverTimestamp(),
-          joinToken: invitationDoc.id,
           uid: userId,
         });
 
+        // 3-7. Update user document
         transaction.set(
           userRef,
           {
             activeHouseholdId: householdId,
             membershipType: "member",
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-            lastInvitationId: invitationDoc.id,
           },
           { merge: true }
         );
-
-        // 4-7. Update invitation status
-        transaction.update(invitationDoc.ref, {
-          status: "accepted",
-          acceptedBy: userId,
-          acceptedAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
 
         return {
           householdId,
