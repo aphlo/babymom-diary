@@ -28,6 +28,8 @@ class MenuPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncHid = ref.watch(currentHouseholdIdProvider);
+    final membershipType = ref.watch(currentMembershipTypeProvider).valueOrNull;
+    final isOwner = membershipType != 'member';
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
       appBar: AppBar(title: const Text('メニュー')),
@@ -107,21 +109,24 @@ class MenuPage extends ConsumerWidget {
                   const Divider(height: 0),
 
                   const SizedBox(height: 24),
-                  const Divider(height: 0),
-                  ListTile(
-                    tileColor: Colors.white,
-                    leading:
-                        const Icon(Icons.delete_forever, color: Colors.red),
-                    title: const Text(
-                      'データの削除',
-                      style: TextStyle(color: Colors.red),
+                  // データ削除メニューはオーナーのみ表示
+                  if (isOwner) ...[
+                    const Divider(height: 0),
+                    ListTile(
+                      tileColor: Colors.white,
+                      leading:
+                          const Icon(Icons.delete_forever, color: Colors.red),
+                      title: const Text(
+                        'データの削除',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                      subtitle: const Text('すべてのデータを削除'),
+                      onTap: () => _handleDeleteData(context, ref, hid),
+                      trailing: const Icon(Icons.chevron_right),
                     ),
-                    subtitle: const Text('すべてのデータを削除'),
-                    onTap: () => _handleDeleteData(context, ref, hid),
-                    trailing: const Icon(Icons.chevron_right),
-                  ),
-                  const Divider(height: 0),
-                  const SizedBox(height: 24),
+                    const Divider(height: 0),
+                    const SizedBox(height: 24),
+                  ],
                   const Padding(
                     padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
                     child: Align(
