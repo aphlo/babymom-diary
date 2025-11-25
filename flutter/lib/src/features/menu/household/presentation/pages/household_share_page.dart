@@ -233,6 +233,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
     return Card(
       margin: const EdgeInsets.only(top: 8),
       child: ListTile(
+        contentPadding: const EdgeInsets.only(left: 16, right: 8),
         leading: CircleAvatar(
           backgroundColor: AppColors.primary,
           child: Text(
@@ -425,7 +426,12 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('メンバーを削除'),
+        title: Text(
+          'メンバーを削除',
+          style: Theme.of(dialogContext).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
         content: Text('${member.displayName}さんを世帯から削除しますか？'),
         actions: [
           TextButton(
