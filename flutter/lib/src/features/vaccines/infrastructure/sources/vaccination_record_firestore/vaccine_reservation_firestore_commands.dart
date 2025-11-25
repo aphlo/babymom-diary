@@ -170,11 +170,14 @@ class VaccineReservationFirestoreCommands {
             );
           }
 
+          // 現在のステータスを保持して日付のみ更新
+          final currentStatus = existingDose.status.name;
+
           final updatedDoses = Map<String, DoseEntryDto>.from(recordDto.doses);
           updatedDoses[doseId] = _ctx.createDoseEntryFromRecordType(
             doseId: doseId,
             dateUtc: scheduledDateUtc,
-            recordType: 'scheduled',
+            recordType: currentStatus,
             reservationGroupId: existingDose.reservationGroupId,
           );
 

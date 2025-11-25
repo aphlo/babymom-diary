@@ -152,11 +152,11 @@ class ReservationGroupFirestoreCommands {
             groupDto,
           );
 
+          // グループのscheduledDateのみを更新（statusは変更しない）
           transaction.update(
             refs.reservationGroupDoc(reservationGroupId),
             <String, dynamic>{
               'scheduledDate': Timestamp.fromDate(scheduledDateUtc),
-              'status': 'scheduled',
               'updatedAt': Timestamp.fromDate(nowUtc),
             },
           );
@@ -176,13 +176,17 @@ class ReservationGroupFirestoreCommands {
               groupId: reservationGroupId,
             );
 
+            // 現在のdoseのステータスを取得して保持
+            final existingDose = recordDto.doses[memberRecord.doseId];
+            final currentStatus = existingDose?.status.name ?? 'scheduled';
+
             final updatedDoses =
                 Map<String, DoseEntryDto>.from(recordDto.doses);
             updatedDoses[memberRecord.doseId] =
                 _ctx.createDoseEntryFromRecordType(
               doseId: memberRecord.doseId,
               dateUtc: scheduledDateUtc,
-              recordType: 'scheduled',
+              recordType: currentStatus,
               reservationGroupId: reservationGroupId,
             );
 
