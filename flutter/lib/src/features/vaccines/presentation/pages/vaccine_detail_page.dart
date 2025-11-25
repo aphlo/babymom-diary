@@ -10,7 +10,6 @@ import '../../domain/entities/dose_record.dart';
 import '../controllers/vaccine_detail_interactions.dart';
 import '../models/vaccine_detail_callbacks.dart';
 import '../models/vaccine_info.dart';
-import '../viewmodels/vaccine_detail_state.dart';
 import '../viewmodels/vaccine_detail_view_model.dart';
 import '../widgets/influenza_dose_reservation_board.dart';
 import '../widgets/scheduled_dose_bottom_sheet.dart';

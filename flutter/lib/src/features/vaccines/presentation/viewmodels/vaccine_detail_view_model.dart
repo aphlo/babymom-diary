@@ -16,6 +16,8 @@ import '../../domain/value_objects/vaccination_recommendation.dart';
 import '../../application/vaccine_catalog_providers.dart';
 import 'vaccine_detail_state.dart';
 
+export 'vaccine_detail_state.dart';
+
 class VaccineDetailViewModel extends StateNotifier<VaccineDetailState> {
   VaccineDetailViewModel({
     required WatchVaccinationRecord watchVaccinationRecord,
@@ -656,48 +658,3 @@ final vaccineDetailViewModelProvider = StateNotifierProvider.autoDispose
     return viewModel;
   },
 );
-
-class VaccineDetailParams {
-  const VaccineDetailParams({
-    required this.vaccineId,
-    required this.doseNumbers,
-    required this.householdId,
-    required this.childId,
-    required this.childBirthday,
-  });
-
-  final String vaccineId;
-  final List<int> doseNumbers;
-  final String householdId;
-  final String childId;
-  final DateTime? childBirthday;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is VaccineDetailParams &&
-          runtimeType == other.runtimeType &&
-          vaccineId == other.vaccineId &&
-          householdId == other.householdId &&
-          childId == other.childId &&
-          _listEquals(doseNumbers, other.doseNumbers) &&
-          childBirthday == other.childBirthday;
-
-  @override
-  int get hashCode => Object.hash(
-        vaccineId,
-        householdId,
-        childId,
-        Object.hashAll(doseNumbers),
-        childBirthday,
-      );
-
-  bool _listEquals(List<int> a, List<int> b) {
-    if (identical(a, b)) return true;
-    if (a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
-}

@@ -168,3 +168,25 @@ class VaccineReservationState {
         'recordType: $recordType)';
   }
 }
+
+// Parameters class
+class VaccineReservationParams {
+  const VaccineReservationParams({
+    required this.vaccine,
+    required this.doseNumber,
+  });
+
+  final VaccineInfo vaccine;
+  final int doseNumber;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VaccineReservationParams &&
+          runtimeType == other.runtimeType &&
+          vaccine == other.vaccine &&
+          doseNumber == other.doseNumber;
+
+  @override
+  int get hashCode => vaccine.hashCode ^ doseNumber.hashCode;
+}

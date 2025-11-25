@@ -9,7 +9,6 @@ import '../../../menu/children/application/selected_child_provider.dart';
 import '../../application/vaccine_catalog_providers.dart';
 import '../../domain/entities/dose_record.dart';
 import '../models/vaccine_info.dart';
-import '../viewmodels/vaccine_detail_state.dart';
 import '../viewmodels/vaccine_detail_view_model.dart';
 import '../widgets/vaccine_header.dart';
 import '../widgets/concurrent_vaccines_card.dart';

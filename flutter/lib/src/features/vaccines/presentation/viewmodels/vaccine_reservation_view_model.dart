@@ -14,6 +14,8 @@ import '../../domain/errors/vaccination_persistence_exception.dart';
 import '../models/vaccine_info.dart';
 import 'vaccine_reservation_state.dart';
 
+export 'vaccine_reservation_state.dart';
+
 // HouseholdServiceのプロバイダー
 final householdServiceProvider = Provider<HouseholdService>((ref) {
   return HouseholdService(
@@ -253,25 +255,3 @@ final vaccineReservationViewModelProvider = StateNotifierProvider.autoDispose
     return viewModel;
   },
 );
-
-// Parameters class
-class VaccineReservationParams {
-  const VaccineReservationParams({
-    required this.vaccine,
-    required this.doseNumber,
-  });
-
-  final VaccineInfo vaccine;
-  final int doseNumber;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is VaccineReservationParams &&
-          runtimeType == other.runtimeType &&
-          vaccine == other.vaccine &&
-          doseNumber == other.doseNumber;
-
-  @override
-  int get hashCode => vaccine.hashCode ^ doseNumber.hashCode;
-}
