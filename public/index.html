@@ -1,89 +1,465 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+    <title>milu - 赤ちゃんをmilu あなたをmilu</title>
+    <meta name="description" content="miluだけで育児がまとまる。授乳も成長曲線も予防接種もまとめて管理できる育児記録アプリです。">
+    <meta name="theme-color" content="#FF8FA3">
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/12.6.0/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/12.6.0/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/12.6.0/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/12.6.0/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/12.6.0/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/12.6.0/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/12.6.0/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/12.6.0/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/12.6.0/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/12.6.0/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+    <!-- OGP -->
+    <meta property="og:title" content="milu - 赤ちゃんをmilu あなたをmilu">
+    <meta property="og:description" content="miluだけで育児がまとまる。授乳も成長曲線も予防接種もまとめて管理できる育児記録アプリです。">
+    <meta property="og:type" content="website">
 
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #FF8FA3;
+        --primary-dark: #E57A8C;
+        --text: #333333;
+        --text-light: #666666;
+        --bg-light: #FFF5F7;
+        --white: #FFFFFF;
+      }
+
+      body {
+        font-family: 'Noto Sans JP', sans-serif;
+        color: var(--text);
+        line-height: 1.8;
+        background: var(--white);
+      }
+
+      /* Header */
+      header {
+        background: var(--white);
+        padding: 16px 24px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+
+      .header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--primary);
+        text-decoration: none;
+      }
+
+      /* Hero Section */
+      .hero {
+        background: linear-gradient(135deg, var(--bg-light) 0%, var(--white) 100%);
+        padding: 140px 24px 80px;
+        text-align: center;
+      }
+
+      .hero-content {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .hero-tagline {
+        font-size: 18px;
+        color: var(--primary);
+        font-weight: 500;
+        margin-bottom: 16px;
+      }
+
+      .hero-title {
+        font-size: 42px;
+        font-weight: 700;
+        line-height: 1.4;
+        margin-bottom: 24px;
+        color: var(--text);
+      }
+
+      .hero-title span {
+        color: var(--primary);
+      }
+
+      .hero-description {
+        font-size: 18px;
+        color: var(--text-light);
+        margin-bottom: 40px;
+      }
+
+      .store-buttons {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .store-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--text);
+        color: var(--white);
+        padding: 14px 28px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .store-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      }
+
+      .store-button svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+      }
+
+      /* Features Section */
+      .features {
+        padding: 100px 24px;
+        background: var(--white);
+      }
+
+      .section-title {
+        text-align: center;
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 60px;
+        color: var(--text);
+      }
+
+      .section-title span {
+        color: var(--primary);
+      }
+
+      .features-grid {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 40px;
+      }
+
+      .feature-card {
+        background: var(--bg-light);
+        border-radius: 24px;
+        padding: 40px 32px;
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(255, 143, 163, 0.2);
+      }
+
+      .feature-icon {
+        width: 72px;
+        height: 72px;
+        background: var(--primary);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+        font-size: 32px;
+      }
+
+      .feature-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: var(--text);
+      }
+
+      .feature-description {
+        font-size: 15px;
+        color: var(--text-light);
+        line-height: 1.8;
+      }
+
+      /* Benefits Section */
+      .benefits {
+        padding: 100px 24px;
+        background: var(--bg-light);
+      }
+
+      .benefits-list {
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+      }
+
+      .benefit-item {
+        background: var(--white);
+        border-radius: 20px;
+        padding: 32px 40px;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+      }
+
+      .benefit-number {
+        width: 48px;
+        height: 48px;
+        background: var(--primary);
+        color: var(--white);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .benefit-text {
+        font-size: 18px;
+        font-weight: 500;
+        color: var(--text);
+      }
+
+      /* CTA Section */
+      .cta {
+        padding: 100px 24px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        text-align: center;
+        color: var(--white);
+      }
+
+      .cta-title {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 16px;
+      }
+
+      .cta-description {
+        font-size: 18px;
+        margin-bottom: 40px;
+        opacity: 0.9;
+      }
+
+      .cta .store-buttons {
+        justify-content: center;
+      }
+
+      .cta .store-button {
+        background: var(--white);
+        color: var(--text);
+      }
+
+      /* Footer */
+      footer {
+        background: var(--text);
+        color: var(--white);
+        padding: 40px 24px;
+        text-align: center;
+      }
+
+      .footer-logo {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 16px;
+      }
+
+      .footer-text {
+        font-size: 14px;
+        opacity: 0.7;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .hero {
+          padding: 120px 20px 60px;
+        }
+
+        .hero-title {
+          font-size: 28px;
+        }
+
+        .hero-description {
+          font-size: 16px;
+        }
+
+        .section-title {
+          font-size: 24px;
+        }
+
+        .feature-card {
+          padding: 32px 24px;
+        }
+
+        .benefit-item {
+          padding: 24px;
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .cta-title {
+          font-size: 24px;
+        }
       }
     </style>
   </head>
   <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
-    </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
+    <!-- Header -->
+    <header>
+      <div class="header-content">
+        <a href="/" class="logo">milu</a>
+      </div>
+    </header>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <p class="hero-tagline">赤ちゃんをmilu あなたをmilu</p>
+        <h1 class="hero-title">
+          <span>milu</span>だけで<br>育児がまとまる
+        </h1>
+        <p class="hero-description">
+          授乳も成長曲線も予防接種も、まとめて管理。<br>
+          忙しい毎日の育児をシンプルにサポートします。
+        </p>
+        <div class="store-buttons">
+          <a href="https://apps.apple.com/jp/app/milu-%E8%B5%A4%E3%81%A1%E3%82%83%E3%82%93%E3%81%AE%E6%8E%88%E4%B9%B3%E8%A8%98%E9%8C%B2%E3%81%A8%E4%BA%88%E9%98%B2%E6%8E%A5%E7%A8%AE%E7%AE%A1%E7%90%86/id6754955821?l=en-US" class="store-button">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+            </svg>
+            App Store
+          </a>
+          <a href="#" class="store-button">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+            </svg>
+            Google Play
+          </a>
+        </div>
+      </div>
+    </section>
 
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
-        }
-      });
-    </script>
+    <!-- Features Section -->
+    <section class="features">
+      <h2 class="section-title"><span>milu</span>の特徴</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">&#x1F37C;</div>
+          <h3 class="feature-title">授乳・ミルク記録</h3>
+          <p class="feature-description">
+            授乳時間やミルクの量をワンタップで簡単記録。
+            毎日の授乳リズムが一目でわかります。
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#x1F4C8;</div>
+          <h3 class="feature-title">成長曲線</h3>
+          <p class="feature-description">
+            身長・体重を記録して成長曲線をチェック。
+            お子さまの成長を可視化できます。
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#x1F489;</div>
+          <h3 class="feature-title">予防接種管理</h3>
+          <p class="feature-description">
+            複雑な予防接種スケジュールを自動で管理。
+            接種漏れを防いで安心です。
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#x1F4C5;</div>
+          <h3 class="feature-title">カレンダー</h3>
+          <p class="feature-description">
+            予防接種の日程や行事をカレンダーで一括管理。
+            大切な予定を見逃しません。
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#x1F46A;</div>
+          <h3 class="feature-title">パートナー共有</h3>
+          <p class="feature-description">
+            パートナーと育児を共有できる。
+            二人で協力して育児に取り組めます。
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#x2728;</div>
+          <h3 class="feature-title">シンプル設計</h3>
+          <p class="feature-description">
+            忙しい育児中でも迷わず使える。
+            シンプルで直感的なデザインです。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="benefits">
+      <h2 class="section-title"><span>milu</span>でできること</h2>
+      <div class="benefits-list">
+        <div class="benefit-item">
+          <div class="benefit-number">1</div>
+          <p class="benefit-text">授乳も成長曲線も予防接種もまとめて管理</p>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-number">2</div>
+          <p class="benefit-text">予防接種の日程や行事はカレンダーで一括管理</p>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-number">3</div>
+          <p class="benefit-text">パートナーと育児を共有できる</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+      <h2 class="cta-title">今すぐmiluをはじめよう</h2>
+      <p class="cta-description">無料でダウンロードして、育児をもっとシンプルに。</p>
+      <div class="store-buttons">
+        <a href="https://apps.apple.com/jp/app/milu-%E8%B5%A4%E3%81%A1%E3%82%83%E3%82%93%E3%81%AE%E6%8E%88%E4%B9%B3%E8%A8%98%E9%8C%B2%E3%81%A8%E4%BA%88%E9%98%B2%E6%8E%A5%E7%A8%AE%E7%AE%A1%E7%90%86/id6754955821?l=en-US" class="store-button">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+          </svg>
+          App Store
+        </a>
+        <a href="#" class="store-button">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+          </svg>
+          Google Play
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-logo">milu</div>
+      <p class="footer-text">&copy; 2025 aphlo All rights reserved.</p>
+    </footer>
   </body>
 </html>
