@@ -3,7 +3,6 @@ import 'package:meta/meta.dart';
 
 import '../../application/usecases/get_reservation_group.dart';
 import '../../application/usecases/get_vaccine_by_id.dart';
-import '../../domain/entities/dose_record.dart';
 import '../../domain/entities/reservation_group.dart';
 import '../../domain/repositories/vaccination_record_repository.dart';
 import '../../application/vaccine_catalog_providers.dart';
@@ -103,16 +102,15 @@ class ConcurrentVaccinesViewModel
         final vaccine = await _getVaccineById(member.vaccineId);
         final displayName = vaccine?.name ?? member.vaccineId;
 
-        // VaccinationRecordを取得してdoseNumberとステータスを確認
+        // VaccinationRecordを取得してdoseNumberを確認
         final record = await _vaccinationRecordRepository.getVaccinationRecord(
           householdId: householdId,
           childId: childId,
           vaccineId: member.vaccineId,
         );
 
-        // doseIdから実際のdoseNumberとステータスを取得
+        // doseIdから実際のdoseNumberを取得
         int doseNumber = 1; // デフォルト値
-        DoseStatus? doseStatus;
         if (record != null) {
           final orderedDoses = record.orderedDoses;
           final doseIndex = orderedDoses.indexWhere(
@@ -120,13 +118,7 @@ class ConcurrentVaccinesViewModel
           );
           if (doseIndex != -1) {
             doseNumber = doseIndex + 1; // 1-based indexing
-            doseStatus = orderedDoses[doseIndex].status;
           }
-        }
-
-        // 接種済み（completed）のワクチンは除外
-        if (doseStatus == DoseStatus.completed) {
-          continue;
         }
 
         resolvedMembers.add(ConcurrentVaccineMember(

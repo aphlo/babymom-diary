@@ -11,9 +11,9 @@ import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_state.dart';
 import '../viewmodels/vaccine_detail_view_model.dart';
 import '../widgets/vaccine_header.dart';
+import '../widgets/concurrent_vaccines_card.dart';
 import '../widgets/concurrent_vaccines_reschedule_dialog.dart';
 import '../widgets/vaccine_error_dialog.dart';
-import '../viewmodels/concurrent_vaccines_view_model.dart';
 import '../../domain/errors/vaccination_persistence_exception.dart';
 
 class VaccineReschedulePage extends ConsumerStatefulWidget {
@@ -80,10 +80,10 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
                     },
                   ),
                   const SizedBox(height: 24),
-                  _ConcurrentVaccinesCard(
+                  ConcurrentVaccinesCard(
                     vaccine: widget.vaccine,
                     doseNumber: widget.doseNumber,
-                    statusInfo: widget.statusInfo,
+                    reservationGroupId: widget.statusInfo.reservationGroupId,
                   ),
                 ],
               ),
@@ -399,172 +399,6 @@ class _DateSelectionCard extends StatelessWidget {
       },
       currentTime: initialDate,
       locale: LocaleType.jp,
-    );
-  }
-}
-
-class _ConcurrentVaccinesCard extends ConsumerWidget {
-  const _ConcurrentVaccinesCard({
-    required this.vaccine,
-    required this.doseNumber,
-    required this.statusInfo,
-  });
-
-  final VaccineInfo vaccine;
-  final int doseNumber;
-  final DoseStatusInfo statusInfo;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final householdId = ref.read(currentHouseholdIdProvider).value;
-    final childId = ref.read(selectedChildControllerProvider).value;
-
-    // 予約グループIDがない場合は同時接種ワクチンなし
-    final groupId = statusInfo.reservationGroupId;
-    if (groupId == null || householdId == null || childId == null) {
-      return _buildEmptyCard(theme);
-    }
-
-    final params = ConcurrentVaccinesParams(
-      householdId: householdId,
-      childId: childId,
-      reservationGroupId: groupId,
-      currentVaccineId: vaccine.id,
-      currentDoseId: 'dose_$doseNumber', // doseNumberからdoseIdに変換
-    );
-
-    final state = ref.watch(concurrentVaccinesViewModelProvider(params));
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            offset: Offset(0, 8),
-            blurRadius: 20,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.vaccines,
-                color: AppColors.primary,
-                size: 24,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                '同時接種するワクチン',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (state.isLoading)
-            const Center(child: CircularProgressIndicator())
-          else if (state.error != null)
-            Text(
-              state.error!,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.red.shade600,
-              ),
-            )
-          else if (state.members.isEmpty)
-            Text(
-              '同時接種するワクチンはありません',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade600,
-              ),
-            )
-          else
-            Column(
-              children: state.members.map((member) {
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.vaccines_outlined,
-                        color: AppColors.primary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '${member.vaccineName} ${member.doseNumber}回目',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyCard(ThemeData theme) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            offset: Offset(0, 8),
-            blurRadius: 20,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.vaccines,
-                color: AppColors.primary,
-                size: 24,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                '同時接種するワクチン',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '同時接種するワクチンはありません',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.grey.shade600,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
