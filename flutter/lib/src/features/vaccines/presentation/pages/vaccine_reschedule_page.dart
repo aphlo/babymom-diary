@@ -98,6 +98,8 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
             child: ElevatedButton(
               onPressed: canSubmit ? () => _updateSchedule(context) : null,
               style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
               child: _isLoading
