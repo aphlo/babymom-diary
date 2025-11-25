@@ -27,45 +27,37 @@ class HouseholdService {
   }
 
   // Find an existing household where current user is a member
+  // Uses users/{uid} document to determine household membership (no collectionGroup query)
   Future<String?> findExistingHouseholdForCurrentUser() async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return null;
-    final userSnap = await _ensureUserDocument(uid);
-    final activeHouseholdId = userSnap.data()?['activeHouseholdId'] as String?;
-    if (activeHouseholdId != null) {
-      final membershipRef = _db
-          .collection('households')
-          .doc(activeHouseholdId)
-          .collection('members')
-          .doc(uid);
-      final membershipSnapshot = await membershipRef.get();
-      if (membershipSnapshot.exists) {
-        return activeHouseholdId;
-      }
-    }
 
-    final membershipSnapshot = await _db
-        .collectionGroup('members')
-        .where('uid', isEqualTo: uid)
-        .limit(1)
-        .get()
-        .catchError((e, _) {
-      throw Exception('Membership query failed for uid=$uid: $e');
-    });
-    if (membershipSnapshot.docs.isEmpty) {
-      if (activeHouseholdId != null) {
-        await _clearActiveHousehold(uid);
-      }
+    final userSnap = await _ensureUserDocument(uid);
+    final userData = userSnap.data();
+
+    final activeHouseholdId = userData?['activeHouseholdId'] as String?;
+    final membershipType = userData?['membershipType'] as String?;
+
+    // No household info stored - user needs to create or join a household
+    if (activeHouseholdId == null || membershipType == null) {
       return null;
     }
-    final doc = membershipSnapshot.docs.first;
-    final hid = doc.reference.parent.parent!.id;
-    await _setActiveHousehold(
-      uid: uid,
-      householdId: hid,
-      membershipType: 'member',
-    );
-    return hid;
+
+    // Verify the household still exists and user is still a member
+    final membershipRef = _db
+        .collection('households')
+        .doc(activeHouseholdId)
+        .collection('members')
+        .doc(uid);
+    final membershipSnapshot = await membershipRef.get();
+
+    if (membershipSnapshot.exists) {
+      return activeHouseholdId;
+    }
+
+    // Membership no longer valid - clear the stored data
+    await _clearActiveHousehold(uid);
+    return null;
   }
 
   // Create a new household and add current user as admin member
@@ -92,6 +84,7 @@ class HouseholdService {
     try {
       await mRef.set({
         'role': 'admin',
+        'displayName': '管理者',
         'joinedAt': FieldValue.serverTimestamp(),
         'joinToken': null,
         'uid': uid,
@@ -169,6 +162,17 @@ class HouseholdService {
       throw Exception('Failed to update ${userRef.path}: $e');
     });
   }
+
+  // Get membership type for current user
+  Future<String?> getMembershipType() async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return null;
+
+    final userSnap = await _userRef(uid).get();
+    if (!userSnap.exists) return null;
+
+    return userSnap.data()?['membershipType'] as String?;
+  }
 }
 
 // Household id provider: ensures household membership exists
@@ -182,4 +186,9 @@ final householdServiceProvider = Provider<HouseholdService>((ref) {
 final currentHouseholdIdProvider = FutureProvider<String>((ref) async {
   final svc = ref.watch(householdServiceProvider);
   return svc.ensureHousehold();
+});
+
+final currentMembershipTypeProvider = FutureProvider<String?>((ref) async {
+  final svc = ref.watch(householdServiceProvider);
+  return svc.getMembershipType();
 });

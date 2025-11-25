@@ -81,7 +81,7 @@ class MenuPage extends ConsumerWidget {
                     tileColor: Colors.white,
                     leading: const Icon(Icons.group_add),
                     title: const Text('世帯の共有'),
-                    subtitle: const Text('招待コードの発行 / コードで参加'),
+                    subtitle: const Text('世帯の共有 / 世帯への参加'),
                     onTap: () => context.push('/household/share'),
                     trailing: const Icon(Icons.chevron_right),
                   ),

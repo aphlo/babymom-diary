@@ -7,11 +7,15 @@ class AcceptInvitation {
 
   final FirebaseFunctions _functions;
 
-  Future<String> call(String invitationCode) async {
+  Future<String> call({
+    required String householdId,
+    required String displayName,
+  }) async {
     try {
       final callable = _functions.httpsCallable('accept-invitation');
       final result = await callable.call<Map<String, dynamic>>({
-        'code': invitationCode.trim().toUpperCase(),
+        'householdId': householdId.trim(),
+        'displayName': displayName.trim(),
       });
 
       final data = result.data;
@@ -27,7 +31,7 @@ class AcceptInvitation {
         case 'already-exists':
           throw const AlreadyMemberException();
         case 'failed-precondition':
-          throw const InvitationExpiredException();
+          throw InvitationAcceptException(e.message ?? '世帯への参加に失敗しました');
         case 'invalid-argument':
           throw InvitationAcceptException(e.message);
         case 'unauthenticated':
