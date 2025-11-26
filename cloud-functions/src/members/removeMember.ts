@@ -99,7 +99,7 @@ export const removeMember = functions
               memberUserRef,
               {
                 activeHouseholdId: originalHouseholdId,
-                membershipType: "owner",
+                role: "admin",
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
               },
               { merge: true }
@@ -111,7 +111,7 @@ export const removeMember = functions
               memberUserRef,
               {
                 activeHouseholdId: admin.firestore.FieldValue.delete(),
-                membershipType: admin.firestore.FieldValue.delete(),
+                role: admin.firestore.FieldValue.delete(),
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
               },
               { merge: true }
