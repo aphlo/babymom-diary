@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../analytics/analytics_service.dart';
 import '../../features/child_record/presentation/pages/record_table_page.dart';
 import '../../features/child_record/presentation/pages/growth_chart_settings_page.dart';
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
@@ -39,10 +40,12 @@ final _shellNavigatorKeyMenu =
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final hasCompletedOnboarding = ref.watch(onboardingStatusProvider);
+  final analyticsService = ref.watch(analyticsServiceProvider);
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/baby',
+    observers: [analyticsService.observer],
     redirect: (context, state) {
       final isOnboardingRoute = state.uri.path.startsWith('/onboarding');
 

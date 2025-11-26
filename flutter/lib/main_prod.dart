@@ -15,5 +15,5 @@ Future<void> main() async {
   // AdMob SDK初期化（ATT許可は後で最初の画面から呼ぶ）
   await AdMobService.initializeMobileAds();
 
-  await runBabymomDiaryApp(appTitle: 'milu');
+  await runBabymomDiaryApp(appTitle: 'milu', enableAnalytics: true);
 }

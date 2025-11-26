@@ -15,9 +15,11 @@ import 'package:babymom_diary/src/features/menu/children/application/children_lo
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
+import 'package:babymom_diary/src/core/analytics/analytics_service.dart';
 
 Future<void> runBabymomDiaryApp({
   required String appTitle,
+  bool enableAnalytics = false,
 }) async {
   await FirebaseAuth.instance.signInAnonymously();
 
@@ -51,6 +53,7 @@ Future<void> runBabymomDiaryApp({
             initialSnapshot,
           );
         }),
+        analyticsEnabledProvider.overrideWithValue(enableAnalytics),
       ],
       child: App(
         appTitle: appTitle,
