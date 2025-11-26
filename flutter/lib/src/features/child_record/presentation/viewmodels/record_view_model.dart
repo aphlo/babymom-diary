@@ -145,24 +145,32 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     _ref.listen<AsyncValue<String?>>(
       selectedChildControllerProvider,
       (previous, next) {
+        // loading状態の場合は何もしない（_loadInitialDataが処理する）
+        if (next.isLoading) {
+          return;
+        }
         final newId = next.valueOrNull;
-        if (newId == state.selectedChildId) {
+        // 前回もdata状態で、値が同じ場合はスキップ
+        final previousWasData = previous != null && !previous.isLoading;
+        if (previousWasData && newId == state.selectedChildId) {
           return;
         }
         state = state.copyWith(
           selectedChildId: newId,
           pendingUiEvent: null,
         );
-        final hid = state.householdId;
-        if (hid == null) {
-          return;
-        }
+        // 子供IDがnullの場合は空リストを設定（householdIdに関係なく）
         if (newId == null || newId.isEmpty) {
           _recordsSubscription?.cancel();
           state = state.copyWith(
             recordsAsync: const AsyncValue<List<RecordItemModel>>.data(
                 <RecordItemModel>[]),
           );
+          return;
+        }
+        final hid = state.householdId;
+        if (hid == null) {
+          // householdIdがまだ設定されていない場合は、_loadInitialDataが処理する
           return;
         }
         _subscribeToRecords(

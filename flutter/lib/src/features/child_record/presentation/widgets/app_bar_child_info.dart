@@ -52,6 +52,10 @@ class AppBarChildInfo extends ConsumerWidget {
             ref
                 .read(childrenLocalProvider(hid).notifier)
                 .replaceChildren(children);
+            // 子どもリストが空になった場合、スナップショットもクリアする
+            if (children.isEmpty) {
+              snapshotNotifier.save(null);
+            }
           });
         });
 
@@ -103,37 +107,28 @@ class AppBarChildInfo extends ConsumerWidget {
           );
         }
 
-        final localChildren = localChildrenState.value;
+        // ストリームでデータを受信済みの場合、それを優先（空リストも含む）
+        final streamValue = streamChildren.valueOrNull;
+        if (streamValue != null) {
+          return buildWithChildren(streamValue);
+        }
+
+        // ストリームがまだロード中の場合、ローカルキャッシュを使用
+        final localChildren = localChildrenState.valueOrNull;
         if (localChildren != null && localChildren.isNotEmpty) {
           return buildWithChildren(localChildren);
         }
 
-        final streamValue = streamChildren.value;
-        if (streamValue != null && streamValue.isNotEmpty) {
-          return buildWithChildren(streamValue);
-        }
-
-        final snapshotValue = snapshotState.value;
+        // ローカルキャッシュも空の場合、スナップショットを使用
+        final snapshotValue = snapshotState.valueOrNull;
         if (snapshotValue != null) {
           return buildWithChildren([snapshotValue]);
         }
 
-        final streamEmptyLoaded = streamChildren.maybeWhen(
-            data: (value) => value.isEmpty, orElse: () => false);
-        final streamHasValue = streamChildren is AsyncData<List<ChildSummary>>;
+        // ローカルキャッシュが空リストをロード済みの場合
         final localEmptyLoaded = localChildrenState.maybeWhen(
             data: (value) => value.isEmpty, orElse: () => false);
-        final localHasValue =
-            localChildrenState is AsyncData<List<ChildSummary>>;
-
-        if (streamHasValue && streamEmptyLoaded) {
-          return const Text(
-            '子ども未登録',
-            style: TextStyle(fontSize: 10),
-          );
-        }
-
-        if (localHasValue && localEmptyLoaded && !streamChildren.isLoading) {
+        if (localEmptyLoaded) {
           return const Text(
             '子ども未登録',
             style: TextStyle(fontSize: 10),
