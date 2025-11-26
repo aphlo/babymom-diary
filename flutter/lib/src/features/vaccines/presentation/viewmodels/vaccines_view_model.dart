@@ -10,6 +10,7 @@ import 'package:babymom_diary/src/features/vaccines/application/usecases/watch_v
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
+import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
 import 'package:babymom_diary/src/features/menu/household/domain/repositories/vaccine_visibility_settings_repository.dart';
 import 'package:babymom_diary/src/features/menu/household/infrastructure/repositories/vaccine_visibility_settings_repository_impl.dart';
 import 'package:babymom_diary/src/features/menu/household/infrastructure/sources/vaccine_visibility_settings_firestore_data_source.dart';
@@ -25,68 +26,133 @@ final _vaccineVisibilitySettingsRepositoryProvider =
   return VaccineVisibilitySettingsRepositoryImpl(dataSource: dataSource);
 });
 
-final vaccinesViewModelProvider = AutoDisposeStateNotifierProvider<
-    VaccinesViewModel, AsyncValue<VaccinesViewData>>((ref) {
-  final getGuideline = ref.watch(getVaccineGuidelineProvider);
-  final watchVaccinationRecords = ref.watch(watchVaccinationRecordsProvider);
-  final visibilitySettingsRepository =
-      ref.watch(_vaccineVisibilitySettingsRepositoryProvider);
-  final String? householdId = ref.watch(currentHouseholdIdProvider).value;
-  final String? childId = ref.watch(selectedChildControllerProvider).value;
-
-  // 選択された子どもの情報を取得
-  final selectedChildSnapshot = householdId != null
-      ? ref.watch(selectedChildSnapshotProvider(householdId)).value
-      : null;
-
-  final viewModel = VaccinesViewModel(
-    getGuideline: getGuideline,
-    watchVaccinationRecords: watchVaccinationRecords,
-    visibilitySettingsRepository: visibilitySettingsRepository,
-    householdId: householdId,
-    childId: childId,
-    childBirthday: selectedChildSnapshot?.birthday,
-  );
-  viewModel.initialize();
+final vaccinesViewModelProvider =
+    StateNotifierProvider<VaccinesViewModel, AsyncValue<VaccinesViewData>>(
+        (ref) {
+  final viewModel = VaccinesViewModel(ref);
   return viewModel;
 });
 
 class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
-  VaccinesViewModel({
-    required GetVaccineMaster getGuideline,
-    required WatchVaccinationRecords watchVaccinationRecords,
-    required VaccineVisibilitySettingsRepository visibilitySettingsRepository,
-    this.householdId,
-    this.childId,
-    this.childBirthday,
-  })  : _getGuideline = getGuideline,
-        _watchVaccinationRecords = watchVaccinationRecords,
-        _visibilitySettingsRepository = visibilitySettingsRepository,
-        super(const AsyncValue.loading());
+  VaccinesViewModel(this._ref) : super(const AsyncValue.loading()) {
+    _initialize();
+  }
 
-  final GetVaccineMaster _getGuideline;
-  final WatchVaccinationRecords _watchVaccinationRecords;
-  final VaccineVisibilitySettingsRepository _visibilitySettingsRepository;
-  final String? householdId;
-  final String? childId;
-  final DateTime? childBirthday;
+  final Ref _ref;
+
+  GetVaccineMaster get _getGuideline => _ref.read(getVaccineGuidelineProvider);
+  WatchVaccinationRecords get _watchVaccinationRecords =>
+      _ref.read(watchVaccinationRecordsProvider);
+  VaccineVisibilitySettingsRepository get _visibilitySettingsRepository =>
+      _ref.read(_vaccineVisibilitySettingsRepositoryProvider);
+
+  String? _householdId;
+  String? _childId;
+  DateTime? _childBirthday;
 
   StreamSubscription<List<VaccinationRecord>>? _recordSubscription;
   VaccineMaster? _guideline;
   List<VaccinationRecord> _records = const <VaccinationRecord>[];
-  bool _initialized = false;
 
-  void initialize() {
-    if (_initialized) {
+  void _initialize() {
+    _listenToHouseholdChange();
+    _listenToSelectedChild();
+    unawaited(_loadInitialData());
+  }
+
+  void _listenToHouseholdChange() {
+    _ref.listen<AsyncValue<String>>(
+      currentHouseholdIdProvider,
+      (previous, next) {
+        if (!mounted) return;
+        final newHouseholdId = next.valueOrNull;
+        final previousHouseholdId = previous?.valueOrNull;
+
+        if (newHouseholdId != previousHouseholdId) {
+          _householdId = newHouseholdId;
+          // 世帯が変わった場合、レコード購読を再設定
+          _recordSubscription?.cancel();
+          _records = const <VaccinationRecord>[];
+          if (_householdId != null && _childId != null) {
+            _subscribeToRecords();
+          }
+          _emitViewData();
+        }
+      },
+    );
+  }
+
+  void _listenToSelectedChild() {
+    _ref.listen<AsyncValue<String?>>(
+      selectedChildControllerProvider,
+      (previous, next) {
+        if (!mounted) return;
+        // loading状態の場合はスキップ
+        if (next.isLoading) return;
+
+        final newChildId = next.valueOrNull;
+        if (newChildId == _childId) return;
+
+        _childId = newChildId;
+        _recordSubscription?.cancel();
+        _records = const <VaccinationRecord>[];
+
+        // 子供の誕生日を更新
+        _updateChildBirthday();
+
+        if (_householdId != null && _childId != null) {
+          _subscribeToRecords();
+        }
+        _emitViewData();
+      },
+      fireImmediately: true,
+    );
+  }
+
+  void _updateChildBirthday() {
+    if (_householdId == null) {
+      _childBirthday = null;
       return;
     }
-    _initialized = true;
-    _loadGuideline();
-    _subscribeToRecordsIfAvailable();
+    final snapshotAsync =
+        _ref.read(selectedChildSnapshotProvider(_householdId!));
+    snapshotAsync.whenData((ChildSummary? summary) {
+      if (summary?.id == _childId) {
+        _childBirthday = summary?.birthday;
+      } else {
+        _childBirthday = null;
+      }
+    });
+  }
+
+  Future<void> _loadInitialData() async {
+    try {
+      final householdId = await _ref.read(currentHouseholdIdProvider.future);
+      if (!mounted) return;
+      _householdId = householdId;
+
+      // 選択された子供を取得
+      final childId = await _ref.read(selectedChildControllerProvider.future);
+      if (!mounted) return;
+      _childId = childId;
+
+      // 子供の誕生日を取得
+      _updateChildBirthday();
+
+      // ガイドラインをロード
+      await _loadGuideline();
+
+      // レコードを購読
+      if (_householdId != null && _childId != null) {
+        _subscribeToRecords();
+      }
+    } catch (error, stackTrace) {
+      if (!mounted) return;
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
 
   Future<void> _loadGuideline() async {
-    state = const AsyncValue.loading();
     try {
       final VaccineMaster guideline = await _getGuideline();
       if (!mounted) return;
@@ -98,13 +164,14 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
     }
   }
 
-  void _subscribeToRecordsIfAvailable() {
-    if (householdId == null || childId == null) {
+  void _subscribeToRecords() {
+    _recordSubscription?.cancel();
+    if (_householdId == null || _childId == null) {
       return;
     }
     _recordSubscription = _watchVaccinationRecords(
-      householdId: householdId!,
-      childId: childId!,
+      householdId: _householdId!,
+      childId: _childId!,
     ).listen(
       (List<VaccinationRecord> records) {
         if (!mounted) return;
@@ -132,14 +199,27 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
     final viewData = mapGuidelineToViewData(
       guideline,
       recordsByVaccine: recordMap,
-      childBirthday: childBirthday,
+      childBirthday: _childBirthday,
+    );
+
+    // まず全てのワクチンを表示（フィルタリング前）
+    // これにより、visibility settings取得中でもデータが表示される
+    if (!mounted) return;
+    state = AsyncValue.data(
+      VaccinesViewData(
+        periodLabels: viewData.periodLabels,
+        vaccines: viewData.vaccines,
+        version: viewData.version,
+        publishedAt: viewData.publishedAt,
+        recordsByVaccine: recordMap,
+      ),
     );
 
     // ワクチン表示設定を取得してフィルタリング
-    if (householdId != null) {
+    if (_householdId != null) {
       try {
         final settings = await _visibilitySettingsRepository.getSettings(
-          householdId: householdId!,
+          householdId: _householdId!,
         );
 
         if (!mounted) return;
@@ -159,28 +239,8 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
           ),
         );
       } catch (error) {
-        if (!mounted) return;
-        // フィルタリングに失敗した場合は全てのワクチンを表示
-        state = AsyncValue.data(
-          VaccinesViewData(
-            periodLabels: viewData.periodLabels,
-            vaccines: viewData.vaccines,
-            version: viewData.version,
-            publishedAt: viewData.publishedAt,
-            recordsByVaccine: recordMap,
-          ),
-        );
+        // フィルタリングに失敗しても、既に全ワクチンが表示されているので何もしない
       }
-    } else {
-      state = AsyncValue.data(
-        VaccinesViewData(
-          periodLabels: viewData.periodLabels,
-          vaccines: viewData.vaccines,
-          version: viewData.version,
-          publishedAt: viewData.publishedAt,
-          recordsByVaccine: recordMap,
-        ),
-      );
     }
   }
 

@@ -144,8 +144,23 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
         if (!mounted) {
           return;
         }
-        final summary = next.valueOrNull;
-        _handleChildSummaryChange(summary);
+        next.when(
+          data: (summary) => _handleChildSummaryChange(summary),
+          loading: () {
+            // loading中は何もしない（isLoadingChildはtrueのまま）
+          },
+          error: (error, stackTrace) {
+            // エラーの場合はisLoadingChildをfalseにして、子供なしとして扱う
+            state = state.copyWith(
+              childSummary: null,
+              replaceChildSummary: true,
+              isLoadingChild: false,
+              chartData: const AsyncValue<GrowthChartData>.data(
+                GrowthChartData.empty,
+              ),
+            );
+          },
+        );
       },
       fireImmediately: true,
     );

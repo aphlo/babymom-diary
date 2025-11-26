@@ -132,7 +132,9 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
                   scrollStorageKey: scrollStorageKey,
                   selectedDate: selectedDate,
                 ),
-                if (state.recordsAsync.isLoading || state.isProcessing)
+                if ((state.recordsAsync.isLoading &&
+                        !state.recordsAsync.hasValue) ||
+                    state.isProcessing)
                   const Positioned(
                     right: 16,
                     bottom: 16,
