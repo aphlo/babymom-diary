@@ -60,6 +60,27 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
     unawaited(_loadInitialData());
   }
 
+  /// 選択中の子供のスナップショット（誕生日など）の変更を監視
+  void _listenToChildSnapshot(String householdId) {
+    _ref.listen<AsyncValue<ChildSummary?>>(
+      selectedChildSnapshotProvider(householdId),
+      (previous, next) {
+        if (!mounted) return;
+        next.whenData((summary) {
+          // 選択中の子供の誕生日が変わった場合のみ更新
+          if (summary?.id == _childId) {
+            final newBirthday = summary?.birthday;
+            if (newBirthday != _childBirthday) {
+              _childBirthday = newBirthday;
+              _emitViewData();
+            }
+          }
+        });
+      },
+      fireImmediately: true,
+    );
+  }
+
   void _listenToHouseholdChange() {
     _ref.listen<AsyncValue<String>>(
       currentHouseholdIdProvider,
@@ -73,6 +94,12 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
           // 世帯が変わった場合、レコード購読を再設定
           _recordSubscription?.cancel();
           _records = const <VaccinationRecord>[];
+
+          // 世帯が変わったら、child snapshotのリスナーを再設定
+          if (newHouseholdId != null) {
+            _listenToChildSnapshot(newHouseholdId);
+          }
+
           if (_householdId != null && _childId != null) {
             _subscribeToRecords();
           }
@@ -97,8 +124,9 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
         _recordSubscription?.cancel();
         _records = const <VaccinationRecord>[];
 
-        // 子供の誕生日を更新
-        _updateChildBirthday();
+        // 子供が変わった場合、誕生日をリセット
+        // （実際の誕生日は _listenToChildSnapshot で更新される）
+        _childBirthday = null;
 
         if (_householdId != null && _childId != null) {
           _subscribeToRecords();
@@ -107,22 +135,6 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
       },
       fireImmediately: true,
     );
-  }
-
-  void _updateChildBirthday() {
-    if (_householdId == null) {
-      _childBirthday = null;
-      return;
-    }
-    final snapshotAsync =
-        _ref.read(selectedChildSnapshotProvider(_householdId!));
-    snapshotAsync.whenData((ChildSummary? summary) {
-      if (summary?.id == _childId) {
-        _childBirthday = summary?.birthday;
-      } else {
-        _childBirthday = null;
-      }
-    });
   }
 
   Future<void> _loadInitialData() async {
@@ -136,8 +148,8 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
       if (!mounted) return;
       _childId = childId;
 
-      // 子供の誕生日を取得
-      _updateChildBirthday();
+      // 子供のスナップショット（誕生日など）の監視を開始
+      _listenToChildSnapshot(householdId);
 
       // ガイドラインをロード
       await _loadGuideline();
