@@ -36,10 +36,10 @@ class HouseholdService {
     final userData = userSnap.data();
 
     final activeHouseholdId = userData?['activeHouseholdId'] as String?;
-    final membershipType = userData?['membershipType'] as String?;
+    final role = userData?['role'] as String?;
 
     // No household info stored - user needs to create or join a household
-    if (activeHouseholdId == null || membershipType == null) {
+    if (activeHouseholdId == null || role == null) {
       return null;
     }
 
@@ -98,7 +98,7 @@ class HouseholdService {
     await _setActiveHousehold(
       uid: uid,
       householdId: hRef.id,
-      membershipType: 'owner',
+      role: 'admin',
     );
     return hRef.id;
   }
@@ -134,13 +134,13 @@ class HouseholdService {
   Future<void> _setActiveHousehold({
     required String uid,
     required String householdId,
-    required String membershipType,
+    required String role,
   }) async {
     final userRef = _userRef(uid);
     await userRef.set(
       {
         'activeHouseholdId': householdId,
-        'membershipType': membershipType,
+        'role': role,
         'updatedAt': FieldValue.serverTimestamp(),
       },
       SetOptions(merge: true),
@@ -154,7 +154,7 @@ class HouseholdService {
     await userRef.set(
       {
         'activeHouseholdId': FieldValue.delete(),
-        'membershipType': FieldValue.delete(),
+        'role': FieldValue.delete(),
         'updatedAt': FieldValue.serverTimestamp(),
       },
       SetOptions(merge: true),
@@ -163,15 +163,15 @@ class HouseholdService {
     });
   }
 
-  // Get membership type for current user
-  Future<String?> getMembershipType() async {
+  // Get role for current user
+  Future<String?> getRole() async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return null;
 
     final userSnap = await _userRef(uid).get();
     if (!userSnap.exists) return null;
 
-    return userSnap.data()?['membershipType'] as String?;
+    return userSnap.data()?['role'] as String?;
   }
 }
 
@@ -211,8 +211,8 @@ final currentHouseholdIdProvider = StreamProvider<String>((ref) {
   });
 });
 
-/// Stream provider that watches users/{uid} document for membershipType changes
-final currentMembershipTypeProvider = StreamProvider<String?>((ref) {
+/// Stream provider that watches users/{uid} document for role changes
+final currentRoleProvider = StreamProvider<String?>((ref) {
   final auth = ref.watch(firebaseAuthProvider);
   final firestore = ref.watch(firebaseFirestoreProvider);
   final uid = auth.currentUser?.uid;
@@ -223,6 +223,6 @@ final currentMembershipTypeProvider = StreamProvider<String?>((ref) {
 
   return firestore.collection('users').doc(uid).snapshots().map((snapshot) {
     final data = snapshot.data();
-    return data?['membershipType'] as String?;
+    return data?['role'] as String?;
   });
 });
