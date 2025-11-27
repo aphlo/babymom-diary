@@ -12,7 +12,6 @@ abstract class DataManagementRepository {
   /// - momDiary (ママの日記)
   /// - momRecords (ママの記録)
   /// - settings (設定)
-  /// - invitations (招待情報)
   ///
   /// This will NOT delete:
   /// - The members subcollection (to preserve household sharing relationships)

@@ -26,9 +26,6 @@ class DataManagementRepositoryImpl implements DataManagementRepository {
 
     // Delete vaccine_visibility_settings
     await _deleteCollection(householdRef.collection('settings'));
-
-    // Delete invitations (past and pending)
-    await _deleteCollection(householdRef.collection('invitations'));
   }
 
   /// Deletes all children and their subcollections
