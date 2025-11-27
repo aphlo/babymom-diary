@@ -257,8 +257,5 @@ Required files (all gitignored):
 - `cloud-functions/README.md` - Cloud Functions documentation
 - `terraform/README.md` - Infrastructure management guide
 - `AGENTS.md` (Japanese) - Detailed MVVM/DDD guidelines with CalendarPage examples
-- `docs/household_sharing.md` (Japanese) - Household sharing feature design
-- `docs/terraform_setup.md` (Japanese) - Terraform setup guide
-- `docs/monorepo_migration.md` (Japanese) - Monorepo migration guide
-- `docs/firebase_config_regeneration.md` (Japanese) - Firebase config regeneration steps
-- `docs/dose.md` (Japanese) - Dose system design rationale and migration strategy
+- `docs/firestore-structure.md` (Japanese) - Current Firestore collection structure
+- `docs/perf.md` (Japanese) - Firestore read/performance notes and proposals

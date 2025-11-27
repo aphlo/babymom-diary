@@ -15,7 +15,6 @@
 ### 必要なツール
 
 - Flutter SDK (FVM管理)
-- Ruby (Fastlane用)
 - Xcode (iOS開発)
 - Android Studio (Android開発)
 
@@ -93,20 +92,6 @@ fvm flutter run --flavor local -t lib/main_local.dart
 
 # Prod flavor
 fvm flutter run --flavor prod -t lib/main_prod.dart
-```
-
-## ビルド
-
-### Fastlane経由
-
-```bash
-# iOS TestFlightへデプロイ
-cd ios
-fastlane beta --env prod
-
-# Android Internal Testingへデプロイ
-cd android
-fastlane beta --env prod
 ```
 
 ## テスト
