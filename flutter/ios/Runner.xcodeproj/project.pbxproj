@@ -57,8 +57,10 @@
 		4D39AE9DF12824D13C76E691 /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
 		52A86A28506C63088BE2FA5A /* Pods-Runner.release-local.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release-local.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release-local.xcconfig"; sourceTree = "<group>"; };
 		6A8855937DD53C5CF84471F0 /* Pods-RunnerTests.profile-local.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile-local.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile-local.xcconfig"; sourceTree = "<group>"; };
+		742EF9724BD4B775FF4AFC9F /* Pods-Runner.debug-stg.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug-stg.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug-stg.xcconfig"; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		777D8A7BE37162DA7F757015 /* Pods-Runner.profile-stg.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile-stg.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile-stg.xcconfig"; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		7D319F12FA785D3921A335EB /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		822ED23B2FF6AB3807F15370 /* Pods-RunnerTests.profile-prod.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile-prod.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile-prod.xcconfig"; sourceTree = "<group>"; };
@@ -77,7 +79,11 @@
 		B3AB47A54A2E8EFF8BB5CE9E /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		B93EA8F5D7ADAA2CF8D98AFD /* Pods-Runner.profile-local.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile-local.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile-local.xcconfig"; sourceTree = "<group>"; };
 		BCB6513722BDA27EBF35E2DA /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
+		C3CE3F3EE679425874C161DA /* Pods-RunnerTests.release-stg.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release-stg.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release-stg.xcconfig"; sourceTree = "<group>"; };
+		D9457B1FA7A82D28FC050EDE /* Pods-RunnerTests.debug-stg.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug-stg.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug-stg.xcconfig"; sourceTree = "<group>"; };
+		DC9C258BA8B48B37426A7C29 /* Pods-Runner.release-stg.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release-stg.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release-stg.xcconfig"; sourceTree = "<group>"; };
 		F63B122E1A52A52A4892B945 /* Pods-RunnerTests.release-prod.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release-prod.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release-prod.xcconfig"; sourceTree = "<group>"; };
+		F8E67D5FA8E347135B10DE16 /* Pods-RunnerTests.profile-stg.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile-stg.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile-stg.xcconfig"; sourceTree = "<group>"; };
 		FB69001E7FB63A0F6456ECFA /* Pods-RunnerTests.debug-local.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug-local.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug-local.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -187,6 +193,12 @@
 				F63B122E1A52A52A4892B945 /* Pods-RunnerTests.release-prod.xcconfig */,
 				6A8855937DD53C5CF84471F0 /* Pods-RunnerTests.profile-local.xcconfig */,
 				822ED23B2FF6AB3807F15370 /* Pods-RunnerTests.profile-prod.xcconfig */,
+				742EF9724BD4B775FF4AFC9F /* Pods-Runner.debug-stg.xcconfig */,
+				DC9C258BA8B48B37426A7C29 /* Pods-Runner.release-stg.xcconfig */,
+				777D8A7BE37162DA7F757015 /* Pods-Runner.profile-stg.xcconfig */,
+				D9457B1FA7A82D28FC050EDE /* Pods-RunnerTests.debug-stg.xcconfig */,
+				C3CE3F3EE679425874C161DA /* Pods-RunnerTests.release-stg.xcconfig */,
+				F8E67D5FA8E347135B10DE16 /* Pods-RunnerTests.profile-stg.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -480,7 +492,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary.stg;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "milu-provisioning-profile";
@@ -495,14 +507,14 @@
 			};
 			name = "Release-prod";
 		};
-		1DC0707A2EB2063F00316199 /* Debug-local */ = {
+		1DC0707A2EB2063F00316199 /* Debug-stg */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FB69001E7FB63A0F6456ECFA /* Pods-RunnerTests.debug-local.xcconfig */;
+			baseConfigurationReference = D9457B1FA7A82D28FC050EDE /* Pods-RunnerTests.debug-stg.xcconfig */;
 			buildSettings = {
 				PRODUCT_NAME = RunnerTests;
 				SWIFT_VERSION = 5.0;
 			};
-			name = "Debug-local";
+			name = "Debug-stg";
 		};
 		1DC0707B2EB2063F00316199 /* Debug-prod */ = {
 			isa = XCBuildConfiguration;
@@ -513,14 +525,14 @@
 			};
 			name = "Debug-prod";
 		};
-		1DC0707C2EB2063F00316199 /* Release-local */ = {
+		1DC0707C2EB2063F00316199 /* Release-stg */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 383AA19AACDC24A5E537DD10 /* Pods-RunnerTests.release-local.xcconfig */;
+			baseConfigurationReference = C3CE3F3EE679425874C161DA /* Pods-RunnerTests.release-stg.xcconfig */;
 			buildSettings = {
 				PRODUCT_NAME = RunnerTests;
 				SWIFT_VERSION = 5.0;
 			};
-			name = "Release-local";
+			name = "Release-stg";
 		};
 		1DC0707D2EB2063F00316199 /* Release-prod */ = {
 			isa = XCBuildConfiguration;
@@ -531,14 +543,14 @@
 			};
 			name = "Release-prod";
 		};
-		1DC0707E2EB2063F00316199 /* Profile-local */ = {
+		1DC0707E2EB2063F00316199 /* Profile-stg */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6A8855937DD53C5CF84471F0 /* Pods-RunnerTests.profile-local.xcconfig */;
+			baseConfigurationReference = F8E67D5FA8E347135B10DE16 /* Pods-RunnerTests.profile-stg.xcconfig */;
 			buildSettings = {
 				PRODUCT_NAME = RunnerTests;
 				SWIFT_VERSION = 5.0;
 			};
-			name = "Profile-local";
+			name = "Profile-stg";
 		};
 		1DC0707F2EB2063F00316199 /* Profile-prod */ = {
 			isa = XCBuildConfiguration;
@@ -617,6 +629,7 @@
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PH48A2GJJ9;
 				ENABLE_BITCODE = NO;
+				FLUTTER_TARGET = "/Users/koumi/Projects/aphlo/babymom-diary/flutter/lib/main_stg.dart";
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "milu - 赤ちゃんの授乳記録と予防接種管理";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
@@ -625,7 +638,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary.stg;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "milu-provisioning-profile";
@@ -690,7 +703,7 @@
 			};
 			name = Profile;
 		};
-		457B43E617BA4763B98ED7A7 /* Release-local */ = {
+		457B43E617BA4763B98ED7A7 /* Release-stg */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
@@ -703,7 +716,7 @@
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PH48A2GJJ9;
 				ENABLE_BITCODE = NO;
-				FLUTTER_TARGET = lib/main_local.dart;
+				FLUTTER_TARGET = lib/main_stg.dart;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "milu - 赤ちゃんの授乳記録と予防接種管理";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
@@ -712,7 +725,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary.stg;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "milu-provisioning-profile";
@@ -725,9 +738,9 @@
 				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
-			name = "Release-local";
+			name = "Release-stg";
 		};
-		4B71B509C52E4692918F47C8 /* Release-local */ = {
+		4B71B509C52E4692918F47C8 /* Release-stg */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -782,9 +795,9 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
-			name = "Release-local";
+			name = "Release-stg";
 		};
-		66DF6AA584C84B44AF58DC31 /* Profile-local */ = {
+		66DF6AA584C84B44AF58DC31 /* Profile-stg */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
@@ -797,7 +810,7 @@
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PH48A2GJJ9;
 				ENABLE_BITCODE = NO;
-				FLUTTER_TARGET = lib/main_local.dart;
+				FLUTTER_TARGET = lib/main_stg.dart;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "milu - 赤ちゃんの授乳記録と予防接種管理";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
@@ -806,7 +819,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary.stg;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "milu-provisioning-profile";
@@ -819,7 +832,7 @@
 				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
-			name = "Profile-local";
+			name = "Profile-stg";
 		};
 		6718A462EC40455B854929E0 /* Debug-prod */ = {
 			isa = XCBuildConfiguration;
@@ -881,7 +894,7 @@
 			};
 			name = "Debug-prod";
 		};
-		69E501FE1E204A26BFC4166A /* Debug-local */ = {
+		69E501FE1E204A26BFC4166A /* Debug-stg */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
@@ -894,7 +907,7 @@
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PH48A2GJJ9;
 				ENABLE_BITCODE = NO;
-				FLUTTER_TARGET = lib/main_local.dart;
+				FLUTTER_TARGET = lib/main_stg.dart;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "milu - 赤ちゃんの授乳記録と予防接種管理";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
@@ -903,7 +916,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary.stg;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "milu-provisioning-profile";
@@ -917,7 +930,7 @@
 				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
-			name = "Debug-local";
+			name = "Debug-stg";
 		};
 		97C147031CF9000F007C117D /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1048,6 +1061,7 @@
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PH48A2GJJ9;
 				ENABLE_BITCODE = NO;
+				FLUTTER_TARGET = "/Users/koumi/Projects/aphlo/babymom-diary/flutter/lib/main_stg.dart";
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "milu - 赤ちゃんの授乳記録と予防接種管理";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
@@ -1056,7 +1070,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary.stg;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "milu-provisioning-profile";
@@ -1086,6 +1100,7 @@
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PH48A2GJJ9;
 				ENABLE_BITCODE = NO;
+				FLUTTER_TARGET = "/Users/koumi/Projects/aphlo/babymom-diary/flutter/lib/main_stg.dart";
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "milu - 赤ちゃんの授乳記録と予防接種管理";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
@@ -1094,7 +1109,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary.stg;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "milu-provisioning-profile";
@@ -1132,7 +1147,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary.stg;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "milu-provisioning-profile";
@@ -1147,7 +1162,7 @@
 			};
 			name = "Profile-prod";
 		};
-		A0570518B7BA45F68E980587 /* Profile-local */ = {
+		A0570518B7BA45F68E980587 /* Profile-stg */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -1201,7 +1216,7 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
-			name = "Profile-local";
+			name = "Profile-stg";
 		};
 		CC3C865CD33044D2AA283283 /* Profile-prod */ = {
 			isa = XCBuildConfiguration;
@@ -1259,7 +1274,7 @@
 			};
 			name = "Profile-prod";
 		};
-		DFE178E2EDF3413EBFCF91C5 /* Debug-local */ = {
+		DFE178E2EDF3413EBFCF91C5 /* Debug-stg */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -1317,7 +1332,7 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
-			name = "Debug-local";
+			name = "Debug-stg";
 		};
 		FDEFF1C482F543D2BC51B2E8 /* Debug-prod */ = {
 			isa = XCBuildConfiguration;
@@ -1342,7 +1357,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aphlo.babymomdiary.stg;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "milu-provisioning-profile";
@@ -1424,11 +1439,11 @@
 				331C8088294A63A400263BE5 /* Debug */,
 				331C8089294A63A400263BE5 /* Release */,
 				331C808A294A63A400263BE5 /* Profile */,
-				1DC0707A2EB2063F00316199 /* Debug-local */,
+				1DC0707A2EB2063F00316199 /* Debug-stg */,
 				1DC0707B2EB2063F00316199 /* Debug-prod */,
-				1DC0707C2EB2063F00316199 /* Release-local */,
+				1DC0707C2EB2063F00316199 /* Release-stg */,
 				1DC0707D2EB2063F00316199 /* Release-prod */,
-				1DC0707E2EB2063F00316199 /* Profile-local */,
+				1DC0707E2EB2063F00316199 /* Profile-stg */,
 				1DC0707F2EB2063F00316199 /* Profile-prod */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -1438,13 +1453,13 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				97C147031CF9000F007C117D /* Debug */,
-				DFE178E2EDF3413EBFCF91C5 /* Debug-local */,
+				DFE178E2EDF3413EBFCF91C5 /* Debug-stg */,
 				6718A462EC40455B854929E0 /* Debug-prod */,
 				97C147041CF9000F007C117D /* Release */,
-				4B71B509C52E4692918F47C8 /* Release-local */,
+				4B71B509C52E4692918F47C8 /* Release-stg */,
 				FE831B8D75C742CF89D4AFE4 /* Release-prod */,
 				249021D3217E4FDB00AE95B9 /* Profile */,
-				A0570518B7BA45F68E980587 /* Profile-local */,
+				A0570518B7BA45F68E980587 /* Profile-stg */,
 				CC3C865CD33044D2AA283283 /* Profile-prod */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -1454,13 +1469,13 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				97C147061CF9000F007C117D /* Debug */,
-				69E501FE1E204A26BFC4166A /* Debug-local */,
+				69E501FE1E204A26BFC4166A /* Debug-stg */,
 				FDEFF1C482F543D2BC51B2E8 /* Debug-prod */,
 				97C147071CF9000F007C117D /* Release */,
-				457B43E617BA4763B98ED7A7 /* Release-local */,
+				457B43E617BA4763B98ED7A7 /* Release-stg */,
 				0FCFD739B01741A9BA2FF702 /* Release-prod */,
 				249021D4217E4FDB00AE95B9 /* Profile */,
-				66DF6AA584C84B44AF58DC31 /* Profile-local */,
+				66DF6AA584C84B44AF58DC31 /* Profile-stg */,
 				9CADBCF1779C494BB75E0C8A /* Profile-prod */,
 			);
 			defaultConfigurationIsVisible = 0;
