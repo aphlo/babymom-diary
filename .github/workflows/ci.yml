@@ -48,8 +48,6 @@ jobs:
       - name: Check formatting and lint
         run: pnpm check
 
-
-
   flutter:
     name: Flutter Check
     runs-on: ubuntu-latest
@@ -59,43 +57,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true
-          working-directory: flutter
+      - name: Read Flutter version from .fvmrc
+        id: fvm
+        run: |
+          FLUTTER_VERSION=$(cat .fvmrc | grep flutter | cut -d'"' -f4)
+          echo "version=$FLUTTER_VERSION" >> $GITHUB_OUTPUT
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.3'
+          flutter-version: ${{ steps.fvm.outputs.version }}
           cache: true
-
-      - name: Mock fvm
-        run: |
-          cat << 'EOF' > fvm
-          #!/bin/bash
-          exec flutter "$@"
-          EOF
-          chmod +x fvm
-          sudo mv fvm /usr/local/bin/
 
       - name: Install dependencies
         run: flutter pub get
 
       - name: Create dummy Firebase options
         run: |
-          cp lib/firebase_options_local.example.dart lib/firebase_options_prod.dart
-          cp lib/firebase_options_local.example.dart lib/firebase_options_stg.dart
+          cp lib/firebase_options_prod.example.dart lib/firebase_options_prod.dart
+          cp lib/firebase_options_stg.example.dart lib/firebase_options_stg.dart
           sed -i 's/LocalFirebaseOptions/DefaultFirebaseOptions/g' lib/firebase_options_prod.dart
           sed -i 's/LocalFirebaseOptions/DefaultFirebaseOptions/g' lib/firebase_options_stg.dart
 
       - name: Check formatting
-        run: rake format_check
+        run: dart format --output=none --set-exit-if-changed lib test
 
       - name: Lint
-        run: rake lint
+        run: flutter analyze
 
       - name: Test
-        run: rake test
+        run: flutter test
