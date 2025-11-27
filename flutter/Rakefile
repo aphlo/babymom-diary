@@ -25,6 +25,10 @@ TASKS = {
     command: "fvm dart format lib test",
     description: "format dart files",
   },
+  format_check: {
+    command: "fvm dart format --output=none --set-exit-if-changed lib test",
+    description: "Check dart files formatting",
+  },
   test: {
     command: "fvm flutter test",
     description: "Run Flutter tests (set ARGS to pass extra options)",

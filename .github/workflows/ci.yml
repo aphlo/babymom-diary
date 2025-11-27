@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'cloud-functions/**'
+      - 'flutter/**'
+      - '.github/workflows/ci.yml'
+
+jobs:
+  cloud-functions:
+    name: Cloud Functions Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cloud-functions
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v4
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('cloud-functions/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Check formatting and lint
+        run: pnpm check
+
+  flutter:
+    name: Flutter Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: flutter
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read Flutter version from .fvmrc
+        id: fvm
+        run: |
+          FLUTTER_VERSION=$(cat .fvmrc | grep flutter | cut -d'"' -f4)
+          echo "version=$FLUTTER_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.fvm.outputs.version }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Create dummy Firebase options
+        run: |
+          cp lib/firebase_options_prod.example.dart lib/firebase_options_prod.dart
+          cp lib/firebase_options_stg.example.dart lib/firebase_options_stg.dart
+          sed -i 's/ProdFirebaseOptions/DefaultFirebaseOptions/g' lib/firebase_options_prod.dart
+          sed -i 's/LocalFirebaseOptions/DefaultFirebaseOptions/g' lib/firebase_options_stg.dart
+
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Lint
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
