@@ -45,13 +45,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Check formatting
-        run: |
-          pnpm format
-          git diff --exit-code
+      - name: Check formatting and lint
+        run: pnpm check
 
-      - name: Lint
-        run: pnpm lint
+
 
   flutter:
     name: Flutter Check
@@ -77,8 +74,10 @@ jobs:
 
       - name: Mock fvm
         run: |
-          echo '#!/bin/bash' > fvm
-          echo '$@' >> fvm
+          cat << 'EOF' > fvm
+          #!/bin/bash
+          exec flutter "$@"
+          EOF
           chmod +x fvm
           sudo mv fvm /usr/local/bin/
 
@@ -93,9 +92,7 @@ jobs:
           sed -i 's/LocalFirebaseOptions/DefaultFirebaseOptions/g' lib/firebase_options_stg.dart
 
       - name: Check formatting
-        run: |
-          rake format
-          git diff --exit-code
+        run: rake format_check
 
       - name: Lint
         run: rake lint
