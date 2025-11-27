@@ -1061,7 +1061,7 @@
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PH48A2GJJ9;
 				ENABLE_BITCODE = NO;
-				FLUTTER_TARGET = "/Users/koumi/Projects/aphlo/babymom-diary/flutter/lib/main_stg.dart";
+				FLUTTER_TARGET = "lib/main_stg.dart";
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "milu - 赤ちゃんの授乳記録と予防接種管理";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
