@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'cloud-functions/**'
+      - 'flutter/**'
+      - '.github/workflows/ci.yml'
+
+jobs:
+  cloud-functions:
+    name: Cloud Functions Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cloud-functions
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v4
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('cloud-functions/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Check formatting
+        run: |
+          pnpm format
+          git diff --exit-code
+
+      - name: Lint
+        run: pnpm lint
+
+  flutter:
+    name: Flutter Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: flutter
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: flutter
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.3'
+          cache: true
+
+      - name: Mock fvm
+        run: |
+          echo '#!/bin/bash' > fvm
+          echo '$@' >> fvm
+          chmod +x fvm
+          sudo mv fvm /usr/local/bin/
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Check formatting
+        run: |
+          rake format
+          git diff --exit-code
+
+      - name: Lint
+        run: rake lint
+
+      - name: Test
+        run: rake test
