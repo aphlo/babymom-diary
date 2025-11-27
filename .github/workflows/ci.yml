@@ -85,6 +85,13 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Create dummy Firebase options
+        run: |
+          cp lib/firebase_options_local.example.dart lib/firebase_options_prod.dart
+          cp lib/firebase_options_local.example.dart lib/firebase_options_stg.dart
+          sed -i 's/LocalFirebaseOptions/DefaultFirebaseOptions/g' lib/firebase_options_prod.dart
+          sed -i 's/LocalFirebaseOptions/DefaultFirebaseOptions/g' lib/firebase_options_stg.dart
+
       - name: Check formatting
         run: |
           rake format
