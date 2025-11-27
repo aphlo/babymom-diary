@@ -80,11 +80,11 @@ android {
 
     flavorDimensions += "env"
     productFlavors {
-        local {
+        stg {
             dimension "env"
-            applicationIdSuffix ".local"
-            versionNameSuffix "-local"
-            resValue "string", "app_name", "milu (Local)"
+            applicationIdSuffix ".stg"
+            versionNameSuffix "-stg"
+            resValue "string", "app_name", "milu (STG)"
         }
         prod {
             dimension "env"

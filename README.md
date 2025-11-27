@@ -40,5 +40,5 @@ babymom-diary/
 
 - **Firestore Rules**: `firestore.rules`
 - **Firestore Indexes**: `firestore.indexes.json`
-- **Firebase設定**: `firebase.json` (gitignored - 秘匿情報を含む)
+- **Firebase設定**: `firebase.json`
 
