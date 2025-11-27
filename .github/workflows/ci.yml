@@ -76,7 +76,7 @@ jobs:
         run: |
           cp lib/firebase_options_prod.example.dart lib/firebase_options_prod.dart
           cp lib/firebase_options_stg.example.dart lib/firebase_options_stg.dart
-          sed -i 's/LocalFirebaseOptions/DefaultFirebaseOptions/g' lib/firebase_options_prod.dart
+          sed -i 's/ProdFirebaseOptions/DefaultFirebaseOptions/g' lib/firebase_options_prod.dart
           sed -i 's/LocalFirebaseOptions/DefaultFirebaseOptions/g' lib/firebase_options_stg.dart
 
       - name: Check formatting
