@@ -32,7 +32,7 @@ babymom-diary/
 
 ```bash
 cd flutter
-rake run_local      # Run with local flavor (Firebase emulator)
+rake run_stg        # Run with stg flavor (STG Firebase)
 rake run_prod       # Run with prod flavor (production Firebase)
 rake format         # Format code: fvm dart format lib test
 rake lint           # Analyze: fvm flutter analyze
@@ -43,7 +43,7 @@ Pass extra Flutter flags via `ARGS` environment variable:
 ```bash
 cd flutter
 ARGS="--device-id emulator-5554" rake run_prod
-ARGS="--dart-define=BABYMOM_FIREBASE_EMULATOR_HOST=10.0.2.2" rake run_local
+ARGS="--device-id iPhone-16" rake run_stg
 ```
 
 ### Direct Flutter Commands (via FVM)
@@ -54,7 +54,7 @@ fvm use                     # Install/switch to pinned Flutter version
 fvm flutter pub get         # Install dependencies
 fvm flutter test test/path/to/test_file.dart  # Run single test file
 fvm flutter test --name "test name pattern"   # Run specific test by name
-fvm flutter run --flavor local -t lib/main_local.dart --device-id <device>
+fvm flutter run --flavor stg -t lib/main_stg.dart --device-id <device>
 ```
 
 ### Testing
@@ -198,10 +198,17 @@ class FeatureViewModel extends StateNotifier<FeatureState> {
 ## Environment & Configuration
 
 ### Flavors
-- **local:** Firebase emulator (default host: `localhost` for iOS, `10.0.2.2` for Android)
-- **prod:** Production Firebase
+- **stg:** STG環境 Firebase（`babymom-diary-stg` プロジェクト）
+- **prod:** 本番環境 Firebase（`babymom-diary` プロジェクト）
 
-Entry points: `flutter/lib/main_local.dart` and `flutter/lib/main_prod.dart`
+Entry points: `flutter/lib/main_stg.dart` and `flutter/lib/main_prod.dart`
+
+### Firebase Projects
+
+| FLAVOR | Firebase Project | 用途 |
+|--------|-----------------|------|
+| `stg` | `babymom-diary-stg` | 開発・テスト |
+| `prod` | `babymom-diary` | 本番リリース |
 
 ### Firebase Setup
 
@@ -212,18 +219,25 @@ See detailed instructions: `docs/firebase_config_regeneration.md`
 Quick setup:
 ```bash
 cd flutter
-flutterfire configure --project=babymom-diary --out=lib/firebase_options_local.dart
+# STG環境（stg flavor用）
+flutterfire configure \
+  --project=babymom-diary-stg \
+  --out=lib/firebase_options_stg.dart \
+  --ios-bundle-id=com.aphlo.babymomdiary.stg \
+  --android-app-id=com.aphlo.babymomdiary.stg
+
+# 本番環境（prod flavor用）
 flutterfire configure --project=babymom-diary --out=lib/firebase_options_prod.dart
 ```
 
 Required files (all gitignored):
-- `flutter/lib/firebase_options_local.dart`
+- `flutter/lib/firebase_options_stg.dart`
 - `flutter/lib/firebase_options_prod.dart`
 - `flutter/lib/firebase_options.dart`
-- `flutter/android/app/src/local/google-services.json`
+- `flutter/android/app/src/stg/google-services.json`
 - `flutter/android/app/src/prod/google-services.json`
 - `flutter/ios/Runner/GoogleService-Info-*.plist`
-- `flutter/fastlane/.env.local`
+- `flutter/fastlane/.env.stg`
 - `flutter/fastlane/.env.prod`
 
 ### Development Tools
@@ -231,7 +245,35 @@ Required files (all gitignored):
 - **Fastlane:** Deployment automation (run from `flutter/` directory)
 - **Widgetbook:** Component catalog for UI development
 - **Terraform:** Infrastructure management (in `terraform/` directory)
-- **Firebase CLI:** Emulator and deployment (run from root directory)
+- **Firebase CLI:** Firestore Rules/Indexes のデプロイに使用（run from root directory）
+
+### Terraform Structure
+
+```
+terraform/
+├── env/
+│   ├── prod/    # 本番環境（babymom-diary）
+│   └── stg/     # STG環境（babymom-diary-stg）
+└── modules/     # 共通モジュール
+```
+
+Cloud Functions は Terraform でデプロイします（Firebase CLI ではなく）。
+
+### Firebase CLI でのプロジェクト切り替え
+
+```bash
+# プロジェクト一覧
+firebase projects:list
+
+# STG環境に切り替え
+firebase use stg
+
+# 本番環境に切り替え
+firebase use prod
+
+# Firestore Rules/Indexes のデプロイ
+firebase deploy --only firestore:rules,firestore:indexes
+```
 
 ## Key Design Decisions
 
@@ -259,3 +301,4 @@ Required files (all gitignored):
 - `AGENTS.md` (Japanese) - Detailed MVVM/DDD guidelines with CalendarPage examples
 - `docs/firestore-structure.md` (Japanese) - Current Firestore collection structure
 - `docs/perf.md` (Japanese) - Firestore read/performance notes and proposals
+- `docs/stg_environment_design.md` (Japanese) - STG環境の設計と実装手順

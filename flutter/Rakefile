@@ -18,8 +18,8 @@ TASKS = {
     description: "Run app with prod flavor (set ARGS for extra flutter flags)",
   },
   run_local: {
-    command: "fvm flutter run --flavor local -t lib/main_local.dart --dart-define=FLAVOR=local",
-    description: "Run app with local flavor (set ARGS for extra flutter flags)",
+    command: "fvm flutter run --flavor stg -t lib/main_stg.dart --dart-define=FLAVOR=stg",
+    description: "Run app with stg flavor (set ARGS for extra flutter flags)",
   },
   format: {
     command: "fvm dart format lib test",

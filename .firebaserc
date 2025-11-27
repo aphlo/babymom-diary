@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "babymom-diary"
+    "default": "babymom-diary",
+    "prod": "babymom-diary",
+    "stg": "babymom-diary-stg"
   }
 }

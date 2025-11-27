@@ -18,7 +18,6 @@ Thumbs.db
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
-firebase.json
 
 # Terraform
 terraform/.terraform/
@@ -50,7 +49,5 @@ serviceAccount*.json
 **/google-services.json
 **/GoogleService-Info*.plist
 flutter/lib/firebase_options.dart
-flutter/lib/firebase_options_local.dart
+flutter/lib/firebase_options_stg.dart
 flutter/lib/firebase_options_prod.dart
-flutter/fastlane/.env.local
-flutter/fastlane/.env.prod

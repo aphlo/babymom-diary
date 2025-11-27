@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'bootstrap.dart';
-import 'firebase_options_prod.dart';
+import 'firebase_options_stg.dart';
 import 'src/app/app_runner.dart';
 import 'src/features/ads/infrastructure/services/admob_service.dart';
 
@@ -15,5 +15,5 @@ Future<void> main() async {
   // AdMob SDK初期化（ATT許可は後で最初の画面から呼ぶ）
   await AdMobService.initializeMobileAds();
 
-  await runBabymomDiaryApp(appTitle: 'milu (Local)');
+  await runBabymomDiaryApp(appTitle: 'milu (STG)');
 }
