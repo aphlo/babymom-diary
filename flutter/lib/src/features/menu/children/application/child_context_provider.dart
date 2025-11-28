@@ -32,7 +32,8 @@ class ChildContext {
   bool get hasChildren => children.isNotEmpty;
 
   /// 子供が選択されているかどうか
-  bool get hasSelectedChild => selectedChildId != null && selectedChildId!.isNotEmpty;
+  bool get hasSelectedChild =>
+      selectedChildId != null && selectedChildId!.isNotEmpty;
 
   ChildContext copyWith({
     String? householdId,

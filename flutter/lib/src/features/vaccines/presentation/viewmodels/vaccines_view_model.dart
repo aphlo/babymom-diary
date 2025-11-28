@@ -73,8 +73,9 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
             previousContext?.householdId != currentContext.householdId;
         final childChanged =
             previousContext?.selectedChildId != currentContext.selectedChildId;
-        final birthdayChanged = previousContext?.selectedChildSummary?.birthday !=
-            currentContext.selectedChildSummary?.birthday;
+        final birthdayChanged =
+            previousContext?.selectedChildSummary?.birthday !=
+                currentContext.selectedChildSummary?.birthday;
 
         // householdIdが変わった場合
         if (householdChanged) {

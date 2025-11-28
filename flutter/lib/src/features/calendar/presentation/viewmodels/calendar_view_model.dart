@@ -123,7 +123,8 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
         }
 
         // スナップショットの更新
-        if (currentContext.selectedChildSummary != previousContext?.selectedChildSummary) {
+        if (currentContext.selectedChildSummary !=
+            previousContext?.selectedChildSummary) {
           _snapshotChild = currentContext.selectedChildSummary;
           _rebuildAvailableChildren();
         }
