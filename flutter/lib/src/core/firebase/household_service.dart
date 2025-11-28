@@ -190,39 +190,61 @@ final initialHouseholdIdProvider = FutureProvider<String>((ref) async {
   return svc.ensureHousehold();
 });
 
-/// Stream provider that watches users/{uid} document for activeHouseholdId changes
-/// This allows real-time updates when user joins/leaves a household
-final currentHouseholdIdProvider = StreamProvider<String>((ref) {
+/// ユーザードキュメントのデータ（householdId + membershipType）
+class UserDocumentData {
+  final String? activeHouseholdId;
+  final String? membershipType;
+
+  const UserDocumentData({
+    this.activeHouseholdId,
+    this.membershipType,
+  });
+}
+
+/// users/{uid}ドキュメントを単一のStreamで購読するプロバイダー
+/// 複数のプロバイダーで同じドキュメントを購読しないよう統合
+final _userDocumentStreamProvider = StreamProvider<UserDocumentData>((ref) {
   final auth = ref.watch(firebaseAuthProvider);
   final firestore = ref.watch(firebaseFirestoreProvider);
   final uid = auth.currentUser?.uid;
 
   if (uid == null) {
-    return Stream.error(StateError('User is not signed in.'));
+    return Stream.value(const UserDocumentData());
   }
 
   return firestore.collection('users').doc(uid).snapshots().map((snapshot) {
     final data = snapshot.data();
-    final activeHouseholdId = data?['activeHouseholdId'] as String?;
-    if (activeHouseholdId == null) {
-      throw StateError('No active household found.');
-    }
-    return activeHouseholdId;
+    return UserDocumentData(
+      activeHouseholdId: data?['activeHouseholdId'] as String?,
+      membershipType: data?['membershipType'] as String?,
+    );
   });
+});
+
+/// Stream provider that watches users/{uid} document for activeHouseholdId changes
+/// This allows real-time updates when user joins/leaves a household
+final currentHouseholdIdProvider = StreamProvider<String>((ref) {
+  final userDoc = ref.watch(_userDocumentStreamProvider);
+
+  return userDoc.when(
+    data: (data) {
+      if (data.activeHouseholdId == null) {
+        return Stream.error(StateError('No active household found.'));
+      }
+      return Stream.value(data.activeHouseholdId!);
+    },
+    loading: () => const Stream.empty(),
+    error: (e, st) => Stream.error(e, st),
+  );
 });
 
 /// Stream provider that watches users/{uid} document for membershipType changes
 final currentMembershipTypeProvider = StreamProvider<String?>((ref) {
-  final auth = ref.watch(firebaseAuthProvider);
-  final firestore = ref.watch(firebaseFirestoreProvider);
-  final uid = auth.currentUser?.uid;
+  final userDoc = ref.watch(_userDocumentStreamProvider);
 
-  if (uid == null) {
-    return Stream.value(null);
-  }
-
-  return firestore.collection('users').doc(uid).snapshots().map((snapshot) {
-    final data = snapshot.data();
-    return data?['membershipType'] as String?;
-  });
+  return userDoc.when(
+    data: (data) => Stream.value(data.membershipType),
+    loading: () => const Stream.empty(),
+    error: (e, st) => Stream.error(e, st),
+  );
 });
