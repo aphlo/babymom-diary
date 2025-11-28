@@ -5,7 +5,7 @@ import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_category.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_requirement.dart';
 import 'package:babymom_diary/src/features/vaccines/presentation/models/vaccine_info.dart';
-import 'package:babymom_diary/src/features/vaccines/presentation/viewmodels/vaccines_view_data.dart';
+import 'package:babymom_diary/src/features/vaccines/presentation/models/vaccines_view_data.dart';
 
 void main() {
   group('VaccinesViewData', () {

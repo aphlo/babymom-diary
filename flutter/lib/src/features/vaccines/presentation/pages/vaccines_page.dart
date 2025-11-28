@@ -17,7 +17,7 @@ import '../components/vaccines_list_view.dart';
 import '../components/vaccines_schedule_table.dart';
 import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_state.dart';
-import '../viewmodels/vaccines_view_data.dart';
+import '../models/vaccines_view_data.dart';
 import '../viewmodels/vaccines_view_model.dart';
 import '../widgets/vaccines_legend.dart';
 import 'vaccine_detail_page.dart';

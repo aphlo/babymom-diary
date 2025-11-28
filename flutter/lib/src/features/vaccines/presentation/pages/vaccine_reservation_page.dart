@@ -225,18 +225,7 @@ class _VaccineReservationContent extends ConsumerWidget {
     VaccineReservationViewModel viewModel,
     WidgetRef ref,
   ) async {
-    final selectedChildId = ref.read(selectedChildControllerProvider).value;
-    if (selectedChildId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('子どもが選択されていません'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final success = await viewModel.createReservation(selectedChildId);
+    final success = await viewModel.createReservation();
     if (success && context.mounted) {
       context.pop();
     }

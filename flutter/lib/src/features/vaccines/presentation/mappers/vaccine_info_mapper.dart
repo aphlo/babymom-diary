@@ -10,7 +10,7 @@ import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine_mast
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccination_period.dart';
 
 import '../models/vaccine_info.dart';
-import '../viewmodels/vaccines_view_data.dart';
+import '../models/vaccines_view_data.dart';
 
 VaccinesViewData mapGuidelineToViewData(
   VaccineMaster guideline, {
