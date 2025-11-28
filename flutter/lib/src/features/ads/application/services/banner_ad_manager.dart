@@ -22,6 +22,7 @@ class _SlotState {
   BannerAd? ad;
   AdSize? adSize;
   bool isLoading = false;
+  Completer<void>? loadCompleter;
 
   void dispose() {
     ad?.dispose();
@@ -37,7 +38,6 @@ class _SlotState {
 class BannerAdManager {
   final Ref _ref;
   final Map<BannerAdSlot, _SlotState> _slots = {};
-  final Map<BannerAdSlot, Completer<void>> _loadCompleters = {};
   bool _isDisposed = false;
   double? _screenWidth;
 
@@ -71,20 +71,23 @@ class BannerAdManager {
   Future<void> preload(BannerAdSlot slot, double width) async {
     final slotState = _slots[slot];
     if (slotState == null || _isDisposed) return;
-    if (slotState.ad != null) return;
+    if (slotState.ad != null) {
+      // 既にロード済みの場合、待機中のCompleterがあれば完了させる
+      slotState.loadCompleter?.complete();
+      return;
+    }
 
     // 既にロード中の場合は既存のCompleterを待機
-    final existingCompleter = _loadCompleters[slot];
-    if (slotState.isLoading && existingCompleter != null) {
-      await existingCompleter.future;
+    if (slotState.isLoading && slotState.loadCompleter != null) {
+      await slotState.loadCompleter!.future;
       return;
     }
 
     slotState.isLoading = true;
 
-    // Completerを作成（待機中のウィジェットに通知するため）
-    final completer = Completer<void>();
-    _loadCompleters[slot] = completer;
+    // Completerがまだ無ければ作成（待機中のウィジェットに通知するため）
+    slotState.loadCompleter ??= Completer<void>();
+    final completer = slotState.loadCompleter!;
 
     try {
       final config = _ref.read(adConfigProvider);
@@ -96,7 +99,7 @@ class BannerAdManager {
 
       if (adSize == null || _isDisposed) {
         slotState.isLoading = false;
-        completer.complete();
+        if (!completer.isCompleted) completer.complete();
         return;
       }
 
@@ -105,7 +108,7 @@ class BannerAdManager {
       if (_isDisposed) {
         ad?.dispose();
         slotState.isLoading = false;
-        completer.complete();
+        if (!completer.isCompleted) completer.complete();
         return;
       }
 
@@ -122,10 +125,18 @@ class BannerAdManager {
   }
 
   /// 指定スロットのプリロード完了を待機する
+  ///
+  /// プリロードがまだ開始されていない場合もCompleterを作成して待機する。
+  /// これにより、BannerAdWidgetがpreloadAllより先に呼ばれても正しく待機できる。
   Future<void> waitForPreload(BannerAdSlot slot) async {
-    final completer = _loadCompleters[slot];
-    if (completer != null && !completer.isCompleted) {
-      await completer.future;
+    final slotState = _slots[slot];
+    if (slotState == null) return;
+
+    // Completerがまだ無ければ作成（preloadが後から呼ばれた時に完了通知を受け取れるように）
+    slotState.loadCompleter ??= Completer<void>();
+
+    if (!slotState.loadCompleter!.isCompleted) {
+      await slotState.loadCompleter!.future;
     }
   }
 
@@ -143,6 +154,7 @@ class BannerAdManager {
     // 広告を消費（次回用にクリア）
     slotState.ad = null;
     slotState.adSize = null;
+    slotState.loadCompleter = null; // 次回のプリロード待機用にリセット
 
     // 次の広告をバックグラウンドでプリフェッチ
     if (_screenWidth != null) {
@@ -202,7 +214,6 @@ class BannerAdManager {
       slotState.dispose();
     }
     _slots.clear();
-    _loadCompleters.clear();
   }
 }
 
