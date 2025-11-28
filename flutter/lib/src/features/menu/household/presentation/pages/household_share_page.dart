@@ -34,7 +34,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
   @override
   Widget build(BuildContext context) {
     final householdIdAsync = ref.watch(currentHouseholdIdProvider);
-    final membershipTypeAsync = ref.watch(currentMembershipTypeProvider);
+    final roleAsync = ref.watch(currentRoleProvider);
 
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
@@ -44,9 +44,8 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
       ),
       body: SafeArea(
         child: householdIdAsync.when(
-          data: (householdId) => membershipTypeAsync.when(
-            data: (membershipType) =>
-                _buildContent(householdId, membershipType),
+          data: (householdId) => roleAsync.when(
+            data: (role) => _buildContent(householdId, role),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => Center(child: Text('エラー: $error')),
           ),
@@ -57,14 +56,14 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
     );
   }
 
-  Widget _buildContent(String householdId, String? membershipType) {
-    // If user is a member (not owner), show readonly view
-    if (membershipType == 'member') {
+  Widget _buildContent(String householdId, String? role) {
+    // If user is a member (not admin), show readonly view
+    if (role == 'member') {
       return _buildMemberView();
     }
 
-    // If user is owner, show full functionality
-    return _buildOwnerView(householdId);
+    // If user is admin, show full functionality
+    return _buildAdminView(householdId);
   }
 
   Widget _buildMemberView() {
@@ -103,7 +102,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
     );
   }
 
-  Widget _buildOwnerView(String householdId) {
+  Widget _buildAdminView(String householdId) {
     final membersAsync = ref.watch(householdMembersProvider(householdId));
     final currentUid = ref.watch(firebaseAuthProvider).currentUser?.uid;
 

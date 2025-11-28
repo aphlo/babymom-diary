@@ -28,8 +28,8 @@ class MenuPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncHid = ref.watch(currentHouseholdIdProvider);
-    final membershipType = ref.watch(currentMembershipTypeProvider).valueOrNull;
-    final isOwner = membershipType != 'member';
+    final role = ref.watch(currentRoleProvider).valueOrNull;
+    final isAdmin = role == 'admin';
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
       appBar: AppBar(title: const Text('メニュー')),
@@ -109,8 +109,8 @@ class MenuPage extends ConsumerWidget {
                   const Divider(height: 0),
 
                   const SizedBox(height: 24),
-                  // データ削除メニューはオーナーのみ表示
-                  if (isOwner) ...[
+                  // データ削除メニューは管理者のみ表示
+                  if (isAdmin) ...[
                     const Divider(height: 0),
                     ListTile(
                       tileColor: Colors.white,

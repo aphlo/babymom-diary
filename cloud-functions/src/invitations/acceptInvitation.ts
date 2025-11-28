@@ -57,11 +57,11 @@ export const acceptInvitation = functions
         const userData = userSnapshot.data() as
           | {
               activeHouseholdId?: string;
-              membershipType?: string;
+              role?: string;
             }
           | undefined;
         const previousHouseholdId = userData?.activeHouseholdId;
-        const previousMembershipType = userData?.membershipType;
+        const previousRole = userData?.role;
 
         // 3-1. Get target household document
         const householdRef = db.doc(`households/${householdId}`);
@@ -92,8 +92,8 @@ export const acceptInvitation = functions
           throw new functions.https.HttpsError("already-exists", "既にこの世帯のメンバーです");
         }
 
-        // 3-4. Check if user is owner of current household with other members
-        if (previousHouseholdId && previousMembershipType === "owner") {
+        // 3-4. Check if user is admin of current household with other members
+        if (previousHouseholdId && previousRole === "admin") {
           // Check if there are other members in the current household
           // Get all members and filter out current user (avoids != query which requires index)
           const currentMembersSnapshot = await db
@@ -128,7 +128,7 @@ export const acceptInvitation = functions
           userRef,
           {
             activeHouseholdId: householdId,
-            membershipType: "member",
+            role: "member",
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
           },
           { merge: true }
