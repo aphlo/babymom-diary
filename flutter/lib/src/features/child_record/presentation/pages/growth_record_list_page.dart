@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 import 'package:babymom_diary/src/core/utils/date_formatter.dart';
+import '../../../ads/application/services/banner_ad_manager.dart';
 import '../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../child_record.dart';
 import '../models/growth_measurement_point.dart';
@@ -51,7 +52,7 @@ class GrowthRecordListPage extends ConsumerWidget {
                 ],
               ),
             ),
-            const BannerAdWidget(),
+            const BannerAdWidget(slot: BannerAdSlot.growthRecordList),
           ],
         ),
       ),

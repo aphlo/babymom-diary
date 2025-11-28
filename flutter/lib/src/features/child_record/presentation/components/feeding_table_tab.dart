@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../child_record.dart';
+import '../../../ads/application/services/banner_ad_manager.dart';
 import '../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../models/record_draft.dart';
 import '../models/record_item_model.dart';
@@ -147,7 +148,7 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
               ],
             ),
           ),
-          const BannerAdWidget(),
+          const BannerAdWidget(slot: BannerAdSlot.feedingTable),
         ],
       );
     }

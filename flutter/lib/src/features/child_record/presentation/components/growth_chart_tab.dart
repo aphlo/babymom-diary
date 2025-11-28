@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../ads/application/services/banner_ad_manager.dart';
 import '../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../child_record.dart';
 import '../models/growth_chart_data.dart';
@@ -70,7 +71,7 @@ class GrowthChartTab extends ConsumerWidget {
             ),
           ),
         ),
-        const BannerAdWidget(),
+        const BannerAdWidget(slot: BannerAdSlot.growthChart),
       ],
     );
   }

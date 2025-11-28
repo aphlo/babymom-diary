@@ -11,6 +11,7 @@ import 'package:babymom_diary/src/features/menu/children/application/selected_ch
 import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
 
 import '../../domain/entities/dose_record.dart';
+import '../../../ads/application/services/banner_ad_manager.dart';
 import '../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../components/vaccines_list_view.dart';
 import '../components/vaccines_schedule_table.dart';
@@ -204,7 +205,7 @@ class _VaccinesContent extends StatelessWidget {
                 ),
         ),
         if (viewMode == VaccineViewMode.table) const VaccinesLegend(),
-        const BannerAdWidget(),
+        const BannerAdWidget(slot: BannerAdSlot.vaccines),
       ],
     );
   }
