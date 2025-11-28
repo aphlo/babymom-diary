@@ -12,7 +12,10 @@ class MomDiaryDto {
   factory MomDiaryDto.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> doc,
   ) {
-    final data = doc.data()!;
+    final data = doc.data();
+    if (data == null) {
+      throw StateError('Document data is null for ${doc.reference.path}');
+    }
     final date = _extractDate(data, doc.id, doc.reference.path);
     final content =
         _readString(data['content'] ?? data['memo'] ?? data['note']);
