@@ -11,6 +11,7 @@ import 'package:babymom_diary/src/core/preferences/shared_preferences_provider.d
 import 'package:babymom_diary/src/core/router/app_router.dart';
 import 'package:babymom_diary/src/core/theme/app_theme_provider.dart';
 import 'package:babymom_diary/src/features/ads/infrastructure/services/admob_service.dart';
+import 'package:babymom_diary/src/features/ads/application/services/banner_ad_manager.dart';
 import 'package:babymom_diary/src/features/menu/children/application/children_local_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
@@ -79,6 +80,7 @@ class App extends ConsumerStatefulWidget {
 
 class _AppState extends ConsumerState<App> {
   String? _previousHouseholdId;
+  bool _adPreloadStarted = false;
 
   @override
   void initState() {
@@ -87,6 +89,25 @@ class _AppState extends ConsumerState<App> {
     // 最初のフレームが描画された後にATT許可をリクエスト
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AdMobService.requestATTPermission();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _preloadBannerAds();
+  }
+
+  /// 全画面分のバナー広告をプリロードする
+  void _preloadBannerAds() {
+    if (_adPreloadStarted) return;
+    _adPreloadStarted = true;
+
+    // 全スロットのバナー広告をプリロード（ATT許可と並行して実行）
+    final screenWidth = MediaQuery.of(context).size.width;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final manager = ref.read(bannerAdManagerProvider);
+      manager.preloadAll(screenWidth);
     });
   }
 
