@@ -233,13 +233,12 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
 
   /// 選択日付のリアルタイムデータを月間データにマージ
   void _mergeSelectedDateEventsIntoMonthly() {
-    final selectedDate = _normalizeDate(state.selectedDay);
+    // リアルタイムデータに含まれるイベントIDを取得
+    final selectedDateEventIds = _selectedDateEvents.map((e) => e.id).toSet();
 
-    // 月間イベントから選択日付のイベントを除去
+    // 月間イベントからリアルタイムデータと重複するイベントのみ除去
     final filteredMonthly = _monthlyEvents.where((e) {
-      final eventDate = _normalizeDate(e.start);
-      // 選択日付のイベントは除去（リアルタイムデータで置き換え）
-      return eventDate != selectedDate;
+      return !selectedDateEventIds.contains(e.id);
     }).toList();
 
     // 選択日付のリアルタイムデータをマージ
