@@ -1,11 +1,14 @@
-import '../../child_record.dart';
+import '../../domain/repositories/child_record_repository.dart';
 
 class DeleteRecord {
-  const DeleteRecord(this.repository);
+  const DeleteRecord(this._repository);
 
-  final ChildRecordRepository repository;
+  final ChildRecordRepository _repository;
 
-  Future<void> call(String childId, String id) {
-    return repository.deleteRecord(childId, id);
+  Future<void> call({
+    required String childId,
+    required String id,
+  }) {
+    return _repository.deleteRecord(childId, id);
   }
 }

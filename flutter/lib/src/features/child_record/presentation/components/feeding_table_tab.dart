@@ -117,12 +117,13 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
     final selectedDate = state.selectedDate;
 
     // ChildContext と selectedChildId が揃っている場合のみ記録を取得
+    final selectedChildId = childContext?.selectedChildId;
     final recordsAsync = (childContext != null &&
-            state.selectedChildId != null &&
-            state.selectedChildId!.isNotEmpty)
+            selectedChildId != null &&
+            selectedChildId.isNotEmpty)
         ? ref.watch(dailyRecordsProvider(DailyRecordsQuery(
             householdId: childContext.householdId,
-            childId: state.selectedChildId!,
+            childId: selectedChildId,
             date: selectedDate,
           )))
         : const AsyncValue<List<RecordItemModel>>.data(<RecordItemModel>[]);

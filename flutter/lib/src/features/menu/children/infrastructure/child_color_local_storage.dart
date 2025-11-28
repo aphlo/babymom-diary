@@ -28,7 +28,7 @@ class ChildColorLocalStorage {
   }
 
   String _toHex(Color c) =>
-      '#${c.value.toRadixString(16).padLeft(8, '0').substring(2)}';
+      '#${c.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
 
   Color _parseColor(String hex) {
     final cleaned = hex.replaceFirst('#', '');

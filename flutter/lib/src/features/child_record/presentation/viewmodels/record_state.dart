@@ -57,8 +57,6 @@ class RecordPageState {
   const RecordPageState({
     required this.selectedDate,
     required this.selectedTabIndex,
-    required this.selectedChildId,
-    required this.householdId,
     this.isProcessing = false,
     this.pendingUiEvent,
     this.activeDraft,
@@ -66,8 +64,6 @@ class RecordPageState {
 
   final DateTime selectedDate;
   final int selectedTabIndex;
-  final String? selectedChildId;
-  final String? householdId;
   final bool isProcessing;
   final RecordUiEvent? pendingUiEvent;
   final RecordDraft? activeDraft;
@@ -75,8 +71,6 @@ class RecordPageState {
   RecordPageState copyWith({
     DateTime? selectedDate,
     int? selectedTabIndex,
-    String? selectedChildId,
-    String? householdId,
     bool? isProcessing,
     RecordUiEvent? pendingUiEvent,
     RecordDraft? activeDraft,
@@ -84,8 +78,6 @@ class RecordPageState {
     return RecordPageState(
       selectedDate: selectedDate ?? this.selectedDate,
       selectedTabIndex: selectedTabIndex ?? this.selectedTabIndex,
-      selectedChildId: selectedChildId ?? this.selectedChildId,
-      householdId: householdId ?? this.householdId,
       isProcessing: isProcessing ?? this.isProcessing,
       pendingUiEvent: pendingUiEvent,
       activeDraft: activeDraft,
@@ -98,8 +90,6 @@ class RecordPageState {
     return RecordPageState(
       selectedDate: normalized,
       selectedTabIndex: 0,
-      selectedChildId: null,
-      householdId: null,
       isProcessing: false,
       pendingUiEvent: null,
       activeDraft: null,

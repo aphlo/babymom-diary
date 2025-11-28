@@ -1,10 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/firebase/household_service.dart' as fbcore;
 import '../../infrastructure/sources/record_firestore_data_source.dart';
 import '../mappers/record_ui_mapper.dart';
 import '../models/record_item_model.dart';
+
+part 'daily_records_provider.g.dart';
 
 /// 日別の記録を取得するためのクエリパラメータ
 @immutable
@@ -51,13 +53,13 @@ class DailyRecordsQuery {
 ///   date: selectedDate,
 /// )));
 /// ```
-final dailyRecordsProvider = StreamProvider.autoDispose
-    .family<List<RecordItemModel>, DailyRecordsQuery>((ref, query) {
-  final db = ref.watch(fbcore.firebaseFirestoreProvider);
-  final dataSource = RecordFirestoreDataSource(db, query.householdId);
+@riverpod
+Stream<List<RecordItemModel>> dailyRecords(Ref ref, DailyRecordsQuery query) {
+  final dataSource =
+      RecordFirestoreDataSource(FirebaseFirestore.instance, query.householdId);
   const mapper = RecordUiMapper();
 
   return dataSource.watchForDay(query.childId, query.date).map(
         (records) => records.map(mapper.toUiModel).toList(),
       );
-});
+}

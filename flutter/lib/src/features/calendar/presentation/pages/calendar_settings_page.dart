@@ -47,32 +47,28 @@ class CalendarSettingsPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   Card(
-                    child: Column(
-                      children: [
-                        RadioListTile<bool>(
-                          title: const Text('月曜日'),
-                          subtitle: const Text('月曜日から週が始まります'),
-                          value: true,
-                          groupValue: state.settings.startingDayOfWeek,
-                          onChanged: (value) {
-                            if (value != null) {
-                              viewModel.updateStartingDayOfWeek(value);
-                            }
-                          },
-                        ),
-                        const Divider(height: 1),
-                        RadioListTile<bool>(
-                          title: const Text('日曜日'),
-                          subtitle: const Text('日曜日から週が始まります'),
-                          value: false,
-                          groupValue: state.settings.startingDayOfWeek,
-                          onChanged: (value) {
-                            if (value != null) {
-                              viewModel.updateStartingDayOfWeek(value);
-                            }
-                          },
-                        ),
-                      ],
+                    child: RadioGroup<bool>(
+                      groupValue: state.settings.startingDayOfWeek,
+                      onChanged: (value) {
+                        if (value != null) {
+                          viewModel.updateStartingDayOfWeek(value);
+                        }
+                      },
+                      child: Column(
+                        children: [
+                          RadioListTile<bool>(
+                            title: const Text('月曜日'),
+                            subtitle: const Text('月曜日から週が始まります'),
+                            value: true,
+                          ),
+                          const Divider(height: 1),
+                          RadioListTile<bool>(
+                            title: const Text('日曜日'),
+                            subtitle: const Text('日曜日から週が始まります'),
+                            value: false,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),

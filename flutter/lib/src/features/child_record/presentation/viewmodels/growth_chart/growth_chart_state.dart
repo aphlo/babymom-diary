@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../menu/children/domain/entities/child_summary.dart';
-import '../../child_record.dart';
-import '../models/growth_chart_data.dart';
+import '../../../../menu/children/domain/entities/child_summary.dart';
+import '../../../child_record.dart';
+import '../../models/growth_chart_data.dart';
 
 class GrowthChartState {
   const GrowthChartState({

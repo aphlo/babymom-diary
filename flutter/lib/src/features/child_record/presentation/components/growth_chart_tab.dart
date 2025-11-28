@@ -8,7 +8,7 @@ import '../../child_record.dart';
 import '../models/growth_chart_data.dart';
 import '../viewmodels/record_view_model.dart';
 import '../widgets/growth_chart.dart';
-import '../viewmodels/growth_chart_view_model.dart';
+import '../viewmodels/growth_chart/growth_chart_view_model.dart';
 import '../widgets/growth_measurement_sheet.dart';
 import '../pages/growth_record_list_page.dart';
 

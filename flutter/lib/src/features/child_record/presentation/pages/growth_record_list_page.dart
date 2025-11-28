@@ -8,7 +8,7 @@ import '../../../ads/application/services/banner_ad_manager.dart';
 import '../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../child_record.dart';
 import '../models/growth_measurement_point.dart';
-import '../viewmodels/growth_chart_view_model.dart';
+import '../viewmodels/growth_chart/growth_chart_view_model.dart';
 import '../widgets/growth_measurement_sheet.dart';
 
 class GrowthRecordListPage extends ConsumerWidget {

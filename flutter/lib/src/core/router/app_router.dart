@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../analytics/analytics_service.dart';
 import '../../features/child_record/presentation/pages/record_table_page.dart';
-import '../../features/child_record/presentation/pages/growth_chart_settings_page.dart';
+import '../../features/menu/growth_chart_settings/presentation/pages/growth_chart_settings_page.dart';
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
 import '../../features/mom_record/presentation/pages/mom_record_page.dart';
 import '../../features/calendar/presentation/pages/calendar_page.dart';

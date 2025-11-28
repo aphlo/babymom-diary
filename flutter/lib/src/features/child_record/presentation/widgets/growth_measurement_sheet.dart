@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../child_record.dart';
 import '../models/growth_measurement_point.dart';
-import '../viewmodels/growth_chart_view_model.dart';
+import '../viewmodels/growth_chart/growth_chart_view_model.dart';
 
 Future<void> showHeightRecordSheet({
   required BuildContext context,
