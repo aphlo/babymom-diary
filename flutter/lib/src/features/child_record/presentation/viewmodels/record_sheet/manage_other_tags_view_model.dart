@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
-import '../record_view_model.dart';
+import '../../providers/record_tag_controller.dart';
 
 @immutable
 class ManageOtherTagsState {
@@ -32,18 +33,28 @@ class ManageOtherTagsState {
   }
 }
 
-final manageOtherTagsViewModelProvider = AutoDisposeStateNotifierProvider<
-    ManageOtherTagsViewModel, ManageOtherTagsState>((ref) {
-  return ManageOtherTagsViewModel(ref);
+/// タグ管理画面の ViewModel
+///
+/// 使用例:
+/// ```dart
+/// final viewModel = ref.watch(manageOtherTagsViewModelProvider(householdId));
+/// final notifier = ref.read(manageOtherTagsViewModelProvider(householdId).notifier);
+/// ```
+final manageOtherTagsViewModelProvider = StateNotifierProvider.autoDispose
+    .family<ManageOtherTagsViewModel, ManageOtherTagsState, String>(
+        (ref, householdId) {
+  return ManageOtherTagsViewModel(ref, householdId);
 });
 
 class ManageOtherTagsViewModel extends StateNotifier<ManageOtherTagsState> {
-  ManageOtherTagsViewModel(this._ref) : super(const ManageOtherTagsState());
+  ManageOtherTagsViewModel(this._ref, this._householdId)
+      : super(const ManageOtherTagsState());
 
   final Ref _ref;
+  final String _householdId;
 
   List<String> get _currentTags =>
-      _ref.read(recordViewModelProvider).otherTagsAsync.valueOrNull ??
+      _ref.read(recordTagControllerProvider(_householdId)).value ??
       const <String>[];
 
   void updateInput(String value) {
@@ -72,7 +83,9 @@ class ManageOtherTagsViewModel extends StateNotifier<ManageOtherTagsState> {
 
     state = state.copyWith(isSubmitting: true, errorMessage: null);
     try {
-      await _ref.read(recordViewModelProvider.notifier).addTag(candidate);
+      await _ref
+          .read(recordTagControllerProvider(_householdId).notifier)
+          .add(candidate);
       if (!mounted) return;
       state = state.copyWith(input: '');
     } finally {
@@ -88,7 +101,9 @@ class ManageOtherTagsViewModel extends StateNotifier<ManageOtherTagsState> {
     }
     state = state.copyWith(isSubmitting: true);
     try {
-      await _ref.read(recordViewModelProvider.notifier).removeTag(tag);
+      await _ref
+          .read(recordTagControllerProvider(_householdId).notifier)
+          .remove(tag);
     } finally {
       if (mounted) {
         state = state.copyWith(isSubmitting: false);

@@ -158,7 +158,7 @@ class _AgeRangeTabs extends StatelessWidget {
     final theme = Theme.of(context);
     const selectedColor = AppColors.primary;
     final unselectedColor = Colors.white;
-    final borderColor = selectedColor.withOpacity(0.35);
+    final borderColor = selectedColor.withValues(alpha: 0.35);
     final borderRadius = BorderRadius.circular(12);
     return Container(
       decoration: BoxDecoration(
@@ -167,7 +167,7 @@ class _AgeRangeTabs extends StatelessWidget {
         border: Border.all(color: borderColor, width: 1.1),
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.05),
+            color: theme.shadowColor.withValues(alpha: 0.05),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -431,7 +431,8 @@ class _EmptyPlaceholder extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon,
-              size: 48, color: theme.colorScheme.primary.withOpacity(0.6)),
+              size: 48,
+              color: theme.colorScheme.primary.withValues(alpha: 0.6)),
           const SizedBox(height: 12),
           Text(
             title,

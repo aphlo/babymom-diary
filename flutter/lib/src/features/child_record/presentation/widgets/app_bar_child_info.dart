@@ -108,19 +108,19 @@ class AppBarChildInfo extends ConsumerWidget {
         }
 
         // ストリームでデータを受信済みの場合、それを優先（空リストも含む）
-        final streamValue = streamChildren.valueOrNull;
+        final streamValue = streamChildren.value;
         if (streamValue != null) {
           return buildWithChildren(streamValue);
         }
 
         // ストリームがまだロード中の場合、ローカルキャッシュを使用
-        final localChildren = localChildrenState.valueOrNull;
+        final localChildren = localChildrenState.value;
         if (localChildren != null && localChildren.isNotEmpty) {
           return buildWithChildren(localChildren);
         }
 
         // ローカルキャッシュも空の場合、スナップショットを使用
-        final snapshotValue = snapshotState.valueOrNull;
+        final snapshotValue = snapshotState.value;
         if (snapshotValue != null) {
           return buildWithChildren([snapshotValue]);
         }

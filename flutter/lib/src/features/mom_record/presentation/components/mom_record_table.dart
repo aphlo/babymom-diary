@@ -87,7 +87,7 @@ class _MomRecordTableState extends State<MomRecordTable> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final borderColor = theme.dividerColor.withOpacity(0.6);
+    final borderColor = theme.dividerColor.withValues(alpha: 0.6);
 
     // スクロール位置保存用のキーを作成
     final firstRecord = widget.records.isNotEmpty ? widget.records.first : null;

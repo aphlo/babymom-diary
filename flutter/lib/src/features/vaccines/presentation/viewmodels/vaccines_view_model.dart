@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import 'package:babymom_diary/src/features/vaccines/application/usecases/get_vaccine_master.dart';
 import 'package:babymom_diary/src/features/vaccines/application/vaccine_catalog_providers.dart';
@@ -64,8 +65,8 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
       (previous, next) {
         if (!mounted) return;
 
-        final previousContext = previous?.valueOrNull;
-        final currentContext = next.valueOrNull;
+        final previousContext = previous?.value;
+        final currentContext = next.value;
 
         if (currentContext == null) return;
 

@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../application/usecases/add_record.dart';
 import '../../application/usecases/delete_record.dart';
@@ -10,28 +10,21 @@ import '../../infrastructure/repositories/child_record_repository_impl.dart';
 import '../../infrastructure/sources/record_firestore_data_source.dart';
 import '../../../menu/children/application/child_context_provider.dart';
 import '../../../menu/children/application/selected_child_provider.dart';
-import '../../../menu/children/data/infrastructure/child_firestore_data_source.dart';
+import '../../../menu/children/presentation/providers/ensure_active_child_provider.dart';
 import '../../../../core/firebase/household_service.dart' as fbcore;
 import '../mappers/record_ui_mapper.dart';
 import '../models/record_draft.dart';
 import '../models/record_item_model.dart';
 import 'record_state.dart';
 
-const String _tagsCollectionName = 'tags';
-
 final recordUiMapperProvider = Provider<RecordUiMapper>((_) {
   return const RecordUiMapper();
 });
 
-final _recordFirestoreDataSourceProvider =
-    Provider.family<RecordFirestoreDataSource, String>((ref, hid) {
-  final db = ref.watch(fbcore.firebaseFirestoreProvider);
-  return RecordFirestoreDataSource(db, hid);
-});
-
 final childRecordRepositoryProvider =
     Provider.family<ChildRecordRepository, String>((ref, hid) {
-  final remote = ref.watch(_recordFirestoreDataSourceProvider(hid));
+  final db = ref.watch(fbcore.firebaseFirestoreProvider);
+  final remote = RecordFirestoreDataSource(db, hid);
   return ChildRecordRepositoryImpl(remote: remote);
 });
 
@@ -53,30 +46,20 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
 
   final Ref _ref;
   final RecordUiMapper _mapper;
-  StreamSubscription<List<Record>>? _recordsSubscription;
-
-  FirebaseFirestore get _db => _ref.read(fbcore.firebaseFirestoreProvider);
-
-  @override
-  void dispose() {
-    _recordsSubscription?.cancel();
-    super.dispose();
-  }
 
   void _initialize() {
     _listenToChildContext();
-    unawaited(_loadInitialData());
   }
 
-  /// ChildContextProviderを監視し、householdId/子供/子供リストの変更に対応
+  /// ChildContextProviderを監視し、householdId/子供の変更に対応
   void _listenToChildContext() {
     _ref.listen<AsyncValue<ChildContext>>(
       childContextProvider,
       (previous, next) {
         if (!mounted) return;
 
-        final previousContext = previous?.valueOrNull;
-        final currentContext = next.valueOrNull;
+        final previousContext = previous?.value;
+        final currentContext = next.value;
 
         if (currentContext == null) return;
 
@@ -86,46 +69,19 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
             previousContext?.selectedChildId != currentContext.selectedChildId;
 
         // householdIdが変わった場合
-        if (householdChanged && previousContext != null) {
-          _recordsSubscription?.cancel();
-          state = state.copyWith(
-            householdId: currentContext.householdId,
-            selectedChildId: currentContext.selectedChildId,
-            recordsAsync: const AsyncValue<List<RecordItemModel>>.loading(),
-          );
-          // タグを再読み込み
-          unawaited(_loadOtherTags(currentContext.householdId));
-        } else if (householdChanged) {
-          // 初回ロード時
+        if (householdChanged) {
           state = state.copyWith(
             householdId: currentContext.householdId,
             selectedChildId: currentContext.selectedChildId,
           );
-          // タグをロード
-          unawaited(_loadOtherTags(currentContext.householdId));
         }
 
-        // 子供が変わった場合（削除による自動選択を含む）
-        if (childChanged || householdChanged) {
-          final childId = currentContext.selectedChildId;
+        // 子供が変わった場合
+        if (childChanged && !householdChanged) {
           state = state.copyWith(
-            selectedChildId: childId,
+            selectedChildId: currentContext.selectedChildId,
             pendingUiEvent: null,
           );
-
-          if (childId == null || childId.isEmpty) {
-            _recordsSubscription?.cancel();
-            state = state.copyWith(
-              recordsAsync: const AsyncValue<List<RecordItemModel>>.data(
-                  <RecordItemModel>[]),
-            );
-          } else {
-            _subscribeToRecords(
-              householdId: currentContext.householdId,
-              childId: childId,
-              date: state.selectedDate,
-            );
-          }
         }
       },
       fireImmediately: true,
@@ -142,44 +98,6 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     );
   }
 
-  Future<void> _loadInitialData() async {
-    final previousRecords = state.recordsAsync;
-    final previousTags = state.otherTagsAsync;
-    state = state.copyWith(
-      recordsAsync: const AsyncValue<List<RecordItemModel>>.loading()
-          .copyWithPrevious(previousRecords),
-      otherTagsAsync: const AsyncValue<List<String>>.loading()
-          .copyWithPrevious(previousTags),
-    );
-    // 初期データは_listenToChildContextで取得される
-    // ここではタグのロードのみ行う
-  }
-
-  Future<void> refresh() async {
-    final householdId = await _requireHouseholdId();
-    if (householdId == null) {
-      return;
-    }
-    final childId = await _ensureActiveChild(
-      householdId: householdId,
-      watchSelected: false,
-    );
-    if (childId == null) {
-      state = state.copyWith(
-        recordsAsync:
-            const AsyncValue<List<RecordItemModel>>.data(<RecordItemModel>[]),
-      );
-      return;
-    }
-    // Streamを再購読してリフレッシュ
-    _subscribeToRecords(
-      householdId: householdId,
-      childId: childId,
-      date: state.selectedDate,
-    );
-    await _loadOtherTags(householdId);
-  }
-
   Future<void> onSelectDate(DateTime date) async {
     final normalized = DateTime(date.year, date.month, date.day);
     if (normalized.isAtSameMomentAs(state.selectedDate)) {
@@ -189,15 +107,7 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
       selectedDate: normalized,
       pendingUiEvent: null,
     );
-    final householdId = await _requireHouseholdId();
-    final childId = state.selectedChildId;
-    if (householdId != null && childId != null && childId.isNotEmpty) {
-      _subscribeToRecords(
-        householdId: householdId,
-        childId: childId,
-        date: normalized,
-      );
-    }
+    // 日付変更で Widget 側の dailyRecordsProvider が自動的に再購読
   }
 
   Future<void> addOrUpdateRecord(RecordDraft draft) async {
@@ -205,10 +115,7 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     if (householdId == null) {
       return;
     }
-    final childId = await _ensureActiveChild(
-      householdId: householdId,
-      watchSelected: false,
-    );
+    final childId = await _ensureActiveChild(householdId);
     if (childId == null) {
       state = state.copyWith(
         pendingUiEvent: const RecordUiEvent.showMessage('子どもの情報が見つかりません'),
@@ -251,10 +158,7 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     if (householdId == null) {
       return;
     }
-    final childId = await _ensureActiveChild(
-      householdId: householdId,
-      watchSelected: false,
-    );
+    final childId = await _ensureActiveChild(householdId);
     if (childId == null) {
       state = state.copyWith(
         pendingUiEvent: const RecordUiEvent.showMessage('子どもの情報が見つかりません'),
@@ -276,76 +180,6 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
       state = state.copyWith(
         isProcessing: false,
         pendingUiEvent: const RecordUiEvent.showMessage('記録の削除に失敗しました'),
-      );
-    }
-  }
-
-  Future<void> addTag(String tag) async {
-    final normalized = tag.trim();
-    if (normalized.isEmpty) {
-      state = state.copyWith(
-        pendingUiEvent: const RecordUiEvent.showMessage('タグ名を入力してください'),
-      );
-      return;
-    }
-    final householdId = await _requireHouseholdId();
-    if (householdId == null) {
-      return;
-    }
-
-    final currentTags =
-        List.of(state.otherTagsAsync.valueOrNull ?? const <String>[]);
-    if (currentTags.contains(normalized)) {
-      state = state.copyWith(
-        pendingUiEvent: const RecordUiEvent.showMessage('既に同じタグが登録されています'),
-      );
-      return;
-    }
-
-    try {
-      await _tagCollection(householdId).doc(normalized).set({
-        'name': normalized,
-        'createdAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-      if (!mounted) return;
-      currentTags.add(normalized);
-      currentTags.sort();
-      state = state.copyWith(
-        otherTagsAsync: AsyncValue.data(
-          List.unmodifiable(currentTags),
-        ),
-      );
-    } catch (_) {
-      if (!mounted) return;
-      state = state.copyWith(
-        pendingUiEvent: const RecordUiEvent.showMessage('タグの追加に失敗しました'),
-      );
-    }
-  }
-
-  Future<void> removeTag(String tag) async {
-    final householdId = await _requireHouseholdId();
-    if (householdId == null) {
-      return;
-    }
-    final currentTags =
-        List.of(state.otherTagsAsync.valueOrNull ?? const <String>[]);
-    if (!currentTags.contains(tag)) {
-      return;
-    }
-    try {
-      await _tagCollection(householdId).doc(tag).delete();
-      if (!mounted) return;
-      currentTags.remove(tag);
-      state = state.copyWith(
-        otherTagsAsync: AsyncValue.data(
-          List.unmodifiable(currentTags),
-        ),
-      );
-    } catch (_) {
-      if (!mounted) return;
-      state = state.copyWith(
-        pendingUiEvent: const RecordUiEvent.showMessage('タグの削除に失敗しました'),
       );
     }
   }
@@ -385,6 +219,7 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
   void openSlotDetails({
     required int hour,
     required RecordType type,
+    required List<RecordItemModel> allRecords,
   }) {
     // 子供が登録されているかチェック
     final childId = state.selectedChildId;
@@ -397,7 +232,7 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
       return;
     }
 
-    final records = state.records
+    final records = allRecords
         .where((record) => record.type == type && record.at.hour == hour)
         .toList(growable: false)
       ..sort((a, b) => a.at.compareTo(b.at));
@@ -436,126 +271,25 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
     }
   }
 
-  Future<String?> _ensureActiveChild({
-    required String householdId,
-    required bool watchSelected,
-  }) async {
-    final selected = watchSelected
-        ? await _ref.watch(selectedChildControllerProvider.future)
-        : await _ref.read(selectedChildControllerProvider.future);
+  Future<String?> _ensureActiveChild(String householdId) async {
+    final currentSelected =
+        await _ref.read(selectedChildControllerProvider.future);
+    final useCase = _ref.read(ensureActiveChildProvider);
 
-    final ds = ChildFirestoreDataSource(
-      _db,
-      householdId,
-    );
-
-    // 選択されている子どもが現在の世帯に存在するか確認
-    if (selected != null && selected.isNotEmpty) {
-      final childDoc = await ds
-          .childrenQuery()
-          .where(FieldPath.documentId, isEqualTo: selected)
-          .limit(1)
-          .get();
-      if (childDoc.docs.isNotEmpty) {
-        state = state.copyWith(selectedChildId: selected);
-        return selected;
-      }
-      // 子どもが現在の世帯に存在しない場合はリセット
-    }
-
-    // 世帯内の最初の子どもを選択
-    final snap = await ds.childrenQuery().limit(1).get();
-    if (snap.docs.isEmpty) {
-      await _ref.read(selectedChildControllerProvider.notifier).select(null);
-      state = state.copyWith(selectedChildId: null);
-      return null;
-    }
-    final firstId = snap.docs.first.id;
-    await _ref.read(selectedChildControllerProvider.notifier).select(firstId);
-    state = state.copyWith(selectedChildId: firstId);
-    return firstId;
-  }
-
-  void _subscribeToRecords({
-    required String householdId,
-    required String childId,
-    required DateTime date,
-    bool keepPrevious = true,
-  }) {
-    // 既存の購読をキャンセル
-    _recordsSubscription?.cancel();
-
-    if (!mounted) return;
-    final previous = state.recordsAsync;
-    const loading = AsyncValue<List<RecordItemModel>>.loading();
-    state = state.copyWith(
-      recordsAsync: keepPrevious ? loading.copyWithPrevious(previous) : loading,
-    );
-
-    final dataSource =
-        _ref.read(_recordFirestoreDataSourceProvider(householdId));
-    _recordsSubscription = dataSource.watchForDay(childId, date).listen(
-      (records) {
-        if (!mounted) return;
-        final items = records.map(_mapper.toUiModel).toList(growable: false);
-        state = state.copyWith(
-          recordsAsync: AsyncValue.data(items),
-        );
-      },
-      onError: (error, stackTrace) {
-        if (!mounted) return;
-        // Firestore権限エラーの場合はスナックバーを表示しない
-        // （世帯変更時に一時的に発生する可能性があるため）
-        final isPermissionError =
-            error.toString().contains('permission-denied') ||
-                error.toString().contains('PERMISSION_DENIED');
-        state = state.copyWith(
-          recordsAsync: AsyncValue.error(error, stackTrace),
-          pendingUiEvent: isPermissionError
-              ? null
-              : const RecordUiEvent.showMessage('記録の取得に失敗しました'),
-        );
+    final childId = await useCase(
+      householdId: householdId,
+      currentSelectedId: currentSelected,
+      onSelect: (id) async {
+        await _ref.read(selectedChildControllerProvider.notifier).select(id);
+        if (mounted) {
+          state = state.copyWith(selectedChildId: id);
+        }
       },
     );
-  }
 
-  Future<void> _loadOtherTags(String householdId) async {
-    if (!mounted) return;
-    final previous = state.otherTagsAsync;
-    if (!mounted) return;
-    state = state.copyWith(
-      otherTagsAsync:
-          const AsyncValue<List<String>>.loading().copyWithPrevious(previous),
-    );
-    try {
-      final snap = await _tagCollection(householdId).orderBy('name').get();
-      final tags = snap.docs
-          .map((doc) => (doc.data()['name'] as String?)?.trim())
-          .whereType<String>()
-          .where((name) => name.isNotEmpty)
-          .toList(growable: true);
-      tags.sort();
-      if (!mounted) return;
-      state = state.copyWith(
-        otherTagsAsync: AsyncValue.data(
-          List.unmodifiable(tags),
-        ),
-      );
-    } catch (error, stackTrace) {
-      if (!mounted) return;
-      state = state.copyWith(
-        otherTagsAsync: AsyncValue.error(error, stackTrace),
-        pendingUiEvent: const RecordUiEvent.showMessage('タグの取得に失敗しました'),
-      );
+    if (childId != null && mounted) {
+      state = state.copyWith(selectedChildId: childId);
     }
-  }
-
-  CollectionReference<Map<String, dynamic>> _tagCollection(
-    String householdId,
-  ) {
-    return _db
-        .collection('households')
-        .doc(householdId)
-        .collection(_tagsCollectionName);
+    return childId;
   }
 }

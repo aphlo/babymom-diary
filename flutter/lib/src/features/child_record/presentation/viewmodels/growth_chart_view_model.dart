@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../../core/firebase/household_service.dart' as fbcore;
 import '../../../menu/children/application/child_context_provider.dart';
@@ -116,7 +117,7 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
 
         next.when(
           data: (context) {
-            final previousContext = previous?.valueOrNull;
+            final previousContext = previous?.value;
 
             // householdIdが変わった場合
             if (previousContext?.householdId != context.householdId) {

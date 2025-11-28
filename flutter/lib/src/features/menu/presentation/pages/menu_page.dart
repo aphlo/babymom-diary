@@ -26,7 +26,7 @@ class MenuPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncHid = ref.watch(currentHouseholdIdProvider);
-    final membershipType = ref.watch(currentMembershipTypeProvider).valueOrNull;
+    final membershipType = ref.watch(currentMembershipTypeProvider).value;
     final isOwner = membershipType != 'member';
     return Scaffold(
       backgroundColor: AppColors.pageBackground,

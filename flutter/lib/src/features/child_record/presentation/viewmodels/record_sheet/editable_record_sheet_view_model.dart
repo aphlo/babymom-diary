@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../child_record.dart';
 import '../../models/record_draft.dart';
+import '../../providers/record_tag_controller.dart';
 import '../record_view_model.dart';
 
 class EditableRecordSheetViewModelArgs {
@@ -87,10 +89,8 @@ class EditableRecordSheetState {
   }
 }
 
-final editableRecordSheetViewModelProvider =
-    AutoDisposeStateNotifierProviderFamily<
-        EditableRecordSheetViewModel,
-        EditableRecordSheetState,
+final editableRecordSheetViewModelProvider = StateNotifierProvider.autoDispose
+    .family<EditableRecordSheetViewModel, EditableRecordSheetState,
         EditableRecordSheetViewModelArgs>((ref, args) {
   return EditableRecordSheetViewModel(
     ref,
@@ -294,10 +294,13 @@ class EditableRecordSheetViewModel
   }
 
   RecordDraft _buildOtherRecord(RecordDraft base, DateTime at) {
-    final availableTags =
-        _ref.read(recordViewModelProvider).otherTagsAsync.valueOrNull;
-    if (availableTags != null) {
-      syncSelectedTags(availableTags);
+    final householdId = _ref.read(recordViewModelProvider).householdId;
+    if (householdId != null) {
+      final availableTags =
+          _ref.read(recordTagControllerProvider(householdId)).value;
+      if (availableTags != null) {
+        syncSelectedTags(availableTags);
+      }
     }
     final tags = state.selectedTags.toList(growable: false);
     return base.copyWith(

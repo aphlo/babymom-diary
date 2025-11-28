@@ -66,10 +66,10 @@ class DoseStatusBadge extends StatelessWidget {
         highlightWithPrimary ? theme.colorScheme.primary : baseColor;
     final Color effectiveColor = isActive ? activeColor : baseColor;
     final Color borderColor =
-        isActive ? effectiveColor : baseColor.withOpacity(0.6);
+        isActive ? effectiveColor : baseColor.withValues(alpha: 0.6);
     final Color backgroundColor = isActive
-        ? effectiveColor.withOpacity(0.15)
-        : baseColor.withOpacity(0.08);
+        ? effectiveColor.withValues(alpha: 0.15)
+        : baseColor.withValues(alpha: 0.08);
     final TextStyle textStyle = theme.textTheme.labelSmall?.copyWith(
           fontWeight: FontWeight.w700,
           color: borderColor,

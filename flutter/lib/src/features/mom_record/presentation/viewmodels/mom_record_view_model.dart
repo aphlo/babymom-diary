@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import 'package:babymom_diary/src/core/firebase/household_service.dart'
     as fbcore;
@@ -13,19 +14,19 @@ import '../models/mom_record_ui_model.dart';
 import 'mom_record_page_state.dart';
 
 final momRecordViewModelProvider =
-    AutoDisposeStateNotifierProvider<MomRecordViewModel, MomRecordPageState>(
-  (ref) => MomRecordViewModel(ref),
+    StateNotifierProvider.autoDispose<MomRecordViewModel, MomRecordPageState>(
+  (ref) {
+    ref.keepAlive();
+    return MomRecordViewModel(ref);
+  },
 );
 
 class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
-  MomRecordViewModel(this._ref)
-      : _keepAliveLink = _ref.keepAlive(),
-        super(MomRecordPageState.initial()) {
+  MomRecordViewModel(this._ref) : super(MomRecordPageState.initial()) {
     _loadMonthlyRecords(state.focusMonth);
   }
 
   final Ref _ref;
-  final KeepAliveLink _keepAliveLink;
   GetMomMonthlyRecords? _getUseCase;
   WatchMomRecordForDate? _watchUseCase;
   SaveMomDailyRecord? _saveUseCase;
@@ -213,7 +214,6 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
   @override
   void dispose() {
     _editingRecordSubscription?.cancel();
-    _keepAliveLink.close();
     super.dispose();
   }
 }

@@ -133,7 +133,7 @@ class _SupportSpeechBubble extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -154,7 +154,7 @@ class _SupportSpeechBubble extends StatelessWidget {
               child: Icon(
                 Icons.close,
                 size: 16,
-                color: onBubble.withOpacity(0.7),
+                color: onBubble.withValues(alpha: 0.7),
               ),
             ),
           ),

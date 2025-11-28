@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../application/usecases/get_reservation_group.dart';
 import '../../application/usecases/get_vaccine_by_id.dart';

@@ -25,7 +25,7 @@ ThemeData buildTheme({Color? childColor}) {
       fillColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) return AppColors.primary;
         if (states.contains(WidgetState.disabled)) {
-          return scheme.onSurface.withOpacity(0.38);
+          return scheme.onSurface.withValues(alpha: 0.38);
         }
         return scheme.onSurfaceVariant;
       }),
@@ -36,25 +36,26 @@ ThemeData buildTheme({Color? childColor}) {
       surfaceTintColor: Colors.transparent,
       elevation: 8,
       scrolledUnderElevation: 12,
-      shadowColor: Colors.black.withOpacity(0.35),
+      shadowColor: Colors.black.withValues(alpha: 0.35),
       shape: Border(
-        bottom: BorderSide(color: Colors.black.withOpacity(0.12), width: 1),
+        bottom:
+            BorderSide(color: Colors.black.withValues(alpha: 0.12), width: 1),
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: appBarColor, // 子どもの色を使用
       surfaceTintColor: Colors.transparent,
-      indicatorColor: scheme.onPrimary.withOpacity(0.20),
+      indicatorColor: scheme.onPrimary.withValues(alpha: 0.20),
       iconTheme: WidgetStateProperty.resolveWith(
         (states) => IconThemeData(
-          color: scheme.onPrimary
-              .withOpacity(states.contains(WidgetState.selected) ? 1.0 : 0.85),
+          color: scheme.onPrimary.withValues(
+              alpha: states.contains(WidgetState.selected) ? 1.0 : 0.85),
         ),
       ),
       labelTextStyle: WidgetStateProperty.resolveWith(
         (states) => TextStyle(
-          color: scheme.onPrimary
-              .withOpacity(states.contains(WidgetState.selected) ? 1.0 : 0.85),
+          color: scheme.onPrimary.withValues(
+              alpha: states.contains(WidgetState.selected) ? 1.0 : 0.85),
           fontWeight: states.contains(WidgetState.selected)
               ? FontWeight.w600
               : FontWeight.w500,

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import 'package:babymom_diary/src/features/calendar/application/calendar_event_controller.dart';
 import 'package:babymom_diary/src/features/calendar/application/mappers/vaccination_to_calendar_event_mapper.dart';
@@ -20,7 +21,7 @@ import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_
 import 'package:babymom_diary/src/features/vaccines/domain/repositories/vaccination_record_repository.dart';
 
 final calendarViewModelProvider =
-    AutoDisposeStateNotifierProvider<CalendarViewModel, CalendarState>(
+    StateNotifierProvider.autoDispose<CalendarViewModel, CalendarState>(
   (ref) {
     final repository = ref.watch(calendarEventRepositoryProvider);
     final settingsRepository = ref.watch(calendarSettingsRepositoryProvider);
@@ -82,8 +83,8 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
       (previous, next) {
         if (!mounted) return;
 
-        final previousContext = previous?.valueOrNull;
-        final currentContext = next.valueOrNull;
+        final previousContext = previous?.value;
+        final currentContext = next.value;
 
         if (currentContext == null) {
           // error/loadingの場合
@@ -153,7 +154,7 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     _ref.listen<AsyncValue<List<ChildSummary>>>(
       childrenLocalProvider(householdId),
       (previous, next) {
-        final value = next.valueOrNull ?? const <ChildSummary>[];
+        final value = next.value ?? const <ChildSummary>[];
         _localChildren = value;
         _rebuildAvailableChildren();
       },
@@ -283,7 +284,7 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
 
     // ローディング状態の場合は常に更新する
     // または状態が実際に変更された場合のみ更新
-    final currentEvents = state.eventsAsync.valueOrNull ?? [];
+    final currentEvents = state.eventsAsync.value ?? [];
     final isLoading = state.eventsAsync.isLoading;
     final hasChanged = combinedEvents.length != currentEvents.length ||
         !_eventsEqual(combinedEvents, currentEvents);
