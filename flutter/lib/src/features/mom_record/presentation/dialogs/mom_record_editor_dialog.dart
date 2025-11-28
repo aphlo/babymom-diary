@@ -35,6 +35,7 @@ class MomRecordEditorDialog extends ConsumerStatefulWidget {
 class _MomRecordEditorDialogState extends ConsumerState<MomRecordEditorDialog> {
   late final TextEditingController _temperatureController;
   late final TextEditingController _memoController;
+  late final MomRecordViewModel _viewModel;
   LochiaAmount? _selectedLochiaAmount;
   LochiaColor? _selectedLochiaColor;
   SymptomIntensity? _selectedBreastFirmness;
@@ -58,10 +59,16 @@ class _MomRecordEditorDialogState extends ConsumerState<MomRecordEditorDialog> {
     _selectedBreastFirmness = record.breastFirmness;
     _selectedBreastPain = record.breastPain;
     _selectedBreastRedness = record.breastRedness;
+
+    // 編集中の日付をリアルタイムで監視開始
+    _viewModel = ref.read(momRecordViewModelProvider.notifier);
+    _viewModel.startEditingRecord(record.date);
   }
 
   @override
   void dispose() {
+    // 編集終了時にリアルタイム監視を停止
+    _viewModel.stopEditingRecord();
     _temperatureController.dispose();
     _memoController.dispose();
     super.dispose();

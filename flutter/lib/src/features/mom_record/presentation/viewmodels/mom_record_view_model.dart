@@ -9,7 +9,6 @@ import '../../application/mom_record_controller.dart';
 import '../../application/usecases/get_mom_monthly_records.dart';
 import '../../application/usecases/save_mom_daily_record.dart';
 import '../../domain/entities/mom_daily_record.dart';
-import '../../domain/entities/mom_monthly_records.dart';
 import '../models/mom_record_ui_model.dart';
 import 'mom_record_page_state.dart';
 
@@ -22,18 +21,24 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
   MomRecordViewModel(this._ref)
       : _keepAliveLink = _ref.keepAlive(),
         super(MomRecordPageState.initial()) {
-    _subscribeToRecords(state.focusMonth);
+    _loadMonthlyRecords(state.focusMonth);
   }
 
   final Ref _ref;
   final KeepAliveLink _keepAliveLink;
-  WatchMomMonthlyRecords? _watchUseCase;
+  GetMomMonthlyRecords? _getUseCase;
+  WatchMomRecordForDate? _watchUseCase;
   SaveMomDailyRecord? _saveUseCase;
-  StreamSubscription<MomMonthlyRecords>? _recordsSubscription;
+  StreamSubscription<MomDailyRecord>? _editingRecordSubscription;
 
-  void _subscribeToRecords(DateTime month) {
-    _recordsSubscription?.cancel();
+  /// 現在編集中の日付（リアルタイム監視対象）
+  DateTime? _editingDate;
 
+  /// 月間記録のキャッシュ（UI更新用）
+  MomMonthlyRecordUiModel? _monthlyRecordsCache;
+
+  /// 月間記録を一度だけ取得（リアルタイム更新なし）
+  Future<void> _loadMonthlyRecords(DateTime month) async {
     final normalized = _normalizeMonth(month);
     if (!mounted) return;
     state = state.copyWith(
@@ -41,29 +46,16 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
       monthlyRecords: const AsyncValue.loading(),
     );
 
-    unawaited(_startSubscription(normalized));
-  }
-
-  Future<void> _startSubscription(DateTime month) async {
     try {
-      final useCase = await _requireWatchUseCase();
-      _recordsSubscription = useCase(
-        year: month.year,
-        month: month.month,
-      ).listen(
-        (result) {
-          if (!mounted) return;
-          final uiModel = MomMonthlyRecordUiModel.fromDomain(result);
-          state = state.copyWith(
-            monthlyRecords: AsyncValue.data(uiModel),
-          );
-        },
-        onError: (error, stackTrace) {
-          if (!mounted) return;
-          state = state.copyWith(
-            monthlyRecords: AsyncValue.error(error, stackTrace),
-          );
-        },
+      final useCase = await _requireGetUseCase();
+      final result = await useCase(
+        year: normalized.year,
+        month: normalized.month,
+      );
+      if (!mounted) return;
+      _monthlyRecordsCache = MomMonthlyRecordUiModel.fromDomain(result);
+      state = state.copyWith(
+        monthlyRecords: AsyncValue.data(_monthlyRecordsCache!),
       );
     } catch (error, stackTrace) {
       if (!mounted) return;
@@ -73,16 +65,75 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
     }
   }
 
+  /// 編集中の日付をリアルタイムで監視開始
+  Future<void> startEditingRecord(DateTime date) async {
+    _editingRecordSubscription?.cancel();
+    _editingDate = date;
+
+    try {
+      final useCase = await _requireWatchUseCase();
+      _editingRecordSubscription = useCase(date: date).listen(
+        (record) {
+          if (!mounted) return;
+          _updateRecordInCache(record);
+        },
+        onError: (error, stackTrace) {
+          // 編集中のエラーは無視（キャッシュデータを使用）
+        },
+      );
+    } catch (error) {
+      // UseCase取得エラーは無視
+    }
+  }
+
+  /// 編集終了時にリアルタイム監視を停止
+  void stopEditingRecord() {
+    _editingRecordSubscription?.cancel();
+    _editingRecordSubscription = null;
+    _editingDate = null;
+  }
+
+  /// キャッシュ内の特定日付のレコードを更新
+  void _updateRecordInCache(MomDailyRecord record) {
+    final cache = _monthlyRecordsCache;
+    if (cache == null) return;
+
+    // 同じ月のデータかチェック
+    if (record.date.year != state.focusMonth.year ||
+        record.date.month != state.focusMonth.month) {
+      return;
+    }
+
+    // キャッシュ内のレコードを更新
+    final updatedDays = cache.days.map((day) {
+      if (day.date.day == record.date.day) {
+        return MomDailyRecordUiModel.fromDomain(record);
+      }
+      return day;
+    }).toList();
+
+    _monthlyRecordsCache = MomMonthlyRecordUiModel(
+      year: cache.year,
+      month: cache.month,
+      days: updatedDays,
+    );
+    state = state.copyWith(
+      monthlyRecords: AsyncValue.data(_monthlyRecordsCache!),
+    );
+  }
+
   void goToPreviousMonth() {
+    stopEditingRecord();
     final current = state.focusMonth;
     final previousMonth = DateTime(current.year, current.month - 1);
-    _subscribeToRecords(previousMonth);
+    _loadMonthlyRecords(previousMonth);
   }
 
   void goToNextMonth() {
+    stopEditingRecord();
     final current = state.focusMonth;
     final nextMonth = DateTime(current.year, current.month + 1);
-    _subscribeToRecords(nextMonth);
+    _loadMonthlyRecords(nextMonth);
   }
 
   void onSelectTab(int index) {
@@ -94,23 +145,41 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
 
   /// エラー時の再読み込み用
   void reloadCurrentMonth() {
-    _subscribeToRecords(state.focusMonth);
+    _loadMonthlyRecords(state.focusMonth);
   }
 
   Future<void> saveRecord(MomDailyRecord record) async {
     final saveUseCase = await _requireSaveUseCase();
     await saveUseCase(record);
-    // Streamが自動更新するため手動リロードは不要
+    // 編集中の日付ならリアルタイム更新される
+    // そうでなければ手動で月間データを再取得
+    if (_editingDate == null ||
+        _editingDate!.day != record.date.day ||
+        _editingDate!.month != record.date.month ||
+        _editingDate!.year != record.date.year) {
+      _loadMonthlyRecords(state.focusMonth);
+    }
   }
 
-  Future<WatchMomMonthlyRecords> _requireWatchUseCase() async {
+  Future<GetMomMonthlyRecords> _requireGetUseCase() async {
+    final existing = _getUseCase;
+    if (existing != null) {
+      return existing;
+    }
+    final householdId = await _ensureHouseholdId();
+    final useCase = _ref.read(getMomMonthlyRecordsUseCaseProvider(householdId));
+    _getUseCase = useCase;
+    return useCase;
+  }
+
+  Future<WatchMomRecordForDate> _requireWatchUseCase() async {
     final existing = _watchUseCase;
     if (existing != null) {
       return existing;
     }
     final householdId = await _ensureHouseholdId();
     final useCase =
-        _ref.read(watchMomMonthlyRecordsUseCaseProvider(householdId));
+        _ref.read(watchMomRecordForDateUseCaseProvider(householdId));
     _watchUseCase = useCase;
     return useCase;
   }
@@ -143,7 +212,7 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
 
   @override
   void dispose() {
-    _recordsSubscription?.cancel();
+    _editingRecordSubscription?.cancel();
     _keepAliveLink.close();
     super.dispose();
   }

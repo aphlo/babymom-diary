@@ -37,27 +37,17 @@ class MomRecordRepositoryImpl implements MomRecordRepository {
   }
 
   @override
-  Stream<MomMonthlyRecords> watchMonthlyRecords({
-    required int year,
-    required int month,
+  Stream<MomDailyRecord> watchRecordForDate({
+    required DateTime date,
   }) {
-    return _remote.watchMonthlyRecords(year: year, month: month).map((dtos) {
-      final dtosByDay = <int, MomRecordDto>{
-        for (final dto in dtos) dto.date.day: dto,
-      };
-      final totalDays = DateTime(year, month + 1, 0).day;
-      final records = List<MomDailyRecord>.generate(totalDays, (index) {
-        final day = index + 1;
-        final dto = dtosByDay[day];
-        return MomDailyRecord(
-          date: DateTime(year, month, day),
-          temperatureCelsius: dto?.temperatureCelsius,
-          lochia: _toLochiaStatus(dto),
-          breast: _toBreastCondition(dto),
-          memo: dto?.memo,
-        );
-      });
-      return MomMonthlyRecords(year: year, month: month, records: records);
+    return _remote.watchRecordForDate(date: date).map((dto) {
+      return MomDailyRecord(
+        date: date,
+        temperatureCelsius: dto?.temperatureCelsius,
+        lochia: _toLochiaStatus(dto),
+        breast: _toBreastCondition(dto),
+        memo: dto?.memo,
+      );
     });
   }
 

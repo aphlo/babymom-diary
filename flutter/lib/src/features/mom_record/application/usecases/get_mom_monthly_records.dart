@@ -1,6 +1,8 @@
+import '../../domain/entities/mom_daily_record.dart';
 import '../../domain/entities/mom_monthly_records.dart';
 import '../../domain/repositories/mom_record_repository.dart';
 
+/// 月間記録を一度だけ取得するUseCase
 class GetMomMonthlyRecords {
   const GetMomMonthlyRecords(this._repository);
 
@@ -14,16 +16,15 @@ class GetMomMonthlyRecords {
   }
 }
 
-/// リアルタイム更新用のUseCase
-class WatchMomMonthlyRecords {
-  const WatchMomMonthlyRecords(this._repository);
+/// 特定の日付の記録をリアルタイムで監視するUseCase
+class WatchMomRecordForDate {
+  const WatchMomRecordForDate(this._repository);
 
   final MomRecordRepository _repository;
 
-  Stream<MomMonthlyRecords> call({
-    required int year,
-    required int month,
+  Stream<MomDailyRecord> call({
+    required DateTime date,
   }) {
-    return _repository.watchMonthlyRecords(year: year, month: month);
+    return _repository.watchRecordForDate(date: date);
   }
 }

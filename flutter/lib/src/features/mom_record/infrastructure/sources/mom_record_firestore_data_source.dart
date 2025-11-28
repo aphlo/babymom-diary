@@ -47,32 +47,16 @@ class MomRecordFirestoreDataSource {
         .toList(growable: false);
   }
 
-  /// リアルタイム更新用のStream版
-  Stream<List<MomRecordDto>> watchMonthlyRecords({
-    required int year,
-    required int month,
+  /// 特定の日付の記録をリアルタイムで監視
+  Stream<MomRecordDto?> watchRecordForDate({
+    required DateTime date,
   }) {
-    final start = DateTime(year, month, 1);
-    final endExclusive = DateTime(year, month + 1, 1);
-
-    final query = _collection
-        .where(
-          'date',
-          isGreaterThanOrEqualTo: Timestamp.fromDate(start),
-        )
-        .where(
-          'date',
-          isLessThan: Timestamp.fromDate(endExclusive),
-        )
-        .orderBy('date');
-
-    return query.snapshots().map((snapshot) {
-      if (snapshot.docs.isEmpty) {
-        return const <MomRecordDto>[];
+    final docId = DateFormat('yyyy-MM-dd').format(date);
+    return _collection.doc(docId).snapshots().map((snapshot) {
+      if (!snapshot.exists) {
+        return null;
       }
-      return snapshot.docs
-          .map(MomRecordDto.fromFirestore)
-          .toList(growable: false);
+      return MomRecordDto.fromFirestore(snapshot);
     });
   }
 

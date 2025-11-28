@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../domain/entities/mom_daily_record.dart';
 import '../../domain/entities/mom_monthly_records.dart';
 import '../../domain/value_objects/breast_condition.dart';
 import '../../domain/value_objects/lochia_status.dart';
@@ -70,6 +71,20 @@ class MomDailyRecordUiModel {
     final pain = breastPainLabel ?? '-';
     final redness = breastRednessLabel ?? '-';
     return '張り：$firmness\n痛み：$pain\n赤み：$redness';
+  }
+
+  static MomDailyRecordUiModel fromDomain(MomDailyRecord record) {
+    return MomDailyRecordUiModel(
+      date: record.date,
+      dateLabel: _formatDateLabel(record.date),
+      temperature: record.temperatureCelsius,
+      lochiaAmount: record.lochia?.amount,
+      lochiaColor: record.lochia?.color,
+      breastFirmness: record.breast?.firmness,
+      breastPain: record.breast?.pain,
+      breastRedness: record.breast?.redness,
+      memo: record.memo,
+    );
   }
 }
 

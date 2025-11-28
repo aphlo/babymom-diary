@@ -10,9 +10,9 @@ class MomDiaryDto {
   final String? content;
 
   factory MomDiaryDto.fromFirestore(
-    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+    DocumentSnapshot<Map<String, dynamic>> doc,
   ) {
-    final data = doc.data();
+    final data = doc.data()!;
     final date = _extractDate(data, doc.id, doc.reference.path);
     final content =
         _readString(data['content'] ?? data['memo'] ?? data['note']);

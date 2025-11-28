@@ -33,24 +33,14 @@ class MomDiaryRepositoryImpl implements MomDiaryRepository {
   }
 
   @override
-  Stream<MomDiaryMonth> watchMonthlyDiary({
-    required int year,
-    required int month,
+  Stream<MomDiaryEntry> watchDiaryForDate({
+    required DateTime date,
   }) {
-    return _remote.watchMonthlyDiary(year: year, month: month).map((dtos) {
-      final dtosByDay = <int, MomDiaryDto>{
-        for (final dto in dtos) dto.date.day: dto,
-      };
-      final totalDays = DateTime(year, month + 1, 0).day;
-      final entries = List<MomDiaryEntry>.generate(totalDays, (index) {
-        final day = index + 1;
-        final dto = dtosByDay[day];
-        return MomDiaryEntry(
-          date: DateTime(year, month, day),
-          content: dto?.content,
-        );
-      });
-      return MomDiaryMonth(year: year, month: month, entries: entries);
+    return _remote.watchDiaryForDate(date: date).map((dto) {
+      return MomDiaryEntry(
+        date: date,
+        content: dto?.content,
+      );
     });
   }
 
