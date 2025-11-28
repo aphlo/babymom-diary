@@ -1,8 +1,5 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../domain/entities/calendar_event.dart';
@@ -13,12 +10,12 @@ class CalendarEventFirestoreDataSource {
   final FirebaseFirestore _firestore;
   final _uuid = const Uuid();
 
-  Stream<List<CalendarEvent>> watchEvents({
+  /// 月間イベントを一度だけ取得（リアルタイム更新なし）
+  Future<List<CalendarEvent>> getEvents({
     required String householdId,
     required DateTime start,
     required DateTime end,
-  }) {
-    // 日付範囲内のドキュメントを取得
+  }) async {
     final startDate = DateTime(start.year, start.month, start.day);
     final endDate = DateTime(end.year, end.month, end.day);
 
@@ -30,88 +27,52 @@ class CalendarEventFirestoreDataSource {
     }
 
     if (dateKeys.isEmpty) {
-      return Stream.value(<CalendarEvent>[]);
+      return <CalendarEvent>[];
     }
 
-    // 各日付のドキュメントを監視
-    final streams = dateKeys.map((dateKey) {
-      return _firestore
-          .collection('households')
-          .doc(householdId)
-          .collection('events')
-          .doc(dateKey)
-          .snapshots()
-          .map((doc) => _extractEventsFromDoc(doc))
-          .handleError((error) {
-        // エラーが発生した場合は空のリストを返す
-        return <CalendarEvent>[];
+    final allEvents = <CalendarEvent>[];
+
+    // バッチで取得（Firestoreの制限を考慮して10件ずつ）
+    const batchSize = 10;
+    for (var i = 0; i < dateKeys.length; i += batchSize) {
+      final batchKeys = dateKeys.skip(i).take(batchSize).toList();
+      final futures = batchKeys.map((dateKey) {
+        return _firestore
+            .collection('households')
+            .doc(householdId)
+            .collection('events')
+            .doc(dateKey)
+            .get();
       });
-    }).toList();
 
-    // 単一ストリームの場合も distinct を適用
-    if (streams.length == 1) {
-      return streams.first.distinct((prev, next) {
-        if (prev.length != next.length) return false;
-
-        // IDでソートして順序を統一
-        final sortedPrev = prev.toList()..sort((a, b) => a.id.compareTo(b.id));
-        final sortedNext = next.toList()..sort((a, b) => a.id.compareTo(b.id));
-
-        // 各イベントのすべてのプロパティを比較
-        for (int i = 0; i < sortedPrev.length; i++) {
-          final eventPrev = sortedPrev[i];
-          final eventNext = sortedNext[i];
-
-          if (eventPrev.id != eventNext.id ||
-              eventPrev.title != eventNext.title ||
-              eventPrev.memo != eventNext.memo ||
-              eventPrev.allDay != eventNext.allDay ||
-              eventPrev.start != eventNext.start ||
-              eventPrev.end != eventNext.end ||
-              eventPrev.iconPath != eventNext.iconPath) {
-            return false; // 異なるイベントが見つかった
-          }
-        }
-
-        return true; // すべて同じ
-      });
+      final snapshots = await Future.wait(futures);
+      for (final doc in snapshots) {
+        allEvents.addAll(_extractEventsFromDoc(doc));
+      }
     }
 
-    // 複数のストリームを効率的に結合
-    return Rx.combineLatestList(streams).map((eventLists) {
-      final allEvents = eventLists.expand((events) => events).toList();
-      // 重複を除去（同じIDのイベントが複数の日付にまたがる場合）
-      final uniqueEvents = <String, CalendarEvent>{};
-      for (final event in allEvents) {
-        uniqueEvents[event.id] = event;
-      }
-      return uniqueEvents.values.toList()
-        ..sort((a, b) => a.start.compareTo(b.start));
-    }).distinct((prev, next) {
-      if (prev.length != next.length) return false;
+    // 重複を除去してソート
+    final uniqueEvents = <String, CalendarEvent>{};
+    for (final event in allEvents) {
+      uniqueEvents[event.id] = event;
+    }
+    return uniqueEvents.values.toList()
+      ..sort((a, b) => a.start.compareTo(b.start));
+  }
 
-      // IDでソートして順序を統一
-      final sortedPrev = prev.toList()..sort((a, b) => a.id.compareTo(b.id));
-      final sortedNext = next.toList()..sort((a, b) => a.id.compareTo(b.id));
-
-      // 各イベントのすべてのプロパティを比較
-      for (int i = 0; i < sortedPrev.length; i++) {
-        final eventPrev = sortedPrev[i];
-        final eventNext = sortedNext[i];
-
-        if (eventPrev.id != eventNext.id ||
-            eventPrev.title != eventNext.title ||
-            eventPrev.memo != eventNext.memo ||
-            eventPrev.allDay != eventNext.allDay ||
-            eventPrev.start != eventNext.start ||
-            eventPrev.end != eventNext.end ||
-            eventPrev.iconPath != eventNext.iconPath) {
-          return false; // 異なるイベントが見つかった
-        }
-      }
-
-      return true; // すべて同じ
-    });
+  /// 特定の日付のイベントをリアルタイムで監視
+  Stream<List<CalendarEvent>> watchEventsForDate({
+    required String householdId,
+    required DateTime date,
+  }) {
+    final dateKey = DateFormat('yyyy-MM-dd').format(date);
+    return _firestore
+        .collection('households')
+        .doc(householdId)
+        .collection('events')
+        .doc(dateKey)
+        .snapshots()
+        .map((doc) => _extractEventsFromDoc(doc));
   }
 
   Future<void> createEvent({

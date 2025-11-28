@@ -43,10 +43,10 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
   ) : super(CalendarState.initial()) {
     _initialize();
     _ref.onDispose(() {
-      _eventsSubscription?.cancel();
+      _selectedDateEventsSubscription?.cancel();
       _settingsSubscription?.cancel();
       _vaccinationSubscription?.cancel();
-      _eventsSubscription = null;
+      _selectedDateEventsSubscription = null;
       _settingsSubscription = null;
       _vaccinationSubscription = null;
     });
@@ -57,17 +57,24 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
   final CalendarSettingsRepository _settingsRepository;
   final VaccinationRecordRepository _vaccinationRepository;
 
-  StreamSubscription<List<CalendarEvent>>? _eventsSubscription;
+  /// 選択中の日付のイベントをリアルタイムで監視するサブスクリプション
+  StreamSubscription<List<CalendarEvent>>? _selectedDateEventsSubscription;
   StreamSubscription<CalendarSettings>? _settingsSubscription;
   StreamSubscription<List<VaccinationRecord>>? _vaccinationSubscription;
-  List<CalendarEvent> _latestEvents = const <CalendarEvent>[];
+
+  /// 月間イベント（get()で取得したもの）
+  List<CalendarEvent> _monthlyEvents = const <CalendarEvent>[];
+
+  /// 選択中の日付のイベント（リアルタイム監視）
+  List<CalendarEvent> _selectedDateEvents = const <CalendarEvent>[];
+
   List<VaccinationRecord> _latestVaccinationRecords =
       const <VaccinationRecord>[];
   List<ChildSummary> _localChildren = const <ChildSummary>[];
   ChildSummary? _snapshotChild;
 
   void _initialize() {
-    _listenToSelectedChild();
+    _initializeSelectedChild();
     _listenToCalendarSettings();
     _loadHouseholdId();
   }
@@ -79,8 +86,9 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
       if (!mounted) return;
       state = state.copyWith(householdId: householdId);
       _subscribeToChildren(householdId);
-      _refreshEventsSubscription();
-      _refreshVaccinationSubscription();
+      _loadMonthlyEvents();
+      _subscribeToSelectedDateEvents();
+      _loadVaccinationRecords();
     } catch (error, stackTrace) {
       if (!mounted) return;
       state = state.copyWith(
@@ -92,18 +100,13 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     }
   }
 
-  void _listenToSelectedChild() {
-    _ref.listen<AsyncValue<String?>>(
-      selectedChildControllerProvider,
-      (previous, next) {
-        final value = next.valueOrNull;
-        if (state.selectedChildId == value) {
-          return;
-        }
-        state = state.copyWith(selectedChildId: value, pendingUiEvent: null);
-      },
-      fireImmediately: true,
-    );
+  /// 選択中の子供IDを初期化時に一度だけ取得
+  void _initializeSelectedChild() {
+    final childIdAsync = _ref.read(selectedChildControllerProvider);
+    final value = childIdAsync.valueOrNull;
+    if (value != null) {
+      state = state.copyWith(selectedChildId: value, pendingUiEvent: null);
+    }
   }
 
   void _listenToCalendarSettings() {
@@ -159,8 +162,8 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     _updateCombinedEventsState();
   }
 
-  void _refreshEventsSubscription() {
-    _eventsSubscription?.cancel();
+  /// 月間イベントを一度だけ取得（リアルタイム更新なし）
+  Future<void> _loadMonthlyEvents() async {
     final householdId = state.householdId;
     if (householdId == null) {
       return;
@@ -168,38 +171,76 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     final range = _visibleRangeForMonth(state.focusedDay);
     state = state.copyWith(eventsAsync: const AsyncValue.loading());
 
-    // ストリームにデバウンス機能を追加してパフォーマンスを向上
-    _eventsSubscription = _repository
-        .watchEvents(
-          householdId: householdId,
-          start: range.start,
-          end: range.end,
-        )
-        .distinct() // 重複する更新を除去
+    try {
+      final events = await _repository.getEvents(
+        householdId: householdId,
+        start: range.start,
+        end: range.end,
+      );
+      if (!mounted) return;
+      _monthlyEvents = events;
+      _updateCombinedEventsState();
+    } catch (error, stackTrace) {
+      if (!mounted) return;
+      state = state.copyWith(
+        eventsAsync: AsyncValue.error(error, stackTrace),
+        pendingUiEvent: const CalendarUiEvent.showMessage(
+          '予定の取得に失敗しました',
+        ),
+      );
+    }
+  }
+
+  /// 選択中の日付のイベントをリアルタイムで監視
+  void _subscribeToSelectedDateEvents() {
+    _selectedDateEventsSubscription?.cancel();
+    final householdId = state.householdId;
+    if (householdId == null) {
+      return;
+    }
+
+    _selectedDateEventsSubscription = _repository
+        .watchEventsForDate(
+      householdId: householdId,
+      date: state.selectedDay,
+    )
         .listen(
       (events) {
-        _latestEvents = events;
+        _selectedDateEvents = events;
+        _mergeSelectedDateEventsIntoMonthly();
         _updateCombinedEventsState();
       },
       onError: (error, stackTrace) {
-        state = state.copyWith(
-          eventsAsync: AsyncValue.error(error, stackTrace),
-          pendingUiEvent: const CalendarUiEvent.showMessage(
-            '予定の取得に失敗しました',
-          ),
-        );
+        // 選択日付のエラーは無視（月間データがあればOK）
       },
     );
   }
 
-  void _refreshVaccinationSubscription() {
-    _vaccinationSubscription?.cancel();
+  /// 選択日付のリアルタイムデータを月間データにマージ
+  void _mergeSelectedDateEventsIntoMonthly() {
+    final selectedDate = _normalizeDate(state.selectedDay);
+
+    // 月間イベントから選択日付のイベントを除去
+    final filteredMonthly = _monthlyEvents.where((e) {
+      final eventDate = _normalizeDate(e.start);
+      // 選択日付のイベントは除去（リアルタイムデータで置き換え）
+      return eventDate != selectedDate;
+    }).toList();
+
+    // 選択日付のリアルタイムデータをマージ
+    _monthlyEvents = [...filteredMonthly, ..._selectedDateEvents]
+      ..sort((a, b) => a.start.compareTo(b.start));
+  }
+
+  /// ワクチン記録を一度だけ取得
+  Future<void> _loadVaccinationRecords() async {
     final householdId = state.householdId;
     final selectedChildId = state.selectedChildId;
     if (householdId == null || selectedChildId == null) {
       return;
     }
 
+    _vaccinationSubscription?.cancel();
     _vaccinationSubscription = _vaccinationRepository
         .watchVaccinationRecords(
       householdId: householdId,
@@ -223,7 +264,7 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     final childId = _snapshotChild?.id ?? '';
     final vaccinationEvents = VaccinationToCalendarEventMapper.toCalendarEvents(
         _latestVaccinationRecords, childId);
-    final combinedEvents = [..._latestEvents, ...vaccinationEvents];
+    final combinedEvents = [..._monthlyEvents, ...vaccinationEvents];
     final eventsByDay = _groupEventsByDay(combinedEvents);
 
     // ローディング状態の場合は常に更新する
@@ -263,16 +304,24 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
   void onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     final normalizedSelected = _normalizeDate(selectedDay);
     final normalizedFocused = _normalizeDate(focusedDay);
-    final requiresRefresh = normalizedFocused.year != state.focusedDay.year ||
+    final monthChanged = normalizedFocused.year != state.focusedDay.year ||
         normalizedFocused.month != state.focusedDay.month;
+    final dayChanged = normalizedSelected != _normalizeDate(state.selectedDay);
+
     state = state.copyWith(
       selectedDay: normalizedSelected,
       focusedDay: normalizedFocused,
       pendingUiEvent: null,
     );
-    if (requiresRefresh) {
-      _refreshEventsSubscription();
-      _refreshVaccinationSubscription();
+
+    if (monthChanged) {
+      // 月が変わった場合は月間イベントを再取得
+      _loadMonthlyEvents();
+    }
+
+    if (dayChanged) {
+      // 選択日付が変わった場合はリスナーを再設定
+      _subscribeToSelectedDateEvents();
     }
   }
 
@@ -280,16 +329,16 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     final normalizedFocused = _normalizeDate(
       DateTime(focusedDay.year, focusedDay.month),
     );
-    final requiresRefresh = normalizedFocused.year != state.focusedDay.year ||
+    final monthChanged = normalizedFocused.year != state.focusedDay.year ||
         normalizedFocused.month != state.focusedDay.month;
-    if (!requiresRefresh) {
+    if (!monthChanged) {
       return;
     }
     state = state.copyWith(
       focusedDay: normalizedFocused,
       pendingUiEvent: null,
     );
-    _refreshEventsSubscription();
+    _loadMonthlyEvents();
   }
 
   void goToPreviousMonth() {
@@ -302,7 +351,7 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
       focusedDay: normalizedPrevious,
       pendingUiEvent: null,
     );
-    _refreshEventsSubscription();
+    _loadMonthlyEvents();
   }
 
   void goToNextMonth() {
@@ -315,7 +364,7 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
       focusedDay: normalizedNext,
       pendingUiEvent: null,
     );
-    _refreshEventsSubscription();
+    _loadMonthlyEvents();
   }
 
   void clearUiEvent() {
