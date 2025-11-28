@@ -27,15 +27,17 @@ class CalendarDayCell extends StatelessWidget {
     if (isToday) {
       return Theme.of(context).colorScheme.secondary;
     }
-    return Theme.of(context).dividerColor.withOpacity(isOutside ? 0.3 : 0.6);
+    return Theme.of(context)
+        .dividerColor
+        .withValues(alpha: isOutside ? 0.3 : 0.6);
   }
 
   Color? _backgroundColor(BuildContext context) {
     if (isSelected) {
-      return Theme.of(context).colorScheme.primary.withOpacity(0.12);
+      return Theme.of(context).colorScheme.primary.withValues(alpha: 0.12);
     }
     if (isToday) {
-      return Theme.of(context).colorScheme.secondary.withOpacity(0.08);
+      return Theme.of(context).colorScheme.secondary.withValues(alpha: 0.08);
     }
     return null;
   }
@@ -63,7 +65,7 @@ class CalendarDayCell extends StatelessWidget {
     }
 
     if (isOutside) {
-      return color.withOpacity(0.35);
+      return color.withValues(alpha: 0.35);
     }
     return color;
   }

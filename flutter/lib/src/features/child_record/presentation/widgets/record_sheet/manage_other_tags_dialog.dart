@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../providers/record_tag_controller.dart';
 import '../../viewmodels/record_sheet/manage_other_tags_view_model.dart';
-import '../../viewmodels/record_view_model.dart';
 
 class ManageOtherTagsDialog extends ConsumerStatefulWidget {
-  const ManageOtherTagsDialog({super.key});
+  const ManageOtherTagsDialog({
+    super.key,
+    required this.householdId,
+  });
+
+  final String householdId;
 
   @override
   ConsumerState<ManageOtherTagsDialog> createState() =>
@@ -26,10 +31,11 @@ class _ManageOtherTagsDialogState extends ConsumerState<ManageOtherTagsDialog> {
   @override
   void initState() {
     super.initState();
-    final initialState = ref.read(manageOtherTagsViewModelProvider);
+    final initialState =
+        ref.read(manageOtherTagsViewModelProvider(widget.householdId));
     _controller = TextEditingController(text: initialState.input);
     _stateSub = ref.listenManual<ManageOtherTagsState>(
-      manageOtherTagsViewModelProvider,
+      manageOtherTagsViewModelProvider(widget.householdId),
       (previous, next) {
         if (_controller.text == next.input) {
           return;
@@ -40,18 +46,23 @@ class _ManageOtherTagsDialogState extends ConsumerState<ManageOtherTagsDialog> {
   }
 
   Future<void> _handleAdd() async {
-    await ref.read(manageOtherTagsViewModelProvider.notifier).addTag();
+    await ref
+        .read(manageOtherTagsViewModelProvider(widget.householdId).notifier)
+        .addTag();
   }
 
   Future<void> _handleRemove(String tag) async {
-    await ref.read(manageOtherTagsViewModelProvider.notifier).removeTag(tag);
+    await ref
+        .read(manageOtherTagsViewModelProvider(widget.householdId).notifier)
+        .removeTag(tag);
   }
 
   @override
   Widget build(BuildContext context) {
-    final viewState = ref.watch(manageOtherTagsViewModelProvider);
-    final tagState = ref.watch(recordViewModelProvider).otherTagsAsync;
-    final tags = tagState.valueOrNull ?? const <String>[];
+    final viewState =
+        ref.watch(manageOtherTagsViewModelProvider(widget.householdId));
+    final tagState = ref.watch(recordTagControllerProvider(widget.householdId));
+    final tags = tagState.value ?? const <String>[];
     final isSubmitting = viewState.isSubmitting;
     final errorText = viewState.errorMessage;
 
@@ -71,7 +82,8 @@ class _ManageOtherTagsDialogState extends ConsumerState<ManageOtherTagsDialog> {
                 errorText: errorText,
               ),
               onChanged: (value) => ref
-                  .read(manageOtherTagsViewModelProvider.notifier)
+                  .read(manageOtherTagsViewModelProvider(widget.householdId)
+                      .notifier)
                   .updateInput(value),
               onSubmitted: (_) => _handleAdd(),
             ),

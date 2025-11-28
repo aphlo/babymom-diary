@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../menu/children/application/child_context_provider.dart';
 import '../../../child_record.dart';
 import '../../models/record_draft.dart';
+import '../../providers/record_tag_controller.dart';
 import '../../viewmodels/record_sheet/editable_record_sheet_view_model.dart';
-import '../../viewmodels/record_view_model.dart';
 import 'manage_other_tags_dialog.dart';
 import 'record_fields_sections.dart';
 
@@ -25,21 +27,20 @@ class EditableRecordSheet extends ConsumerStatefulWidget {
 
 class _EditableRecordSheetState extends ConsumerState<EditableRecordSheet> {
   final _formKey = GlobalKey<FormState>();
-  late final AutoDisposeStateNotifierProvider<EditableRecordSheetViewModel,
-      EditableRecordSheetState> _viewModelProvider;
-  late final ProviderSubscription<EditableRecordSheetState> _stateSub;
+  late final EditableRecordSheetViewModelArgs _args;
   late final TextEditingController _minutesController;
   late final TextEditingController _amountController;
   late final TextEditingController _noteController;
 
+  EditableRecordSheetViewModelProvider get _viewModelProvider =>
+      editableRecordSheetViewModelProvider(_args);
+
   @override
   void initState() {
     super.initState();
-    _viewModelProvider = editableRecordSheetViewModelProvider(
-      EditableRecordSheetViewModelArgs(
-        initialDraft: widget.initialDraft,
-        isNew: widget.isNew,
-      ),
+    _args = EditableRecordSheetViewModelArgs(
+      initialDraft: widget.initialDraft,
+      isNew: widget.isNew,
     );
     final initialState = ref.read(_viewModelProvider);
     _minutesController = TextEditingController(text: initialState.minutesInput);
@@ -48,19 +49,10 @@ class _EditableRecordSheetState extends ConsumerState<EditableRecordSheet> {
     _minutesController.addListener(_onMinutesChanged);
     _amountController.addListener(_onAmountChanged);
     _noteController.addListener(_onNoteChanged);
-    _stateSub = ref.listenManual<EditableRecordSheetState>(
-      _viewModelProvider,
-      (previous, next) {
-        _syncController(_minutesController, next.minutesInput);
-        _syncController(_amountController, next.amountInput);
-        _syncController(_noteController, next.noteInput);
-      },
-    );
   }
 
   @override
   void dispose() {
-    _stateSub.close();
     _minutesController
       ..removeListener(_onMinutesChanged)
       ..dispose();
@@ -71,13 +63,6 @@ class _EditableRecordSheetState extends ConsumerState<EditableRecordSheet> {
       ..removeListener(_onNoteChanged)
       ..dispose();
     super.dispose();
-  }
-
-  void _syncController(TextEditingController controller, String value) {
-    if (controller.text == value) {
-      return;
-    }
-    controller.text = value;
   }
 
   void _onMinutesChanged() {
@@ -100,7 +85,10 @@ class _EditableRecordSheetState extends ConsumerState<EditableRecordSheet> {
   Widget build(BuildContext context) {
     final state = ref.watch(_viewModelProvider);
     final viewModel = ref.read(_viewModelProvider.notifier);
-    final tagsAsync = ref.watch(recordViewModelProvider).otherTagsAsync;
+    final householdId = ref.watch(childContextProvider).value?.householdId;
+    final tagsAsync = householdId != null
+        ? ref.watch(recordTagControllerProvider(householdId))
+        : const AsyncValue<List<String>>.data(<String>[]);
     final type = state.type;
     final typeLabel = type.label;
 
@@ -124,11 +112,12 @@ class _EditableRecordSheetState extends ConsumerState<EditableRecordSheet> {
       RecordType.other => OtherRecordFields(
           isLoading: tagsAsync.isLoading,
           hasError: tagsAsync.hasError,
-          tags: tagsAsync.valueOrNull ?? const <String>[],
+          tags: tagsAsync.value ?? const <String>[],
           selectedTags: state.selectedTags,
           onTagToggled: (tag, selected) => viewModel.toggleTag(tag, selected),
-          onManageTagsPressed:
-              tagsAsync.isLoading ? null : _openManageTagsDialog,
+          onManageTagsPressed: tagsAsync.isLoading || householdId == null
+              ? null
+              : () => _openManageTagsDialog(householdId),
           noteController: _noteController,
         ),
     };
@@ -188,14 +177,14 @@ class _EditableRecordSheetState extends ConsumerState<EditableRecordSheet> {
     );
   }
 
-  Future<void> _openManageTagsDialog() async {
+  Future<void> _openManageTagsDialog(String householdId) async {
     await showDialog<void>(
       context: context,
-      builder: (_) => const ManageOtherTagsDialog(),
+      builder: (_) => ManageOtherTagsDialog(householdId: householdId),
     );
     if (!mounted) return;
     final availableTags =
-        ref.read(recordViewModelProvider).otherTagsAsync.valueOrNull;
+        ref.read(recordTagControllerProvider(householdId)).value;
     ref.read(_viewModelProvider.notifier).syncSelectedTags(availableTags);
   }
 

@@ -15,9 +15,13 @@ class AppBottomNav extends StatelessWidget {
   int _indexForLocation(String location) {
     if (location == '/' ||
         location.startsWith('/baby') ||
-        location.startsWith('/add')) return 0;
+        location.startsWith('/add')) {
+      return 0;
+    }
     for (var i = 0; i < _tabs.length; i++) {
-      if (location.startsWith(_tabs[i].route)) return i;
+      if (location.startsWith(_tabs[i].route)) {
+        return i;
+      }
     }
     return 0;
   }
@@ -31,7 +35,9 @@ class AppBottomNav extends StatelessWidget {
       selectedIndex: currentIndex,
       onDestinationSelected: (index) {
         final to = _tabs[index].route;
-        if (to != location) context.go(to);
+        if (to != location) {
+          context.go(to);
+        }
       },
       destinations: [
         for (final t in _tabs)

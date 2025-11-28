@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
 import 'package:babymom_diary/src/features/calendar/presentation/models/calendar_event_model.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/add_calendar_event_state.dart';
 
-final addCalendarEventViewModelProvider =
-    AutoDisposeStateNotifierProviderFamily<AddCalendarEventViewModel,
-        AddCalendarEventState, DateTime>((ref, initialDate) {
+final addCalendarEventViewModelProvider = StateNotifierProvider.autoDispose
+    .family<AddCalendarEventViewModel, AddCalendarEventState, DateTime>(
+        (ref, initialDate) {
   return AddCalendarEventViewModel(initialDate: initialDate);
 });
 

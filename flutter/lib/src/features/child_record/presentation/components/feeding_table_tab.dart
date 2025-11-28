@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../child_record.dart';
+import '../providers/daily_records_provider.dart';
 import '../../../ads/application/services/banner_ad_manager.dart';
 import '../../../ads/presentation/widgets/banner_ad_widget.dart';
+import '../../../menu/children/application/child_context_provider.dart';
 import '../models/record_draft.dart';
 import '../models/record_item_model.dart';
 import '../viewmodels/record_state.dart';
@@ -111,10 +113,24 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
   Widget build(BuildContext context) {
     final state = ref.watch(recordViewModelProvider);
     final notifier = ref.read(recordViewModelProvider.notifier);
+    final childContext = ref.watch(childContextProvider).value;
     final selectedDate = state.selectedDate;
 
+    // ChildContext と selectedChildId が揃っている場合のみ記録を取得
+    final selectedChildId = childContext?.selectedChildId;
+    final recordsAsync = (childContext != null &&
+            selectedChildId != null &&
+            selectedChildId.isNotEmpty)
+        ? ref.watch(dailyRecordsProvider(DailyRecordsQuery(
+            householdId: childContext.householdId,
+            childId: selectedChildId,
+            date: selectedDate,
+          )))
+        : const AsyncValue<List<RecordItemModel>>.data(<RecordItemModel>[]);
+
     void handleSlotTap(int hour, RecordType type) {
-      notifier.openSlotDetails(hour: hour, type: type);
+      final records = recordsAsync.value ?? const <RecordItemModel>[];
+      notifier.openSlotDetails(hour: hour, type: type, allRecords: records);
     }
 
     final scrollStorageKey = PageStorageKey<String>(
@@ -133,8 +149,7 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
                   scrollStorageKey: scrollStorageKey,
                   selectedDate: selectedDate,
                 ),
-                if ((state.recordsAsync.isLoading &&
-                        !state.recordsAsync.hasValue) ||
+                if ((recordsAsync.isLoading && !recordsAsync.hasValue) ||
                     state.isProcessing)
                   const Positioned(
                     right: 16,
@@ -153,10 +168,10 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
       );
     }
 
-    return state.recordsAsync.when(
+    return recordsAsync.when(
       data: buildRecordTable,
       loading: () {
-        final records = state.recordsAsync.value;
+        final records = recordsAsync.value;
         if (records != null) {
           return buildRecordTable(records);
         }

@@ -7,7 +7,14 @@
 
 ## MVVM の運用（CalendarPage / AddCalendarEventPage）
 - **View（Widget/Page）**: `ViewModel` が公開する状態を宣言的に描画し、ユーザー操作をコールバックで渡す。View 層からリポジトリやデータソースを直接参照しない。
-- **ViewModel（状態管理）**: 機能固有の状態とユースケース呼び出しを担当し、イミュータブルな値やストリームを View に公開する。`CalendarEventModel` のようなプレゼンテーション向けモデルや入力バリデーションのみを含め、`BuildContext` への依存を避ける。
+- **ViewModel（状態管理）**: **「UIのための状態管理」と「UseCaseの呼び出し」** のみを担当する。
+  - **UIのための状態管理**: `selectedDate`、`selectedTabIndex`、`isProcessing`、`pendingUiEvent` など画面固有の状態を管理
+  - **UseCaseの呼び出し**: ビジネスロジックはUseCaseに委譲し、結果に応じてUI状態を更新
+  - **行うべきでない責務**:
+    - `householdId` や `childId` の取得・管理 → `childContextProvider` など共通Providerから取得
+    - データのフェッチやストリーム購読 → 専用のStreamProviderで行い、Widgetで直接watchする
+    - ドメインロジック（バリデーション、計算など） → Domain ServiceやUseCaseに委譲
+  - `CalendarEventModel` のようなプレゼンテーション向けモデルや入力バリデーションのみを含め、`BuildContext` への依存を避ける。
 - **Model / Mapper**: ドメインエンティティと UI モデルの変換を担当。Mapper はプレゼンテーション層に配置し、ドメイン層を Flutter 非依存に保つ。
 - 新しい画面や UI 責務を追加する際は `lib/src/features/calendar/presentation` の構造に倣い、可能であれば ViewModel を Flutter 依存なくテストできるユニット／ウィジェットテストを用意する。
 

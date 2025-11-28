@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import 'package:babymom_diary/src/core/firebase/household_service.dart'
     as fbcore;
@@ -15,7 +16,7 @@ import 'mom_record_page_state.dart';
 import 'mom_record_view_model.dart';
 
 final momDiaryViewModelProvider =
-    AutoDisposeStateNotifierProvider<MomDiaryViewModel, MomDiaryPageState>(
+    StateNotifierProvider.autoDispose<MomDiaryViewModel, MomDiaryPageState>(
   (ref) => MomDiaryViewModel(ref),
 );
 

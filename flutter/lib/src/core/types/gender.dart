@@ -8,7 +8,6 @@ extension GenderX on Gender {
       case Gender.female:
         return 'female';
       case Gender.unknown:
-      default:
         return 'unknown';
     }
   }
@@ -20,7 +19,6 @@ extension GenderX on Gender {
       case Gender.female:
         return '（女）';
       case Gender.unknown:
-      default:
         return '';
     }
   }
@@ -33,7 +31,7 @@ Gender genderFromKey(String? key) {
     case 'female':
       return Gender.female;
     case 'unknown':
-    default:
       return Gender.unknown;
   }
+  return Gender.unknown;
 }

@@ -1,49 +1,28 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../record_view_model.dart';
+import '../../providers/record_tag_controller.dart';
+import 'manage_other_tags_state.dart';
 
-@immutable
-class ManageOtherTagsState {
-  const ManageOtherTagsState({
-    this.input = '',
-    this.isSubmitting = false,
-    this.errorMessage,
-  });
+export 'manage_other_tags_state.dart';
 
-  static const Object _sentinel = Object();
+part 'manage_other_tags_view_model.g.dart';
 
-  final String input;
-  final bool isSubmitting;
-  final String? errorMessage;
-
-  ManageOtherTagsState copyWith({
-    String? input,
-    bool? isSubmitting,
-    Object? errorMessage = _sentinel,
-  }) {
-    return ManageOtherTagsState(
-      input: input ?? this.input,
-      isSubmitting: isSubmitting ?? this.isSubmitting,
-      errorMessage: errorMessage == _sentinel
-          ? this.errorMessage
-          : errorMessage as String?,
-    );
+/// タグ管理画面の ViewModel
+///
+/// 使用例:
+/// ```dart
+/// final state = ref.watch(manageOtherTagsViewModelProvider(householdId));
+/// final notifier = ref.read(manageOtherTagsViewModelProvider(householdId).notifier);
+/// ```
+@riverpod
+class ManageOtherTagsViewModel extends _$ManageOtherTagsViewModel {
+  @override
+  ManageOtherTagsState build(String householdId) {
+    return const ManageOtherTagsState();
   }
-}
-
-final manageOtherTagsViewModelProvider = AutoDisposeStateNotifierProvider<
-    ManageOtherTagsViewModel, ManageOtherTagsState>((ref) {
-  return ManageOtherTagsViewModel(ref);
-});
-
-class ManageOtherTagsViewModel extends StateNotifier<ManageOtherTagsState> {
-  ManageOtherTagsViewModel(this._ref) : super(const ManageOtherTagsState());
-
-  final Ref _ref;
 
   List<String> get _currentTags =>
-      _ref.read(recordViewModelProvider).otherTagsAsync.valueOrNull ??
+      ref.read(recordTagControllerProvider(householdId)).value ??
       const <String>[];
 
   void updateInput(String value) {
@@ -72,13 +51,12 @@ class ManageOtherTagsViewModel extends StateNotifier<ManageOtherTagsState> {
 
     state = state.copyWith(isSubmitting: true, errorMessage: null);
     try {
-      await _ref.read(recordViewModelProvider.notifier).addTag(candidate);
-      if (!mounted) return;
-      state = state.copyWith(input: '');
-    } finally {
-      if (mounted) {
-        state = state.copyWith(isSubmitting: false);
-      }
+      await ref
+          .read(recordTagControllerProvider(householdId).notifier)
+          .add(candidate);
+      state = state.copyWith(input: '', isSubmitting: false);
+    } catch (_) {
+      state = state.copyWith(isSubmitting: false);
     }
   }
 
@@ -88,11 +66,12 @@ class ManageOtherTagsViewModel extends StateNotifier<ManageOtherTagsState> {
     }
     state = state.copyWith(isSubmitting: true);
     try {
-      await _ref.read(recordViewModelProvider.notifier).removeTag(tag);
-    } finally {
-      if (mounted) {
-        state = state.copyWith(isSubmitting: false);
-      }
+      await ref
+          .read(recordTagControllerProvider(householdId).notifier)
+          .remove(tag);
+      state = state.copyWith(isSubmitting: false);
+    } catch (_) {
+      state = state.copyWith(isSubmitting: false);
     }
   }
 }

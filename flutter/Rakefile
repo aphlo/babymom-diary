@@ -37,6 +37,22 @@ TASKS = {
     command: "fvm flutter analyze",
     description: "Run Flutter analyzer (set ARGS to pass extra options)",
   },
+  build_runner: {
+    command: "fvm dart run build_runner build --delete-conflicting-outputs",
+    description: "Run build_runner to generate code",
+  },
+  build_runner_watch: {
+    command: "fvm dart run build_runner watch --delete-conflicting-outputs",
+    description: "Run build_runner in watch mode",
+  },
+  pub_get: {
+    command: "fvm flutter pub get",
+    description: "Get dependencies",
+  },
+  clean: {
+    command: "fvm flutter clean && fvm flutter pub get",
+    description: "Clean and get dependencies",
+  },
 }.freeze
 
 TASKS.each do |name, config|

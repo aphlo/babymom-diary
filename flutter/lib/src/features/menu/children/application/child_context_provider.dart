@@ -103,7 +103,7 @@ class ChildContextNotifier extends AsyncNotifier<ChildContext> {
 
     // スナップショットを取得
     final snapshotAsync = ref.read(selectedChildSnapshotProvider(householdId));
-    final snapshot = snapshotAsync.valueOrNull;
+    final snapshot = snapshotAsync.value;
 
     return ChildContext(
       householdId: householdId,
@@ -118,8 +118,8 @@ class ChildContextNotifier extends AsyncNotifier<ChildContext> {
     ref.listen<AsyncValue<List<ChildSummary>>>(
       childrenStreamProvider(householdId),
       (previous, next) {
-        final children = next.valueOrNull ?? const <ChildSummary>[];
-        final currentContext = state.valueOrNull;
+        final children = next.value ?? const <ChildSummary>[];
+        final currentContext = state.value;
         final selectedId = currentContext?.selectedChildId;
 
         // 選択中の子供がリストに存在しない場合（削除された場合）
@@ -150,7 +150,7 @@ class ChildContextNotifier extends AsyncNotifier<ChildContext> {
       selectedChildSnapshotProvider(householdId),
       (previous, next) {
         next.whenData((summary) {
-          final currentContext = state.valueOrNull;
+          final currentContext = state.value;
           // 選択中の子供の情報が変わった場合のみ更新
           if (summary?.id == currentContext?.selectedChildId) {
             _emitContext();
@@ -164,7 +164,7 @@ class ChildContextNotifier extends AsyncNotifier<ChildContext> {
   /// 現在の状態からChildContextを生成して発行
   void _emitContext() {
     final householdIdAsync = ref.read(currentHouseholdIdProvider);
-    final householdId = householdIdAsync.valueOrNull;
+    final householdId = householdIdAsync.value;
 
     if (householdId == null) {
       // householdIdがまだ読み込まれていない
@@ -172,13 +172,13 @@ class ChildContextNotifier extends AsyncNotifier<ChildContext> {
     }
 
     final selectedChildIdAsync = ref.read(selectedChildControllerProvider);
-    final selectedChildId = selectedChildIdAsync.valueOrNull;
+    final selectedChildId = selectedChildIdAsync.value;
 
     final childrenAsync = ref.read(childrenStreamProvider(householdId));
-    final children = childrenAsync.valueOrNull ?? const <ChildSummary>[];
+    final children = childrenAsync.value ?? const <ChildSummary>[];
 
     final snapshotAsync = ref.read(selectedChildSnapshotProvider(householdId));
-    final snapshot = snapshotAsync.valueOrNull;
+    final snapshot = snapshotAsync.value;
 
     state = AsyncValue.data(ChildContext(
       householdId: householdId,

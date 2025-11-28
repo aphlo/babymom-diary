@@ -190,7 +190,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
     final colorScheme = Theme.of(context).colorScheme;
     final DateTime? childBirthday = widget.childBirthday;
     final BorderSide borderSide = BorderSide(
-      color: colorScheme.outlineVariant.withOpacity(0.6),
+      color: colorScheme.outlineVariant.withValues(alpha: 0.6),
       width: 0.5,
     );
 
@@ -263,10 +263,12 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                     final Color backgroundColor;
                     switch (vaccine.requirement) {
                       case VaccineRequirement.mandatory:
-                        backgroundColor = AppColors.primary.withOpacity(0.2);
+                        backgroundColor =
+                            AppColors.primary.withValues(alpha: 0.2);
                         break;
                       case VaccineRequirement.optional:
-                        backgroundColor = AppColors.secondary.withOpacity(0.2);
+                        backgroundColor =
+                            AppColors.secondary.withValues(alpha: 0.2);
                         break;
                     }
                     return GestureDetector(

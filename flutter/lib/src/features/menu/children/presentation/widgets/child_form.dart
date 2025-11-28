@@ -62,7 +62,7 @@ class _ChildFormState extends State<ChildForm> {
         _dueDateCtrl.text =
             '${i.dueDate!.year}/${i.dueDate!.month}/${i.dueDate!.day}';
       }
-      final inPalette = _palette.any((c) => c.value == i.color.value);
+      final inPalette = _palette.any((c) => c.toARGB32() == i.color.toARGB32());
       _pickedColor = inPalette ? i.color : AppColors.primary;
     } else {
       // 新規追加の場合、デフォルト値を設定
@@ -152,7 +152,7 @@ class _ChildFormState extends State<ChildForm> {
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<Gender>(
-            value: _gender,
+            initialValue: _gender,
             decoration: const InputDecoration(labelText: '性別'),
             items: const [
               DropdownMenuItem(value: Gender.male, child: Text('男の子')),
@@ -221,7 +221,7 @@ class _ChildFormState extends State<ChildForm> {
                       color: c,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: _pickedColor.value == c.value
+                        color: _pickedColor.toARGB32() == c.toARGB32()
                             ? Colors.black
                             : Colors.transparent,
                         width: 2,

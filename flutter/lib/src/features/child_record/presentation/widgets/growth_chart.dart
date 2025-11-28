@@ -122,8 +122,8 @@ class GrowthChart extends StatelessWidget {
 
     const heightCurveColor = AppColors.primary;
     const weightCurveColor = AppColors.secondary;
-    final heightBandColor = heightCurveColor.withOpacity(0.25);
-    final weightBandColor = weightCurveColor.withOpacity(0.25);
+    final heightBandColor = heightCurveColor.withValues(alpha: 0.25);
+    final weightBandColor = weightCurveColor.withValues(alpha: 0.25);
     const heightLabelColor = heightCurveColor;
     const weightLabelColor = weightCurveColor;
 
@@ -263,18 +263,18 @@ class GrowthChart extends StatelessWidget {
           drawHorizontalLine: true,
           horizontalInterval: 1,
           getDrawingHorizontalLine: (value) => FlLine(
-            color: theme.dividerColor.withOpacity(0.3),
+            color: theme.dividerColor.withValues(alpha: 0.3),
             strokeWidth: 0.5,
           ),
           getDrawingVerticalLine: (value) => FlLine(
-            color: theme.dividerColor.withOpacity(0.25),
+            color: theme.dividerColor.withValues(alpha: 0.25),
             strokeWidth: 0.5,
           ),
         ),
         borderData: FlBorderData(
           show: true,
           border: Border.all(
-            color: theme.dividerColor.withOpacity(0.6),
+            color: theme.dividerColor.withValues(alpha: 0.6),
             width: 0.5,
           ),
         ),
@@ -283,12 +283,12 @@ class GrowthChart extends StatelessWidget {
           BetweenBarsData(
             fromIndex: 0,
             toIndex: 1,
-            color: heightBandColor.withOpacity(0.25),
+            color: heightBandColor.withValues(alpha: 0.25),
           ),
           BetweenBarsData(
             fromIndex: 2,
             toIndex: 3,
-            color: weightBandColor.withOpacity(0.25),
+            color: weightBandColor.withValues(alpha: 0.25),
           ),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide TimeOfDay;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
@@ -12,9 +13,8 @@ import 'package:babymom_diary/src/features/calendar/presentation/models/calendar
 import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/edit_calendar_event_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-final editCalendarEventViewModelProvider =
-    AutoDisposeStateNotifierProviderFamily<EditCalendarEventViewModel,
-        EditCalendarEventState, CalendarEvent>(
+final editCalendarEventViewModelProvider = StateNotifierProvider.autoDispose
+    .family<EditCalendarEventViewModel, EditCalendarEventState, CalendarEvent>(
   (ref, event) {
     final repository = CalendarEventRepositoryImpl(
       remote: CalendarEventFirestoreDataSource(FirebaseFirestore.instance),

@@ -75,7 +75,7 @@ class TableHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final headerColor =
-        theme.colorScheme.surfaceContainerHighest.withOpacity(0.6);
+        theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6);
 
     return Container(
       color: headerColor,

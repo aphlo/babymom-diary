@@ -131,16 +131,50 @@ Widget
 - **Stream-based reactivity:** Real-time Firestore updates via StreamProvider
 
 **ViewModel Pattern:**
+
+ViewModelの責務は **「UIのための状態管理」と「UseCaseの呼び出し」** のみに限定する。
+
+- **UIのための状態管理:** `selectedDate`、`selectedTabIndex`、`isProcessing`、`pendingUiEvent` など画面固有の状態
+- **UseCaseの呼び出し:** ビジネスロジックはUseCaseに委譲し、結果に応じてUI状態を更新
+
+以下はViewModelが行うべきでない責務:
+- `householdId` や `childId` の取得・管理 → `childContextProvider` など共通Providerから取得
+- データのフェッチやストリーム購読 → 専用のStreamProviderで行い、Widgetで直接watchする
+- ドメインロジック（バリデーション、計算など） → Domain ServiceやUseCaseに委譲
+
 ```dart
-class FeatureViewModel extends StateNotifier<FeatureState> {
-  final UseCase _useCase;
+@Riverpod(keepAlive: true)
+class FeatureViewModel extends _$FeatureViewModel {
+  @override
+  FeatureState build() {
+    return FeatureState.initial();
+  }
 
-  FeatureViewModel(this._useCase) : super(FeatureState.initial());
+  Future<void> performAction(SomeDraft draft) async {
+    // 共通Providerからコンテキスト取得（ViewModelで管理しない）
+    final context = ref.read(childContextProvider).value;
+    if (context == null) {
+      state = state.copyWith(
+        pendingUiEvent: const FeatureUiEvent.showMessage('データの読み込み中です'),
+      );
+      return;
+    }
 
-  Future<void> performAction() async {
-    state = state.copyWith(isLoading: true);
-    final result = await _useCase.execute();
-    state = state.copyWith(isLoading: false, data: result);
+    state = state.copyWith(isProcessing: true, pendingUiEvent: null);
+    try {
+      // UseCaseはProviderから取得してDI
+      final useCase = ref.read(featureUseCaseProvider(context.householdId));
+      await useCase.call(childId: context.selectedChildId!, data: draft);
+      state = state.copyWith(
+        isProcessing: false,
+        pendingUiEvent: const FeatureUiEvent.showMessage('成功しました'),
+      );
+    } catch (_) {
+      state = state.copyWith(
+        isProcessing: false,
+        pendingUiEvent: const FeatureUiEvent.showMessage('失敗しました'),
+      );
+    }
   }
 }
 ```

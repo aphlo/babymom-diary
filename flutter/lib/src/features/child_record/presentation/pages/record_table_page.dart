@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../menu/children/application/child_context_provider.dart';
 import '../components/feeding_table_tab.dart';
 import '../components/growth_chart_tab.dart';
 import '../viewmodels/record_view_model.dart';
@@ -49,7 +50,8 @@ class _RecordTablePageState extends ConsumerState<RecordTablePage>
     final selectedDate = state.selectedDate;
 
     // 子供の変更を検知して、TabControllerのインデックスを保持
-    final currentChildId = state.selectedChildId;
+    final childContext = ref.watch(childContextProvider).value;
+    final currentChildId = childContext?.selectedChildId;
     if (_previousChildId != currentChildId) {
       // 子供が変更された - TabControllerのインデックスはそのまま保持
       _previousChildId = currentChildId;
