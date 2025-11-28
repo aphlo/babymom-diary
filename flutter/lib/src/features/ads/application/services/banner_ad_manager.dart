@@ -71,7 +71,14 @@ class BannerAdManager {
   Future<void> preload(BannerAdSlot slot, double width) async {
     final slotState = _slots[slot];
     if (slotState == null || _isDisposed) return;
-    if (slotState.isLoading || slotState.ad != null) return;
+    if (slotState.ad != null) return;
+
+    // 既にロード中の場合は既存のCompleterを待機
+    final existingCompleter = _loadCompleters[slot];
+    if (slotState.isLoading && existingCompleter != null) {
+      await existingCompleter.future;
+      return;
+    }
 
     slotState.isLoading = true;
 
@@ -195,6 +202,7 @@ class BannerAdManager {
       slotState.dispose();
     }
     _slots.clear();
+    _loadCompleters.clear();
   }
 }
 

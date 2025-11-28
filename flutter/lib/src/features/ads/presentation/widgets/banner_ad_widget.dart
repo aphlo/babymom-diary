@@ -72,7 +72,7 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
     return SafeArea(
       child: Container(
         alignment: Alignment.center,
-        width: _adSize?.width.toDouble(),
+        width: double.infinity,
         height: bannerHeight,
         child: _bannerAd != null
             ? AdWidget(ad: _bannerAd!)

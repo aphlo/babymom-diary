@@ -92,12 +92,19 @@ class _AppState extends ConsumerState<App> {
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _preloadBannerAds();
+  }
+
   /// 全画面分のバナー広告をプリロードする
-  void _preloadBannerAds(double screenWidth) {
+  void _preloadBannerAds() {
     if (_adPreloadStarted) return;
     _adPreloadStarted = true;
 
     // 全スロットのバナー広告をプリロード（ATT許可と並行して実行）
+    final screenWidth = MediaQuery.of(context).size.width;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final manager = ref.read(bannerAdManagerProvider);
       manager.preloadAll(screenWidth);
@@ -110,10 +117,6 @@ class _AppState extends ConsumerState<App> {
     final householdId = householdAsync.value ?? widget.initialHouseholdId;
     final router = ref.watch(appRouterProvider);
     final theme = ref.watch(appThemeProvider(householdId));
-
-    // 全画面分のバナー広告をプリロード（初回のみ）
-    final screenWidth = MediaQuery.of(context).size.width;
-    _preloadBannerAds(screenWidth);
 
     // 世帯IDが変更されたら選択中の子供をリセット
     if (_previousHouseholdId != null && _previousHouseholdId != householdId) {
