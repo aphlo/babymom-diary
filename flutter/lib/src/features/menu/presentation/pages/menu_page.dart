@@ -38,9 +38,9 @@ class MenuPage extends ConsumerWidget {
           final childrenAsync = ref.watch(childrenStreamProvider(hid));
           return childrenAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, __) =>
-                Center(child: Text('子どもの読み込みに失敗しました\n$e')),
-            data: (children) => _buildMenuList(context, ref, hid, children, isOwner),
+            error: (e, __) => Center(child: Text('子どもの読み込みに失敗しました\n$e')),
+            data: (children) =>
+                _buildMenuList(context, ref, hid, children, isOwner),
           );
         },
       ),

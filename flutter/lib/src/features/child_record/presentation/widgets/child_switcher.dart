@@ -29,9 +29,8 @@ class ChildSwitcher extends ConsumerWidget {
           data: (children) {
             return DropdownButtonHideUnderline(
               child: DropdownButton<String?>(
-                value: children.any((c) => c.id == selectedId)
-                    ? selectedId
-                    : null,
+                value:
+                    children.any((c) => c.id == selectedId) ? selectedId : null,
                 hint: const Text('子どもを選択'),
                 items: [
                   for (final child in children)
