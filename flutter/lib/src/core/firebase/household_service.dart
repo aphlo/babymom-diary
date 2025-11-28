@@ -221,30 +221,20 @@ final _userDocumentStreamProvider = StreamProvider<UserDocumentData>((ref) {
   });
 });
 
-/// Stream provider that watches users/{uid} document for activeHouseholdId changes
-/// This allows real-time updates when user joins/leaves a household
-final currentHouseholdIdProvider = StreamProvider<String>((ref) {
-  final userDoc = ref.watch(_userDocumentStreamProvider);
-
-  return userDoc.when(
-    data: (data) {
-      if (data.activeHouseholdId == null) {
-        return Stream.error(StateError('No active household found.'));
-      }
-      return Stream.value(data.activeHouseholdId!);
-    },
-    loading: () => const Stream.empty(),
-    error: (e, st) => Stream.error(e, st),
-  );
+/// Provider that derives activeHouseholdId from the shared user document stream
+/// Uses select to avoid Stream-of-Streams while sharing the single Firestore listener
+final currentHouseholdIdProvider = FutureProvider<String>((ref) async {
+  final userDocAsync = await ref.watch(_userDocumentStreamProvider.future);
+  final householdId = userDocAsync.activeHouseholdId;
+  if (householdId == null) {
+    throw StateError('No active household found.');
+  }
+  return householdId;
 });
 
-/// Stream provider that watches users/{uid} document for membershipType changes
-final currentMembershipTypeProvider = StreamProvider<String?>((ref) {
-  final userDoc = ref.watch(_userDocumentStreamProvider);
-
-  return userDoc.when(
-    data: (data) => Stream.value(data.membershipType),
-    loading: () => const Stream.empty(),
-    error: (e, st) => Stream.error(e, st),
-  );
+/// Provider that derives membershipType from the shared user document stream
+/// Uses select to avoid Stream-of-Streams while sharing the single Firestore listener
+final currentMembershipTypeProvider = FutureProvider<String?>((ref) async {
+  final userDocAsync = await ref.watch(_userDocumentStreamProvider.future);
+  return userDocAsync.membershipType;
 });

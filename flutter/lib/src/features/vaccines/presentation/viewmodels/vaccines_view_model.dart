@@ -8,9 +8,7 @@ import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine_mast
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_record.dart';
 import 'package:babymom_diary/src/features/vaccines/application/usecases/watch_vaccination_records.dart';
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
-import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
-import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
-import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
+import 'package:babymom_diary/src/features/menu/children/application/child_context_provider.dart';
 import 'package:babymom_diary/src/features/menu/household/domain/repositories/vaccine_visibility_settings_repository.dart';
 import 'package:babymom_diary/src/features/menu/household/infrastructure/repositories/vaccine_visibility_settings_repository_impl.dart';
 import 'package:babymom_diary/src/features/menu/household/infrastructure/sources/vaccine_visibility_settings_firestore_data_source.dart';
@@ -55,83 +53,52 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
   List<VaccinationRecord> _records = const <VaccinationRecord>[];
 
   void _initialize() {
-    _listenToHouseholdChange();
-    _listenToSelectedChild();
+    _listenToChildContext();
     unawaited(_loadInitialData());
   }
 
-  /// 選択中の子供のスナップショット（誕生日など）の変更を監視
-  void _listenToChildSnapshot(String householdId) {
-    _ref.listen<AsyncValue<ChildSummary?>>(
-      selectedChildSnapshotProvider(householdId),
+  /// ChildContextProviderを監視し、householdId/子供/子供リストの変更に対応
+  void _listenToChildContext() {
+    _ref.listen<AsyncValue<ChildContext>>(
+      childContextProvider,
       (previous, next) {
         if (!mounted) return;
-        next.whenData((summary) {
-          // 選択中の子供の誕生日が変わった場合のみ更新
-          if (summary?.id == _childId) {
-            final newBirthday = summary?.birthday;
-            if (newBirthday != _childBirthday) {
-              _childBirthday = newBirthday;
-              _emitViewData();
-            }
-          }
-        });
-      },
-      fireImmediately: true,
-    );
-  }
 
-  void _listenToHouseholdChange() {
-    _ref.listen<AsyncValue<String>>(
-      currentHouseholdIdProvider,
-      (previous, next) {
-        if (!mounted) return;
-        final newHouseholdId = next.valueOrNull;
-        final previousHouseholdId = previous?.valueOrNull;
+        final previousContext = previous?.valueOrNull;
+        final currentContext = next.valueOrNull;
 
-        if (newHouseholdId != previousHouseholdId) {
-          _householdId = newHouseholdId;
-          // 世帯が変わった場合、レコード購読を再設定
+        if (currentContext == null) return;
+
+        final householdChanged =
+            previousContext?.householdId != currentContext.householdId;
+        final childChanged =
+            previousContext?.selectedChildId != currentContext.selectedChildId;
+        final birthdayChanged = previousContext?.selectedChildSummary?.birthday !=
+            currentContext.selectedChildSummary?.birthday;
+
+        // householdIdが変わった場合
+        if (householdChanged) {
+          _householdId = currentContext.householdId;
           _recordSubscription?.cancel();
           _records = const <VaccinationRecord>[];
+        }
 
-          // 世帯が変わったら、child snapshotのリスナーを再設定
-          if (newHouseholdId != null) {
-            _listenToChildSnapshot(newHouseholdId);
-          }
+        // 子供が変わった場合（削除による自動選択を含む）
+        if (childChanged || householdChanged) {
+          _childId = currentContext.selectedChildId;
+          _childBirthday = currentContext.selectedChildSummary?.birthday;
+          _recordSubscription?.cancel();
+          _records = const <VaccinationRecord>[];
 
           if (_householdId != null && _childId != null) {
             _subscribeToRecords();
           }
           _emitViewData();
+        } else if (birthdayChanged) {
+          // 誕生日のみが変わった場合
+          _childBirthday = currentContext.selectedChildSummary?.birthday;
+          _emitViewData();
         }
-      },
-    );
-  }
-
-  void _listenToSelectedChild() {
-    _ref.listen<AsyncValue<String?>>(
-      selectedChildControllerProvider,
-      (previous, next) {
-        if (!mounted) return;
-        // loading状態の場合はスキップ
-        if (next.isLoading) return;
-
-        final newChildId = next.valueOrNull;
-        if (newChildId == _childId) return;
-
-        _childId = newChildId;
-        _recordSubscription?.cancel();
-        _records = const <VaccinationRecord>[];
-
-        // 子供が変わった場合、誕生日をリセット
-        // （実際の誕生日は _listenToChildSnapshot で更新される）
-        _childBirthday = null;
-
-        if (_householdId != null && _childId != null) {
-          _subscribeToRecords();
-        }
-        _emitViewData();
       },
       fireImmediately: true,
     );
@@ -139,25 +106,8 @@ class VaccinesViewModel extends StateNotifier<AsyncValue<VaccinesViewData>> {
 
   Future<void> _loadInitialData() async {
     try {
-      final householdId = await _ref.read(currentHouseholdIdProvider.future);
-      if (!mounted) return;
-      _householdId = householdId;
-
-      // 選択された子供を取得
-      final childId = await _ref.read(selectedChildControllerProvider.future);
-      if (!mounted) return;
-      _childId = childId;
-
-      // 子供のスナップショット（誕生日など）の監視を開始
-      _listenToChildSnapshot(householdId);
-
-      // ガイドラインをロード
+      // ガイドラインをロード（ChildContextは_listenToChildContextで取得される）
       await _loadGuideline();
-
-      // レコードを購読
-      if (_householdId != null && _childId != null) {
-        _subscribeToRecords();
-      }
     } catch (error, stackTrace) {
       if (!mounted) return;
       state = AsyncValue.error(error, stackTrace);

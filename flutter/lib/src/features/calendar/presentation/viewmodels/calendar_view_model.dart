@@ -11,16 +11,13 @@ import 'package:babymom_diary/src/features/calendar/domain/repositories/calendar
 import 'package:babymom_diary/src/features/calendar/infrastructure/repositories/calendar_settings_repository_impl.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/models/calendar_event_model.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/calendar_state.dart';
+import 'package:babymom_diary/src/features/menu/children/application/child_context_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/application/children_local_provider.dart';
-import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
-import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
 import 'package:babymom_diary/src/features/vaccines/application/vaccine_catalog_providers.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/repositories/vaccination_record_repository.dart';
-import 'package:babymom_diary/src/core/firebase/household_service.dart'
-    as fbcore;
 
 final calendarViewModelProvider =
     AutoDisposeStateNotifierProvider<CalendarViewModel, CalendarState>(
@@ -74,39 +71,65 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
   ChildSummary? _snapshotChild;
 
   void _initialize() {
-    _initializeSelectedChild();
+    _listenToChildContext();
     _listenToCalendarSettings();
-    _loadHouseholdId();
   }
 
-  Future<void> _loadHouseholdId() async {
-    try {
-      final householdId =
-          await _ref.read(fbcore.currentHouseholdIdProvider.future);
-      if (!mounted) return;
-      state = state.copyWith(householdId: householdId);
-      _subscribeToChildren(householdId);
-      _loadMonthlyEvents();
-      _subscribeToSelectedDateEvents();
-      _loadVaccinationRecords();
-    } catch (error, stackTrace) {
-      if (!mounted) return;
-      state = state.copyWith(
-        pendingUiEvent: const CalendarUiEvent.showMessage('世帯情報の取得に失敗しました'),
-      );
-      state = state.copyWith(
-        eventsAsync: AsyncValue.error(error, stackTrace),
-      );
-    }
-  }
+  /// ChildContextProviderを監視し、householdId/子供/子供リストの変更に対応
+  void _listenToChildContext() {
+    _ref.listen<AsyncValue<ChildContext>>(
+      childContextProvider,
+      (previous, next) {
+        if (!mounted) return;
 
-  /// 選択中の子供IDを初期化時に一度だけ取得
-  void _initializeSelectedChild() {
-    final childIdAsync = _ref.read(selectedChildControllerProvider);
-    final value = childIdAsync.valueOrNull;
-    if (value != null) {
-      state = state.copyWith(selectedChildId: value, pendingUiEvent: null);
-    }
+        final previousContext = previous?.valueOrNull;
+        final currentContext = next.valueOrNull;
+
+        if (currentContext == null) {
+          // error/loadingの場合
+          if (next.hasError) {
+            state = state.copyWith(
+              pendingUiEvent:
+                  const CalendarUiEvent.showMessage('世帯情報の取得に失敗しました'),
+              eventsAsync: AsyncValue.error(next.error!, next.stackTrace!),
+            );
+          }
+          return;
+        }
+
+        final householdChanged =
+            previousContext?.householdId != currentContext.householdId;
+        final childChanged =
+            previousContext?.selectedChildId != currentContext.selectedChildId;
+
+        // householdIdが変わった場合
+        if (householdChanged) {
+          state = state.copyWith(
+            householdId: currentContext.householdId,
+            selectedChildId: currentContext.selectedChildId,
+          );
+          _subscribeToChildren(currentContext.householdId);
+          _loadMonthlyEvents();
+          _subscribeToSelectedDateEvents();
+          _loadVaccinationRecords();
+        } else if (childChanged) {
+          // 子供のみが変わった場合
+          state = state.copyWith(
+            selectedChildId: currentContext.selectedChildId,
+          );
+          _snapshotChild = currentContext.selectedChildSummary;
+          _rebuildAvailableChildren();
+          _loadVaccinationRecords();
+        }
+
+        // スナップショットの更新
+        if (currentContext.selectedChildSummary != previousContext?.selectedChildSummary) {
+          _snapshotChild = currentContext.selectedChildSummary;
+          _rebuildAvailableChildren();
+        }
+      },
+      fireImmediately: true,
+    );
   }
 
   void _listenToCalendarSettings() {
@@ -131,15 +154,6 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
       (previous, next) {
         final value = next.valueOrNull ?? const <ChildSummary>[];
         _localChildren = value;
-        _rebuildAvailableChildren();
-      },
-      fireImmediately: true,
-    );
-
-    _ref.listen<AsyncValue<ChildSummary?>>(
-      selectedChildSnapshotProvider(householdId),
-      (previous, next) {
-        _snapshotChild = next.valueOrNull;
         _rebuildAvailableChildren();
       },
       fireImmediately: true,

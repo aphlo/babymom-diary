@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/firebase/household_service.dart' as fbcore;
-import '../../../menu/children/application/selected_child_snapshot_provider.dart';
+import '../../../menu/children/application/child_context_provider.dart';
 import '../../../menu/children/domain/entities/child_summary.dart';
 import '../../child_record.dart';
 import '../../infrastructure/repositories/growth_curve_repository_impl.dart';
@@ -103,49 +103,30 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
   String? _householdId;
 
   void _initialize() {
-    Future<void>(() async {
-      try {
-        final hid = await _ref.read(fbcore.currentHouseholdIdProvider.future);
-        if (!mounted) {
-          return;
-        }
-        _householdId = hid;
-        _listenToSelectedChild(hid);
-        _listenToSettingsChanges();
-      } catch (error, stackTrace) {
-        if (!mounted) {
-          return;
-        }
-        state = state.copyWith(
-          chartData: AsyncValue.error(error, stackTrace),
-          isLoadingChild: false,
-        );
-      }
-    });
+    _listenToChildContext();
+    _listenToSettingsChanges();
   }
 
-  void _listenToSettingsChanges() {
-    _ref.listen<bool>(
-      growthChartSettingsProvider,
+  /// ChildContextProviderを監視し、householdId/子供/子供リストの変更に対応
+  void _listenToChildContext() {
+    _ref.listen<AsyncValue<ChildContext>>(
+      childContextProvider,
       (previous, next) {
-        if (!mounted || previous == next) {
-          return;
-        }
-        // Rebuild measurements when corrected age setting changes
-        _rebuildMeasurements();
-      },
-    );
-  }
+        if (!mounted) return;
 
-  void _listenToSelectedChild(String householdId) {
-    _ref.listen<AsyncValue<ChildSummary?>>(
-      selectedChildSnapshotProvider(householdId),
-      (previous, next) {
-        if (!mounted) {
-          return;
-        }
         next.when(
-          data: (summary) => _handleChildSummaryChange(summary),
+          data: (context) {
+            final previousContext = previous?.valueOrNull;
+
+            // householdIdが変わった場合
+            if (previousContext?.householdId != context.householdId) {
+              _householdId = context.householdId;
+            }
+
+            // 選択中の子供のスナップショットをchildSummaryとして取得
+            final summary = context.selectedChildSummary;
+            _handleChildSummaryChange(summary);
+          },
           loading: () {
             // loading中は何もしない（isLoadingChildはtrueのまま）
           },
@@ -163,6 +144,19 @@ class GrowthChartViewModel extends StateNotifier<GrowthChartState> {
         );
       },
       fireImmediately: true,
+    );
+  }
+
+  void _listenToSettingsChanges() {
+    _ref.listen<bool>(
+      growthChartSettingsProvider,
+      (previous, next) {
+        if (!mounted || previous == next) {
+          return;
+        }
+        // Rebuild measurements when corrected age setting changes
+        _rebuildMeasurements();
+      },
     );
   }
 
