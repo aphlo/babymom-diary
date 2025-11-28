@@ -34,18 +34,4 @@ class VaccineVisibilitySettingsRepositoryImpl
       visibilityMap: settings.visibilityMap,
     );
   }
-
-  @override
-  Stream<VaccineVisibilitySettings> watchSettings({
-    required String householdId,
-  }) {
-    return _dataSource
-        .watchSettings(householdId: householdId)
-        .map((visibilityMap) {
-      return VaccineVisibilitySettings(
-        householdId: householdId,
-        visibilityMap: visibilityMap,
-      );
-    });
-  }
 }

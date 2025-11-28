@@ -71,32 +71,4 @@ class VaccineVisibilitySettingsFirestoreDataSource {
           'Failed to update vaccine visibility settings for household $householdId: $e');
     }
   }
-
-  /// ワクチン表示設定の変更をリアルタイムで監視
-  Stream<Map<String, bool>> watchSettings({
-    required String householdId,
-  }) {
-    return _householdRef(householdId).snapshots().map((snapshot) {
-      final data = snapshot.data();
-
-      if (data == null || !data.containsKey('vaccineVisibilitySettings')) {
-        return <String, bool>{};
-      }
-
-      final settingsData = data['vaccineVisibilitySettings'];
-      if (settingsData is! Map) {
-        return <String, bool>{};
-      }
-
-      // Map<String, dynamic>からMap<String, bool>に変換
-      final result = <String, bool>{};
-      settingsData.forEach((key, value) {
-        if (key is String && value is bool) {
-          result[key] = value;
-        }
-      });
-
-      return result;
-    });
-  }
 }

@@ -11,16 +11,13 @@ import 'package:babymom_diary/src/features/calendar/domain/repositories/calendar
 import 'package:babymom_diary/src/features/calendar/infrastructure/repositories/calendar_settings_repository_impl.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/models/calendar_event_model.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/calendar_state.dart';
+import 'package:babymom_diary/src/features/menu/children/application/child_context_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/application/children_local_provider.dart';
-import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
-import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
 import 'package:babymom_diary/src/features/vaccines/application/vaccine_catalog_providers.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/repositories/vaccination_record_repository.dart';
-import 'package:babymom_diary/src/core/firebase/household_service.dart'
-    as fbcore;
 
 final calendarViewModelProvider =
     AutoDisposeStateNotifierProvider<CalendarViewModel, CalendarState>(
@@ -43,10 +40,10 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
   ) : super(CalendarState.initial()) {
     _initialize();
     _ref.onDispose(() {
-      _eventsSubscription?.cancel();
+      _selectedDateEventsSubscription?.cancel();
       _settingsSubscription?.cancel();
       _vaccinationSubscription?.cancel();
-      _eventsSubscription = null;
+      _selectedDateEventsSubscription = null;
       _settingsSubscription = null;
       _vaccinationSubscription = null;
     });
@@ -57,50 +54,80 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
   final CalendarSettingsRepository _settingsRepository;
   final VaccinationRecordRepository _vaccinationRepository;
 
-  StreamSubscription<List<CalendarEvent>>? _eventsSubscription;
+  /// 選択中の日付のイベントをリアルタイムで監視するサブスクリプション
+  StreamSubscription<List<CalendarEvent>>? _selectedDateEventsSubscription;
   StreamSubscription<CalendarSettings>? _settingsSubscription;
   StreamSubscription<List<VaccinationRecord>>? _vaccinationSubscription;
-  List<CalendarEvent> _latestEvents = const <CalendarEvent>[];
+
+  /// 月間イベント（get()で取得したもの）
+  List<CalendarEvent> _monthlyEvents = const <CalendarEvent>[];
+
+  /// 選択中の日付のイベント（リアルタイム監視）
+  List<CalendarEvent> _selectedDateEvents = const <CalendarEvent>[];
+
   List<VaccinationRecord> _latestVaccinationRecords =
       const <VaccinationRecord>[];
   List<ChildSummary> _localChildren = const <ChildSummary>[];
   ChildSummary? _snapshotChild;
 
   void _initialize() {
-    _listenToSelectedChild();
+    _listenToChildContext();
     _listenToCalendarSettings();
-    _loadHouseholdId();
   }
 
-  Future<void> _loadHouseholdId() async {
-    try {
-      final householdId =
-          await _ref.read(fbcore.currentHouseholdIdProvider.future);
-      if (!mounted) return;
-      state = state.copyWith(householdId: householdId);
-      _subscribeToChildren(householdId);
-      _refreshEventsSubscription();
-      _refreshVaccinationSubscription();
-    } catch (error, stackTrace) {
-      if (!mounted) return;
-      state = state.copyWith(
-        pendingUiEvent: const CalendarUiEvent.showMessage('世帯情報の取得に失敗しました'),
-      );
-      state = state.copyWith(
-        eventsAsync: AsyncValue.error(error, stackTrace),
-      );
-    }
-  }
-
-  void _listenToSelectedChild() {
-    _ref.listen<AsyncValue<String?>>(
-      selectedChildControllerProvider,
+  /// ChildContextProviderを監視し、householdId/子供/子供リストの変更に対応
+  void _listenToChildContext() {
+    _ref.listen<AsyncValue<ChildContext>>(
+      childContextProvider,
       (previous, next) {
-        final value = next.valueOrNull;
-        if (state.selectedChildId == value) {
+        if (!mounted) return;
+
+        final previousContext = previous?.valueOrNull;
+        final currentContext = next.valueOrNull;
+
+        if (currentContext == null) {
+          // error/loadingの場合
+          if (next.hasError) {
+            state = state.copyWith(
+              pendingUiEvent:
+                  const CalendarUiEvent.showMessage('世帯情報の取得に失敗しました'),
+              eventsAsync: AsyncValue.error(next.error!, next.stackTrace!),
+            );
+          }
           return;
         }
-        state = state.copyWith(selectedChildId: value, pendingUiEvent: null);
+
+        final householdChanged =
+            previousContext?.householdId != currentContext.householdId;
+        final childChanged =
+            previousContext?.selectedChildId != currentContext.selectedChildId;
+
+        // householdIdが変わった場合
+        if (householdChanged) {
+          state = state.copyWith(
+            householdId: currentContext.householdId,
+            selectedChildId: currentContext.selectedChildId,
+          );
+          _subscribeToChildren(currentContext.householdId);
+          _loadMonthlyEvents();
+          _subscribeToSelectedDateEvents();
+          _loadVaccinationRecords();
+        } else if (childChanged) {
+          // 子供のみが変わった場合
+          state = state.copyWith(
+            selectedChildId: currentContext.selectedChildId,
+          );
+          _snapshotChild = currentContext.selectedChildSummary;
+          _rebuildAvailableChildren();
+          _loadVaccinationRecords();
+        }
+
+        // スナップショットの更新
+        if (currentContext.selectedChildSummary !=
+            previousContext?.selectedChildSummary) {
+          _snapshotChild = currentContext.selectedChildSummary;
+          _rebuildAvailableChildren();
+        }
       },
       fireImmediately: true,
     );
@@ -132,15 +159,6 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
       },
       fireImmediately: true,
     );
-
-    _ref.listen<AsyncValue<ChildSummary?>>(
-      selectedChildSnapshotProvider(householdId),
-      (previous, next) {
-        _snapshotChild = next.valueOrNull;
-        _rebuildAvailableChildren();
-      },
-      fireImmediately: true,
-    );
   }
 
   void _rebuildAvailableChildren() {
@@ -159,8 +177,8 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     _updateCombinedEventsState();
   }
 
-  void _refreshEventsSubscription() {
-    _eventsSubscription?.cancel();
+  /// 月間イベントを一度だけ取得（リアルタイム更新なし）
+  Future<void> _loadMonthlyEvents() async {
     final householdId = state.householdId;
     if (householdId == null) {
       return;
@@ -168,38 +186,75 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     final range = _visibleRangeForMonth(state.focusedDay);
     state = state.copyWith(eventsAsync: const AsyncValue.loading());
 
-    // ストリームにデバウンス機能を追加してパフォーマンスを向上
-    _eventsSubscription = _repository
-        .watchEvents(
-          householdId: householdId,
-          start: range.start,
-          end: range.end,
-        )
-        .distinct() // 重複する更新を除去
+    try {
+      final events = await _repository.getEvents(
+        householdId: householdId,
+        start: range.start,
+        end: range.end,
+      );
+      if (!mounted) return;
+      _monthlyEvents = events;
+      _updateCombinedEventsState();
+    } catch (error, stackTrace) {
+      if (!mounted) return;
+      state = state.copyWith(
+        eventsAsync: AsyncValue.error(error, stackTrace),
+        pendingUiEvent: const CalendarUiEvent.showMessage(
+          '予定の取得に失敗しました',
+        ),
+      );
+    }
+  }
+
+  /// 選択中の日付のイベントをリアルタイムで監視
+  void _subscribeToSelectedDateEvents() {
+    _selectedDateEventsSubscription?.cancel();
+    final householdId = state.householdId;
+    if (householdId == null) {
+      return;
+    }
+
+    _selectedDateEventsSubscription = _repository
+        .watchEventsForDate(
+      householdId: householdId,
+      date: state.selectedDay,
+    )
         .listen(
       (events) {
-        _latestEvents = events;
+        _selectedDateEvents = events;
+        _mergeSelectedDateEventsIntoMonthly();
         _updateCombinedEventsState();
       },
       onError: (error, stackTrace) {
-        state = state.copyWith(
-          eventsAsync: AsyncValue.error(error, stackTrace),
-          pendingUiEvent: const CalendarUiEvent.showMessage(
-            '予定の取得に失敗しました',
-          ),
-        );
+        // 選択日付のエラーは無視（月間データがあればOK）
       },
     );
   }
 
-  void _refreshVaccinationSubscription() {
-    _vaccinationSubscription?.cancel();
+  /// 選択日付のリアルタイムデータを月間データにマージ
+  void _mergeSelectedDateEventsIntoMonthly() {
+    // リアルタイムデータに含まれるイベントIDを取得
+    final selectedDateEventIds = _selectedDateEvents.map((e) => e.id).toSet();
+
+    // 月間イベントからリアルタイムデータと重複するイベントのみ除去
+    final filteredMonthly = _monthlyEvents.where((e) {
+      return !selectedDateEventIds.contains(e.id);
+    }).toList();
+
+    // 選択日付のリアルタイムデータをマージ
+    _monthlyEvents = [...filteredMonthly, ..._selectedDateEvents]
+      ..sort((a, b) => a.start.compareTo(b.start));
+  }
+
+  /// ワクチン記録を一度だけ取得
+  Future<void> _loadVaccinationRecords() async {
     final householdId = state.householdId;
     final selectedChildId = state.selectedChildId;
     if (householdId == null || selectedChildId == null) {
       return;
     }
 
+    _vaccinationSubscription?.cancel();
     _vaccinationSubscription = _vaccinationRepository
         .watchVaccinationRecords(
       householdId: householdId,
@@ -223,7 +278,7 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     final childId = _snapshotChild?.id ?? '';
     final vaccinationEvents = VaccinationToCalendarEventMapper.toCalendarEvents(
         _latestVaccinationRecords, childId);
-    final combinedEvents = [..._latestEvents, ...vaccinationEvents];
+    final combinedEvents = [..._monthlyEvents, ...vaccinationEvents];
     final eventsByDay = _groupEventsByDay(combinedEvents);
 
     // ローディング状態の場合は常に更新する
@@ -263,16 +318,24 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
   void onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     final normalizedSelected = _normalizeDate(selectedDay);
     final normalizedFocused = _normalizeDate(focusedDay);
-    final requiresRefresh = normalizedFocused.year != state.focusedDay.year ||
+    final monthChanged = normalizedFocused.year != state.focusedDay.year ||
         normalizedFocused.month != state.focusedDay.month;
+    final dayChanged = normalizedSelected != _normalizeDate(state.selectedDay);
+
     state = state.copyWith(
       selectedDay: normalizedSelected,
       focusedDay: normalizedFocused,
       pendingUiEvent: null,
     );
-    if (requiresRefresh) {
-      _refreshEventsSubscription();
-      _refreshVaccinationSubscription();
+
+    if (monthChanged) {
+      // 月が変わった場合は月間イベントを再取得
+      _loadMonthlyEvents();
+    }
+
+    if (dayChanged) {
+      // 選択日付が変わった場合はリスナーを再設定
+      _subscribeToSelectedDateEvents();
     }
   }
 
@@ -280,16 +343,16 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
     final normalizedFocused = _normalizeDate(
       DateTime(focusedDay.year, focusedDay.month),
     );
-    final requiresRefresh = normalizedFocused.year != state.focusedDay.year ||
+    final monthChanged = normalizedFocused.year != state.focusedDay.year ||
         normalizedFocused.month != state.focusedDay.month;
-    if (!requiresRefresh) {
+    if (!monthChanged) {
       return;
     }
     state = state.copyWith(
       focusedDay: normalizedFocused,
       pendingUiEvent: null,
     );
-    _refreshEventsSubscription();
+    _loadMonthlyEvents();
   }
 
   void goToPreviousMonth() {
@@ -302,7 +365,7 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
       focusedDay: normalizedPrevious,
       pendingUiEvent: null,
     );
-    _refreshEventsSubscription();
+    _loadMonthlyEvents();
   }
 
   void goToNextMonth() {
@@ -315,7 +378,7 @@ class CalendarViewModel extends StateNotifier<CalendarState> {
       focusedDay: normalizedNext,
       pendingUiEvent: null,
     );
-    _refreshEventsSubscription();
+    _loadMonthlyEvents();
   }
 
   void clearUiEvent() {

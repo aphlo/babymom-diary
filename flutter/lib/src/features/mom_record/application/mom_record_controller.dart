@@ -35,10 +35,10 @@ final getMomMonthlyRecordsUseCaseProvider =
   return GetMomMonthlyRecords(repository);
 });
 
-final watchMomMonthlyRecordsUseCaseProvider =
-    Provider.family<WatchMomMonthlyRecords, String>((ref, householdId) {
+final watchMomRecordForDateUseCaseProvider =
+    Provider.family<WatchMomRecordForDate, String>((ref, householdId) {
   final repository = ref.watch(momRecordRepositoryProvider(householdId));
-  return WatchMomMonthlyRecords(repository);
+  return WatchMomRecordForDate(repository);
 });
 
 final saveMomDailyRecordUseCaseProvider =
@@ -68,10 +68,10 @@ final getMomDiaryMonthlyEntriesUseCaseProvider =
   return GetMomDiaryMonthlyEntries(repository);
 });
 
-final watchMomDiaryMonthlyEntriesUseCaseProvider =
-    Provider.family<WatchMomDiaryMonthlyEntries, String>((ref, householdId) {
+final watchMomDiaryForDateUseCaseProvider =
+    Provider.family<WatchMomDiaryForDate, String>((ref, householdId) {
   final repository = ref.watch(momDiaryRepositoryProvider(householdId));
-  return WatchMomDiaryMonthlyEntries(repository);
+  return WatchMomDiaryForDate(repository);
 });
 
 final saveMomDiaryEntryUseCaseProvider =

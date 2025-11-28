@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../domain/entities/mom_diary_entry.dart';
 import '../../domain/entities/mom_diary_month.dart';
 
 @immutable
@@ -15,6 +16,14 @@ class MomDiaryEntryUiModel {
   final String? content;
 
   bool get hasContent => content != null && content!.isNotEmpty;
+
+  static MomDiaryEntryUiModel fromDomain(MomDiaryEntry entry) {
+    return MomDiaryEntryUiModel(
+      date: entry.date,
+      dateLabel: _formatDateLabel(entry.date),
+      content: entry.content,
+    );
+  }
 }
 
 @immutable

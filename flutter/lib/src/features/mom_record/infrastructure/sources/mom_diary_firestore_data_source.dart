@@ -45,32 +45,16 @@ class MomDiaryFirestoreDataSource {
     return snapshot.docs.map(MomDiaryDto.fromFirestore).toList(growable: false);
   }
 
-  /// リアルタイム更新用のStream版
-  Stream<List<MomDiaryDto>> watchMonthlyDiary({
-    required int year,
-    required int month,
+  /// 特定の日付の日記をリアルタイムで監視
+  Stream<MomDiaryDto?> watchDiaryForDate({
+    required DateTime date,
   }) {
-    final start = DateTime(year, month, 1);
-    final endExclusive = DateTime(year, month + 1, 1);
-
-    final query = _collection
-        .where(
-          'date',
-          isGreaterThanOrEqualTo: Timestamp.fromDate(start),
-        )
-        .where(
-          'date',
-          isLessThan: Timestamp.fromDate(endExclusive),
-        )
-        .orderBy('date');
-
-    return query.snapshots().map((snapshot) {
-      if (snapshot.docs.isEmpty) {
-        return const <MomDiaryDto>[];
+    final docId = DateFormat('yyyy-MM-dd').format(date);
+    return _collection.doc(docId).snapshots().map((snapshot) {
+      if (!snapshot.exists) {
+        return null;
       }
-      return snapshot.docs
-          .map(MomDiaryDto.fromFirestore)
-          .toList(growable: false);
+      return MomDiaryDto.fromFirestore(snapshot);
     });
   }
 

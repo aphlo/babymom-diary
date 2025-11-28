@@ -22,9 +22,12 @@ class MomRecordDto {
   final String? memo;
 
   factory MomRecordDto.fromFirestore(
-    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+    DocumentSnapshot<Map<String, dynamic>> doc,
   ) {
     final data = doc.data();
+    if (data == null) {
+      throw StateError('Document data is null for ${doc.reference.path}');
+    }
     final date = _extractDate(data, doc.id, doc.reference.path);
     final temperature = _parseTemperature(
       data['temperatureCelsius'] ??

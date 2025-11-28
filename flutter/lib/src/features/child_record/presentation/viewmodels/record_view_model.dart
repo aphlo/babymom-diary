@@ -8,6 +8,7 @@ import '../../application/usecases/delete_record.dart';
 import '../../child_record.dart';
 import '../../infrastructure/repositories/child_record_repository_impl.dart';
 import '../../infrastructure/sources/record_firestore_data_source.dart';
+import '../../../menu/children/application/child_context_provider.dart';
 import '../../../menu/children/application/selected_child_provider.dart';
 import '../../../menu/children/data/infrastructure/child_firestore_data_source.dart';
 import '../../../../core/firebase/household_service.dart' as fbcore;
@@ -63,121 +64,69 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
   }
 
   void _initialize() {
-    _listenToHouseholdChange();
-    _listenToSelectedChild();
+    _listenToChildContext();
     unawaited(_loadInitialData());
   }
 
-  void _listenToHouseholdChange() {
-    _ref.listen<AsyncValue<String>>(
-      fbcore.currentHouseholdIdProvider,
+  /// ChildContextProviderを監視し、householdId/子供/子供リストの変更に対応
+  void _listenToChildContext() {
+    _ref.listen<AsyncValue<ChildContext>>(
+      childContextProvider,
       (previous, next) {
-        final newHouseholdId = next.valueOrNull;
-        final previousHouseholdId = previous?.valueOrNull;
+        if (!mounted) return;
 
-        // 世帯IDが変更された場合、データを再読み込み
-        if (newHouseholdId != null &&
-            previousHouseholdId != null &&
-            newHouseholdId != previousHouseholdId) {
-          // 世帯が変わったので、選択中の子どもをリセットしてデータを再読み込み
+        final previousContext = previous?.valueOrNull;
+        final currentContext = next.valueOrNull;
+
+        if (currentContext == null) return;
+
+        final householdChanged =
+            previousContext?.householdId != currentContext.householdId;
+        final childChanged =
+            previousContext?.selectedChildId != currentContext.selectedChildId;
+
+        // householdIdが変わった場合
+        if (householdChanged && previousContext != null) {
           _recordsSubscription?.cancel();
           state = state.copyWith(
-            householdId: newHouseholdId,
-            selectedChildId: null,
+            householdId: currentContext.householdId,
+            selectedChildId: currentContext.selectedChildId,
             recordsAsync: const AsyncValue<List<RecordItemModel>>.loading(),
           );
-          // 次のフレームでリロードを実行（Riverpodの状態が安定した後）
-          Future.microtask(() => _reloadForNewHousehold(newHouseholdId));
-        }
-      },
-    );
-  }
-
-  Future<void> _reloadForNewHousehold(String householdId) async {
-    if (!mounted) return;
-
-    try {
-      // Providerを使わずに直接Firestoreから子どもを取得
-      final ds = ChildFirestoreDataSource(_db, householdId);
-      final snap = await ds.childrenQuery().limit(1).get();
-
-      if (!mounted) return;
-
-      String? childId;
-      if (snap.docs.isNotEmpty) {
-        childId = snap.docs.first.id;
-        // SharedPreferencesに保存（selectedChildControllerProviderを経由）
-        await _ref
-            .read(selectedChildControllerProvider.notifier)
-            .select(childId);
-        state = state.copyWith(selectedChildId: childId);
-      } else {
-        await _ref.read(selectedChildControllerProvider.notifier).select(null);
-        state = state.copyWith(selectedChildId: null);
-      }
-
-      if (!mounted) return;
-
-      if (childId != null) {
-        _subscribeToRecords(
-          householdId: householdId,
-          childId: childId,
-          date: state.selectedDate,
-          keepPrevious: false,
-        );
-      } else {
-        state = state.copyWith(
-          recordsAsync:
-              const AsyncValue<List<RecordItemModel>>.data(<RecordItemModel>[]),
-        );
-      }
-      await _loadOtherTags(householdId);
-    } catch (error, stackTrace) {
-      if (!mounted) return;
-      state = state.copyWith(
-        recordsAsync: AsyncValue.error(error, stackTrace),
-        pendingUiEvent: const RecordUiEvent.showMessage('記録の読み込みに失敗しました'),
-      );
-    }
-  }
-
-  void _listenToSelectedChild() {
-    _ref.listen<AsyncValue<String?>>(
-      selectedChildControllerProvider,
-      (previous, next) {
-        // loading状態の場合は何もしない（_loadInitialDataが処理する）
-        if (next.isLoading) {
-          return;
-        }
-        final newId = next.valueOrNull;
-        // 前回もdata状態で、値が同じ場合はスキップ
-        final previousWasData = previous != null && !previous.isLoading;
-        if (previousWasData && newId == state.selectedChildId) {
-          return;
-        }
-        state = state.copyWith(
-          selectedChildId: newId,
-          pendingUiEvent: null,
-        );
-        // 子供IDがnullの場合は空リストを設定（householdIdに関係なく）
-        if (newId == null || newId.isEmpty) {
-          _recordsSubscription?.cancel();
+          // タグを再読み込み
+          unawaited(_loadOtherTags(currentContext.householdId));
+        } else if (householdChanged) {
+          // 初回ロード時
           state = state.copyWith(
-            recordsAsync: const AsyncValue<List<RecordItemModel>>.data(
-                <RecordItemModel>[]),
+            householdId: currentContext.householdId,
+            selectedChildId: currentContext.selectedChildId,
           );
-          return;
+          // タグをロード
+          unawaited(_loadOtherTags(currentContext.householdId));
         }
-        final hid = state.householdId;
-        if (hid == null) {
-          // householdIdがまだ設定されていない場合は、_loadInitialDataが処理する
-          return;
+
+        // 子供が変わった場合（削除による自動選択を含む）
+        if (childChanged || householdChanged) {
+          final childId = currentContext.selectedChildId;
+          state = state.copyWith(
+            selectedChildId: childId,
+            pendingUiEvent: null,
+          );
+
+          if (childId == null || childId.isEmpty) {
+            _recordsSubscription?.cancel();
+            state = state.copyWith(
+              recordsAsync: const AsyncValue<List<RecordItemModel>>.data(
+                  <RecordItemModel>[]),
+            );
+          } else {
+            _subscribeToRecords(
+              householdId: currentContext.householdId,
+              childId: childId,
+              date: state.selectedDate,
+            );
+          }
         }
-        _subscribeToRecords(
-          householdId: hid,
-          childId: newId,
-          date: state.selectedDate,
-        );
       },
       fireImmediately: true,
     );
@@ -202,37 +151,8 @@ class RecordViewModel extends StateNotifier<RecordPageState> {
       otherTagsAsync: const AsyncValue<List<String>>.loading()
           .copyWithPrevious(previousTags),
     );
-    try {
-      final householdId =
-          await _ref.read(fbcore.currentHouseholdIdProvider.future);
-      if (!mounted) return;
-      state = state.copyWith(householdId: householdId);
-      final childId = await _ensureActiveChild(
-        householdId: householdId,
-        watchSelected: true,
-      );
-      if (!mounted) return;
-      if (childId != null) {
-        _subscribeToRecords(
-          householdId: householdId,
-          childId: childId,
-          date: state.selectedDate,
-          keepPrevious: false,
-        );
-      } else {
-        state = state.copyWith(
-          recordsAsync:
-              const AsyncValue<List<RecordItemModel>>.data(<RecordItemModel>[]),
-        );
-      }
-      await _loadOtherTags(householdId);
-    } catch (error, stackTrace) {
-      if (!mounted) return;
-      state = state.copyWith(
-        recordsAsync: AsyncValue.error(error, stackTrace),
-        pendingUiEvent: const RecordUiEvent.showMessage('記録の読み込みに失敗しました'),
-      );
-    }
+    // 初期データは_listenToChildContextで取得される
+    // ここではタグのロードのみ行う
   }
 
   Future<void> refresh() async {

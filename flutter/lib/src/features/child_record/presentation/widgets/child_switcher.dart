@@ -1,20 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/firebase/household_service.dart';
-import '../../../menu/children/data/infrastructure/child_firestore_data_source.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../menu/children/application/child_color_provider.dart';
+import '../../../menu/children/application/children_stream_provider.dart';
 import '../../../menu/children/application/selected_child_provider.dart';
 
 class ChildSwitcher extends ConsumerWidget {
   const ChildSwitcher({super.key});
-
-  Color _parseColor(String? hex) {
-    if (hex == null || hex.isEmpty) return Colors.grey;
-    final cleaned = hex.replaceFirst('#', '');
-    final value = int.tryParse(cleaned, radix: 16);
-    if (value == null) return Colors.grey;
-    return Color(0xFF000000 | value);
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,28 +20,33 @@ class ChildSwitcher extends ConsumerWidget {
           child: Center(child: CircularProgressIndicator(strokeWidth: 2))),
       error: (e, __) => Text('error: $e'),
       data: (hid) {
-        final ds =
-            ChildFirestoreDataSource(ref.watch(firebaseFirestoreProvider), hid);
-        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          stream: ds.childrenQuery().snapshots(),
-          builder: (context, snap) {
-            final items = snap.data?.docs ?? const [];
+        final childrenAsync = ref.watch(childrenStreamProvider(hid));
+        return childrenAsync.when(
+          loading: () => const SizedBox(
+              height: 40,
+              child: Center(child: CircularProgressIndicator(strokeWidth: 2))),
+          error: (e, __) => Text('error: $e'),
+          data: (children) {
             return DropdownButtonHideUnderline(
               child: DropdownButton<String?>(
-                value: items.any((d) => d.id == selectedId) ? selectedId : null,
+                value:
+                    children.any((c) => c.id == selectedId) ? selectedId : null,
                 hint: const Text('子どもを選択'),
                 items: [
-                  for (final d in items)
+                  for (final child in children)
                     DropdownMenuItem(
-                      value: d.id,
+                      value: child.id,
                       child: Row(
                         children: [
                           CircleAvatar(
                             radius: 8,
-                            backgroundColor: _parseColor(d['color'] as String?),
+                            backgroundColor: ref
+                                .watch(childColorProvider.notifier)
+                                .getColor(child.id,
+                                    defaultColor: AppColors.primary),
                           ),
                           const SizedBox(width: 8),
-                          Text((d['name'] as String?) ?? '未設定'),
+                          Text(child.name),
                         ],
                       ),
                     ),

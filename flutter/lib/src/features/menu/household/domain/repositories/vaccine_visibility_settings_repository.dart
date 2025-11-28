@@ -16,9 +16,4 @@ abstract class VaccineVisibilitySettingsRepository {
   Future<void> updateSettings({
     required VaccineVisibilitySettings settings,
   });
-
-  /// ワクチン表示設定の変更をリアルタイムで監視
-  Stream<VaccineVisibilitySettings> watchSettings({
-    required String householdId,
-  });
 }

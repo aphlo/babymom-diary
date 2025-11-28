@@ -27,6 +27,7 @@ class MomDiaryEditorDialog extends ConsumerStatefulWidget {
 
 class _MomDiaryEditorDialogState extends ConsumerState<MomDiaryEditorDialog> {
   late final TextEditingController _contentController;
+  late final MomDiaryViewModel _viewModel;
   bool _isSaving = false;
 
   @override
@@ -34,10 +35,16 @@ class _MomDiaryEditorDialogState extends ConsumerState<MomDiaryEditorDialog> {
     super.initState();
     _contentController =
         TextEditingController(text: widget.entry.content ?? '');
+
+    // 編集中の日付をリアルタイムで監視開始
+    _viewModel = ref.read(momDiaryViewModelProvider.notifier);
+    _viewModel.startEditingDiary(widget.entry.date);
   }
 
   @override
   void dispose() {
+    // 編集終了時にリアルタイム監視を停止
+    _viewModel.stopEditingDiary();
     _contentController.dispose();
     super.dispose();
   }
