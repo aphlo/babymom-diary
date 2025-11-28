@@ -27,7 +27,8 @@ class MenuPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncHid = ref.watch(currentHouseholdIdProvider);
     final membershipType = ref.watch(currentMembershipTypeProvider).value;
-    final isOwner = membershipType != 'member';
+    // nullの場合は安全側に倒してfalseとする（ローディング中は非オーナー扱い）
+    final isOwner = membershipType == 'owner';
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
       appBar: AppBar(title: const Text('メニュー')),
