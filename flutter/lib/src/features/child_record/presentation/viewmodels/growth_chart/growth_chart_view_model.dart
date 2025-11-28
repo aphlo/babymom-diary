@@ -37,10 +37,28 @@ class GrowthChartViewModel extends _$GrowthChartViewModel {
     _listenToChildContext();
     _listenToSettingsChanges();
 
-    return GrowthChartState.initial();
+    // 初期状態を構築（childContextから初期値を取得）
+    final childContext = ref.read(childContextProvider).value;
+    final summary = childContext?.selectedChildSummary;
+
+    if (summary != null) {
+      // 子供が選択されている場合は初期化処理をスケジュール
+      Future.microtask(() => _initializeForChild(summary));
+    }
+
+    return GrowthChartState.initial().copyWith(
+      childSummary: summary,
+      replaceChildSummary: true,
+      isLoadingChild: childContext == null,
+    );
   }
 
   String? get _householdId => ref.read(childContextProvider).value?.householdId;
+
+  void _initializeForChild(ChildSummary summary) {
+    _subscribeToGrowthRecords(summary.id);
+    _loadCurvesForCurrentChild();
+  }
 
   void _listenToChildContext() {
     ref.listen<AsyncValue<ChildContext>>(
@@ -69,7 +87,6 @@ class GrowthChartViewModel extends _$GrowthChartViewModel {
           },
         );
       },
-      fireImmediately: true,
     );
   }
 

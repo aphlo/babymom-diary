@@ -42,7 +42,7 @@ final class GrowthChartViewModelProvider
 }
 
 String _$growthChartViewModelHash() =>
-    r'f6b25e2ffb3d304aed8e46f7be2c13c3c7fbbda6';
+    r'57918cbdd5fbf4861854bf666edd3093f4e811fd';
 
 abstract class _$GrowthChartViewModel extends $Notifier<GrowthChartState> {
   GrowthChartState build();
