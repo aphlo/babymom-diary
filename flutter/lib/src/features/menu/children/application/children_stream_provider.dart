@@ -1,14 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/firebase/household_service.dart';
 import '../../../../core/types/gender.dart';
 import '../data/infrastructure/child_firestore_data_source.dart';
 import '../domain/entities/child_summary.dart';
 
+part 'children_stream_provider.g.dart';
+
 /// Household 内の子ども一覧を監視する StreamProvider。
-final childrenStreamProvider = StreamProvider.autoDispose
-    .family<List<ChildSummary>, String>((ref, householdId) {
+@riverpod
+Stream<List<ChildSummary>> childrenStream(Ref ref, String householdId) {
   final firestore = ref.watch(firebaseFirestoreProvider);
   final ds = ChildFirestoreDataSource(firestore, householdId);
   return ds.childrenQuery().snapshots().map((snapshot) {
@@ -26,4 +28,4 @@ final childrenStreamProvider = StreamProvider.autoDispose
       );
     }).toList();
   });
-});
+}

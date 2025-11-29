@@ -41,26 +41,6 @@ class AdRepositoryImpl implements AdRepository {
   }
 
   @override
-  Future<InterstitialAd> loadInterstitialAd(String adUnitId) async {
-    final completer = Completer<InterstitialAd>();
-
-    await InterstitialAd.load(
-      adUnitId: adUnitId,
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          completer.complete(ad);
-        },
-        onAdFailedToLoad: (error) {
-          completer.completeError(error);
-        },
-      ),
-    );
-
-    return completer.future;
-  }
-
-  @override
   void dispose() {
     // 必要に応じてクリーンアップ処理
   }

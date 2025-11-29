@@ -1,7 +1,9 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'analytics_service.g.dart';
 
 /// Google Analyticsサービス
 ///
@@ -77,20 +79,23 @@ class AnalyticsService {
 }
 
 /// FirebaseAnalyticsのインスタンスを提供
-final firebaseAnalyticsProvider = Provider<FirebaseAnalytics>((ref) {
+@Riverpod(keepAlive: true)
+FirebaseAnalytics firebaseAnalytics(Ref ref) {
   return FirebaseAnalytics.instance;
-});
+}
 
 /// Analyticsが有効かどうかを管理するProvider
 /// main_prod.dartでtrueにoverrideする
-final analyticsEnabledProvider = Provider<bool>((ref) => false);
+@Riverpod(keepAlive: true)
+bool analyticsEnabled(Ref ref) => false;
 
 /// AnalyticsServiceのインスタンスを提供
-final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
+@Riverpod(keepAlive: true)
+AnalyticsService analyticsService(Ref ref) {
   final analytics = ref.watch(firebaseAnalyticsProvider);
   final enabled = ref.watch(analyticsEnabledProvider);
   return AnalyticsService(
     analytics: analytics,
     enabled: enabled,
   );
-});
+}

@@ -94,21 +94,4 @@ class AdMobService {
         : 'ca-app-pub-6548153014267210/8481091445';
     return adUnitId;
   }
-
-  /// インタースティシャル広告ユニットIDを取得
-  /// localフレーバー: テスト広告ID
-  /// prodフレーバー: 本番広告ID
-  static String getInterstitialAdUnitId() {
-    if (isLocalFlavor) {
-      // テスト用広告ユニットID
-      return Platform.isAndroid
-          ? 'ca-app-pub-3940256099942544/1033173712'
-          : 'ca-app-pub-3940256099942544/4411468910';
-    }
-
-    // 本番用広告ユニットID（現在はバナーと同じIDを使用）
-    return Platform.isAndroid
-        ? 'ca-app-pub-6548153014267210/2709890019'
-        : 'ca-app-pub-6548153014267210/8481091445';
-  }
 }

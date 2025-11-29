@@ -233,7 +233,7 @@ class CalendarViewModel extends _$CalendarViewModel {
     // リアルタイムデータに含まれるイベントIDを取得
     final selectedDateEventIds = _selectedDateEvents.map((e) => e.id).toSet();
 
-    // 月間イベントからリアルタイムデータと重複するイベントのみ除去
+    // 月間イベントからリアルタイムデータと重複するイベントを除去（更新対象）
     final filteredMonthly = _monthlyEvents.where((e) {
       return !selectedDateEventIds.contains(e.id);
     }).toList();
@@ -241,6 +241,11 @@ class CalendarViewModel extends _$CalendarViewModel {
     // 選択日付のリアルタイムデータをマージ
     _monthlyEvents = [...filteredMonthly, ..._selectedDateEvents]
       ..sort((a, b) => a.start.compareTo(b.start));
+  }
+
+  /// 月間イベントを再取得する（詳細画面から戻った際に呼び出す）
+  Future<void> refreshMonthlyEvents() async {
+    await _loadMonthlyEvents();
   }
 
   /// ワクチン記録を一度だけ取得

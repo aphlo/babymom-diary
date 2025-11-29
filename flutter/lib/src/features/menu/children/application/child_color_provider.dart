@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/preferences/shared_preferences_provider.dart';
 import '../infrastructure/child_color_local_storage.dart';
 
-final childColorLocalStorageProvider = Provider<ChildColorLocalStorage>((ref) {
+part 'child_color_provider.g.dart';
+
+@riverpod
+ChildColorLocalStorage childColorLocalStorage(Ref ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return ChildColorLocalStorage(prefs);
-});
+}
 
-/// 子供の色を管理するStateNotifier
-class ChildColorNotifier extends StateNotifier<Map<String, Color>> {
-  ChildColorNotifier(this._storage) : super({});
+/// 子供の色を管理するNotifier
+@Riverpod(keepAlive: true)
+class ChildColor extends _$ChildColor {
+  @override
+  Map<String, Color> build() {
+    return {};
+  }
 
-  final ChildColorLocalStorage _storage;
+  ChildColorLocalStorage get _storage =>
+      ref.read(childColorLocalStorageProvider);
 
   /// 子供の色を取得（読み取り専用）
   Color getColor(String childId, {Color defaultColor = Colors.blueAccent}) {
@@ -49,9 +56,3 @@ class ChildColorNotifier extends StateNotifier<Map<String, Color>> {
     }
   }
 }
-
-final childColorProvider =
-    StateNotifierProvider<ChildColorNotifier, Map<String, Color>>((ref) {
-  final storage = ref.watch(childColorLocalStorageProvider);
-  return ChildColorNotifier(storage);
-});

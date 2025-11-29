@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../analytics/analytics_service.dart';
 import '../../features/child_record/presentation/pages/record_table_page.dart';
 import '../../features/menu/growth_chart_settings/presentation/pages/growth_chart_settings_page.dart';
@@ -27,6 +27,8 @@ import '../../features/vaccines/presentation/pages/vaccine_reschedule_page.dart'
 import '../../features/vaccines/presentation/models/vaccine_info.dart';
 import '../../features/vaccines/presentation/viewmodels/vaccine_detail_state.dart';
 
+part 'app_router.g.dart';
+
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKeyBaby =
     GlobalKey<NavigatorState>(debugLabel: 'shellBaby');
@@ -38,7 +40,8 @@ final _shellNavigatorKeyCalendar =
 final _shellNavigatorKeyMenu =
     GlobalKey<NavigatorState>(debugLabel: 'shellMenu');
 
-final appRouterProvider = Provider<GoRouter>((ref) {
+@Riverpod(keepAlive: true)
+GoRouter appRouter(Ref ref) {
   final hasCompletedOnboarding = ref.watch(onboardingStatusProvider);
   final analyticsService = ref.watch(analyticsServiceProvider);
 
@@ -296,7 +299,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
-});
+}
 
 // StatefulNavigationShellを使用したスキャフォールドウィジェット
 class _ScaffoldWithNavBar extends StatelessWidget {

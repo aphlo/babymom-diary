@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/menu/children/application/child_color_provider.dart';
 import '../../features/menu/children/application/children_local_provider.dart';
@@ -11,7 +11,10 @@ import '../preferences/shared_preferences_provider.dart';
 import 'app_colors.dart';
 import 'app_theme.dart';
 
-final appThemeProvider = Provider.family<ThemeData, String>((ref, householdId) {
+part 'app_theme_provider.g.dart';
+
+@Riverpod(keepAlive: true)
+ThemeData appTheme(Ref ref, String householdId) {
   const fallbackColor = AppColors.primary;
 
   final prefs = ref.watch(sharedPreferencesProvider);
@@ -20,9 +23,9 @@ final appThemeProvider = Provider.family<ThemeData, String>((ref, householdId) {
   Color? selectedColor;
 
   final storedSnapshotRaw =
-      prefs.getString(SelectedChildSnapshotNotifier.prefsKey(householdId));
+      prefs.getString(SelectedChildSnapshot.prefsKey(householdId));
   if (storedSnapshotRaw != null) {
-    selectedSummary = decodeSelectedChildSnapshot(storedSnapshotRaw);
+    selectedSummary = SelectedChildSnapshot.decodeSnapshot(storedSnapshotRaw);
   }
 
   ChildSummary? findById(List<ChildSummary> list, String id) {
@@ -65,4 +68,4 @@ final appThemeProvider = Provider.family<ThemeData, String>((ref, householdId) {
   }
 
   return buildTheme(childColor: selectedColor ?? fallbackColor);
-});
+}

@@ -1,9 +1,11 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../providers/ad_providers.dart';
+
+part 'banner_ad_manager.g.dart';
 
 /// バナー広告のスロット識別子
 ///
@@ -218,8 +220,9 @@ class BannerAdManager {
 }
 
 /// BannerAdManagerのプロバイダー
-final bannerAdManagerProvider = Provider<BannerAdManager>((ref) {
+@Riverpod(keepAlive: true)
+BannerAdManager bannerAdManager(Ref ref) {
   final manager = BannerAdManager(ref);
   ref.onDispose(() => manager.dispose());
   return manager;
-});
+}
