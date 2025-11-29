@@ -17,7 +17,6 @@ AdRepository adRepository(Ref ref) {
 AdConfig adConfig(Ref ref) {
   return AdConfig(
     bannerAdUnitId: AdMobService.getBannerAdUnitId(),
-    interstitialAdUnitId: AdMobService.getInterstitialAdUnitId(),
     isTestMode: AdMobService.isLocalFlavor,
   );
 }
