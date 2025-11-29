@@ -1,21 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:babymom_diary/src/features/calendar/presentation/models/calendar_event_model.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/add_calendar_event_state.dart';
 
-final addCalendarEventViewModelProvider = StateNotifierProvider.autoDispose
-    .family<AddCalendarEventViewModel, AddCalendarEventState, DateTime>(
-        (ref, initialDate) {
-  return AddCalendarEventViewModel(initialDate: initialDate);
-});
+part 'add_calendar_event_view_model.g.dart';
 
-class AddCalendarEventViewModel extends StateNotifier<AddCalendarEventState> {
-  AddCalendarEventViewModel({
-    required DateTime initialDate,
-  }) : super(_initialState(initialDate: initialDate));
-
+@riverpod
+class AddCalendarEventViewModel extends _$AddCalendarEventViewModel {
   static const String _noIconPath = '';
 
   static const List<String> _availableIconPaths = <String>[
@@ -33,9 +26,8 @@ class AddCalendarEventViewModel extends StateNotifier<AddCalendarEventState> {
     'assets/icons/first_girl_festival.png',
   ];
 
-  static AddCalendarEventState _initialState({
-    required DateTime initialDate,
-  }) {
+  @override
+  AddCalendarEventState build(DateTime initialDate) {
     final normalizedDate = _normalizeDate(initialDate);
     return AddCalendarEventState(
       title: '',
