@@ -72,5 +72,9 @@ ThemeData buildTheme({Color? childColor}) {
       headerBackgroundColor: AppColors.primary,
       headerForegroundColor: Colors.white,
     ),
+    dialogTheme: const DialogThemeData(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+    ),
   );
 }
