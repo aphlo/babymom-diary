@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../../domain/entities/vaccination_record.dart';
-import '../models/vaccine_info.dart';
+import 'vaccine_info.dart';
 
 @immutable
 class VaccinesViewData {

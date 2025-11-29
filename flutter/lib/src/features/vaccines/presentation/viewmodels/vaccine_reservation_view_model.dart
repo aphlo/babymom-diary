@@ -1,89 +1,77 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/firebase/household_service.dart';
-import '../../../menu/children/application/selected_child_provider.dart';
-import '../../../menu/children/application/children_stream_provider.dart';
-import '../../../menu/children/domain/entities/child_summary.dart';
+import '../../../menu/children/application/child_context_provider.dart';
 import '../../application/usecases/create_vaccine_reservation.dart';
 import '../../application/usecases/get_vaccines_for_simulataneous_reservation.dart';
 import '../../application/vaccine_catalog_providers.dart';
 import '../../domain/value_objects/vaccine_record_type.dart';
 import '../../domain/errors/vaccination_persistence_exception.dart';
-import '../models/vaccine_info.dart';
 import 'vaccine_reservation_state.dart';
 
 export 'vaccine_reservation_state.dart';
 
-// HouseholdServiceのプロバイダー
-final householdServiceProvider = Provider<HouseholdService>((ref) {
-  return HouseholdService(
-    FirebaseAuth.instance,
-    FirebaseFirestore.instance,
-  );
-});
+part 'vaccine_reservation_view_model.g.dart';
 
-class VaccineReservationViewModel
-    extends StateNotifier<VaccineReservationState> {
-  VaccineReservationViewModel({
-    required CreateVaccineReservation createVaccineReservation,
-    required GetVaccinesForSimultaneousReservation getAvailableVaccines,
-    required HouseholdService householdService,
-  })  : _createVaccineReservation = createVaccineReservation,
-        _getAvailableVaccines = getAvailableVaccines,
-        _householdService = householdService,
-        super(const VaccineReservationState());
+@riverpod
+class VaccineReservationViewModel extends _$VaccineReservationViewModel {
+  CreateVaccineReservation get _createVaccineReservation =>
+      ref.read(createVaccineReservationProvider);
+  GetVaccinesForSimultaneousReservation get _getAvailableVaccines =>
+      ref.read(getAvailableVaccinesForSimultaneousReservationProvider);
 
-  final CreateVaccineReservation _createVaccineReservation;
-  final GetVaccinesForSimultaneousReservation _getAvailableVaccines;
-  final HouseholdService _householdService;
+  @override
+  VaccineReservationState build(VaccineReservationParams params) {
+    // 初期化処理をスケジュール
+    Future.microtask(() => _initialize(params));
 
-  /// 初期化
-  Future<void> initialize({
-    required VaccineInfo primaryVaccine,
-    required int doseNumber,
-    required String childId,
-    required ChildSummary child,
-  }) async {
-    state = state.copyWith(
+    return VaccineReservationState(
+      primaryVaccine: params.vaccine,
+      primaryDoseNumber: params.doseNumber,
       isLoading: true,
-      primaryVaccine: primaryVaccine,
-      primaryDoseNumber: doseNumber,
     );
+  }
+
+  Future<void> _initialize(VaccineReservationParams params) async {
+    final childContext = ref.read(childContextProvider).value;
+    if (childContext == null) {
+      state = state.copyWith(
+        isLoading: false,
+        error: '子どもが選択されていません',
+      );
+      return;
+    }
+
+    final selectedChildId = childContext.selectedChildId;
+    final selectedChild = childContext.selectedChildSummary;
+
+    if (selectedChildId == null || selectedChild == null) {
+      state = state.copyWith(
+        isLoading: false,
+        error: '子どもが選択されていません',
+      );
+      return;
+    }
 
     try {
-      final householdId =
-          await _householdService.findExistingHouseholdForCurrentUser();
-      if (householdId == null) {
-        if (!mounted) return;
-        state = state.copyWith(
-          isLoading: false,
-          error: 'ホームが見つかりません',
-        );
-        return;
-      }
+      final householdId = childContext.householdId;
 
       // 年齢に基づいて同時接種可能なワクチンを取得
       final availableVaccines = await _getAvailableVaccines(
         householdId: householdId,
-        childId: childId,
-        child: child,
+        childId: selectedChildId,
+        child: selectedChild,
       );
 
       // メインのワクチンを除外
       final filteredVaccines = availableVaccines
-          .where((vaccine) => vaccine.vaccineId != primaryVaccine.id)
+          .where((vaccine) => vaccine.vaccineId != params.vaccine.id)
           .toList();
 
-      if (!mounted) return;
       state = state.copyWith(
         isLoading: false,
         availableVaccines: filteredVaccines,
       );
     } catch (error) {
-      if (!mounted) return;
       state = state.copyWith(
         isLoading: false,
         error: 'データの取得に失敗しました: $error',
@@ -124,27 +112,34 @@ class VaccineReservationViewModel
   }
 
   /// 予約を作成
-  Future<bool> createReservation(String childId) async {
+  Future<bool> createReservation() async {
     if (!state.canSubmit) return false;
+
+    final childContext = ref.read(childContextProvider).value;
+    if (childContext == null) {
+      state = state.copyWith(
+        isSubmitting: false,
+        error: '子どもが選択されていません',
+      );
+      return false;
+    }
+
+    final childId = childContext.selectedChildId;
+    if (childId == null) {
+      state = state.copyWith(
+        isSubmitting: false,
+        error: '子どもが選択されていません',
+      );
+      return false;
+    }
 
     state = state.copyWith(isSubmitting: true, error: null);
 
     try {
-      final householdId =
-          await _householdService.findExistingHouseholdForCurrentUser();
-      if (householdId == null) {
-        if (!mounted) return false;
-        state = state.copyWith(
-          isSubmitting: false,
-          error: 'ホームが見つかりません',
-        );
-        return false;
-      }
-
+      final householdId = childContext.householdId;
       final requests = state.generateReservationRequests(childId);
 
       if (requests.isEmpty) {
-        if (!mounted) return false;
         state = state.copyWith(
           isSubmitting: false,
           error: '予約情報が不正です',
@@ -168,11 +163,9 @@ class VaccineReservationViewModel
         );
       }
 
-      if (!mounted) return false;
       state = state.copyWith(isSubmitting: false);
       return true;
     } on DuplicateScheduleDateException catch (e) {
-      if (!mounted) return false;
       state = state.copyWith(
         isSubmitting: false,
         error: e.message,
@@ -180,7 +173,6 @@ class VaccineReservationViewModel
       );
       return false;
     } catch (error) {
-      if (!mounted) return false;
       state = state.copyWith(
         isSubmitting: false,
         error: '予約の作成に失敗しました: $error',
@@ -194,65 +186,3 @@ class VaccineReservationViewModel
     state = state.clearError();
   }
 }
-
-// Provider
-final vaccineReservationViewModelProvider = StateNotifierProvider.autoDispose
-    .family<VaccineReservationViewModel, VaccineReservationState,
-        VaccineReservationParams>(
-  (ref, params) {
-    final createVaccineReservation =
-        ref.watch(createVaccineReservationProvider);
-    final getAvailableVaccines =
-        ref.watch(getAvailableVaccinesForSimultaneousReservationProvider);
-    final householdService = ref.watch(householdServiceProvider);
-
-    final viewModel = VaccineReservationViewModel(
-      createVaccineReservation: createVaccineReservation,
-      getAvailableVaccines: getAvailableVaccines,
-      householdService: householdService,
-    );
-
-    // 初期化
-
-    final selectedChildId = ref.watch(selectedChildControllerProvider).value;
-
-    if (selectedChildId != null) {
-      // まずhouseholdIdを取得
-      Future.microtask(() async {
-        try {
-          final householdId =
-              await householdService.findExistingHouseholdForCurrentUser();
-          if (householdId != null) {
-            // 子どものリストから該当する子どもを検索
-            final childrenAsync =
-                ref.watch(childrenStreamProvider(householdId));
-
-            childrenAsync.when(
-              data: (children) {
-                final selectedChild = children
-                        .where((child) => child.id == selectedChildId)
-                        .isNotEmpty
-                    ? children
-                        .firstWhere((child) => child.id == selectedChildId)
-                    : null;
-
-                if (selectedChild != null) {
-                  viewModel.initialize(
-                    primaryVaccine: params.vaccine,
-                    doseNumber: params.doseNumber,
-                    childId: selectedChildId,
-                    child: selectedChild,
-                  );
-                } else {}
-              },
-              loading: () {},
-              error: (error, stackTrace) {},
-            );
-          } else {}
-        } catch (error) {/* Intentionally ignored */}
-      });
-    } else {}
-
-    return viewModel;
-  },
-);

@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../application/usecases/get_reservation_group.dart';
 import '../../application/usecases/get_vaccine_by_id.dart';
@@ -9,51 +9,44 @@ import 'concurrent_vaccines_state.dart';
 
 export 'concurrent_vaccines_state.dart';
 
-class ConcurrentVaccinesViewModel
-    extends StateNotifier<ConcurrentVaccinesState> {
-  ConcurrentVaccinesViewModel({
-    required GetReservationGroup getReservationGroup,
-    required GetVaccineById getVaccineById,
-    required VaccinationRecordRepository vaccinationRecordRepository,
-  })  : _getReservationGroup = getReservationGroup,
-        _getVaccineById = getVaccineById,
-        _vaccinationRecordRepository = vaccinationRecordRepository,
-        super(const ConcurrentVaccinesState());
+part 'concurrent_vaccines_view_model.g.dart';
 
-  final GetReservationGroup _getReservationGroup;
-  final GetVaccineById _getVaccineById;
-  final VaccinationRecordRepository _vaccinationRecordRepository;
+@riverpod
+class ConcurrentVaccinesViewModel extends _$ConcurrentVaccinesViewModel {
+  GetReservationGroup get _getReservationGroup =>
+      ref.read(getReservationGroupProvider);
+  GetVaccineById get _getVaccineById => ref.read(getVaccineByIdProvider);
+  VaccinationRecordRepository get _vaccinationRecordRepository =>
+      ref.read(vaccinationRecordRepositoryProvider);
 
-  Future<void> load({
-    required String householdId,
-    required String childId,
-    required String reservationGroupId,
-    required String currentVaccineId,
-    required String currentDoseId,
-  }) async {
-    state = state.copyWith(isLoading: true, clearError: true);
+  @override
+  ConcurrentVaccinesState build(ConcurrentVaccinesParams params) {
+    // 初期化処理をスケジュール
+    Future.microtask(() => _load(params));
 
+    return const ConcurrentVaccinesState(isLoading: true);
+  }
+
+  Future<void> _load(ConcurrentVaccinesParams params) async {
     try {
       final group = await _getReservationGroup(
-        householdId: householdId,
-        childId: childId,
-        reservationGroupId: reservationGroupId,
+        householdId: params.householdId,
+        childId: params.childId,
+        reservationGroupId: params.reservationGroupId,
       );
 
       if (group == null) {
-        if (!mounted) return;
         state = state.copyWith(isLoading: false, members: const []);
         return;
       }
 
       final otherMembers = group.members.where(
         (ReservationGroupMember member) =>
-            member.vaccineId != currentVaccineId ||
-            member.doseId != currentDoseId,
+            member.vaccineId != params.currentVaccineId ||
+            member.doseId != params.currentDoseId,
       );
 
       if (otherMembers.isEmpty) {
-        if (!mounted) return;
         state = state.copyWith(isLoading: false, members: const []);
         return;
       }
@@ -65,8 +58,8 @@ class ConcurrentVaccinesViewModel
 
         // VaccinationRecordを取得してdoseNumberを確認
         final record = await _vaccinationRecordRepository.getVaccinationRecord(
-          householdId: householdId,
-          childId: childId,
+          householdId: params.householdId,
+          childId: params.childId,
           vaccineId: member.vaccineId,
         );
 
@@ -90,13 +83,11 @@ class ConcurrentVaccinesViewModel
         ));
       }
 
-      if (!mounted) return;
       state = state.copyWith(
         isLoading: false,
         members: List<ConcurrentVaccineMember>.unmodifiable(resolvedMembers),
       );
     } catch (_) {
-      if (!mounted) return;
       state = state.copyWith(
         isLoading: false,
         error: '同時接種情報の取得に失敗しました',
@@ -104,27 +95,3 @@ class ConcurrentVaccinesViewModel
     }
   }
 }
-
-final concurrentVaccinesViewModelProvider = StateNotifierProvider.autoDispose
-    .family<ConcurrentVaccinesViewModel, ConcurrentVaccinesState,
-        ConcurrentVaccinesParams>(
-  (ref, params) {
-    final getReservationGroup = ref.watch(getReservationGroupProvider);
-    final getVaccineById = ref.watch(getVaccineByIdProvider);
-    final vaccinationRecordRepository =
-        ref.watch(vaccinationRecordRepositoryProvider);
-    final viewModel = ConcurrentVaccinesViewModel(
-      getReservationGroup: getReservationGroup,
-      getVaccineById: getVaccineById,
-      vaccinationRecordRepository: vaccinationRecordRepository,
-    );
-    viewModel.load(
-      householdId: params.householdId,
-      childId: params.childId,
-      reservationGroupId: params.reservationGroupId,
-      currentVaccineId: params.currentVaccineId,
-      currentDoseId: params.currentDoseId,
-    );
-    return viewModel;
-  },
-);
