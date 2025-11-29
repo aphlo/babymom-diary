@@ -1,40 +1,37 @@
 import 'dart:convert';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/entities/child_summary.dart';
 
-class ChildrenLocalNotifier
-    extends StateNotifier<AsyncValue<List<ChildSummary>>> {
-  ChildrenLocalNotifier(this._householdId) : super(const AsyncValue.loading()) {
-    _restore();
-  }
+part 'children_local_provider.g.dart';
 
-  ChildrenLocalNotifier.withInitial(
-    this._householdId,
-    List<ChildSummary> initial,
-  ) : super(AsyncValue.data(initial));
-
-  final String _householdId;
+@Riverpod(keepAlive: true)
+class ChildrenLocal extends _$ChildrenLocal {
+  String? _householdId;
 
   static String prefsKey(String householdId) => 'cachedChildren/$householdId';
 
-  Future<void> _restore() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(prefsKey(_householdId));
-      final stored = raw == null ? const <ChildSummary>[] : decodeList(raw);
-      if (!mounted) return;
-      state = AsyncValue.data(stored);
-    } catch (e, stack) {
-      if (!mounted) return;
-      state = AsyncValue.error(e, stack);
-    }
+  @override
+  Future<List<ChildSummary>> build(String householdId) async {
+    _householdId = householdId;
+    return _restore();
+  }
+
+  Future<List<ChildSummary>> _restore() async {
+    final householdId = _householdId;
+    if (householdId == null) return const <ChildSummary>[];
+
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(prefsKey(householdId));
+    return raw == null ? const <ChildSummary>[] : decodeList(raw);
   }
 
   Future<void> replaceChildren(List<ChildSummary> children) async {
+    final householdId = _householdId;
+    if (householdId == null) return;
+
     final current = state.value;
     if (_listEquals(current, children)) {
       return;
@@ -43,7 +40,7 @@ class ChildrenLocalNotifier
     try {
       final prefs = await SharedPreferences.getInstance();
       final encoded = jsonEncode(children.map((e) => e.toJson()).toList());
-      await prefs.setString(prefsKey(_householdId), encoded);
+      await prefs.setString(prefsKey(householdId), encoded);
     } catch (_) {
       // 永続化に失敗しても UI 表示は維持したいので握りつぶす。
     }
@@ -82,8 +79,3 @@ class ChildrenLocalNotifier
     return true;
   }
 }
-
-final childrenLocalProvider = StateNotifierProvider.family<
-    ChildrenLocalNotifier, AsyncValue<List<ChildSummary>>, String>(
-  (ref, householdId) => ChildrenLocalNotifier(householdId),
-);

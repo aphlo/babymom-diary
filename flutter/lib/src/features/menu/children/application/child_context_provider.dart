@@ -1,10 +1,12 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/firebase/household_service.dart';
 import '../domain/entities/child_summary.dart';
 import 'children_stream_provider.dart';
 import 'selected_child_provider.dart';
 import 'selected_child_snapshot_provider.dart';
+
+part 'child_context_provider.g.dart';
 
 /// 子供コンテキストを表すイミュータブルなクラス
 /// householdId、選択中の子供、子供リストを統合的に管理
@@ -81,7 +83,20 @@ class ChildContext {
 /// - selectedChild のスナップショット（誕生日など）の変更
 ///
 /// 子供が削除された場合、自動的に次の子供を選択します。
-class ChildContextNotifier extends AsyncNotifier<ChildContext> {
+///
+/// 使用例:
+/// ```dart
+/// final contextAsync = ref.watch(childContextProvider);
+/// contextAsync.when(
+///   data: (context) {
+///     // context.householdId, context.selectedChildId, etc.
+///   },
+///   loading: () => CircularProgressIndicator(),
+///   error: (e, s) => Text('Error: $e'),
+/// );
+/// ```
+@Riverpod(keepAlive: true)
+class ChildContextNotifier extends _$ChildContextNotifier {
   @override
   Future<ChildContext> build() async {
     // householdIdの取得
@@ -188,20 +203,3 @@ class ChildContextNotifier extends AsyncNotifier<ChildContext> {
     ));
   }
 }
-
-/// 子供コンテキストを一元管理するプロバイダ
-///
-/// 使用例:
-/// ```dart
-/// final contextAsync = ref.watch(childContextProvider);
-/// contextAsync.when(
-///   data: (context) {
-///     // context.householdId, context.selectedChildId, etc.
-///   },
-///   loading: () => CircularProgressIndicator(),
-///   error: (e, s) => Text('Error: $e'),
-/// );
-/// ```
-final childContextProvider =
-    AsyncNotifierProvider<ChildContextNotifier, ChildContext>(
-        ChildContextNotifier.new);

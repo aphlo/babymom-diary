@@ -31,34 +31,27 @@ Future<void> runBabymomDiaryApp({
   );
   final hid = await householdService.ensureHousehold();
 
-  final childrenRaw = prefs.getString(ChildrenLocalNotifier.prefsKey(hid));
+  final childrenRaw = prefs.getString(ChildrenLocal.prefsKey(hid));
   final initialChildren = childrenRaw == null
       ? const <ChildSummary>[]
-      : ChildrenLocalNotifier.decodeList(childrenRaw);
+      : ChildrenLocal.decodeList(childrenRaw);
 
   final snapshotRaw =
-      prefs.getString(SelectedChildSnapshotNotifier.prefsKey(hid));
+      prefs.getString(SelectedChildSnapshot.prefsKey(hid));
   final initialSnapshot =
-      snapshotRaw == null ? null : decodeSelectedChildSnapshot(snapshotRaw);
+      snapshotRaw == null ? null : SelectedChildSnapshot.decodeSnapshot(snapshotRaw);
 
   runApp(
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
-        childrenLocalProvider(hid).overrideWith((ref) {
-          return ChildrenLocalNotifier.withInitial(hid, initialChildren);
-        }),
-        selectedChildSnapshotProvider(hid).overrideWith((ref) {
-          return SelectedChildSnapshotNotifier.withInitial(
-            hid,
-            initialSnapshot,
-          );
-        }),
         analyticsEnabledProvider.overrideWithValue(enableAnalytics),
       ],
       child: App(
         appTitle: appTitle,
         initialHouseholdId: hid,
+        initialChildren: initialChildren,
+        initialSnapshot: initialSnapshot,
       ),
     ),
   );
@@ -69,10 +62,14 @@ class App extends ConsumerStatefulWidget {
     super.key,
     required this.appTitle,
     required this.initialHouseholdId,
+    this.initialChildren = const [],
+    this.initialSnapshot,
   });
 
   final String appTitle;
   final String initialHouseholdId;
+  final List<ChildSummary> initialChildren;
+  final ChildSummary? initialSnapshot;
 
   @override
   ConsumerState<App> createState() => _AppState();

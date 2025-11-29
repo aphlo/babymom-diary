@@ -1,32 +1,24 @@
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../../core/firebase/household_service.dart';
+import '../../../../vaccines/application/vaccine_catalog_providers.dart';
 import '../../application/usecases/get_vaccine_visibility_settings.dart';
 import '../../application/usecases/update_vaccine_visibility_settings.dart';
 import '../../application/usecases/remove_vaccine_from_reservation_groups.dart';
+import '../../application/vaccine_visibility_settings_provider.dart';
 import '../../domain/entities/vaccine_visibility_settings.dart';
-import '../../../../vaccines/domain/repositories/vaccine_master_repository.dart';
 import 'vaccine_visibility_settings_state.dart';
 
-/// ワクチン表示設定画面のViewModel
-class VaccineVisibilitySettingsViewModel
-    extends StateNotifier<VaccineVisibilitySettingsState> {
-  VaccineVisibilitySettingsViewModel({
-    required GetVaccineVisibilitySettings getVaccineVisibilitySettings,
-    required UpdateVaccineVisibilitySettings updateVaccineVisibilitySettings,
-    required RemoveVaccineFromReservationGroups
-        removeVaccineFromReservationGroups,
-    required VaccineMasterRepository vaccineMasterRepository,
-  })  : _getVaccineVisibilitySettings = getVaccineVisibilitySettings,
-        _updateVaccineVisibilitySettings = updateVaccineVisibilitySettings,
-        _removeVaccineFromReservationGroups =
-            removeVaccineFromReservationGroups,
-        _vaccineMasterRepository = vaccineMasterRepository,
-        super(const VaccineVisibilitySettingsState());
+part 'vaccine_visibility_settings_view_model.g.dart';
 
-  final GetVaccineVisibilitySettings _getVaccineVisibilitySettings;
-  final UpdateVaccineVisibilitySettings _updateVaccineVisibilitySettings;
-  final RemoveVaccineFromReservationGroups _removeVaccineFromReservationGroups;
-  final VaccineMasterRepository _vaccineMasterRepository;
+/// ワクチン表示設定画面のViewModel
+@riverpod
+class VaccineVisibilitySettingsViewModel
+    extends _$VaccineVisibilitySettingsViewModel {
+  @override
+  VaccineVisibilitySettingsState build() {
+    return const VaccineVisibilitySettingsState();
+  }
 
   /// 初期化
   Future<void> initialize({
@@ -35,11 +27,18 @@ class VaccineVisibilitySettingsViewModel
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
+      final repository = ref.read(vaccineVisibilitySettingsRepositoryProvider);
+      final vaccineMasterRepository =
+          ref.read(vaccineMasterRepositoryProvider);
+
+      final getVaccineVisibilitySettings =
+          GetVaccineVisibilitySettings(repository: repository);
+
       // 全てのワクチンマスターデータを取得
-      final allVaccines = await _vaccineMasterRepository.getAllVaccines();
+      final allVaccines = await vaccineMasterRepository.getAllVaccines();
 
       // 現在の表示設定を取得
-      final settings = await _getVaccineVisibilitySettings(
+      final settings = await getVaccineVisibilitySettings(
         householdId: householdId,
       );
 
@@ -51,14 +50,12 @@ class VaccineVisibilitySettingsViewModel
               ))
           .toList();
 
-      if (!mounted) return;
       state = state.copyWith(
         isLoading: false,
         visibilitySettings: settings.visibilityMap,
         vaccines: vaccineInfos,
       );
     } catch (error) {
-      if (!mounted) return;
       state = state.copyWith(
         isLoading: false,
         error: 'データの取得に失敗しました: $error',
@@ -84,19 +81,32 @@ class VaccineVisibilitySettingsViewModel
     state = state.copyWith(isSaving: true, clearError: true);
 
     try {
+      final repository = ref.read(vaccineVisibilitySettingsRepositoryProvider);
+      final firestore = ref.read(firebaseFirestoreProvider);
+      final vaccinationRecordRepository =
+          ref.read(vaccinationRecordRepositoryProvider);
+
+      final updateVaccineVisibilitySettings =
+          UpdateVaccineVisibilitySettings(repository: repository);
+      final removeVaccineFromReservationGroups =
+          RemoveVaccineFromReservationGroups(
+        firestore: firestore,
+        vaccinationRecordRepository: vaccinationRecordRepository,
+      );
+
       // 設定を更新
       final settings = VaccineVisibilitySettings(
         householdId: householdId,
         visibilityMap: state.visibilitySettings,
       );
 
-      await _updateVaccineVisibilitySettings(settings: settings);
+      await updateVaccineVisibilitySettings(settings: settings);
 
       // OFFに設定されたワクチンをreservation_groupsから削除
       final hiddenVaccineIds = settings.hiddenVaccineIds;
       for (final vaccineId in hiddenVaccineIds) {
         try {
-          await _removeVaccineFromReservationGroups(
+          await removeVaccineFromReservationGroups(
             householdId: householdId,
             vaccineId: vaccineId,
           );
@@ -108,11 +118,9 @@ class VaccineVisibilitySettingsViewModel
         }
       }
 
-      if (!mounted) return false;
       state = state.copyWith(isSaving: false);
       return true;
     } catch (error) {
-      if (!mounted) return false;
       state = state.copyWith(
         isSaving: false,
         error: '設定の保存に失敗しました: $error',

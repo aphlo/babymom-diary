@@ -20,9 +20,9 @@ final appThemeProvider = Provider.family<ThemeData, String>((ref, householdId) {
   Color? selectedColor;
 
   final storedSnapshotRaw =
-      prefs.getString(SelectedChildSnapshotNotifier.prefsKey(householdId));
+      prefs.getString(SelectedChildSnapshot.prefsKey(householdId));
   if (storedSnapshotRaw != null) {
-    selectedSummary = decodeSelectedChildSnapshot(storedSnapshotRaw);
+    selectedSummary = SelectedChildSnapshot.decodeSnapshot(storedSnapshotRaw);
   }
 
   ChildSummary? findById(List<ChildSummary> list, String id) {

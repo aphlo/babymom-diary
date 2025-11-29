@@ -1,7 +1,11 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SelectedChildController extends AsyncNotifier<String?> {
+part 'selected_child_provider.g.dart';
+
+/// Persisted selected child id
+@Riverpod(keepAlive: true)
+class SelectedChildController extends _$SelectedChildController {
   static const _prefsKey = 'selectedChildId';
 
   @override
@@ -22,9 +26,3 @@ class SelectedChildController extends AsyncNotifier<String?> {
     }
   }
 }
-
-/// Persisted selected child id
-final selectedChildControllerProvider =
-    AsyncNotifierProvider<SelectedChildController, String?>(
-  SelectedChildController.new,
-);

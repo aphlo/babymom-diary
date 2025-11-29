@@ -1,52 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/firebase/household_service.dart';
-import '../../../../vaccines/application/vaccine_catalog_providers.dart';
-import '../../application/usecases/get_vaccine_visibility_settings.dart';
-import '../../application/usecases/update_vaccine_visibility_settings.dart';
-import '../../application/usecases/remove_vaccine_from_reservation_groups.dart';
-import '../../domain/repositories/vaccine_visibility_settings_repository.dart';
-import '../../infrastructure/repositories/vaccine_visibility_settings_repository_impl.dart';
-import '../../infrastructure/sources/vaccine_visibility_settings_firestore_data_source.dart';
 import '../viewmodels/vaccine_visibility_settings_view_model.dart';
-import '../viewmodels/vaccine_visibility_settings_state.dart';
-
-/// ワクチン表示設定のプロバイダー
-final _vaccineVisibilitySettingsRepositoryProvider =
-    Provider<VaccineVisibilitySettingsRepository>((ref) {
-  final firestore = ref.watch(firebaseFirestoreProvider);
-  final dataSource = VaccineVisibilitySettingsFirestoreDataSource(firestore);
-  return VaccineVisibilitySettingsRepositoryImpl(dataSource: dataSource);
-});
-
-final _vaccineVisibilitySettingsViewModelProvider =
-    StateNotifierProvider.autoDispose<VaccineVisibilitySettingsViewModel,
-        VaccineVisibilitySettingsState>((ref) {
-  final repository = ref.watch(_vaccineVisibilitySettingsRepositoryProvider);
-  final vaccineMasterRepository = ref.watch(vaccineMasterRepositoryProvider);
-  final firestore = ref.watch(firebaseFirestoreProvider);
-  final vaccinationRecordRepository =
-      ref.watch(vaccinationRecordRepositoryProvider);
-
-  final getSettings = GetVaccineVisibilitySettings(repository: repository);
-  final updateSettings =
-      UpdateVaccineVisibilitySettings(repository: repository);
-  final removeFromGroups = RemoveVaccineFromReservationGroups(
-    firestore: firestore,
-    vaccinationRecordRepository: vaccinationRecordRepository,
-  );
-
-  return VaccineVisibilitySettingsViewModel(
-    getVaccineVisibilitySettings: getSettings,
-    updateVaccineVisibilitySettings: updateSettings,
-    removeVaccineFromReservationGroups: removeFromGroups,
-    vaccineMasterRepository: vaccineMasterRepository,
-  );
-});
 
 /// ワクチン表示設定画面
 class VaccineVisibilitySettingsPage extends ConsumerStatefulWidget {
@@ -72,7 +30,7 @@ class _VaccineVisibilitySettingsPageState
     householdIdAsync.when(
       data: (householdId) {
         ref
-            .read(_vaccineVisibilitySettingsViewModelProvider.notifier)
+            .read(vaccineVisibilitySettingsViewModelProvider.notifier)
             .initialize(householdId: householdId);
       },
       loading: () {},
@@ -89,12 +47,12 @@ class _VaccineVisibilitySettingsPageState
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(_vaccineVisibilitySettingsViewModelProvider);
+    final state = ref.watch(vaccineVisibilitySettingsViewModelProvider);
     final viewModel =
-        ref.read(_vaccineVisibilitySettingsViewModelProvider.notifier);
+        ref.read(vaccineVisibilitySettingsViewModelProvider.notifier);
 
     // エラー表示
-    ref.listen(_vaccineVisibilitySettingsViewModelProvider, (previous, next) {
+    ref.listen(vaccineVisibilitySettingsViewModelProvider, (previous, next) {
       if (next.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -196,7 +154,7 @@ class _VaccineVisibilitySettingsPageState
     }
 
     final viewModel =
-        ref.read(_vaccineVisibilitySettingsViewModelProvider.notifier);
+        ref.read(vaccineVisibilitySettingsViewModelProvider.notifier);
     final success = await viewModel.saveSettings(householdId: householdId);
 
     if (success && context.mounted) {
