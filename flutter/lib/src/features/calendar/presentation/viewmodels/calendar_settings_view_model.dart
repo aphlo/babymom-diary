@@ -1,53 +1,40 @@
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_settings.dart';
 import 'package:babymom_diary/src/features/calendar/domain/repositories/calendar_settings_repository.dart';
 import 'package:babymom_diary/src/features/calendar/infrastructure/repositories/calendar_settings_repository_impl.dart';
 
-/// カレンダー設定画面の状態
-class CalendarSettingsState {
-  const CalendarSettingsState({
-    required this.settings,
-    this.isLoading = false,
-    this.error,
-  });
+import 'calendar_settings_state.dart';
 
-  final CalendarSettings settings;
-  final bool isLoading;
-  final String? error;
+part 'calendar_settings_view_model.g.dart';
 
-  CalendarSettingsState copyWith({
-    CalendarSettings? settings,
-    bool? isLoading,
-    String? error,
-  }) {
-    return CalendarSettingsState(
-      settings: settings ?? this.settings,
-      isLoading: isLoading ?? this.isLoading,
-      error: error,
+@Riverpod(keepAlive: true)
+class CalendarSettingsViewModel extends _$CalendarSettingsViewModel {
+  CalendarSettingsRepository? _repository;
+
+  @override
+  CalendarSettingsState build() {
+    _repository = ref.watch(calendarSettingsRepositoryProvider);
+
+    final initialState = const CalendarSettingsState(
+      settings: CalendarSettings(startingDayOfWeek: false),
     );
-  }
-}
 
-/// カレンダー設定画面のViewModel
-class CalendarSettingsViewModel extends StateNotifier<CalendarSettingsState> {
-  CalendarSettingsViewModel(this._repository)
-      : super(const CalendarSettingsState(
-          settings: CalendarSettings(startingDayOfWeek: false),
-        )) {
-    _loadSettings();
-  }
+    // 初期化処理をスケジュール
+    Future.microtask(() => _loadSettings());
 
-  final CalendarSettingsRepository _repository;
+    return initialState;
+  }
 
   Future<void> _loadSettings() async {
+    final repository = _repository;
+    if (repository == null) return;
+
     try {
       state = state.copyWith(isLoading: true, error: null);
-      final settings = await _repository.getSettings();
-      if (!mounted) return;
+      final settings = await repository.getSettings();
       state = state.copyWith(settings: settings, isLoading: false);
     } catch (e) {
-      if (!mounted) return;
       state = state.copyWith(
         isLoading: false,
         error: '設定の読み込みに失敗しました: $e',
@@ -56,16 +43,17 @@ class CalendarSettingsViewModel extends StateNotifier<CalendarSettingsState> {
   }
 
   Future<void> updateStartingDayOfWeek(bool startingDayOfWeek) async {
+    final repository = _repository;
+    if (repository == null) return;
+
     try {
       state = state.copyWith(isLoading: true, error: null);
       final newSettings = state.settings.copyWith(
         startingDayOfWeek: startingDayOfWeek,
       );
-      await _repository.saveSettings(newSettings);
-      if (!mounted) return;
+      await repository.saveSettings(newSettings);
       state = state.copyWith(settings: newSettings, isLoading: false);
     } catch (e) {
-      if (!mounted) return;
       state = state.copyWith(
         isLoading: false,
         error: '設定の保存に失敗しました: $e',
@@ -73,11 +61,3 @@ class CalendarSettingsViewModel extends StateNotifier<CalendarSettingsState> {
     }
   }
 }
-
-/// カレンダー設定ViewModelのプロバイダー
-final calendarSettingsViewModelProvider =
-    StateNotifierProvider<CalendarSettingsViewModel, CalendarSettingsState>(
-        (ref) {
-  final repository = ref.watch(calendarSettingsRepositoryProvider);
-  return CalendarSettingsViewModel(repository);
-});

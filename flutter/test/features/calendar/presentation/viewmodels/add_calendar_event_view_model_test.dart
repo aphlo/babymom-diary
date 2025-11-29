@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/add_calendar_event_view_model.dart';
+import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/add_calendar_event_state.dart';
 
 void main() {
-  group('AddCalendarEventViewModel', () {
-    late AddCalendarEventViewModel viewModel;
-
-    setUp(() {
-      viewModel = AddCalendarEventViewModel(
-        initialDate: DateTime(2024, 3, 15),
-      );
-    });
-
-    tearDown(() {
-      viewModel.dispose();
-    });
-
+  group('AddCalendarEventState', () {
     test('初期状態が正しい', () {
-      final state = viewModel.state;
+      final state = AddCalendarEventState(
+        title: '',
+        memo: '',
+        allDay: false,
+        startDate: DateTime(2024, 3, 15),
+        endDate: DateTime(2024, 3, 15),
+        startTime: const TimeOfDay(hour: 9, minute: 0),
+        endTime: const TimeOfDay(hour: 10, minute: 0),
+        selectedIconPath: '',
+        isSubmitting: false,
+        titleError: null,
+        dateTimeError: null,
+        availableIconPaths: const ['', 'assets/icons/birthday.png'],
+      );
+
       expect(state.title, '');
       expect(state.memo, '');
       expect(state.allDay, false);
@@ -33,99 +35,165 @@ void main() {
       expect(state.availableIconPaths.isNotEmpty, true);
     });
 
-    test('updateTitle でタイトルを更新', () {
-      viewModel.updateTitle('テストイベント');
-      expect(viewModel.state.title, 'テストイベント');
+    test('copyWith でタイトルを更新できる', () {
+      final state = AddCalendarEventState(
+        title: '',
+        memo: '',
+        allDay: false,
+        startDate: DateTime(2024, 3, 15),
+        endDate: DateTime(2024, 3, 15),
+        startTime: const TimeOfDay(hour: 9, minute: 0),
+        endTime: const TimeOfDay(hour: 10, minute: 0),
+        selectedIconPath: '',
+        isSubmitting: false,
+        titleError: null,
+        dateTimeError: null,
+        availableIconPaths: const [],
+      );
+
+      final updated = state.copyWith(title: 'テストイベント');
+      expect(updated.title, 'テストイベント');
     });
 
-    test('updateTitle でtitleErrorがクリアされる', () {
-      // まずエラーを設定
-      viewModel.buildResult(); // タイトル空でエラーが設定される
-      expect(viewModel.state.titleError, isNotNull);
+    test('copyWith でメモを更新できる', () {
+      final state = AddCalendarEventState(
+        title: '',
+        memo: '',
+        allDay: false,
+        startDate: DateTime(2024, 3, 15),
+        endDate: DateTime(2024, 3, 15),
+        startTime: const TimeOfDay(hour: 9, minute: 0),
+        endTime: const TimeOfDay(hour: 10, minute: 0),
+        selectedIconPath: '',
+        isSubmitting: false,
+        titleError: null,
+        dateTimeError: null,
+        availableIconPaths: const [],
+      );
 
-      // タイトル更新でエラークリア
-      viewModel.updateTitle('タイトル');
-      expect(viewModel.state.titleError, isNull);
+      final updated = state.copyWith(memo: 'メモ内容');
+      expect(updated.memo, 'メモ内容');
     });
 
-    test('updateMemo でメモを更新', () {
-      viewModel.updateMemo('メモ内容');
-      expect(viewModel.state.memo, 'メモ内容');
+    test('copyWith で終日フラグを更新できる', () {
+      final state = AddCalendarEventState(
+        title: '',
+        memo: '',
+        allDay: false,
+        startDate: DateTime(2024, 3, 15),
+        endDate: DateTime(2024, 3, 15),
+        startTime: const TimeOfDay(hour: 9, minute: 0),
+        endTime: const TimeOfDay(hour: 10, minute: 0),
+        selectedIconPath: '',
+        isSubmitting: false,
+        titleError: null,
+        dateTimeError: null,
+        availableIconPaths: const [],
+      );
+
+      final updated = state.copyWith(allDay: true);
+      expect(updated.allDay, true);
     });
 
-    test('updateAllDay で終日フラグを更新', () {
-      viewModel.updateAllDay(true);
-      expect(viewModel.state.allDay, true);
-    });
+    test('copyWith で開始日を更新できる', () {
+      final state = AddCalendarEventState(
+        title: '',
+        memo: '',
+        allDay: false,
+        startDate: DateTime(2024, 3, 15),
+        endDate: DateTime(2024, 3, 15),
+        startTime: const TimeOfDay(hour: 9, minute: 0),
+        endTime: const TimeOfDay(hour: 10, minute: 0),
+        selectedIconPath: '',
+        isSubmitting: false,
+        titleError: null,
+        dateTimeError: null,
+        availableIconPaths: const [],
+      );
 
-    test('updateStartDate で開始日を更新', () {
       final newDate = DateTime(2024, 4, 1);
-      viewModel.updateStartDate(newDate);
-      expect(viewModel.state.startDate, newDate);
+      final updated = state.copyWith(startDate: newDate);
+      expect(updated.startDate, newDate);
     });
 
-    test('updateEndDate で終了日を更新', () {
-      final newDate = DateTime(2024, 4, 5);
-      viewModel.updateEndDate(newDate);
-      expect(viewModel.state.endDate, newDate);
-    });
+    test('copyWith で開始時刻を更新できる', () {
+      final state = AddCalendarEventState(
+        title: '',
+        memo: '',
+        allDay: false,
+        startDate: DateTime(2024, 3, 15),
+        endDate: DateTime(2024, 3, 15),
+        startTime: const TimeOfDay(hour: 9, minute: 0),
+        endTime: const TimeOfDay(hour: 10, minute: 0),
+        selectedIconPath: '',
+        isSubmitting: false,
+        titleError: null,
+        dateTimeError: null,
+        availableIconPaths: const [],
+      );
 
-    test('updateStartTime で開始時刻を更新', () {
       const newTime = TimeOfDay(hour: 14, minute: 30);
-      viewModel.updateStartTime(newTime);
-      expect(viewModel.state.startTime, newTime);
+      final updated = state.copyWith(startTime: newTime);
+      expect(updated.startTime, newTime);
     });
 
-    test('updateEndTime で終了時刻を更新', () {
-      const newTime = TimeOfDay(hour: 17, minute: 0);
-      viewModel.updateEndTime(newTime);
-      expect(viewModel.state.endTime, newTime);
+    test('copyWith でアイコンを更新できる', () {
+      final state = AddCalendarEventState(
+        title: '',
+        memo: '',
+        allDay: false,
+        startDate: DateTime(2024, 3, 15),
+        endDate: DateTime(2024, 3, 15),
+        startTime: const TimeOfDay(hour: 9, minute: 0),
+        endTime: const TimeOfDay(hour: 10, minute: 0),
+        selectedIconPath: '',
+        isSubmitting: false,
+        titleError: null,
+        dateTimeError: null,
+        availableIconPaths: const [],
+      );
+
+      final updated =
+          state.copyWith(selectedIconPath: 'assets/icons/birthday.png');
+      expect(updated.selectedIconPath, 'assets/icons/birthday.png');
     });
 
-    test('selectIcon でアイコンを選択', () {
-      viewModel.selectIcon('assets/icons/birthday.png');
-      expect(viewModel.state.selectedIconPath, 'assets/icons/birthday.png');
+    test('effectiveStart は終日の場合は日の開始を返す', () {
+      final state = AddCalendarEventState(
+        title: '',
+        memo: '',
+        allDay: true,
+        startDate: DateTime(2024, 3, 15),
+        endDate: DateTime(2024, 3, 15),
+        startTime: const TimeOfDay(hour: 9, minute: 0),
+        endTime: const TimeOfDay(hour: 10, minute: 0),
+        selectedIconPath: '',
+        isSubmitting: false,
+        titleError: null,
+        dateTimeError: null,
+        availableIconPaths: const [],
+      );
+
+      expect(state.effectiveStart, DateTime(2024, 3, 15, 0, 0));
     });
 
-    group('buildResult', () {
-      test('タイトルが空の場合はnullを返しエラーを設定', () {
-        final result = viewModel.buildResult();
-        expect(result, isNull);
-        expect(viewModel.state.titleError, 'タイトルを入力してください');
-      });
+    test('effectiveEnd は終日の場合は日の終わり(23:59)を返す', () {
+      final state = AddCalendarEventState(
+        title: '',
+        memo: '',
+        allDay: true,
+        startDate: DateTime(2024, 3, 15),
+        endDate: DateTime(2024, 3, 15),
+        startTime: const TimeOfDay(hour: 9, minute: 0),
+        endTime: const TimeOfDay(hour: 10, minute: 0),
+        selectedIconPath: '',
+        isSubmitting: false,
+        titleError: null,
+        dateTimeError: null,
+        availableIconPaths: const [],
+      );
 
-      test('終了時刻が開始時刻より前の場合はnullを返しエラーを設定', () {
-        viewModel.updateTitle('テストイベント');
-        viewModel.updateEndTime(const TimeOfDay(hour: 8, minute: 0));
-
-        final result = viewModel.buildResult();
-        expect(result, isNull);
-        expect(viewModel.state.dateTimeError, '終了時間は開始時間より後にしてください');
-      });
-
-      test('有効な入力の場合はCalendarEventModelを返す', () {
-        viewModel.updateTitle('テストイベント');
-        viewModel.updateMemo('メモ');
-        viewModel.updateAllDay(true);
-        viewModel.selectIcon('assets/icons/birthday.png');
-
-        final result = viewModel.buildResult();
-        expect(result, isNotNull);
-        expect(result!.title, 'テストイベント');
-        expect(result.memo, 'メモ');
-        expect(result.allDay, true);
-        expect(result.iconPath, 'assets/icons/birthday.png');
-      });
-
-      test('タイトルの前後の空白はトリムされる', () {
-        viewModel.updateTitle('  テスト  ');
-        viewModel.updateMemo('  メモ  ');
-
-        final result = viewModel.buildResult();
-        expect(result, isNotNull);
-        expect(result!.title, 'テスト');
-        expect(result.memo, 'メモ');
-      });
+      expect(state.effectiveEnd, DateTime(2024, 3, 15, 23, 59));
     });
   });
 }

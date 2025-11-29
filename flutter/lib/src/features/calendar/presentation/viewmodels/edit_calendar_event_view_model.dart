@@ -1,50 +1,21 @@
 import 'package:flutter/material.dart' hide TimeOfDay;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/features/calendar/application/usecases/update_calendar_event.dart';
 import 'package:babymom_diary/src/features/calendar/application/usecases/delete_calendar_event.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
-import 'package:babymom_diary/src/features/calendar/infrastructure/repositories/calendar_event_repository_impl.dart';
-import 'package:babymom_diary/src/features/calendar/infrastructure/sources/calendar_event_firestore_data_source.dart';
+import 'package:babymom_diary/src/features/calendar/application/calendar_event_controller.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/models/calendar_event_model.dart';
 import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/edit_calendar_event_state.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
-final editCalendarEventViewModelProvider = StateNotifierProvider.autoDispose
-    .family<EditCalendarEventViewModel, EditCalendarEventState, CalendarEvent>(
-  (ref, event) {
-    final repository = CalendarEventRepositoryImpl(
-      remote: CalendarEventFirestoreDataSource(FirebaseFirestore.instance),
-    );
-    final updateUseCase = UpdateCalendarEvent(repository);
-    final deleteUseCase = DeleteCalendarEvent(repository);
+part 'edit_calendar_event_view_model.g.dart';
 
-    return EditCalendarEventViewModel(
-      event: event,
-      updateUseCase: updateUseCase,
-      deleteUseCase: deleteUseCase,
-      ref: ref,
-    );
-  },
-);
-
-class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
-  EditCalendarEventViewModel({
-    required CalendarEvent event,
-    required UpdateCalendarEvent updateUseCase,
-    required DeleteCalendarEvent deleteUseCase,
-    required Ref ref,
-  })  : _updateUseCase = updateUseCase,
-        _deleteUseCase = deleteUseCase,
-        _ref = ref,
-        super(_initialState(event));
-
-  final UpdateCalendarEvent _updateUseCase;
-  final DeleteCalendarEvent _deleteUseCase;
-  final Ref _ref;
+@riverpod
+class EditCalendarEventViewModel extends _$EditCalendarEventViewModel {
+  UpdateCalendarEvent? _updateUseCase;
+  DeleteCalendarEvent? _deleteUseCase;
 
   static const String _noIconPath = '';
 
@@ -63,7 +34,12 @@ class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
     'assets/icons/first_girl_festival.png',
   ];
 
-  static EditCalendarEventState _initialState(CalendarEvent event) {
+  @override
+  EditCalendarEventState build(CalendarEvent event) {
+    final repository = ref.watch(calendarEventRepositoryProvider);
+    _updateUseCase = UpdateCalendarEvent(repository);
+    _deleteUseCase = DeleteCalendarEvent(repository);
+
     return EditCalendarEventState(
       eventId: event.id,
       title: event.title,
@@ -205,9 +181,17 @@ class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
         isSubmitting: true, titleError: null, dateTimeError: null);
 
     try {
-      final householdId = await _ref.read(currentHouseholdIdProvider.future);
+      final householdId = await ref.read(currentHouseholdIdProvider.future);
+      final updateUseCase = _updateUseCase;
+      if (updateUseCase == null) {
+        state = state.copyWith(
+          isSubmitting: false,
+          dateTimeError: 'イベントの更新に失敗しました',
+        );
+        return false;
+      }
 
-      await _updateUseCase(
+      await updateUseCase(
         eventId: state.eventId,
         householdId: householdId,
         title: state.title.trim(),
@@ -218,11 +202,9 @@ class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
         iconKey: state.selectedIconPath,
       );
 
-      if (!mounted) return false;
       state = state.copyWith(isSubmitting: false);
       return true;
     } catch (error) {
-      if (!mounted) return false;
       state = state.copyWith(
         isSubmitting: false,
         dateTimeError: 'イベントの更新に失敗しました: $error',
@@ -240,19 +222,25 @@ class EditCalendarEventViewModel extends StateNotifier<EditCalendarEventState> {
         state.copyWith(isDeleting: true, titleError: null, dateTimeError: null);
 
     try {
-      final householdId = await _ref.read(currentHouseholdIdProvider.future);
+      final householdId = await ref.read(currentHouseholdIdProvider.future);
+      final deleteUseCase = _deleteUseCase;
+      if (deleteUseCase == null) {
+        state = state.copyWith(
+          isDeleting: false,
+          dateTimeError: 'イベントの削除に失敗しました',
+        );
+        return false;
+      }
 
-      await _deleteUseCase(
+      await deleteUseCase(
         eventId: state.eventId,
         householdId: householdId,
         eventDate: state.startDate,
       );
 
-      if (!mounted) return false;
       state = state.copyWith(isDeleting: false);
       return true;
     } catch (error) {
-      if (!mounted) return false;
       state = state.copyWith(
         isDeleting: false,
         dateTimeError: 'イベントの削除に失敗しました: $error',

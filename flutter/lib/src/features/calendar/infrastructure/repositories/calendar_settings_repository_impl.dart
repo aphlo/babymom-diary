@@ -1,11 +1,13 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:babymom_diary/src/core/preferences/shared_preferences_provider.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_settings.dart';
 import 'package:babymom_diary/src/features/calendar/domain/repositories/calendar_settings_repository.dart';
+
+part 'calendar_settings_repository_impl.g.dart';
 
 /// SharedPreferencesを使ったカレンダー設定リポジトリの実装
 class CalendarSettingsRepositoryImpl implements CalendarSettingsRepository {
@@ -47,9 +49,8 @@ class CalendarSettingsRepositoryImpl implements CalendarSettingsRepository {
   }
 }
 
-/// カレンダー設定リポジトリのプロバイダー
-final calendarSettingsRepositoryProvider =
-    Provider<CalendarSettingsRepository>((ref) {
+@Riverpod(keepAlive: true)
+CalendarSettingsRepository calendarSettingsRepository(Ref ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return CalendarSettingsRepositoryImpl(prefs);
-});
+}

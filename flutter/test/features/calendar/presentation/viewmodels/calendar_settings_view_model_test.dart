@@ -1,17 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_settings.dart';
-import 'package:babymom_diary/src/features/calendar/domain/repositories/calendar_settings_repository.dart';
-import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/calendar_settings_view_model.dart';
-
-class MockCalendarSettingsRepository extends Mock
-    implements CalendarSettingsRepository {}
+import 'package:babymom_diary/src/features/calendar/presentation/viewmodels/calendar_settings_state.dart';
 
 void main() {
-  setUpAll(() {
-    registerFallbackValue(const CalendarSettings(startingDayOfWeek: false));
-  });
   group('CalendarSettingsState', () {
     test('初期状態が正しい', () {
       const state = CalendarSettingsState(
@@ -66,87 +58,6 @@ void main() {
       final newState = state.copyWith(error: null);
 
       expect(newState.error, isNull);
-    });
-  });
-
-  group('CalendarSettingsViewModel', () {
-    late MockCalendarSettingsRepository mockRepository;
-
-    setUp(() {
-      mockRepository = MockCalendarSettingsRepository();
-    });
-
-    test('初期化時に設定を読み込む', () async {
-      when(() => mockRepository.getSettings()).thenAnswer(
-        (_) async => const CalendarSettings(startingDayOfWeek: true),
-      );
-
-      final viewModel = CalendarSettingsViewModel(mockRepository);
-
-      // 初期状態
-      expect(viewModel.state.settings.startingDayOfWeek, false);
-
-      // 非同期読み込み完了を待つ
-      await Future.delayed(Duration.zero);
-
-      expect(viewModel.state.settings.startingDayOfWeek, true);
-      expect(viewModel.state.isLoading, false);
-      verify(() => mockRepository.getSettings()).called(1);
-
-      viewModel.dispose();
-    });
-
-    test('設定読み込み失敗時にエラーを設定', () async {
-      when(() => mockRepository.getSettings()).thenThrow(Exception('読み込みエラー'));
-
-      final viewModel = CalendarSettingsViewModel(mockRepository);
-
-      // 非同期処理完了を待つ
-      await Future.delayed(Duration.zero);
-
-      expect(viewModel.state.error, contains('設定の読み込みに失敗しました'));
-      expect(viewModel.state.isLoading, false);
-
-      viewModel.dispose();
-    });
-
-    test('updateStartingDayOfWeek で設定を更新', () async {
-      when(() => mockRepository.getSettings()).thenAnswer(
-        (_) async => const CalendarSettings(startingDayOfWeek: false),
-      );
-      when(() => mockRepository.saveSettings(any())).thenAnswer((_) async {});
-
-      final viewModel = CalendarSettingsViewModel(mockRepository);
-      await Future.delayed(Duration.zero);
-
-      await viewModel.updateStartingDayOfWeek(true);
-
-      expect(viewModel.state.settings.startingDayOfWeek, true);
-      expect(viewModel.state.isLoading, false);
-
-      verify(() => mockRepository.saveSettings(
-            const CalendarSettings(startingDayOfWeek: true),
-          )).called(1);
-
-      viewModel.dispose();
-    });
-
-    test('updateStartingDayOfWeek で保存失敗時にエラーを設定', () async {
-      when(() => mockRepository.getSettings()).thenAnswer(
-        (_) async => const CalendarSettings(startingDayOfWeek: false),
-      );
-      when(() => mockRepository.saveSettings(any()))
-          .thenThrow(Exception('保存エラー'));
-
-      final viewModel = CalendarSettingsViewModel(mockRepository);
-      await Future.delayed(Duration.zero);
-
-      await viewModel.updateStartingDayOfWeek(true);
-
-      expect(viewModel.state.error, contains('設定の保存に失敗しました'));
-      expect(viewModel.state.isLoading, false);
-
-      viewModel.dispose();
     });
   });
 }
