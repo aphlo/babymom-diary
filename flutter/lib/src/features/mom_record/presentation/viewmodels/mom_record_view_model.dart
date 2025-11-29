@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:babymom_diary/src/core/firebase/household_service.dart'
     as fbcore;
@@ -13,20 +12,10 @@ import '../../domain/entities/mom_daily_record.dart';
 import '../models/mom_record_ui_model.dart';
 import 'mom_record_page_state.dart';
 
-final momRecordViewModelProvider =
-    StateNotifierProvider.autoDispose<MomRecordViewModel, MomRecordPageState>(
-  (ref) {
-    ref.keepAlive();
-    return MomRecordViewModel(ref);
-  },
-);
+part 'mom_record_view_model.g.dart';
 
-class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
-  MomRecordViewModel(this._ref) : super(MomRecordPageState.initial()) {
-    _loadMonthlyRecords(state.focusMonth);
-  }
-
-  final Ref _ref;
+@Riverpod(keepAlive: true)
+class MomRecordViewModel extends _$MomRecordViewModel {
   GetMomMonthlyRecords? _getUseCase;
   WatchMomRecordForDate? _watchUseCase;
   SaveMomDailyRecord? _saveUseCase;
@@ -38,10 +27,23 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
   /// 月間記録のキャッシュ（UI更新用）
   MomMonthlyRecordUiModel? _monthlyRecordsCache;
 
+  @override
+  MomRecordPageState build() {
+    ref.onDispose(() {
+      _editingRecordSubscription?.cancel();
+    });
+
+    final initialState = MomRecordPageState.initial();
+
+    // 初期化処理をスケジュール
+    Future.microtask(() => _loadMonthlyRecords(initialState.focusMonth));
+
+    return initialState;
+  }
+
   /// 月間記録を一度だけ取得（リアルタイム更新なし）
   Future<void> _loadMonthlyRecords(DateTime month) async {
     final normalized = _normalizeMonth(month);
-    if (!mounted) return;
     state = state.copyWith(
       focusMonth: normalized,
       monthlyRecords: const AsyncValue.loading(),
@@ -53,13 +55,11 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
         year: normalized.year,
         month: normalized.month,
       );
-      if (!mounted) return;
       _monthlyRecordsCache = MomMonthlyRecordUiModel.fromDomain(result);
       state = state.copyWith(
         monthlyRecords: AsyncValue.data(_monthlyRecordsCache!),
       );
     } catch (error, stackTrace) {
-      if (!mounted) return;
       state = state.copyWith(
         monthlyRecords: AsyncValue.error(error, stackTrace),
       );
@@ -75,7 +75,6 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
       final useCase = await _requireWatchUseCase();
       _editingRecordSubscription = useCase(date: date).listen(
         (record) {
-          if (!mounted) return;
           _updateRecordInCache(record);
         },
         onError: (error, stackTrace) {
@@ -168,7 +167,7 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
       return existing;
     }
     final householdId = await _ensureHouseholdId();
-    final useCase = _ref.read(getMomMonthlyRecordsUseCaseProvider(householdId));
+    final useCase = ref.read(getMomMonthlyRecordsUseCaseProvider(householdId));
     _getUseCase = useCase;
     return useCase;
   }
@@ -179,8 +178,7 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
       return existing;
     }
     final householdId = await _ensureHouseholdId();
-    final useCase =
-        _ref.read(watchMomRecordForDateUseCaseProvider(householdId));
+    final useCase = ref.read(watchMomRecordForDateUseCaseProvider(householdId));
     _watchUseCase = useCase;
     return useCase;
   }
@@ -191,7 +189,7 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
       return existing;
     }
     final householdId = await _ensureHouseholdId();
-    final useCase = _ref.read(saveMomDailyRecordUseCaseProvider(householdId));
+    final useCase = ref.read(saveMomDailyRecordUseCaseProvider(householdId));
     _saveUseCase = useCase;
     return useCase;
   }
@@ -202,18 +200,12 @@ class MomRecordViewModel extends StateNotifier<MomRecordPageState> {
       return existing;
     }
     final householdId =
-        await _ref.read(fbcore.currentHouseholdIdProvider.future);
+        await ref.read(fbcore.currentHouseholdIdProvider.future);
     state = state.copyWith(householdId: householdId);
     return householdId;
   }
 
   static DateTime _normalizeMonth(DateTime date) {
     return DateTime(date.year, date.month);
-  }
-
-  @override
-  void dispose() {
-    _editingRecordSubscription?.cancel();
-    super.dispose();
   }
 }

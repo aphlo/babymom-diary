@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:babymom_diary/src/core/firebase/household_service.dart'
     as fbcore;
@@ -15,17 +14,10 @@ import 'mom_diary_page_state.dart';
 import 'mom_record_page_state.dart';
 import 'mom_record_view_model.dart';
 
-final momDiaryViewModelProvider =
-    StateNotifierProvider.autoDispose<MomDiaryViewModel, MomDiaryPageState>(
-  (ref) => MomDiaryViewModel(ref),
-);
+part 'mom_diary_view_model.g.dart';
 
-class MomDiaryViewModel extends StateNotifier<MomDiaryPageState> {
-  MomDiaryViewModel(this._ref) : super(MomDiaryPageState.initial()) {
-    _initialize();
-  }
-
-  final Ref _ref;
+@Riverpod(keepAlive: true)
+class MomDiaryViewModel extends _$MomDiaryViewModel {
   GetMomDiaryMonthlyEntries? _getUseCase;
   WatchMomDiaryForDate? _watchUseCase;
   SaveMomDiaryEntry? _saveUseCase;
@@ -37,11 +29,27 @@ class MomDiaryViewModel extends StateNotifier<MomDiaryPageState> {
   /// 月間日記のキャッシュ（UI更新用）
   MomDiaryMonthlyUiModel? _monthlyDiaryCache;
 
-  void _initialize() {
-    final recordState = _ref.read(momRecordViewModelProvider);
-    _loadMonthlyDiary(recordState.focusMonth);
+  @override
+  MomDiaryPageState build() {
+    ref.onDispose(() {
+      _editingDiarySubscription?.cancel();
+    });
 
-    _ref.listen<MomRecordPageState>(
+    _listenToMomRecordViewModel();
+
+    final recordState = ref.read(momRecordViewModelProvider);
+    final initialState = MomDiaryPageState.initial().copyWith(
+      focusMonth: recordState.focusMonth,
+    );
+
+    // 初期化処理をスケジュール
+    Future.microtask(() => _loadMonthlyDiary(initialState.focusMonth));
+
+    return initialState;
+  }
+
+  void _listenToMomRecordViewModel() {
+    ref.listen<MomRecordPageState>(
       momRecordViewModelProvider,
       (previous, next) {
         if (previous?.focusMonth == next.focusMonth) {
@@ -50,14 +58,12 @@ class MomDiaryViewModel extends StateNotifier<MomDiaryPageState> {
         stopEditingDiary();
         _loadMonthlyDiary(next.focusMonth);
       },
-      fireImmediately: false,
     );
   }
 
   /// 月間日記を一度だけ取得（リアルタイム更新なし）
   Future<void> _loadMonthlyDiary(DateTime month) async {
     final normalized = _normalizeMonth(month);
-    if (!mounted) return;
     state = state.copyWith(
       focusMonth: normalized,
       monthlyDiary: const AsyncValue.loading(),
@@ -69,13 +75,11 @@ class MomDiaryViewModel extends StateNotifier<MomDiaryPageState> {
         year: normalized.year,
         month: normalized.month,
       );
-      if (!mounted) return;
       _monthlyDiaryCache = MomDiaryMonthlyUiModel.fromDomain(result);
       state = state.copyWith(
         monthlyDiary: AsyncValue.data(_monthlyDiaryCache!),
       );
     } catch (error, stackTrace) {
-      if (!mounted) return;
       state = state.copyWith(
         monthlyDiary: AsyncValue.error(error, stackTrace),
       );
@@ -91,7 +95,6 @@ class MomDiaryViewModel extends StateNotifier<MomDiaryPageState> {
       final useCase = await _requireWatchUseCase();
       _editingDiarySubscription = useCase(date: date).listen(
         (entry) {
-          if (!mounted) return;
           _updateEntryInCache(entry);
         },
         onError: (error, stackTrace) {
@@ -164,7 +167,7 @@ class MomDiaryViewModel extends StateNotifier<MomDiaryPageState> {
     }
     final householdId = await _ensureHouseholdId();
     final useCase =
-        _ref.read(getMomDiaryMonthlyEntriesUseCaseProvider(householdId));
+        ref.read(getMomDiaryMonthlyEntriesUseCaseProvider(householdId));
     _getUseCase = useCase;
     return useCase;
   }
@@ -175,7 +178,7 @@ class MomDiaryViewModel extends StateNotifier<MomDiaryPageState> {
       return existing;
     }
     final householdId = await _ensureHouseholdId();
-    final useCase = _ref.read(watchMomDiaryForDateUseCaseProvider(householdId));
+    final useCase = ref.read(watchMomDiaryForDateUseCaseProvider(householdId));
     _watchUseCase = useCase;
     return useCase;
   }
@@ -186,7 +189,7 @@ class MomDiaryViewModel extends StateNotifier<MomDiaryPageState> {
       return existing;
     }
     final householdId = await _ensureHouseholdId();
-    final useCase = _ref.read(saveMomDiaryEntryUseCaseProvider(householdId));
+    final useCase = ref.read(saveMomDiaryEntryUseCaseProvider(householdId));
     _saveUseCase = useCase;
     return useCase;
   }
@@ -197,18 +200,12 @@ class MomDiaryViewModel extends StateNotifier<MomDiaryPageState> {
       return existing;
     }
     final householdId =
-        await _ref.read(fbcore.currentHouseholdIdProvider.future);
+        await ref.read(fbcore.currentHouseholdIdProvider.future);
     state = state.copyWith(householdId: householdId);
     return householdId;
   }
 
   static DateTime _normalizeMonth(DateTime date) {
     return DateTime(date.year, date.month);
-  }
-
-  @override
-  void dispose() {
-    _editingDiarySubscription?.cancel();
-    super.dispose();
   }
 }

@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:babymom_diary/src/core/firebase/household_service.dart'
     as fbcore;
@@ -14,68 +14,100 @@ import 'usecases/get_mom_monthly_records.dart';
 import 'usecases/save_mom_daily_record.dart';
 import 'usecases/save_mom_diary_entry.dart';
 
-final _momRecordFirestoreDataSourceProvider =
-    Provider.family<MomRecordFirestoreDataSource, String>((ref, householdId) {
+part 'mom_record_controller.g.dart';
+
+@Riverpod(keepAlive: true)
+MomRecordFirestoreDataSource momRecordFirestoreDataSource(
+  Ref ref,
+  String householdId,
+) {
   final firestore = ref.watch(fbcore.firebaseFirestoreProvider);
   return MomRecordFirestoreDataSource(
     firestore: firestore,
     householdId: householdId,
   );
-});
+}
 
-final momRecordRepositoryProvider =
-    Provider.family<MomRecordRepository, String>((ref, householdId) {
-  final remote = ref.watch(_momRecordFirestoreDataSourceProvider(householdId));
+@Riverpod(keepAlive: true)
+MomRecordRepository momRecordRepository(
+  Ref ref,
+  String householdId,
+) {
+  final remote = ref.watch(momRecordFirestoreDataSourceProvider(householdId));
   return MomRecordRepositoryImpl(remote: remote);
-});
+}
 
-final getMomMonthlyRecordsUseCaseProvider =
-    Provider.family<GetMomMonthlyRecords, String>((ref, householdId) {
+@Riverpod(keepAlive: true)
+GetMomMonthlyRecords getMomMonthlyRecordsUseCase(
+  Ref ref,
+  String householdId,
+) {
   final repository = ref.watch(momRecordRepositoryProvider(householdId));
   return GetMomMonthlyRecords(repository);
-});
+}
 
-final watchMomRecordForDateUseCaseProvider =
-    Provider.family<WatchMomRecordForDate, String>((ref, householdId) {
+@Riverpod(keepAlive: true)
+WatchMomRecordForDate watchMomRecordForDateUseCase(
+  Ref ref,
+  String householdId,
+) {
   final repository = ref.watch(momRecordRepositoryProvider(householdId));
   return WatchMomRecordForDate(repository);
-});
+}
 
-final saveMomDailyRecordUseCaseProvider =
-    Provider.family<SaveMomDailyRecord, String>((ref, householdId) {
+@Riverpod(keepAlive: true)
+SaveMomDailyRecord saveMomDailyRecordUseCase(
+  Ref ref,
+  String householdId,
+) {
   final repository = ref.watch(momRecordRepositoryProvider(householdId));
   return SaveMomDailyRecord(repository);
-});
+}
 
-final _momDiaryFirestoreDataSourceProvider =
-    Provider.family<MomDiaryFirestoreDataSource, String>((ref, householdId) {
+@Riverpod(keepAlive: true)
+MomDiaryFirestoreDataSource momDiaryFirestoreDataSource(
+  Ref ref,
+  String householdId,
+) {
   final firestore = ref.watch(fbcore.firebaseFirestoreProvider);
   return MomDiaryFirestoreDataSource(
     firestore: firestore,
     householdId: householdId,
   );
-});
+}
 
-final momDiaryRepositoryProvider =
-    Provider.family<MomDiaryRepository, String>((ref, householdId) {
-  final remote = ref.watch(_momDiaryFirestoreDataSourceProvider(householdId));
+@Riverpod(keepAlive: true)
+MomDiaryRepository momDiaryRepository(
+  Ref ref,
+  String householdId,
+) {
+  final remote = ref.watch(momDiaryFirestoreDataSourceProvider(householdId));
   return MomDiaryRepositoryImpl(remote: remote);
-});
+}
 
-final getMomDiaryMonthlyEntriesUseCaseProvider =
-    Provider.family<GetMomDiaryMonthlyEntries, String>((ref, householdId) {
+@Riverpod(keepAlive: true)
+GetMomDiaryMonthlyEntries getMomDiaryMonthlyEntriesUseCase(
+  Ref ref,
+  String householdId,
+) {
   final repository = ref.watch(momDiaryRepositoryProvider(householdId));
   return GetMomDiaryMonthlyEntries(repository);
-});
+}
 
-final watchMomDiaryForDateUseCaseProvider =
-    Provider.family<WatchMomDiaryForDate, String>((ref, householdId) {
+@Riverpod(keepAlive: true)
+WatchMomDiaryForDate watchMomDiaryForDateUseCase(
+  Ref ref,
+  String householdId,
+) {
   final repository = ref.watch(momDiaryRepositoryProvider(householdId));
   return WatchMomDiaryForDate(repository);
-});
+}
 
-final saveMomDiaryEntryUseCaseProvider =
-    Provider.family<SaveMomDiaryEntry, String>((ref, householdId) {
+@Riverpod(keepAlive: true)
+SaveMomDiaryEntry saveMomDiaryEntryUseCase(
+  Ref ref,
+  String householdId,
+) {
   final repository = ref.watch(momDiaryRepositoryProvider(householdId));
   return SaveMomDiaryEntry(repository);
-});
+}

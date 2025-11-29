@@ -61,7 +61,7 @@ final class VaccineReservationViewModelProvider extends $NotifierProvider<
 }
 
 String _$vaccineReservationViewModelHash() =>
-    r'435661a35ebce42cb06c2479c1da8fbeb8adfc64';
+    r'23116c9536132b3e3d22f5264df2f5a8e824e3df';
 
 final class VaccineReservationViewModelFamily extends $Family
     with
