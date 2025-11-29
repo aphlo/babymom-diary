@@ -345,9 +345,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
     // 通常のイベントの場合は編集ページに遷移
     context.push('/calendar/edit', extra: event).then((result) {
-      // 編集・削除が成功した場合はリフレッシュ
+      // 編集・削除が成功した場合は月間データを再取得
       if (result == true) {
-        // ViewModelが自動的にリフレッシュするため、特別な処理は不要
+        ref.read(calendarViewModelProvider.notifier).refreshMonthlyEvents();
       }
     });
   }
