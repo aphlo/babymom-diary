@@ -1,5 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:babymom_diary/src/features/vaccines/domain/repositories/vaccine_catalog_repository.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/repositories/vaccine_master_repository.dart';
@@ -18,100 +18,98 @@ import 'package:babymom_diary/src/features/vaccines/application/usecases/watch_v
 import 'package:babymom_diary/src/features/vaccines/application/usecases/watch_vaccination_records.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/services/vaccination_schedule_policy.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/services/vaccine_schedule_conflict_validator.dart';
-import 'package:babymom_diary/src/features/menu/household/domain/repositories/vaccine_visibility_settings_repository.dart';
-import 'package:babymom_diary/src/features/menu/household/infrastructure/repositories/vaccine_visibility_settings_repository_impl.dart';
-import 'package:babymom_diary/src/features/menu/household/infrastructure/sources/vaccine_visibility_settings_firestore_data_source.dart';
+import 'package:babymom_diary/src/features/menu/household/application/vaccine_visibility_settings_provider.dart';
 
-final vaccineCatalogRepositoryProvider =
-    Provider<VaccineCatalogRepository>((ref) {
+part 'vaccine_catalog_providers.g.dart';
+
+@Riverpod(keepAlive: true)
+VaccineCatalogRepository vaccineCatalogRepository(Ref ref) {
   return const InMemoryVaccineCatalogRepository();
-});
+}
 
-final vaccineMasterRepositoryProvider =
-    Provider<VaccineMasterRepository>((ref) {
+@Riverpod(keepAlive: true)
+VaccineMasterRepository vaccineMasterRepository(Ref ref) {
   return const InMemoryVaccineMasterRepository();
-});
+}
 
-final vaccinationRecordDataSourceProvider =
-    Provider<VaccinationRecordFirestoreDataSource>((ref) {
+@Riverpod(keepAlive: true)
+VaccinationRecordFirestoreDataSource vaccinationRecordDataSource(Ref ref) {
   final vaccineMasterRepository = ref.watch(vaccineMasterRepositoryProvider);
   return VaccinationRecordFirestoreDataSource(
     FirebaseFirestore.instance,
     vaccineMasterRepository,
   );
-});
+}
 
-final vaccineScheduleConflictValidatorProvider =
-    Provider<VaccineScheduleConflictValidator>((ref) {
+@Riverpod(keepAlive: true)
+VaccineScheduleConflictValidator vaccineScheduleConflictValidator(Ref ref) {
   return VaccineScheduleConflictValidator();
-});
+}
 
-final vaccinationRecordRepositoryProvider =
-    Provider<VaccinationRecordRepository>((ref) {
+@Riverpod(keepAlive: true)
+VaccinationRecordRepository vaccinationRecordRepository(Ref ref) {
   final dataSource = ref.watch(vaccinationRecordDataSourceProvider);
   final conflictValidator = ref.watch(vaccineScheduleConflictValidatorProvider);
   return VaccinationRecordRepositoryImpl(
     dataSource,
     conflictValidator,
   );
-});
+}
 
-final getVaccineGuidelineProvider = Provider<GetVaccineMaster>((ref) {
+@Riverpod(keepAlive: true)
+GetVaccineMaster getVaccineGuideline(Ref ref) {
   final repository = ref.watch(vaccineCatalogRepositoryProvider);
   return GetVaccineMaster(repository);
-});
+}
 
-final createVaccineReservationProvider =
-    Provider<CreateVaccineReservation>((ref) {
+@Riverpod(keepAlive: true)
+CreateVaccineReservation createVaccineReservation(Ref ref) {
   final repository = ref.watch(vaccinationRecordRepositoryProvider);
   return CreateVaccineReservation(repository);
-});
+}
 
-final getAvailableVaccinesProvider =
-    Provider<GetAvailableVaccinesForReservation>((ref) {
+@Riverpod(keepAlive: true)
+GetAvailableVaccinesForReservation getAvailableVaccines(Ref ref) {
   final repository = ref.watch(vaccinationRecordRepositoryProvider);
   return GetAvailableVaccinesForReservation(repository);
-});
+}
 
-final watchVaccinationRecordProvider = Provider<WatchVaccinationRecord>((ref) {
+@Riverpod(keepAlive: true)
+WatchVaccinationRecord watchVaccinationRecord(Ref ref) {
   final repository = ref.watch(vaccinationRecordRepositoryProvider);
   return WatchVaccinationRecord(repository);
-});
+}
 
-final watchVaccinationRecordsProvider =
-    Provider<WatchVaccinationRecords>((ref) {
+@Riverpod(keepAlive: true)
+WatchVaccinationRecords watchVaccinationRecords(Ref ref) {
   final repository = ref.watch(vaccinationRecordRepositoryProvider);
   return WatchVaccinationRecords(repository);
-});
+}
 
-final _vaccineVisibilitySettingsRepositoryProvider =
-    Provider<VaccineVisibilitySettingsRepository>((ref) {
-  final firestore = FirebaseFirestore.instance;
-  final dataSource = VaccineVisibilitySettingsFirestoreDataSource(firestore);
-  return VaccineVisibilitySettingsRepositoryImpl(dataSource: dataSource);
-});
-
-final getAvailableVaccinesForSimultaneousReservationProvider =
-    Provider<GetVaccinesForSimultaneousReservation>(
-  (ref) => GetVaccinesForSimultaneousReservation(
+@Riverpod(keepAlive: true)
+GetVaccinesForSimultaneousReservation
+    getAvailableVaccinesForSimultaneousReservation(Ref ref) {
+  return GetVaccinesForSimultaneousReservation(
     vaccineMasterRepository: ref.watch(vaccineMasterRepositoryProvider),
     vaccinationRecordRepository: ref.watch(vaccinationRecordRepositoryProvider),
     vaccineVisibilitySettingsRepository:
-        ref.watch(_vaccineVisibilitySettingsRepositoryProvider),
-  ),
-);
+        ref.watch(vaccineVisibilitySettingsRepositoryProvider),
+  );
+}
 
-final getVaccineByIdProvider = Provider<GetVaccineById>((ref) {
+@Riverpod(keepAlive: true)
+GetVaccineById getVaccineById(Ref ref) {
   final repository = ref.watch(vaccineMasterRepositoryProvider);
   return GetVaccineById(repository);
-});
+}
 
-final getReservationGroupProvider = Provider<GetReservationGroup>((ref) {
+@Riverpod(keepAlive: true)
+GetReservationGroup getReservationGroup(Ref ref) {
   final repository = ref.watch(vaccinationRecordRepositoryProvider);
   return GetReservationGroup(repository);
-});
+}
 
-final vaccinationSchedulePolicyProvider =
-    Provider<VaccinationSchedulePolicy>((ref) {
+@Riverpod(keepAlive: true)
+VaccinationSchedulePolicy vaccinationSchedulePolicy(Ref ref) {
   return const VaccinationSchedulePolicy();
-});
+}

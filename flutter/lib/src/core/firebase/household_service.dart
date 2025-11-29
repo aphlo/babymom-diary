@@ -1,20 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'household_service.g.dart';
 
 // Core Firebase providers
-final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
+@Riverpod(keepAlive: true)
+FirebaseAuth firebaseAuth(Ref ref) {
   return FirebaseAuth.instance;
-});
+}
 
-final firebaseFirestoreProvider = Provider<FirebaseFirestore>((ref) {
+@Riverpod(keepAlive: true)
+FirebaseFirestore firebaseFirestore(Ref ref) {
   return FirebaseFirestore.instance;
-});
+}
 
-final firebaseFunctionsProvider = Provider<FirebaseFunctions>((ref) {
+@Riverpod(keepAlive: true)
+FirebaseFunctions firebaseFunctions(Ref ref) {
   return FirebaseFunctions.instanceFor(region: 'asia-northeast1');
-});
+}
 
 class HouseholdService {
   HouseholdService(this._auth, this._db);
@@ -176,19 +181,21 @@ class HouseholdService {
 }
 
 // Household id provider: ensures household membership exists
-final householdServiceProvider = Provider<HouseholdService>((ref) {
+@Riverpod(keepAlive: true)
+HouseholdService householdService(Ref ref) {
   return HouseholdService(
     ref.watch(firebaseAuthProvider),
     ref.watch(firebaseFirestoreProvider),
   );
-});
+}
 
 /// Provider for initial household ID (used at app startup)
 /// This ensures a household exists and returns its ID synchronously after initial load
-final initialHouseholdIdProvider = FutureProvider<String>((ref) async {
+@Riverpod(keepAlive: true)
+Future<String> initialHouseholdId(Ref ref) async {
   final svc = ref.watch(householdServiceProvider);
   return svc.ensureHousehold();
-});
+}
 
 /// ユーザードキュメントのデータ（householdId + membershipType）
 class UserDocumentData {
@@ -203,7 +210,8 @@ class UserDocumentData {
 
 /// users/{uid}ドキュメントを単一のStreamで購読するプロバイダー
 /// 複数のプロバイダーで同じドキュメントを購読しないよう統合
-final _userDocumentStreamProvider = StreamProvider<UserDocumentData>((ref) {
+@Riverpod(keepAlive: true)
+Stream<UserDocumentData> userDocumentStream(Ref ref) {
   final auth = ref.watch(firebaseAuthProvider);
   final firestore = ref.watch(firebaseFirestoreProvider);
   final uid = auth.currentUser?.uid;
@@ -219,22 +227,24 @@ final _userDocumentStreamProvider = StreamProvider<UserDocumentData>((ref) {
       membershipType: data?['membershipType'] as String?,
     );
   });
-});
+}
 
 /// Provider that derives activeHouseholdId from the shared user document stream
 /// Uses select to avoid Stream-of-Streams while sharing the single Firestore listener
-final currentHouseholdIdProvider = FutureProvider<String>((ref) async {
-  final userDocAsync = await ref.watch(_userDocumentStreamProvider.future);
+@Riverpod(keepAlive: true)
+Future<String> currentHouseholdId(Ref ref) async {
+  final userDocAsync = await ref.watch(userDocumentStreamProvider.future);
   final householdId = userDocAsync.activeHouseholdId;
   if (householdId == null) {
     throw StateError('No active household found.');
   }
   return householdId;
-});
+}
 
 /// Provider that derives membershipType from the shared user document stream
 /// Uses select to avoid Stream-of-Streams while sharing the single Firestore listener
-final currentMembershipTypeProvider = FutureProvider<String?>((ref) async {
-  final userDocAsync = await ref.watch(_userDocumentStreamProvider.future);
+@Riverpod(keepAlive: true)
+Future<String?> currentMembershipType(Ref ref) async {
+  final userDocAsync = await ref.watch(userDocumentStreamProvider.future);
   return userDocAsync.membershipType;
-});
+}
