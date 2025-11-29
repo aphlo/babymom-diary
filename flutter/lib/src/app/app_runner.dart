@@ -36,10 +36,10 @@ Future<void> runBabymomDiaryApp({
       ? const <ChildSummary>[]
       : ChildrenLocal.decodeList(childrenRaw);
 
-  final snapshotRaw =
-      prefs.getString(SelectedChildSnapshot.prefsKey(hid));
-  final initialSnapshot =
-      snapshotRaw == null ? null : SelectedChildSnapshot.decodeSnapshot(snapshotRaw);
+  final snapshotRaw = prefs.getString(SelectedChildSnapshot.prefsKey(hid));
+  final initialSnapshot = snapshotRaw == null
+      ? null
+      : SelectedChildSnapshot.decodeSnapshot(snapshotRaw);
 
   runApp(
     ProviderScope(

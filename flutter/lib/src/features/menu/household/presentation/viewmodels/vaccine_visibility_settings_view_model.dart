@@ -28,8 +28,7 @@ class VaccineVisibilitySettingsViewModel
 
     try {
       final repository = ref.read(vaccineVisibilitySettingsRepositoryProvider);
-      final vaccineMasterRepository =
-          ref.read(vaccineMasterRepositoryProvider);
+      final vaccineMasterRepository = ref.read(vaccineMasterRepositoryProvider);
 
       final getVaccineVisibilitySettings =
           GetVaccineVisibilitySettings(repository: repository);
