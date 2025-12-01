@@ -3,6 +3,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../domain/entities/update_requirement.dart';
 
+/// 強制アップデートが必要な場合に表示する画面。
+///
+/// 戻るボタンは無効化され、ユーザーはストアでアップデートするしかない。
 class ForceUpdatePage extends StatelessWidget {
   final UpdateRequirement requirement;
 
@@ -68,7 +71,7 @@ class ForceUpdatePage extends StatelessWidget {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () => _openStore(requirement.storeUrl),
+                    onPressed: () => _openStore(context, requirement.storeUrl),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _primaryColor,
                       foregroundColor: Colors.white,
@@ -96,10 +99,35 @@ class ForceUpdatePage extends StatelessWidget {
     );
   }
 
-  Future<void> _openStore(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+  Future<void> _openStore(BuildContext context, String url) async {
+    try {
+      final uri = Uri.parse(url);
+      final canLaunch = await canLaunchUrl(uri);
+      if (canLaunch) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        debugPrint('Cannot launch URL: $url');
+        if (context.mounted) {
+          _showErrorSnackBar(context);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error opening store: $e');
+      if (context.mounted) {
+        _showErrorSnackBar(context);
+      }
     }
+  }
+
+  void _showErrorSnackBar(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'ストアを開けませんでした。\nApp Store/Google Play Storeから直接更新してください。',
+          style: TextStyle(fontFamily: _fontFamily),
+        ),
+        duration: Duration(seconds: 5),
+      ),
+    );
   }
 }
