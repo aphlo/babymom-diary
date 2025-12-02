@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/widgets/milu_infinite_time_picker.dart';
 import '../../../../menu/children/application/child_context_provider.dart';
 import '../../../child_record.dart';
 import '../../models/record_draft.dart';
@@ -221,28 +221,12 @@ class _TimePickerField extends StatelessWidget {
       title: Text(label),
       trailing: FilledButton.tonalIcon(
         onPressed: () async {
-          final now = DateTime.now();
-          final reference = DateTime(
-            now.year,
-            now.month,
-            now.day,
-            value.hour,
-            value.minute,
-          );
-          final picked = await DatePicker.showTimePicker(
+          final picked = await showMiluInfiniteTimePicker(
             context,
-            currentTime: reference,
-            showTitleActions: true,
-            showSecondsColumn: false,
-            locale: LocaleType.jp,
+            initialTime: value,
           );
           if (picked != null) {
-            onChanged(
-              TimeOfDay(
-                hour: picked.hour,
-                minute: picked.minute,
-              ),
-            );
+            onChanged(picked);
           }
         },
         icon: const Icon(Icons.access_time),
