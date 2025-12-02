@@ -83,7 +83,6 @@ android {
         stg {
             dimension "env"
             applicationIdSuffix ".stg"
-            versionNameSuffix "-stg"
             resValue "string", "app_name", "milu (STG)"
         }
         prod {
