@@ -71,7 +71,7 @@ class AdMobService {
 
   /// 現在のフレーバーを取得
   static const String _flavor =
-      String.fromEnvironment('FLAVOR', defaultValue: 'prod');
+      String.fromEnvironment('FLAVOR', defaultValue: 'stg');
 
   /// テスト広告を使用するフレーバーかどうか
   static bool get isTestAdFlavor => _flavor == 'stg';
