@@ -98,7 +98,7 @@ jobs:
 
       - name: Build ipa
         id: build
-        run: flutter build ipa --release --dart-define=FLAVOR=prod --export-options-plist=./ios/ExportOptions.plist
+        run: flutter build ipa --release --flavor prod --export-options-plist=./ios/ExportOptions.plist
         working-directory: flutter
 
       - name: Detect path for ipa file
