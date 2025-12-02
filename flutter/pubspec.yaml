@@ -61,10 +61,10 @@ flutter:
       fonts:
         - asset: assets/fonts/MPLUSRounded1c-Regular.ttf
 
-flutter_icons: 
+flutter_icons:
   image_path_android: assets/launcher_icon/milu_android_icon.png
-  adaptive_icon_background: '#BD4F6B'
-  adaptive_icon_foreground: assets/launcher_icon/milu_android_icon.png
+  adaptive_icon_background: '#BD506A'
+  adaptive_icon_foreground: assets/launcher_icon/milu_adaptive_foreground.png
   image_path_ios: assets/launcher_icon/milu_ios_icon.png
   android: true
   adaptive_icon_padding: true
@@ -72,5 +72,9 @@ flutter_icons:
   ios: true   
 
 flutter_native_splash:
-  image: "assets/launcher_icon/milu_android_icon.png"
-  color: "BD4F6B"
+  image: "assets/launcher_icon/milu_adaptive_foreground.png"
+  color: "#BD506A"
+  android_12:
+    image: "assets/launcher_icon/milu_adaptive_foreground.png"
+    color: "#BD506A"
+    icon_background_color: "#BD506A"

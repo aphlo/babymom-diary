@@ -71,16 +71,16 @@ class AdMobService {
 
   /// 現在のフレーバーを取得
   static const String _flavor =
-      String.fromEnvironment('FLAVOR', defaultValue: 'local');
+      String.fromEnvironment('FLAVOR', defaultValue: 'stg');
 
-  /// localフレーバーかどうか
-  static bool get isLocalFlavor => _flavor == 'local';
+  /// テスト広告を使用するフレーバーかどうか
+  static bool get isTestAdFlavor => _flavor == 'stg';
 
   /// バナー広告ユニットIDを取得
-  /// localフレーバー: テスト広告ID
+  /// stgフレーバー: テスト広告ID
   /// prodフレーバー: 本番広告ID
   static String getBannerAdUnitId() {
-    if (isLocalFlavor) {
+    if (isTestAdFlavor) {
       // テスト用広告ユニットID
       final adUnitId = Platform.isAndroid
           ? 'ca-app-pub-3940256099942544/6300978111'
