@@ -23,6 +23,7 @@ class LochiaAmountChips extends StatelessWidget {
           label: Text(_lochiaAmountLabel(value)),
           selected: selected,
           showCheckmark: false,
+          backgroundColor: Colors.white,
           onSelected: (isSelected) {
             if (selectedAmount == value) {
               // 既に選択されている場合は未選択にする
@@ -70,6 +71,7 @@ class LochiaColorChips extends StatelessWidget {
           label: Text(_lochiaColorLabel(value)),
           selected: selected,
           showCheckmark: false,
+          backgroundColor: Colors.white,
           onSelected: (isSelected) {
             if (selectedColor == value) {
               // 既に選択されている場合は未選択にする

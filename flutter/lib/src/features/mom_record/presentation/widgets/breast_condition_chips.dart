@@ -23,6 +23,7 @@ class BreastConditionChips extends StatelessWidget {
           label: Text(_intensityLabel(value)),
           selected: isSelected,
           showCheckmark: false,
+          backgroundColor: Colors.white,
           onSelected: (selected) {
             if (isSelected) {
               // 既に選択されている場合は未選択にする
