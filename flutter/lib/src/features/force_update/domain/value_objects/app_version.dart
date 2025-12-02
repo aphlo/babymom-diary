@@ -18,6 +18,7 @@ class AppVersion implements Comparable<AppVersion> {
   /// バージョン文字列をパースして [AppVersion] を生成する。
   ///
   /// "1.2.3", "1.2", "1" などの形式を受け付ける。
+  /// "1.2.3-stg" のようなサフィックス付きバージョンも対応。
   /// minor, patch が省略された場合は 0 として扱う。
   ///
   /// [version] が空文字列、不正な形式、数値以外を含む場合は
@@ -27,7 +28,10 @@ class AppVersion implements Comparable<AppVersion> {
       throw const FormatException('Version string cannot be empty');
     }
 
-    final parts = version.split('.');
+    // "-stg", "-prod" などのサフィックスを除去
+    final versionWithoutSuffix = version.split('-').first;
+
+    final parts = versionWithoutSuffix.split('.');
     if (parts.length > 3) {
       throw FormatException('Invalid version format: $version');
     }
