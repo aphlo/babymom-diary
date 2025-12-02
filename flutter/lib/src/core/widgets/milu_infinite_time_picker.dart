@@ -42,6 +42,8 @@ class _MiluInfiniteTimePickerState extends State<_MiluInfiniteTimePicker> {
 
   static const double _itemExtent = 40.0;
   static const double _pickerHeight = 200.0;
+  static const int _hoursInDay = 24;
+  static const int _minutesInHour = 60;
 
   @override
   void initState() {
@@ -135,60 +137,68 @@ class _MiluInfiniteTimePickerState extends State<_MiluInfiniteTimePicker> {
   }
 
   Widget _buildHourPicker() {
-    return CupertinoPicker(
-      scrollController: _hourController,
-      itemExtent: _itemExtent,
-      looping: true,
-      selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(
-        capEndEdge: false,
-      ),
-      onSelectedItemChanged: (index) {
-        setState(() {
-          _selectedHour = index;
-        });
-      },
-      children: List.generate(24, (index) {
-        final isSelected = index == _selectedHour;
-        return Center(
-          child: Text(
-            '$index時',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? AppColors.primary : Colors.black87,
+    return Semantics(
+      label: '時間を選択',
+      child: CupertinoPicker(
+        scrollController: _hourController,
+        itemExtent: _itemExtent,
+        looping: true,
+        // capEndEdge: false で右端の丸みを消し、分ピッカーと連続した見た目にする
+        selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(
+          capEndEdge: false,
+        ),
+        onSelectedItemChanged: (index) {
+          setState(() {
+            _selectedHour = index;
+          });
+        },
+        children: List.generate(_hoursInDay, (index) {
+          final isSelected = index == _selectedHour;
+          return Center(
+            child: Text(
+              '$index時',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? AppColors.primary : Colors.black87,
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 
   Widget _buildMinutePicker() {
-    return CupertinoPicker(
-      scrollController: _minuteController,
-      itemExtent: _itemExtent,
-      looping: true,
-      selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(
-        capStartEdge: false,
-      ),
-      onSelectedItemChanged: (index) {
-        setState(() {
-          _selectedMinute = index;
-        });
-      },
-      children: List.generate(60, (index) {
-        final isSelected = index == _selectedMinute;
-        return Center(
-          child: Text(
-            '$index分',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? AppColors.primary : Colors.black87,
+    return Semantics(
+      label: '分を選択',
+      child: CupertinoPicker(
+        scrollController: _minuteController,
+        itemExtent: _itemExtent,
+        looping: true,
+        // capStartEdge: false で左端の丸みを消し、時間ピッカーと連続した見た目にする
+        selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(
+          capStartEdge: false,
+        ),
+        onSelectedItemChanged: (index) {
+          setState(() {
+            _selectedMinute = index;
+          });
+        },
+        children: List.generate(_minutesInHour, (index) {
+          final isSelected = index == _selectedMinute;
+          return Center(
+            child: Text(
+              '$index分',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? AppColors.primary : Colors.black87,
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 }
