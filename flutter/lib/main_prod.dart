@@ -8,9 +8,14 @@ import 'firebase_options_prod.dart';
 import 'src/app/app_runner.dart';
 import 'src/features/ads/infrastructure/services/admob_service.dart';
 import 'src/features/force_update/force_update.dart';
+import 'src/features/widget/infrastructure/repositories/widget_data_repository_impl.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // ウィジェット用App Group初期化（本番環境）
+  await WidgetDataRepositoryImpl.initialize(isProduction: true);
+
   await bootstrap(
     options: DefaultFirebaseOptions.currentPlatform,
     useEmulator: false,

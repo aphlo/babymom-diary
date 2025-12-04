@@ -284,3 +284,225 @@ final class DeleteRecordUseCaseFamily extends $Family
   @override
   String toString() => r'deleteRecordUseCaseProvider';
 }
+
+/// Record追加とウィジェット同期を行う関数（householdIdごと）
+
+@ProviderFor(addRecordWithWidgetSync)
+const addRecordWithWidgetSyncProvider = AddRecordWithWidgetSyncFamily._();
+
+/// Record追加とウィジェット同期を行う関数（householdIdごと）
+
+final class AddRecordWithWidgetSyncProvider
+    extends $FunctionalProvider<
+        Future<void> Function(
+            {required String childId, required Record record}),
+        Future<void> Function(
+            {required String childId, required Record record}),
+        Future<void> Function(
+            {required String childId, required Record record})>
+    with
+        $Provider<
+            Future<void> Function(
+                {required String childId, required Record record})> {
+  /// Record追加とウィジェット同期を行う関数（householdIdごと）
+  const AddRecordWithWidgetSyncProvider._(
+      {required AddRecordWithWidgetSyncFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'addRecordWithWidgetSyncProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$addRecordWithWidgetSyncHash();
+
+  @override
+  String toString() {
+    return r'addRecordWithWidgetSyncProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<
+      Future<void> Function(
+          {required String childId,
+          required Record record})> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Future<void> Function({required String childId, required Record record})
+      create(Ref ref) {
+    final argument = this.argument as String;
+    return addRecordWithWidgetSync(
+      ref,
+      argument,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+      Future<void> Function({required String childId, required Record record})
+          value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<
+          Future<void> Function(
+              {required String childId, required Record record})>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is AddRecordWithWidgetSyncProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$addRecordWithWidgetSyncHash() =>
+    r'02e73e249cf7588e702a1289a404df161b0b6efd';
+
+/// Record追加とウィジェット同期を行う関数（householdIdごと）
+
+final class AddRecordWithWidgetSyncFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+            Future<void> Function(
+                {required String childId, required Record record}),
+            String> {
+  const AddRecordWithWidgetSyncFamily._()
+      : super(
+          retry: null,
+          name: r'addRecordWithWidgetSyncProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// Record追加とウィジェット同期を行う関数（householdIdごと）
+
+  AddRecordWithWidgetSyncProvider call(
+    String householdId,
+  ) =>
+      AddRecordWithWidgetSyncProvider._(argument: householdId, from: this);
+
+  @override
+  String toString() => r'addRecordWithWidgetSyncProvider';
+}
+
+/// Record削除とウィジェット同期を行う関数（householdIdごと）
+
+@ProviderFor(deleteRecordWithWidgetSync)
+const deleteRecordWithWidgetSyncProvider = DeleteRecordWithWidgetSyncFamily._();
+
+/// Record削除とウィジェット同期を行う関数（householdIdごと）
+
+final class DeleteRecordWithWidgetSyncProvider extends $FunctionalProvider<
+        Future<void> Function({required String childId, required String id}),
+        Future<void> Function({required String childId, required String id}),
+        Future<void> Function({required String childId, required String id})>
+    with
+        $Provider<
+            Future<void> Function(
+                {required String childId, required String id})> {
+  /// Record削除とウィジェット同期を行う関数（householdIdごと）
+  const DeleteRecordWithWidgetSyncProvider._(
+      {required DeleteRecordWithWidgetSyncFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'deleteRecordWithWidgetSyncProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$deleteRecordWithWidgetSyncHash();
+
+  @override
+  String toString() {
+    return r'deleteRecordWithWidgetSyncProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<
+          Future<void> Function({required String childId, required String id})>
+      $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
+
+  @override
+  Future<void> Function({required String childId, required String id}) create(
+      Ref ref) {
+    final argument = this.argument as String;
+    return deleteRecordWithWidgetSync(
+      ref,
+      argument,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+      Future<void> Function({required String childId, required String id})
+          value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<
+          Future<void> Function(
+              {required String childId, required String id})>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is DeleteRecordWithWidgetSyncProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$deleteRecordWithWidgetSyncHash() =>
+    r'17dda66ffa285f0c74d686a794dfca8efeefe30a';
+
+/// Record削除とウィジェット同期を行う関数（householdIdごと）
+
+final class DeleteRecordWithWidgetSyncFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+            Future<void> Function(
+                {required String childId, required String id}),
+            String> {
+  const DeleteRecordWithWidgetSyncFamily._()
+      : super(
+          retry: null,
+          name: r'deleteRecordWithWidgetSyncProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// Record削除とウィジェット同期を行う関数（householdIdごと）
+
+  DeleteRecordWithWidgetSyncProvider call(
+    String householdId,
+  ) =>
+      DeleteRecordWithWidgetSyncProvider._(argument: householdId, from: this);
+
+  @override
+  String toString() => r'deleteRecordWithWidgetSyncProvider';
+}
