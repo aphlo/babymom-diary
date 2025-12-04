@@ -164,8 +164,14 @@ class RecordViewModel extends _$RecordViewModel {
       return;
     }
 
+    final targetTypes =
+        (type == RecordType.breastLeft || type == RecordType.breastRight)
+            ? [RecordType.breastLeft, RecordType.breastRight]
+            : [type];
+
     final records = allRecords
-        .where((record) => record.type == type && record.at.hour == hour)
+        .where((record) =>
+            targetTypes.contains(record.type) && record.at.hour == hour)
         .toList(growable: false)
       ..sort((a, b) => a.at.compareTo(b.at));
     final request = RecordSlotRequest(

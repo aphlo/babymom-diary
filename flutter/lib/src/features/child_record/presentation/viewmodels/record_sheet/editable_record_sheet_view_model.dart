@@ -26,6 +26,13 @@ class EditableRecordSheetViewModel extends _$EditableRecordSheetViewModel {
     state = state.copyWith(timeOfDay: value);
   }
 
+  void updateType(RecordType type) {
+    if (state.type == type) {
+      return;
+    }
+    state = state.copyWith(draft: state.draft.copyWith(type: type));
+  }
+
   void updateMinutesInput(String value) {
     if (state.minutesInput == value) {
       return;
