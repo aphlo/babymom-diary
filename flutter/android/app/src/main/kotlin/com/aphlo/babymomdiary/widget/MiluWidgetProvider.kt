@@ -175,8 +175,9 @@ open class MiluWidgetProvider : HomeWidgetProvider() {
         if (records == null) return null
 
         // カテゴリの場合、該当するタイプのリストを取得
+        // 授乳は breastRight/breastLeft どちらが指定されても両方検索する
         val targetTypes = when (typeOrCategory) {
-            "breast" -> listOf("breastRight", "breastLeft")
+            "breast", "breastRight", "breastLeft" -> listOf("breastRight", "breastLeft")
             else -> listOf(typeOrCategory)
         }
 

@@ -26,9 +26,13 @@ open class MiluWidgetSmallProvider : HomeWidgetProvider() {
             // Load widget data
             val widgetDataJson = widgetData.getString("widget_data", null)
 
+            // Load widget settings
+            val settingsJson = widgetData.getString("widget_settings", null)
+
             if (widgetDataJson != null) {
                 try {
                     val data = JSONObject(widgetDataJson)
+                    val settings = if (settingsJson != null) JSONObject(settingsJson) else JSONObject()
 
                     // Get selected child
                     val selectedChildId = data.optString("selectedChildId", "")
@@ -63,8 +67,17 @@ open class MiluWidgetSmallProvider : HomeWidgetProvider() {
                         recentRecords?.optJSONArray(selectedChild.getString("id"))
                     } else null
 
-                    // Get the latest record (excluding future records)
-                    val latestRecord = findLatestPastRecord(childRecords)
+                    // Get display record type from settings (first item)
+                    val mediumSettings = settings.optJSONObject("mediumWidget")
+                    val displayTypes = mediumSettings?.optJSONArray("displayRecordTypes")
+                    val primaryDisplayType = if (displayTypes != null && displayTypes.length() > 0) {
+                        displayTypes.getString(0)
+                    } else {
+                        "breast" // デフォルト
+                    }
+
+                    // Get the latest record for the primary display type
+                    val latestRecord = findRecordByTypeOrCategory(childRecords, primaryDisplayType)
                     if (latestRecord != null) {
                         val recordType = latestRecord.getString("type")
                         val atDate = parseIsoDate(latestRecord.getString("at"))
@@ -80,9 +93,9 @@ open class MiluWidgetSmallProvider : HomeWidgetProvider() {
                             views.setTextViewText(R.id.record_ago, "")
                         }
                     } else {
-                        views.setTextViewText(R.id.record_emoji, "📝")
-                        views.setTextViewText(R.id.record_label, "記録なし")
-                        views.setTextViewText(R.id.record_time, "--:--")
+                        views.setTextViewText(R.id.record_emoji, getRecordEmoji(primaryDisplayType))
+                        views.setTextViewText(R.id.record_label, getRecordLabel(primaryDisplayType))
+                        views.setTextViewText(R.id.record_time, "--")
                         views.setTextViewText(R.id.record_ago, "")
                     }
 
@@ -117,9 +130,18 @@ open class MiluWidgetSmallProvider : HomeWidgetProvider() {
         views.setTextViewText(R.id.record_ago, "")
     }
 
-    /// 未来の記録、および24時間以上前の記録を除外して最新の記録を返す
-    private fun findLatestPastRecord(records: org.json.JSONArray?): JSONObject? {
+    /// カテゴリまたはタイプで記録を検索
+    /// "breast" の場合は breastRight/breastLeft の最新を返す
+    /// 未来の記録、および24時間以上前の記録は除外する
+    private fun findRecordByTypeOrCategory(records: org.json.JSONArray?, typeOrCategory: String): JSONObject? {
         if (records == null) return null
+
+        // カテゴリの場合、該当するタイプのリストを取得
+        // 授乳は breastRight/breastLeft どちらが指定されても両方検索する
+        val targetTypes = when (typeOrCategory) {
+            "breast", "breastRight", "breastLeft" -> listOf("breastRight", "breastLeft")
+            else -> listOf(typeOrCategory)
+        }
 
         val now = Date()
         val twentyFourHoursAgo = Date(now.time - 24 * 60 * 60 * 1000) // 24時間前
@@ -128,19 +150,23 @@ open class MiluWidgetSmallProvider : HomeWidgetProvider() {
 
         for (i in 0 until records.length()) {
             val record = records.getJSONObject(i)
-            val atDate = parseIsoDate(record.getString("at"))
-            if (atDate != null) {
-                // 未来の記録は除外
-                if (atDate.after(now)) {
-                    continue
-                }
-                // 24時間以上前の記録は除外
-                if (atDate.before(twentyFourHoursAgo)) {
-                    continue
-                }
-                if (latestDate == null || atDate.after(latestDate)) {
-                    latestDate = atDate
-                    latestRecord = record
+            val recordType = record.getString("type")
+
+            if (targetTypes.contains(recordType)) {
+                val atDate = parseIsoDate(record.getString("at"))
+                if (atDate != null) {
+                    // 未来の記録は除外
+                    if (atDate.after(now)) {
+                        continue
+                    }
+                    // 24時間以上前の記録は除外
+                    if (atDate.before(twentyFourHoursAgo)) {
+                        continue
+                    }
+                    if (latestDate == null || atDate.after(latestDate)) {
+                        latestDate = atDate
+                        latestRecord = record
+                    }
                 }
             }
         }
@@ -150,7 +176,7 @@ open class MiluWidgetSmallProvider : HomeWidgetProvider() {
 
     private fun getRecordEmoji(type: String): String {
         return when (type) {
-            "breastRight", "breastLeft" -> "🤱"
+            "breast", "breastRight", "breastLeft" -> "🤱"
             "formula" -> "🍼"
             "pump" -> "🥛"
             "pee" -> "💧"
@@ -163,6 +189,7 @@ open class MiluWidgetSmallProvider : HomeWidgetProvider() {
 
     private fun getRecordLabel(type: String): String {
         return when (type) {
+            "breast" -> "授乳"  // カテゴリ用（記録がない場合）
             "breastRight" -> "授乳(右)"
             "breastLeft" -> "授乳(左)"
             "formula" -> "ミルク"

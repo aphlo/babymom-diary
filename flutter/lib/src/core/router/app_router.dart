@@ -26,6 +26,7 @@ import '../../features/vaccines/presentation/pages/vaccine_scheduled_details_pag
 import '../../features/vaccines/presentation/pages/vaccine_reschedule_page.dart';
 import '../../features/vaccines/presentation/models/vaccine_info.dart';
 import '../../features/vaccines/presentation/viewmodels/vaccine_detail_state.dart';
+import '../../features/menu/widget_settings/presentation/pages/widget_settings_page.dart';
 
 part 'app_router.g.dart';
 
@@ -202,6 +203,13 @@ GoRouter appRouter(Ref ref) {
         name: 'growth_chart_settings',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: GrowthChartSettingsPage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/widget/settings',
+        name: 'widget_settings',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: WidgetSettingsPage()),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

@@ -18,7 +18,7 @@ class MediumWidgetSettings {
       RecordType.pee,
     ],
     this.quickActionTypes = const [
-      RecordType.breastRight,
+      RecordType.breastLeft,
       RecordType.formula,
       RecordType.pee,
       RecordType.poop,
@@ -50,7 +50,7 @@ class MediumWidgetSettings {
               ?.map((t) => RecordType.values.byName(t as String))
               .toList() ??
           const [
-            RecordType.breastRight,
+            RecordType.breastLeft,
             RecordType.formula,
             RecordType.pee,
             RecordType.poop,
