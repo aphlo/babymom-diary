@@ -14,6 +14,9 @@ class WidgetDataSyncService {
   /// 直近記録の保持件数（各RecordType毎）
   static const int _recentRecordsLimit = 10;
 
+  /// ウィジェットに表示する記録の有効期間（24時間）
+  static const Duration _validRecordDuration = Duration(hours: 24);
+
   WidgetDataSyncService({
     required WidgetDataRepository widgetRepository,
     required ChildRecordRepository recordRepository,
@@ -45,9 +48,12 @@ class WidgetDataSyncService {
       existingRecords.add(widgetRecord);
     }
 
+    // 24時間以内かつ未来でない記録のみに絞り込み
+    final validRecords = _filterValidRecords(existingRecords);
+
     // 日時順でソート（新しい順）、上限件数に制限
-    existingRecords.sort((a, b) => b.at.compareTo(a.at));
-    final limitedRecords = existingRecords.take(_recentRecordsLimit).toList();
+    validRecords.sort((a, b) => b.at.compareTo(a.at));
+    final limitedRecords = validRecords.take(_recentRecordsLimit).toList();
 
     await _widgetRepository.updateChildRecords(childId, limitedRecords);
     await _widgetRepository.notifyWidgetUpdate();
@@ -74,23 +80,19 @@ class WidgetDataSyncService {
     required String householdId,
     required String childId,
   }) async {
-    // 直近7日間の記録を取得
+    // 直近2日間の記録を取得（24時間フィルターがあるため2日分で十分）
     final now = DateTime.now();
     final records = <Record>[];
 
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 2; i++) {
       final date = now.subtract(Duration(days: i));
       final dayRecords =
           await _recordRepository.getRecordsForDay(childId, date);
       records.addAll(dayRecords);
     }
 
-    // 日時順でソート（新しい順）
-    records.sort((a, b) => b.at.compareTo(a.at));
-
-    // 上位N件をWidgetRecord形式に変換
+    // WidgetRecord形式に変換
     final widgetRecords = records
-        .take(_recentRecordsLimit)
         .map((r) => WidgetRecord(
               id: r.id,
               type: r.type,
@@ -100,7 +102,14 @@ class WidgetDataSyncService {
             ))
         .toList();
 
-    await _widgetRepository.updateChildRecords(childId, widgetRecords);
+    // 24時間以内かつ未来でない記録のみに絞り込み
+    final validRecords = _filterValidRecords(widgetRecords);
+
+    // 日時順でソート（新しい順）、上限件数に制限
+    validRecords.sort((a, b) => b.at.compareTo(a.at));
+    final limitedRecords = validRecords.take(_recentRecordsLimit).toList();
+
+    await _widgetRepository.updateChildRecords(childId, limitedRecords);
     await _widgetRepository.notifyWidgetUpdate();
   }
 
@@ -136,6 +145,23 @@ class WidgetDataSyncService {
   /// 選択子供変更時に呼び出し
   Future<void> onSelectedChildChanged(String childId) async {
     await _widgetRepository.updateSelectedChildId(childId);
+  }
+
+  /// 24時間以内かつ未来でない記録のみを抽出
+  ///
+  /// ウィジェットには直近の記録のみを表示するため、
+  /// 24時間以上前の記録と未来の記録（予約など）は除外する。
+  List<WidgetRecord> _filterValidRecords(List<WidgetRecord> records) {
+    final now = DateTime.now();
+    final cutoffTime = now.subtract(_validRecordDuration);
+
+    return records.where((r) {
+      // 未来の記録は除外
+      if (r.at.isAfter(now)) return false;
+      // 24時間以上前の記録は除外
+      if (r.at.isBefore(cutoffTime)) return false;
+      return true;
+    }).toList();
   }
 
   /// 全データを同期（アプリ起動時など）
@@ -177,17 +203,16 @@ class WidgetDataSyncService {
       try {
         final records = <Record>[];
 
-        for (int i = 0; i < 7; i++) {
+        // 直近2日間の記録を取得（24時間フィルターがあるため2日分で十分）
+        for (int i = 0; i < 2; i++) {
           final date = now.subtract(Duration(days: i));
           final dayRecords =
               await _recordRepository.getRecordsForDay(child.id, date);
           records.addAll(dayRecords);
         }
 
-        records.sort((a, b) => b.at.compareTo(a.at));
-
-        recentRecords[child.id] = records
-            .take(_recentRecordsLimit)
+        // WidgetRecord形式に変換
+        final widgetRecords = records
             .map((r) => WidgetRecord(
                   id: r.id,
                   type: r.type,
@@ -196,11 +221,19 @@ class WidgetDataSyncService {
                   excretionVolume: r.excretionVolume,
                 ))
             .toList();
+
+        // 24時間以内かつ未来でない記録のみに絞り込み
+        final validRecords = _filterValidRecords(widgetRecords);
+
+        // 日時順でソート（新しい順）、上限件数に制限
+        validRecords.sort((a, b) => b.at.compareTo(a.at));
+        recentRecords[child.id] =
+            validRecords.take(_recentRecordsLimit).toList();
       } catch (e) {
-        // 個別の子供のレコード取得失敗は、既存データを維持
+        // 個別の子供のレコード取得失敗は、既存データを維持（フィルタリング適用）
         final existingChildRecords = existingData.recentRecords[child.id];
         if (existingChildRecords != null) {
-          recentRecords[child.id] = existingChildRecords;
+          recentRecords[child.id] = _filterValidRecords(existingChildRecords);
         }
       }
     }

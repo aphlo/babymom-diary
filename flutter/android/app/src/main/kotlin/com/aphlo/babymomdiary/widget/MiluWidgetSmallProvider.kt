@@ -117,11 +117,12 @@ open class MiluWidgetSmallProvider : HomeWidgetProvider() {
         views.setTextViewText(R.id.record_ago, "")
     }
 
-    /// 未来の記録を除外して最新の記録を返す
+    /// 未来の記録、および24時間以上前の記録を除外して最新の記録を返す
     private fun findLatestPastRecord(records: org.json.JSONArray?): JSONObject? {
         if (records == null) return null
 
         val now = Date()
+        val twentyFourHoursAgo = Date(now.time - 24 * 60 * 60 * 1000) // 24時間前
         var latestRecord: JSONObject? = null
         var latestDate: Date? = null
 
@@ -131,6 +132,10 @@ open class MiluWidgetSmallProvider : HomeWidgetProvider() {
             if (atDate != null) {
                 // 未来の記録は除外
                 if (atDate.after(now)) {
+                    continue
+                }
+                // 24時間以上前の記録は除外
+                if (atDate.before(twentyFourHoursAgo)) {
                     continue
                 }
                 if (latestDate == null || atDate.after(latestDate)) {
@@ -238,11 +243,18 @@ open class MiluWidgetSmallProvider : HomeWidgetProvider() {
         val now = Date()
         val diffMinutes = ((now.time - date.time) / (1000 * 60)).toInt()
         val diffHours = diffMinutes / 60
+        val remainingMinutes = diffMinutes % 60
 
         return when {
             diffMinutes < 1 -> "たった今"
             diffMinutes < 60 -> "${diffMinutes}分前"
-            diffHours < 24 -> "${diffHours}時間前"
+            diffHours < 24 -> {
+                if (remainingMinutes > 0) {
+                    "${diffHours}時間${remainingMinutes}分前"
+                } else {
+                    "${diffHours}時間前"
+                }
+            }
             else -> "${diffHours / 24}日前"
         }
     }

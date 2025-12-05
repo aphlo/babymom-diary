@@ -170,7 +170,7 @@ open class MiluWidgetProvider : HomeWidgetProvider() {
 
     /// カテゴリまたはタイプで記録を検索
     /// "breast" の場合は breastRight/breastLeft の最新を返す
-    /// 未来の記録は除外する
+    /// 未来の記録、および24時間以上前の記録は除外する
     private fun findRecordByTypeOrCategory(records: org.json.JSONArray?, typeOrCategory: String): JSONObject? {
         if (records == null) return null
 
@@ -181,6 +181,7 @@ open class MiluWidgetProvider : HomeWidgetProvider() {
         }
 
         val now = Date()
+        val twentyFourHoursAgo = Date(now.time - 24 * 60 * 60 * 1000) // 24時間前
         var latestRecord: JSONObject? = null
         var latestDate: Date? = null
 
@@ -193,6 +194,10 @@ open class MiluWidgetProvider : HomeWidgetProvider() {
                 if (atDate != null) {
                     // 未来の記録は除外
                     if (atDate.after(now)) {
+                        continue
+                    }
+                    // 24時間以上前の記録は除外
+                    if (atDate.before(twentyFourHoursAgo)) {
                         continue
                     }
                     if (latestDate == null || atDate.after(latestDate)) {
@@ -320,11 +325,18 @@ open class MiluWidgetProvider : HomeWidgetProvider() {
         val now = Date()
         val diffMinutes = ((now.time - date.time) / (1000 * 60)).toInt()
         val diffHours = diffMinutes / 60
+        val remainingMinutes = diffMinutes % 60
 
         return when {
             diffMinutes < 1 -> "たった今"
             diffMinutes < 60 -> "${diffMinutes}分前"
-            diffHours < 24 -> "${diffHours}時間前"
+            diffHours < 24 -> {
+                if (remainingMinutes > 0) {
+                    "${diffHours}時間${remainingMinutes}分前"
+                } else {
+                    "${diffHours}時間前"
+                }
+            }
             else -> "${diffHours / 24}日前"
         }
     }
