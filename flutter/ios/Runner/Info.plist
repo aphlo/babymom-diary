@@ -231,6 +231,19 @@
 		</array>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLName</key>
+				<string>com.aphlo.babymomdiary</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>milu</string>
+				</array>
+			</dict>
+		</array>
 		<key>UILaunchStoryboardName</key>
 		<string>LaunchScreen</string>
 		<key>UIMainStoryboardFile</key>

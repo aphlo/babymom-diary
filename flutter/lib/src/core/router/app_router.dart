@@ -50,6 +50,12 @@ GoRouter appRouter(Ref ref) {
     initialLocation: '/baby',
     observers: [analyticsService.observer],
     redirect: (context, state) {
+      // ディープリンク（milu://）はDeepLinkServiceで処理するので、
+      // ここでは/babyにリダイレクトして、GoExceptionを回避する
+      if (state.uri.scheme == 'milu') {
+        return '/baby';
+      }
+
       final isOnboardingRoute = state.uri.path.startsWith('/onboarding');
 
       if (!hasCompletedOnboarding && !isOnboardingRoute) {
