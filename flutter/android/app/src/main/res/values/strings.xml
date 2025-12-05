@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">milu</string>
+    <string name="widget_description">育児記録をすばやく確認・登録</string>
+    <string name="widget_name">milu ウィジェット</string>
+    <string name="widget_small_name">milu (小)</string>
+    <string name="widget_small_description">最新の記録を確認</string>
+    <string name="widget_medium_name">milu (中)</string>
+    <string name="widget_medium_description">育児記録をすばやく確認・登録</string>
 </resources>

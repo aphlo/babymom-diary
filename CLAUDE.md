@@ -208,6 +208,15 @@ class FeatureViewModel extends _$FeatureViewModel {
 ### 6. Household
 - Multi-user household management with anonymous Firebase auth
 
+### 7. Home Widget (iOS/Android)
+- **Package:** `home_widget` - Native widget support for both platforms
+- **iOS:** WidgetKit + SwiftUI (MiluWidget extension in `flutter/ios/MiluWidget/`)
+- **Android:** Glance API (Jetpack Compose)
+- **Data Sharing:** App Groups (iOS) / SharedPreferences (Android)
+- **Flavor Support:** Auto-detects STG/PROD based on Bundle Identifier
+- **Widget Sizes:** Small (latest record), Medium (3 recent records)
+- **Documentation:** `docs/adr/001-home-widget-architecture.md`, `docs/spec/home_widget_spec.md`
+
 ## Important Conventions
 
 ### Naming
@@ -270,9 +279,22 @@ Required files (all gitignored):
 - `flutter/lib/firebase_options.dart`
 - `flutter/android/app/src/stg/google-services.json`
 - `flutter/android/app/src/prod/google-services.json`
-- `flutter/ios/Runner/GoogleService-Info-*.plist`
+- `flutter/ios/Runner/GoogleService-Info-stg.plist` (STG用、リポジトリに含む)
+- `flutter/ios/Runner/GoogleService-Info-prod.plist` (PROD用、gitignore)
 - `flutter/fastlane/.env.stg`
 - `flutter/fastlane/.env.prod`
+
+### iOS GoogleService-Info.plist Flavor Handling
+
+iOSではBuild Phaseスクリプトで適切なplistを自動コピーする:
+
+```
+flutter/ios/scripts/copy_google_service_info.sh
+```
+
+- **STG:** `GoogleService-Info-stg.plist` → ビルド時にコピー
+- **PROD:** `GoogleService-Info-prod.plist` → ビルド時にコピー
+- Configuration名に `-prod` または `Release` を含む場合はPROD、それ以外はSTG
 
 ### Development Tools
 - **FVM:** Flutter Version Manager (pinned via `flutter/.fvmrc`)
@@ -336,3 +358,6 @@ firebase deploy --only firestore:rules,firestore:indexes
 - `docs/firestore-structure.md` (Japanese) - Current Firestore collection structure
 - `docs/perf.md` (Japanese) - Firestore read/performance notes and proposals
 - `docs/stg_environment_design.md` (Japanese) - STG環境の設計と実装手順
+- `docs/adr/001-home-widget-architecture.md` - Home Widget architecture decision record
+- `docs/spec/home_widget_spec.md` - Home Widget feature specification
+- `docs/spec/home_widget_setup.md` - Home Widget setup guide

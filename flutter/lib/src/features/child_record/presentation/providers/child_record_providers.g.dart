@@ -284,3 +284,250 @@ final class DeleteRecordUseCaseFamily extends $Family
   @override
   String toString() => r'deleteRecordUseCaseProvider';
 }
+
+/// Record追加/更新とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+/// ウィジェット同期の失敗は次回アプリ起動時のフル同期で回復される。
+
+@ProviderFor(addRecordWithWidgetSync)
+const addRecordWithWidgetSyncProvider = AddRecordWithWidgetSyncFamily._();
+
+/// Record追加/更新とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+/// ウィジェット同期の失敗は次回アプリ起動時のフル同期で回復される。
+
+final class AddRecordWithWidgetSyncProvider
+    extends $FunctionalProvider<
+        Future<void> Function(
+            {required String childId, required Record record}),
+        Future<void> Function(
+            {required String childId, required Record record}),
+        Future<void> Function(
+            {required String childId, required Record record})>
+    with
+        $Provider<
+            Future<void> Function(
+                {required String childId, required Record record})> {
+  /// Record追加/更新とウィジェット同期を行う関数（householdIdごと）
+  ///
+  /// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+  /// ウィジェット同期の失敗は次回アプリ起動時のフル同期で回復される。
+  const AddRecordWithWidgetSyncProvider._(
+      {required AddRecordWithWidgetSyncFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'addRecordWithWidgetSyncProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$addRecordWithWidgetSyncHash();
+
+  @override
+  String toString() {
+    return r'addRecordWithWidgetSyncProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<
+      Future<void> Function(
+          {required String childId,
+          required Record record})> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Future<void> Function({required String childId, required Record record})
+      create(Ref ref) {
+    final argument = this.argument as String;
+    return addRecordWithWidgetSync(
+      ref,
+      argument,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+      Future<void> Function({required String childId, required Record record})
+          value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<
+          Future<void> Function(
+              {required String childId, required Record record})>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is AddRecordWithWidgetSyncProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$addRecordWithWidgetSyncHash() =>
+    r'30d2d62b7c0199b1715c792ac5a5f0d6e90711bd';
+
+/// Record追加/更新とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+/// ウィジェット同期の失敗は次回アプリ起動時のフル同期で回復される。
+
+final class AddRecordWithWidgetSyncFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+            Future<void> Function(
+                {required String childId, required Record record}),
+            String> {
+  const AddRecordWithWidgetSyncFamily._()
+      : super(
+          retry: null,
+          name: r'addRecordWithWidgetSyncProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// Record追加/更新とウィジェット同期を行う関数（householdIdごと）
+  ///
+  /// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+  /// ウィジェット同期の失敗は次回アプリ起動時のフル同期で回復される。
+
+  AddRecordWithWidgetSyncProvider call(
+    String householdId,
+  ) =>
+      AddRecordWithWidgetSyncProvider._(argument: householdId, from: this);
+
+  @override
+  String toString() => r'addRecordWithWidgetSyncProvider';
+}
+
+/// Record削除とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore削除は必須、ウィジェット同期は失敗してもエラーとしない。
+
+@ProviderFor(deleteRecordWithWidgetSync)
+const deleteRecordWithWidgetSyncProvider = DeleteRecordWithWidgetSyncFamily._();
+
+/// Record削除とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore削除は必須、ウィジェット同期は失敗してもエラーとしない。
+
+final class DeleteRecordWithWidgetSyncProvider extends $FunctionalProvider<
+        Future<void> Function({required String childId, required String id}),
+        Future<void> Function({required String childId, required String id}),
+        Future<void> Function({required String childId, required String id})>
+    with
+        $Provider<
+            Future<void> Function(
+                {required String childId, required String id})> {
+  /// Record削除とウィジェット同期を行う関数（householdIdごと）
+  ///
+  /// Firestore削除は必須、ウィジェット同期は失敗してもエラーとしない。
+  const DeleteRecordWithWidgetSyncProvider._(
+      {required DeleteRecordWithWidgetSyncFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'deleteRecordWithWidgetSyncProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$deleteRecordWithWidgetSyncHash();
+
+  @override
+  String toString() {
+    return r'deleteRecordWithWidgetSyncProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<
+          Future<void> Function({required String childId, required String id})>
+      $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
+
+  @override
+  Future<void> Function({required String childId, required String id}) create(
+      Ref ref) {
+    final argument = this.argument as String;
+    return deleteRecordWithWidgetSync(
+      ref,
+      argument,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+      Future<void> Function({required String childId, required String id})
+          value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<
+          Future<void> Function(
+              {required String childId, required String id})>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is DeleteRecordWithWidgetSyncProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$deleteRecordWithWidgetSyncHash() =>
+    r'32769ddc5a20b59f8c2f92b5000a016b6824465b';
+
+/// Record削除とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore削除は必須、ウィジェット同期は失敗してもエラーとしない。
+
+final class DeleteRecordWithWidgetSyncFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+            Future<void> Function(
+                {required String childId, required String id}),
+            String> {
+  const DeleteRecordWithWidgetSyncFamily._()
+      : super(
+          retry: null,
+          name: r'deleteRecordWithWidgetSyncProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// Record削除とウィジェット同期を行う関数（householdIdごと）
+  ///
+  /// Firestore削除は必須、ウィジェット同期は失敗してもエラーとしない。
+
+  DeleteRecordWithWidgetSyncProvider call(
+    String householdId,
+  ) =>
+      DeleteRecordWithWidgetSyncProvider._(argument: householdId, from: this);
+
+  @override
+  String toString() => r'deleteRecordWithWidgetSyncProvider';
+}

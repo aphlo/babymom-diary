@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Widget colors (Dark mode) -->
+    <color name="widget_background">#1E1E1E</color>
+    <color name="widget_card_background">#2D2D2D</color>
+    <color name="widget_card_border">#E87086</color>
+    <color name="widget_header_background">#3D2A30</color>
+    <color name="widget_text_primary">#FFFFFF</color>
+    <color name="widget_text_secondary">#B0B0B0</color>
+    <color name="widget_text_time">#FF8A9E</color>
+    <color name="widget_text_ago">#E0E0E0</color>
+    <color name="widget_divider">#5A4048</color>
+    <color name="widget_action_background">#3D2A30</color>
+</resources>

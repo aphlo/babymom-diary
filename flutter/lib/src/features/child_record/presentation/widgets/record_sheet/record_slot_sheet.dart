@@ -91,7 +91,10 @@ void showRecordSlotSheet({
                     Icon(_iconFor(request.type)),
                     const SizedBox(width: 8),
                     Text(
-                      request.type.label,
+                      (request.type == RecordType.breastLeft ||
+                              request.type == RecordType.breastRight)
+                          ? '授乳'
+                          : request.type.label,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,

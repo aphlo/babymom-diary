@@ -111,6 +111,15 @@ class MenuPage extends ConsumerWidget {
           trailing: const Icon(Icons.chevron_right),
         ),
         const Divider(height: 0),
+        ListTile(
+          tileColor: Colors.white,
+          leading: const Icon(Icons.widgets_outlined),
+          title: const Text('ウィジェット設定'),
+          subtitle: const Text('表示項目・クイックアクションの設定'),
+          onTap: () => context.push('/widget/settings'),
+          trailing: const Icon(Icons.chevron_right),
+        ),
+        const Divider(height: 0),
 
         const SizedBox(height: 24),
         // データ削除メニューはオーナーのみ表示

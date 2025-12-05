@@ -30,8 +30,7 @@ class RecordTable extends StatefulWidget {
     4: FlexColumnWidth(1.0),
     5: FlexColumnWidth(1.0),
     6: FlexColumnWidth(1.0),
-    7: FlexColumnWidth(1.0),
-    8: FlexColumnWidth(2.0),
+    7: FlexColumnWidth(2.0),
   };
 
   static const _borderDashPattern = <double>[1.5, 2.5];
@@ -105,8 +104,7 @@ class _RecordTableState extends State<RecordTable> {
 
   static const _headers = <String>[
     '時間',
-    '授乳\n(左)',
-    '授乳\n(右)',
+    '授乳',
     'ミルク',
     '搾母乳',
     '尿',
@@ -135,11 +133,7 @@ class _RecordTableState extends State<RecordTable> {
       borderSide: borderSide,
       values: [
         _TotalValue(
-          value: '$totalBreastLeftCount',
-          unit: '回',
-        ),
-        _TotalValue(
-          value: '$totalBreastRightCount',
+          value: '${totalBreastLeftCount + totalBreastRightCount}',
           unit: '回',
         ),
         _TotalValue(
@@ -247,11 +241,11 @@ class _RecordTableState extends State<RecordTable> {
                                   height: RecordTable.bodyRowHeight,
                                   child: Center(child: Text('$hour')),
                                 ),
-                                for (final type in _slotTypes)
+                                for (final types in _columnTypes)
                                   RecordTableCell(
                                     records: widget.records,
                                     hour: hour,
-                                    type: type,
+                                    types: types,
                                     onTap: widget.onSlotTap,
                                     rowHeight: RecordTable.bodyRowHeight,
                                   ),
@@ -277,15 +271,14 @@ class _RecordTableState extends State<RecordTable> {
   }
 }
 
-const _slotTypes = <RecordType>[
-  RecordType.breastLeft,
-  RecordType.breastRight,
-  RecordType.formula,
-  RecordType.pump,
-  RecordType.pee,
-  RecordType.poop,
-  RecordType.temperature,
-  RecordType.other,
+const _columnTypes = <List<RecordType>>[
+  [RecordType.breastLeft, RecordType.breastRight],
+  [RecordType.formula],
+  [RecordType.pump],
+  [RecordType.pee],
+  [RecordType.poop],
+  [RecordType.temperature],
+  [RecordType.other],
 ];
 
 class _TotalsRow extends StatelessWidget {

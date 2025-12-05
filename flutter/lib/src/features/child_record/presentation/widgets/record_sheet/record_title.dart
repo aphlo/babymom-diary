@@ -308,16 +308,17 @@ class _TagChip extends StatelessWidget {
 
 String _formatBreastDuration(RecordItemModel record) {
   final amount = record.amount;
+  final sideLabel = record.type == RecordType.breastLeft ? '(左)' : '(右)';
 
   if (amount != null) {
-    if (amount <= 0) return '';
+    if (amount <= 0) return sideLabel;
     if (amount > 0) {
       // 整数の場合は小数点なしで表示
       if (amount == amount.roundToDouble()) {
-        return '${amount.toInt()}分';
+        return '${amount.toInt()}分 $sideLabel';
       }
-      return '$amount分';
+      return '$amount分 $sideLabel';
     }
   }
-  return '';
+  return sideLabel;
 }

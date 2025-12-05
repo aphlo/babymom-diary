@@ -96,6 +96,8 @@ class _EditableRecordSheetState extends ConsumerState<EditableRecordSheet> {
       RecordType.breastLeft || RecordType.breastRight => BreastRecordFields(
           controller: _minutesController,
           errorText: state.durationError,
+          selectedType: type,
+          onTypeChanged: viewModel.updateType,
         ),
       RecordType.formula || RecordType.pump => AmountRecordFields(
           controller: _amountController,

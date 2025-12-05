@@ -17,6 +17,8 @@ import 'package:babymom_diary/src/features/menu/children/application/selected_ch
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
 import 'package:babymom_diary/src/core/analytics/analytics_service.dart';
+import 'package:babymom_diary/src/features/widget/application/providers/widget_providers.dart';
+import 'package:babymom_diary/src/core/deeplink/deep_link_service.dart';
 
 Future<void> runBabymomDiaryApp({
   required String appTitle,
@@ -83,10 +85,17 @@ class _AppState extends ConsumerState<App> {
   void initState() {
     super.initState();
     _previousHouseholdId = widget.initialHouseholdId;
-    // 最初のフレームが描画された後にATT許可をリクエスト
+    // 最初のフレームが描画された後にATT許可をリクエストとディープリンク初期化
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AdMobService.requestATTPermission();
+      _initializeDeepLinks();
     });
+  }
+
+  /// ディープリンクサービスを初期化
+  Future<void> _initializeDeepLinks() async {
+    final deepLinkService = ref.read(deepLinkServiceProvider);
+    await deepLinkService.initialize();
   }
 
   @override
@@ -114,6 +123,9 @@ class _AppState extends ConsumerState<App> {
     final householdId = householdAsync.value ?? widget.initialHouseholdId;
     final router = ref.watch(appRouterProvider);
     final theme = ref.watch(appThemeProvider(householdId));
+
+    // ウィジェットデータの自動同期を有効化
+    ref.watch(widgetAutoSyncProvider);
 
     // 世帯IDが変更されたら選択中の子供をリセット
     if (_previousHouseholdId != null && _previousHouseholdId != householdId) {

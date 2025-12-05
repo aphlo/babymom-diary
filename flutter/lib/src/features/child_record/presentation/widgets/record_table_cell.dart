@@ -14,23 +14,28 @@ class RecordTableCell extends StatelessWidget {
     super.key,
     required this.records,
     required this.hour,
-    required this.type,
+    required this.types,
     required this.onTap,
     required this.rowHeight,
   });
 
   final List<RecordItemModel> records;
   final int hour;
-  final RecordType type;
+  final List<RecordType> types;
   final RecordSlotTapCallback onTap;
   final double rowHeight;
 
   @override
   Widget build(BuildContext context) {
-    final filtered =
-        records.where((e) => e.at.hour == hour && e.type == type).toList();
+    final filtered = records
+        .where((e) => e.at.hour == hour && types.contains(e.type))
+        .toList();
 
-    if (type == RecordType.other) {
+    // 代表的なタイプを取得（バッジの色などを決定するため）
+    // 複数ある場合はリストの最初のものを使用
+    final primaryType = types.first;
+
+    if (primaryType == RecordType.other) {
       final tags = filtered
           .expand((record) => record.tags)
           .map((tag) => tag.trim())
@@ -39,7 +44,7 @@ class RecordTableCell extends StatelessWidget {
       final fallbackText = filtered.isEmpty ? '' : '${filtered.length}';
 
       return InkWell(
-        onTap: () => onTap(hour, type),
+        onTap: () => onTap(hour, primaryType),
         child: SizedBox(
           height: rowHeight,
           child: Padding(
@@ -50,7 +55,7 @@ class RecordTableCell extends StatelessWidget {
                     : Center(
                         child: _buildCountBadge(
                           context,
-                          type,
+                          primaryType,
                           fallbackText,
                         ),
                       ))
@@ -62,7 +67,7 @@ class RecordTableCell extends StatelessWidget {
 
     var text = '';
     if (filtered.isNotEmpty) {
-      switch (type) {
+      switch (primaryType) {
         case RecordType.formula:
         case RecordType.pump:
           final sum = filtered.fold<double>(0, (p, e) => p + (e.amount ?? 0));
@@ -79,10 +84,13 @@ class RecordTableCell extends StatelessWidget {
             text = latest != null ? latest.toStringAsFixed(1) : '';
           }
           break;
-        case RecordType.breastLeft || RecordType.breastRight:
+        case RecordType.breastLeft:
+        case RecordType.breastRight:
+          // 授乳（左右）の場合は合計回数を表示
           text = '${filtered.length}';
           break;
-        case RecordType.pee || RecordType.poop:
+        case RecordType.pee:
+        case RecordType.poop:
         case RecordType.other:
           text = '${filtered.length}';
           break;
@@ -90,11 +98,11 @@ class RecordTableCell extends StatelessWidget {
     }
 
     return InkWell(
-      onTap: () => onTap(hour, type),
+      onTap: () => onTap(hour, primaryType),
       child: SizedBox(
         height: rowHeight,
         child: Center(
-          child: _buildCountBadge(context, type, text),
+          child: _buildCountBadge(context, primaryType, text),
         ),
       ),
     );

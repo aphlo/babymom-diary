@@ -8,17 +8,41 @@ class BreastRecordFields extends StatelessWidget {
   const BreastRecordFields({
     super.key,
     required this.controller,
+    required this.selectedType,
+    required this.onTypeChanged,
     this.errorText,
   });
 
   final TextEditingController controller;
   final String? errorText;
+  final RecordType selectedType;
+  final ValueChanged<RecordType> onTypeChanged;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(
+          width: double.infinity,
+          child: SegmentedButton<RecordType>(
+            segments: const [
+              ButtonSegment(
+                value: RecordType.breastLeft,
+                label: Text('左'),
+              ),
+              ButtonSegment(
+                value: RecordType.breastRight,
+                label: Text('右'),
+              ),
+            ],
+            selected: {selectedType},
+            onSelectionChanged: (newSelection) {
+              onTypeChanged(newSelection.first);
+            },
+          ),
+        ),
+        const SizedBox(height: 16),
         TextFormField(
           controller: controller,
           decoration: const InputDecoration(
