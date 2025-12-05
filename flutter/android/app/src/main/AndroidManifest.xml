@@ -38,6 +38,33 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- Home Widget (Medium 4x2) -->
+        <!-- 相対パス: STGでは .stg.widget.*, PRODでは .widget.* に解決される -->
+        <receiver
+            android:name=".widget.MiluWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_medium_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/milu_widget_info" />
+        </receiver>
+
+        <!-- Home Widget (Small 2x2) -->
+        <receiver
+            android:name=".widget.MiluWidgetSmallProvider"
+            android:exported="true"
+            android:label="@string/widget_small_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/milu_widget_small_info" />
+        </receiver>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

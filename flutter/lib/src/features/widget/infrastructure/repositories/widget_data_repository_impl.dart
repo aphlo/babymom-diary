@@ -13,7 +13,13 @@ class WidgetDataRepositoryImpl implements WidgetDataRepository {
   static const _widgetDataKey = 'widget_data';
   static const _widgetSettingsKey = 'widget_settings';
   static const _iOSWidgetName = 'MiluWidget';
-  static const _androidWidgetName = 'MiluWidgetProvider';
+  // Android: mainソースセットのクラス名をフルパスで指定
+  // AndroidManifest.xmlで .widget.MiluWidgetProvider と指定しているが、
+  // 実際に登録されるComponentNameはmainソースセットのクラスになる
+  static const _androidWidgetName =
+      'com.aphlo.babymomdiary.widget.MiluWidgetProvider';
+  static const _androidSmallWidgetName =
+      'com.aphlo.babymomdiary.widget.MiluWidgetSmallProvider';
 
   final SharedPreferences _prefs;
 
@@ -102,9 +108,18 @@ class WidgetDataRepositoryImpl implements WidgetDataRepository {
 
   @override
   Future<void> notifyWidgetUpdate() async {
-    await HomeWidget.updateWidget(
-      iOSName: _iOSWidgetName,
-      androidName: _androidWidgetName,
-    );
+    // iOS（MiluWidget）とAndroid（Medium/Small両方）に更新通知を送信
+    try {
+      await HomeWidget.updateWidget(
+        iOSName: _iOSWidgetName,
+        qualifiedAndroidName: _androidWidgetName,
+      );
+
+      await HomeWidget.updateWidget(
+        qualifiedAndroidName: _androidSmallWidgetName,
+      );
+    } catch (e) {
+      // ウィジェット更新エラーは無視（ウィジェットが配置されていない場合など）
+    }
   }
 }

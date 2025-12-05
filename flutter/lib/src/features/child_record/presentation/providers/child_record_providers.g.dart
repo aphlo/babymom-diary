@@ -285,12 +285,18 @@ final class DeleteRecordUseCaseFamily extends $Family
   String toString() => r'deleteRecordUseCaseProvider';
 }
 
-/// Record追加とウィジェット同期を行う関数（householdIdごと）
+/// Record追加/更新とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+/// ウィジェット同期の失敗は次回アプリ起動時のフル同期で回復される。
 
 @ProviderFor(addRecordWithWidgetSync)
 const addRecordWithWidgetSyncProvider = AddRecordWithWidgetSyncFamily._();
 
-/// Record追加とウィジェット同期を行う関数（householdIdごと）
+/// Record追加/更新とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+/// ウィジェット同期の失敗は次回アプリ起動時のフル同期で回復される。
 
 final class AddRecordWithWidgetSyncProvider
     extends $FunctionalProvider<
@@ -304,7 +310,10 @@ final class AddRecordWithWidgetSyncProvider
         $Provider<
             Future<void> Function(
                 {required String childId, required Record record})> {
-  /// Record追加とウィジェット同期を行う関数（householdIdごと）
+  /// Record追加/更新とウィジェット同期を行う関数（householdIdごと）
+  ///
+  /// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+  /// ウィジェット同期の失敗は次回アプリ起動時のフル同期で回復される。
   const AddRecordWithWidgetSyncProvider._(
       {required AddRecordWithWidgetSyncFamily super.from,
       required String super.argument})
@@ -369,9 +378,12 @@ final class AddRecordWithWidgetSyncProvider
 }
 
 String _$addRecordWithWidgetSyncHash() =>
-    r'02e73e249cf7588e702a1289a404df161b0b6efd';
+    r'30d2d62b7c0199b1715c792ac5a5f0d6e90711bd';
 
-/// Record追加とウィジェット同期を行う関数（householdIdごと）
+/// Record追加/更新とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+/// ウィジェット同期の失敗は次回アプリ起動時のフル同期で回復される。
 
 final class AddRecordWithWidgetSyncFamily extends $Family
     with
@@ -388,7 +400,10 @@ final class AddRecordWithWidgetSyncFamily extends $Family
           isAutoDispose: true,
         );
 
-  /// Record追加とウィジェット同期を行う関数（householdIdごと）
+  /// Record追加/更新とウィジェット同期を行う関数（householdIdごと）
+  ///
+  /// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+  /// ウィジェット同期の失敗は次回アプリ起動時のフル同期で回復される。
 
   AddRecordWithWidgetSyncProvider call(
     String householdId,
@@ -400,11 +415,15 @@ final class AddRecordWithWidgetSyncFamily extends $Family
 }
 
 /// Record削除とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore削除は必須、ウィジェット同期は失敗してもエラーとしない。
 
 @ProviderFor(deleteRecordWithWidgetSync)
 const deleteRecordWithWidgetSyncProvider = DeleteRecordWithWidgetSyncFamily._();
 
 /// Record削除とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore削除は必須、ウィジェット同期は失敗してもエラーとしない。
 
 final class DeleteRecordWithWidgetSyncProvider extends $FunctionalProvider<
         Future<void> Function({required String childId, required String id}),
@@ -415,6 +434,8 @@ final class DeleteRecordWithWidgetSyncProvider extends $FunctionalProvider<
             Future<void> Function(
                 {required String childId, required String id})> {
   /// Record削除とウィジェット同期を行う関数（householdIdごと）
+  ///
+  /// Firestore削除は必須、ウィジェット同期は失敗してもエラーとしない。
   const DeleteRecordWithWidgetSyncProvider._(
       {required DeleteRecordWithWidgetSyncFamily super.from,
       required String super.argument})
@@ -477,9 +498,11 @@ final class DeleteRecordWithWidgetSyncProvider extends $FunctionalProvider<
 }
 
 String _$deleteRecordWithWidgetSyncHash() =>
-    r'17dda66ffa285f0c74d686a794dfca8efeefe30a';
+    r'32769ddc5a20b59f8c2f92b5000a016b6824465b';
 
 /// Record削除とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore削除は必須、ウィジェット同期は失敗してもエラーとしない。
 
 final class DeleteRecordWithWidgetSyncFamily extends $Family
     with
@@ -497,6 +520,8 @@ final class DeleteRecordWithWidgetSyncFamily extends $Family
         );
 
   /// Record削除とウィジェット同期を行う関数（householdIdごと）
+  ///
+  /// Firestore削除は必須、ウィジェット同期は失敗してもエラーとしない。
 
   DeleteRecordWithWidgetSyncProvider call(
     String householdId,

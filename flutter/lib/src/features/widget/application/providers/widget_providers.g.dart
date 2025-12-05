@@ -199,3 +199,63 @@ abstract class _$WidgetSettingsNotifier extends $AsyncNotifier<WidgetSettings> {
     element.handleValue(ref, created);
   }
 }
+
+/// ウィジェットデータ自動同期プロバイダー
+///
+/// ChildContextの変更を監視し、自動的にウィジェットデータを同期します。
+/// アプリのルートウィジェットでwatchすることで、アプリ起動時から監視を開始します。
+
+@ProviderFor(WidgetAutoSync)
+const widgetAutoSyncProvider = WidgetAutoSyncProvider._();
+
+/// ウィジェットデータ自動同期プロバイダー
+///
+/// ChildContextの変更を監視し、自動的にウィジェットデータを同期します。
+/// アプリのルートウィジェットでwatchすることで、アプリ起動時から監視を開始します。
+final class WidgetAutoSyncProvider
+    extends $AsyncNotifierProvider<WidgetAutoSync, void> {
+  /// ウィジェットデータ自動同期プロバイダー
+  ///
+  /// ChildContextの変更を監視し、自動的にウィジェットデータを同期します。
+  /// アプリのルートウィジェットでwatchすることで、アプリ起動時から監視を開始します。
+  const WidgetAutoSyncProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'widgetAutoSyncProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$widgetAutoSyncHash();
+
+  @$internal
+  @override
+  WidgetAutoSync create() => WidgetAutoSync();
+}
+
+String _$widgetAutoSyncHash() => r'6c89751a6f6b1cd9745239f88736e6cbb5bc2195';
+
+/// ウィジェットデータ自動同期プロバイダー
+///
+/// ChildContextの変更を監視し、自動的にウィジェットデータを同期します。
+/// アプリのルートウィジェットでwatchすることで、アプリ起動時から監視を開始します。
+
+abstract class _$WidgetAutoSync extends $AsyncNotifier<void> {
+  FutureOr<void> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    build();
+    final ref = this.ref as $Ref<AsyncValue<void>, void>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<void>, void>,
+        AsyncValue<void>,
+        Object?,
+        Object?>;
+    element.handleValue(ref, null);
+  }
+}

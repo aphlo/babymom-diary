@@ -17,6 +17,7 @@ import 'package:babymom_diary/src/features/menu/children/application/selected_ch
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
 import 'package:babymom_diary/src/core/analytics/analytics_service.dart';
+import 'package:babymom_diary/src/features/widget/application/providers/widget_providers.dart';
 
 Future<void> runBabymomDiaryApp({
   required String appTitle,
@@ -114,6 +115,9 @@ class _AppState extends ConsumerState<App> {
     final householdId = householdAsync.value ?? widget.initialHouseholdId;
     final router = ref.watch(appRouterProvider);
     final theme = ref.watch(appThemeProvider(householdId));
+
+    // ウィジェットデータの自動同期を有効化
+    ref.watch(widgetAutoSyncProvider);
 
     // 世帯IDが変更されたら選択中の子供をリセット
     if (_previousHouseholdId != null && _previousHouseholdId != householdId) {

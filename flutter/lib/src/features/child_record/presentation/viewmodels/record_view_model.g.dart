@@ -41,7 +41,7 @@ final class RecordViewModelProvider
   }
 }
 
-String _$recordViewModelHash() => r'070706e6cd03093eed66a1b002c16f02dac255d6';
+String _$recordViewModelHash() => r'efcee991119309c4b1e74cd6384328dfc6db26df';
 
 abstract class _$RecordViewModel extends $Notifier<RecordPageState> {
   RecordPageState build();

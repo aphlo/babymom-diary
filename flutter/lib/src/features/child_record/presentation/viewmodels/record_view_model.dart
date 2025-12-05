@@ -62,11 +62,13 @@ class RecordViewModel extends _$RecordViewModel {
     final record = mapper.toDomain(draft);
     final shouldDeletePrevious = previousId != null && previousId != record.id;
     try {
-      final addRecord = ref.read(addRecordUseCaseProvider(householdId));
-      await addRecord.call(childId: childId, record: record);
+      final addRecordWithSync =
+          ref.read(addRecordWithWidgetSyncProvider(householdId));
+      await addRecordWithSync(childId: childId, record: record);
       if (shouldDeletePrevious) {
-        final deleteRecord = ref.read(deleteRecordUseCaseProvider(householdId));
-        await deleteRecord.call(childId: childId, id: previousId);
+        final deleteRecordWithSync =
+            ref.read(deleteRecordWithWidgetSyncProvider(householdId));
+        await deleteRecordWithSync(childId: childId, id: previousId);
       }
       state = state.copyWith(
         isProcessing: false,
@@ -102,9 +104,9 @@ class RecordViewModel extends _$RecordViewModel {
 
     state = state.copyWith(isProcessing: true, pendingUiEvent: null);
     try {
-      final deleteRecordUseCase =
-          ref.read(deleteRecordUseCaseProvider(householdId));
-      await deleteRecordUseCase.call(childId: childId, id: recordId);
+      final deleteRecordWithSync =
+          ref.read(deleteRecordWithWidgetSyncProvider(householdId));
+      await deleteRecordWithSync(childId: childId, id: recordId);
       state = state.copyWith(
         isProcessing: false,
         pendingUiEvent: const RecordUiEvent.showMessage('記録を削除しました'),

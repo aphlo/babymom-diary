@@ -29,7 +29,10 @@ DeleteRecord deleteRecordUseCase(Ref ref, String householdId) {
   return DeleteRecord(repository);
 }
 
-/// Record追加とウィジェット同期を行う関数（householdIdごと）
+/// Record追加/更新とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+/// ウィジェット同期の失敗は次回アプリ起動時のフル同期で回復される。
 @riverpod
 Future<void> Function({required String childId, required Record record})
     addRecordWithWidgetSync(Ref ref, String householdId) {
@@ -37,16 +40,31 @@ Future<void> Function({required String childId, required Record record})
   final widgetSync = ref.watch(widgetDataSyncServiceProvider(householdId));
 
   return ({required String childId, required Record record}) async {
+    // Firestoreに保存（これが失敗したらエラー）
     await addRecord.call(childId: childId, record: record);
-    // ウィジェットデータを同期
-    await widgetSync.onRecordChanged(
-      householdId: householdId,
-      childId: childId,
-    );
+
+    // ウィジェットデータを同期（失敗してもエラーとしない）
+    try {
+      // ignore: avoid_print
+      print('[Widget] Starting widget sync for record: ${record.type}');
+      await widgetSync.onRecordAdded(
+        childId: childId,
+        record: record,
+      );
+      // ignore: avoid_print
+      print('[Widget] Widget sync completed successfully');
+    } catch (e) {
+      // ignore: avoid_print
+      print('[Widget] Widget sync failed: $e');
+      // ウィジェット同期失敗はサイレントに処理
+      // 次回アプリ起動時のフル同期で整合性が回復される
+    }
   };
 }
 
 /// Record削除とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore削除は必須、ウィジェット同期は失敗してもエラーとしない。
 @riverpod
 Future<void> Function({required String childId, required String id})
     deleteRecordWithWidgetSync(Ref ref, String householdId) {
@@ -54,11 +72,17 @@ Future<void> Function({required String childId, required String id})
   final widgetSync = ref.watch(widgetDataSyncServiceProvider(householdId));
 
   return ({required String childId, required String id}) async {
+    // Firestoreから削除（これが失敗したらエラー）
     await deleteRecord.call(childId: childId, id: id);
-    // ウィジェットデータを同期
-    await widgetSync.onRecordChanged(
-      householdId: householdId,
-      childId: childId,
-    );
+
+    // ウィジェットデータを同期（失敗してもエラーとしない）
+    try {
+      await widgetSync.onRecordDeleted(
+        childId: childId,
+        recordId: id,
+      );
+    } catch (e) {
+      // ウィジェット同期失敗はサイレントに処理
+    }
   };
 }
