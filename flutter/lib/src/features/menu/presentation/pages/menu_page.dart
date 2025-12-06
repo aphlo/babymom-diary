@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
-import 'package:babymom_diary/src/features/menu/children/application/child_color_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/application/children_stream_provider.dart';
-import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
 import 'package:babymom_diary/src/features/menu/data_management/application/providers/data_management_providers.dart';
 import 'package:babymom_diary/src/features/menu/data_management/presentation/widgets/delete_data_confirmation_dialog.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:babymom_diary/src/features/menu/presentation/widgets/app_version_footer.dart';
+import 'package:babymom_diary/src/features/menu/presentation/widgets/child_list_tile.dart';
+import 'package:babymom_diary/src/features/menu/presentation/widgets/children_empty_state.dart';
+import 'package:babymom_diary/src/features/menu/presentation/widgets/menu_section.dart';
 
 class MenuPage extends ConsumerWidget {
   const MenuPage({super.key});
@@ -59,13 +61,13 @@ class MenuPage extends ConsumerWidget {
       children: [
         // 子ども一覧セクション
         if (children.isEmpty) ...[
-          const _ChildrenEmptyState(),
+          const ChildrenEmptyState(),
           const SizedBox(height: 16),
         ],
-        _MenuSection(
+        MenuSection(
           children: [
             for (int i = 0; i < children.length; i++) ...[
-              _ChildListTile(
+              ChildListTile(
                 id: children[i].id,
                 name: children[i].name,
                 subtitle: _formatBirthday(children[i].birthday),
@@ -85,7 +87,7 @@ class MenuPage extends ConsumerWidget {
 
         const SizedBox(height: 24),
 
-        _MenuSection(
+        MenuSection(
           children: [
             ListTile(
               leading: const Icon(Icons.group_add),
@@ -125,7 +127,7 @@ class MenuPage extends ConsumerWidget {
         const SizedBox(height: 24),
         // データ削除メニューはオーナーのみ表示
         if (isOwner) ...[
-          _MenuSection(
+          MenuSection(
             children: [
               ListTile(
                 leading: const Icon(Icons.delete_forever, color: Colors.red),
@@ -155,7 +157,7 @@ class MenuPage extends ConsumerWidget {
             ),
           ),
         ),
-        _MenuSection(
+        MenuSection(
           children: [
             ListTile(
               leading: const Icon(Icons.description_outlined),
@@ -172,7 +174,7 @@ class MenuPage extends ConsumerWidget {
             ),
           ],
         ),
-        const _AppVersionFooter(),
+        const AppVersionFooter(),
       ],
     );
   }
@@ -252,168 +254,5 @@ class MenuPage extends ConsumerWidget {
         ),
       );
     }
-  }
-}
-
-class _ChildrenEmptyState extends StatelessWidget {
-  const _ChildrenEmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-      child: Column(
-        children: [
-          Icon(
-            Icons.child_care_outlined,
-            size: 64,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '子どもが登録されていません',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '下のボタンから子どもを追加してください',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[500],
-                ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ChildListTile extends ConsumerWidget {
-  const _ChildListTile({
-    required this.id,
-    required this.name,
-    required this.subtitle,
-  });
-  final String id;
-  final String name;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isSelected = ref.watch(
-      selectedChildControllerProvider.select((v) => v.value == id),
-    );
-    // SharedPreferencesから色を取得
-    final color = ref
-        .watch(childColorProvider.notifier)
-        .getColor(id, defaultColor: AppColors.primary);
-
-    final scheme = Theme.of(context).colorScheme;
-    return ListTile(
-      key: ValueKey('child-$id'),
-      tileColor: isSelected ? scheme.primaryContainer : Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      minLeadingWidth: 40,
-      leading: InkWell(
-        onTap: () =>
-            ref.read(selectedChildControllerProvider.notifier).select(id),
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 8.0),
-          child: Icon(
-            isSelected ? Icons.check_circle : Icons.circle_outlined,
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : Colors.grey,
-            size: 28,
-          ),
-        ),
-      ),
-      title: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: color,
-            radius: 16,
-            child: const Icon(Icons.child_care, color: Colors.white),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  name,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () => context.push('/children/edit/$id'),
-    );
-  }
-}
-
-class _MenuSection extends StatelessWidget {
-  const _MenuSection({required this.children});
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(color: Color(0xFFE0E0E0), width: 0.5),
-          bottom: BorderSide(color: Color(0xFFE0E0E0), width: 0.5),
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: children,
-      ),
-    );
-  }
-}
-
-class _AppVersionFooter extends StatelessWidget {
-  const _AppVersionFooter();
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<PackageInfo>(
-      future: PackageInfo.fromPlatform(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const SizedBox.shrink();
-        }
-
-        final packageInfo = snapshot.data!;
-        final version = packageInfo.version;
-
-        return Container(
-          padding: const EdgeInsets.all(16),
-          alignment: Alignment.centerRight,
-          child: Text(
-            'バージョン $version',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.black,
-                ),
-          ),
-        );
-      },
-    );
   }
 }
