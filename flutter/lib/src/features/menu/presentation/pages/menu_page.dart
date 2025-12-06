@@ -62,81 +62,83 @@ class MenuPage extends ConsumerWidget {
           const _ChildrenEmptyState(),
           const SizedBox(height: 16),
         ],
-        for (final child in children) ...[
-          _ChildListTile(
-            id: child.id,
-            name: child.name,
-            subtitle: _formatBirthday(child.birthday),
-          ),
-          const Divider(height: 0),
-        ],
-        ListTile(
-          tileColor: Colors.white,
-          leading: const Icon(Icons.add),
-          title: const Text('子どもの追加'),
-          onTap: () => context.push('/children/add'),
-          trailing: const Icon(Icons.chevron_right),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          minLeadingWidth: 40,
+        _MenuSection(
+          children: [
+            for (int i = 0; i < children.length; i++) ...[
+              _ChildListTile(
+                id: children[i].id,
+                name: children[i].name,
+                subtitle: _formatBirthday(children[i].birthday),
+              ),
+              const Divider(height: 0),
+            ],
+            ListTile(
+              leading: const Icon(Icons.add),
+              title: const Text('子どもの追加'),
+              onTap: () => context.push('/children/add'),
+              trailing: const Icon(Icons.chevron_right),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              minLeadingWidth: 40,
+            ),
+          ],
         ),
-        const Divider(height: 0),
 
         const SizedBox(height: 24),
 
-        const Divider(height: 0),
-        ListTile(
-          tileColor: Colors.white,
-          leading: const Icon(Icons.group_add),
-          title: const Text('世帯の共有'),
-          subtitle: const Text('世帯の共有 / 世帯への参加'),
-          onTap: () => context.push('/household/share'),
-          trailing: const Icon(Icons.chevron_right),
+        _MenuSection(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.group_add),
+              title: const Text('世帯の共有'),
+              subtitle: const Text('世帯の共有 / 世帯への参加'),
+              onTap: () => context.push('/household/share'),
+              trailing: const Icon(Icons.chevron_right),
+            ),
+            const Divider(height: 0),
+            ListTile(
+              leading: const Icon(Icons.show_chart),
+              title: const Text('成長曲線の設定'),
+              subtitle: const Text('修正月齢での表示設定'),
+              onTap: () => context.push('/growth-chart/settings'),
+              trailing: const Icon(Icons.chevron_right),
+            ),
+            const Divider(height: 0),
+            ListTile(
+              leading: const Icon(Icons.vaccines),
+              title: const Text('ワクチンの表示・非表示'),
+              subtitle: const Text('表示するワクチンを選択'),
+              onTap: () =>
+                  context.push('/household/vaccine-visibility-settings'),
+              trailing: const Icon(Icons.chevron_right),
+            ),
+            const Divider(height: 0),
+            ListTile(
+              leading: const Icon(Icons.widgets_outlined),
+              title: const Text('ウィジェット設定'),
+              subtitle: const Text('表示項目・クイックアクションの設定'),
+              onTap: () => context.push('/widget/settings'),
+              trailing: const Icon(Icons.chevron_right),
+            ),
+          ],
         ),
-        const Divider(height: 0),
-        ListTile(
-          tileColor: Colors.white,
-          leading: const Icon(Icons.show_chart),
-          title: const Text('成長曲線の設定'),
-          subtitle: const Text('修正月齢での表示設定'),
-          onTap: () => context.push('/growth-chart/settings'),
-          trailing: const Icon(Icons.chevron_right),
-        ),
-        const Divider(height: 0),
-        ListTile(
-          tileColor: Colors.white,
-          leading: const Icon(Icons.vaccines),
-          title: const Text('ワクチンの表示・非表示'),
-          subtitle: const Text('表示するワクチンを選択'),
-          onTap: () => context.push('/household/vaccine-visibility-settings'),
-          trailing: const Icon(Icons.chevron_right),
-        ),
-        const Divider(height: 0),
-        ListTile(
-          tileColor: Colors.white,
-          leading: const Icon(Icons.widgets_outlined),
-          title: const Text('ウィジェット設定'),
-          subtitle: const Text('表示項目・クイックアクションの設定'),
-          onTap: () => context.push('/widget/settings'),
-          trailing: const Icon(Icons.chevron_right),
-        ),
-        const Divider(height: 0),
 
         const SizedBox(height: 24),
         // データ削除メニューはオーナーのみ表示
         if (isOwner) ...[
-          const Divider(height: 0),
-          ListTile(
-            tileColor: Colors.white,
-            leading: const Icon(Icons.delete_forever, color: Colors.red),
-            title: const Text(
-              'データの削除',
-              style: TextStyle(color: Colors.red),
-            ),
-            subtitle: const Text('すべてのデータを削除'),
-            onTap: () => _handleDeleteData(context, ref, hid),
-            trailing: const Icon(Icons.chevron_right),
+          _MenuSection(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.delete_forever, color: Colors.red),
+                title: const Text(
+                  'データの削除',
+                  style: TextStyle(color: Colors.red),
+                ),
+                subtitle: const Text('すべてのデータを削除'),
+                onTap: () => _handleDeleteData(context, ref, hid),
+                trailing: const Icon(Icons.chevron_right),
+              ),
+            ],
           ),
-          const Divider(height: 0),
           const SizedBox(height: 24),
         ],
         const Padding(
@@ -153,23 +155,23 @@ class MenuPage extends ConsumerWidget {
             ),
           ),
         ),
-        const Divider(height: 0),
-        ListTile(
-          tileColor: Colors.white,
-          leading: const Icon(Icons.description_outlined),
-          title: const Text('利用規約'),
-          onTap: () => _launchExternalUrl(context, _termsUrl),
-          trailing: const Icon(Icons.open_in_new),
+        _MenuSection(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.description_outlined),
+              title: const Text('利用規約'),
+              onTap: () => _launchExternalUrl(context, _termsUrl),
+              trailing: const Icon(Icons.open_in_new),
+            ),
+            const Divider(height: 0),
+            ListTile(
+              leading: const Icon(Icons.privacy_tip_outlined),
+              title: const Text('プライバシーポリシー'),
+              onTap: () => _launchExternalUrl(context, _privacyUrl),
+              trailing: const Icon(Icons.open_in_new),
+            ),
+          ],
         ),
-        const Divider(height: 0),
-        ListTile(
-          tileColor: Colors.white,
-          leading: const Icon(Icons.privacy_tip_outlined),
-          title: const Text('プライバシーポリシー'),
-          onTap: () => _launchExternalUrl(context, _privacyUrl),
-          trailing: const Icon(Icons.open_in_new),
-        ),
-        const Divider(height: 0),
         const _AppVersionFooter(),
       ],
     );
@@ -360,6 +362,28 @@ class _ChildListTile extends ConsumerWidget {
       ),
       trailing: const Icon(Icons.chevron_right),
       onTap: () => context.push('/children/edit/$id'),
+    );
+  }
+}
+
+class _MenuSection extends StatelessWidget {
+  const _MenuSection({required this.children});
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: Color(0xFFE0E0E0), width: 0.5),
+          bottom: BorderSide(color: Color(0xFFE0E0E0), width: 0.5),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: children,
+      ),
     );
   }
 }
