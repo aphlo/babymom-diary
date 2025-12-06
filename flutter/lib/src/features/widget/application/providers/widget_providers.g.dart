@@ -166,7 +166,7 @@ final class WidgetSettingsNotifierProvider
           argument: null,
           retry: null,
           name: r'widgetSettingsProvider',
-          isAutoDispose: true,
+          isAutoDispose: false,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
@@ -180,7 +180,7 @@ final class WidgetSettingsNotifierProvider
 }
 
 String _$widgetSettingsNotifierHash() =>
-    r'35d911783e7fe8cde368ca516902c3b4ae19c368';
+    r'd8411e90ab8d4e6901f0bc6390f86b73ff7929ba';
 
 /// ウィジェット設定プロバイダー
 
