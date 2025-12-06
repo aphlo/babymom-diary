@@ -23,7 +23,7 @@ struct MediumWidgetSettings: Codable {
 
     static let `default` = MediumWidgetSettings(
         displayRecordTypes: ["breast", "formula", "pee"],
-        quickActionTypes: ["breastRight", "formula", "pee", "poop", "temperature"]
+        quickActionTypes: ["breastLeft", "formula", "pee", "poop", "temperature"]
     )
 }
 
