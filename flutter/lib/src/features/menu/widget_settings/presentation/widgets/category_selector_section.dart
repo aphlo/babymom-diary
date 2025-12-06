@@ -160,6 +160,7 @@ class _CategoryTile extends StatelessWidget {
             : null,
       ),
       child: ListTile(
+        contentPadding: const EdgeInsets.only(left: 16, right: 8),
         leading: ReorderableDragStartListener(
           index: index,
           child: const Icon(Icons.drag_handle, color: Colors.grey),
@@ -177,6 +178,8 @@ class _CategoryTile extends StatelessWidget {
         trailing: IconButton(
           icon: const Icon(Icons.edit_outlined, size: 20),
           color: Colors.grey,
+          padding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
           onPressed: availableCategories.isNotEmpty
               ? () => _showReplaceDialog(context)
               : null,
@@ -188,6 +191,7 @@ class _CategoryTile extends StatelessWidget {
   Future<void> _showReplaceDialog(BuildContext context) async {
     final selected = await showModalBottomSheet<WidgetRecordCategory>(
       context: context,
+      backgroundColor: Colors.white,
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
