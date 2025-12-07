@@ -7,7 +7,6 @@ class CategorySelectorSection extends StatelessWidget {
   const CategorySelectorSection({
     super.key,
     required this.title,
-    required this.subtitle,
     required this.categories,
     required this.availableCategories,
     required this.onReplace,
@@ -15,7 +14,6 @@ class CategorySelectorSection extends StatelessWidget {
   });
 
   final String title;
-  final String subtitle;
   final List<WidgetRecordCategory> categories;
   final List<WidgetRecordCategory> availableCategories;
   final void Function(int index, WidgetRecordCategory newCategory) onReplace;
@@ -26,7 +24,7 @@ class CategorySelectorSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionHeader(title: title, subtitle: subtitle),
+        _SectionHeader(title: title),
         _CategoryList(
           categories: categories,
           availableCategories: availableCategories,
@@ -41,11 +39,9 @@ class CategorySelectorSection extends StatelessWidget {
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({
     required this.title,
-    required this.subtitle,
   });
 
   final String title;
-  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -58,14 +54,6 @@ class _SectionHeader extends StatelessWidget {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            subtitle,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey[600],
             ),
           ),
         ],

@@ -23,7 +23,6 @@ class WidgetSettingsPage extends ConsumerWidget {
               children: [
                 CategorySelectorSection(
                   title: '直近の記録表示',
-                  subtitle: '3項目',
                   categories: state.displayCategories,
                   availableCategories: state.availableDisplayCategories,
                   onReplace: viewModel.replaceDisplayCategory,
@@ -32,7 +31,6 @@ class WidgetSettingsPage extends ConsumerWidget {
                 const SizedBox(height: 32),
                 CategorySelectorSection(
                   title: 'クイックアクション',
-                  subtitle: '5項目',
                   categories: state.quickActionCategories,
                   availableCategories: state.availableQuickActionCategories,
                   onReplace: viewModel.replaceQuickActionCategory,
