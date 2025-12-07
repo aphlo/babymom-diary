@@ -7,22 +7,16 @@ class CategorySelectorSection extends StatelessWidget {
   const CategorySelectorSection({
     super.key,
     required this.title,
-    required this.subtitle,
     required this.categories,
     required this.availableCategories,
-    required this.canAdd,
-    required this.onAdd,
-    required this.onRemove,
+    required this.onReplace,
     required this.onReorder,
   });
 
   final String title;
-  final String subtitle;
   final List<WidgetRecordCategory> categories;
   final List<WidgetRecordCategory> availableCategories;
-  final bool canAdd;
-  final void Function(WidgetRecordCategory category) onAdd;
-  final void Function(WidgetRecordCategory category) onRemove;
+  final void Function(int index, WidgetRecordCategory newCategory) onReplace;
   final void Function(int oldIndex, int newIndex) onReorder;
 
   @override
@@ -30,16 +24,12 @@ class CategorySelectorSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionHeader(title: title, subtitle: subtitle),
+        _SectionHeader(title: title),
         _CategoryList(
           categories: categories,
-          onReorder: onReorder,
-          onRemove: onRemove,
-        ),
-        _AddButton(
-          canAdd: canAdd,
           availableCategories: availableCategories,
-          onAdd: onAdd,
+          onReorder: onReorder,
+          onReplace: onReplace,
         ),
       ],
     );
@@ -49,11 +39,9 @@ class CategorySelectorSection extends StatelessWidget {
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({
     required this.title,
-    required this.subtitle,
   });
 
   final String title;
-  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -68,14 +56,6 @@ class _SectionHeader extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(width: 8),
-          Text(
-            subtitle,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey[600],
-            ),
-          ),
         ],
       ),
     );
@@ -85,13 +65,15 @@ class _SectionHeader extends StatelessWidget {
 class _CategoryList extends StatelessWidget {
   const _CategoryList({
     required this.categories,
+    required this.availableCategories,
     required this.onReorder,
-    required this.onRemove,
+    required this.onReplace,
   });
 
   final List<WidgetRecordCategory> categories;
+  final List<WidgetRecordCategory> availableCategories;
   final void Function(int oldIndex, int newIndex) onReorder;
-  final void Function(WidgetRecordCategory category) onRemove;
+  final void Function(int index, WidgetRecordCategory newCategory) onReplace;
 
   @override
   Widget build(BuildContext context) {
@@ -131,8 +113,9 @@ class _CategoryList extends StatelessWidget {
             key: ValueKey(category),
             index: index,
             category: category,
+            availableCategories: availableCategories,
             showTopBorder: index > 0,
-            onRemove: () => onRemove(category),
+            onReplace: (newCategory) => onReplace(index, newCategory),
           );
         },
       ),
@@ -145,14 +128,16 @@ class _CategoryTile extends StatelessWidget {
     super.key,
     required this.index,
     required this.category,
+    required this.availableCategories,
     required this.showTopBorder,
-    required this.onRemove,
+    required this.onReplace,
   });
 
   final int index;
   final WidgetRecordCategory category;
+  final List<WidgetRecordCategory> availableCategories;
   final bool showTopBorder;
-  final VoidCallback onRemove;
+  final void Function(WidgetRecordCategory newCategory) onReplace;
 
   @override
   Widget build(BuildContext context) {
@@ -163,6 +148,7 @@ class _CategoryTile extends StatelessWidget {
             : null,
       ),
       child: ListTile(
+        contentPadding: const EdgeInsets.only(left: 16, right: 8),
         leading: ReorderableDragStartListener(
           index: index,
           child: const Icon(Icons.drag_handle, color: Colors.grey),
@@ -178,46 +164,23 @@ class _CategoryTile extends StatelessWidget {
           ],
         ),
         trailing: IconButton(
-          icon: const Icon(Icons.close, size: 20),
+          icon: const Icon(Icons.edit_outlined, size: 20),
           color: Colors.grey,
-          onPressed: onRemove,
-        ),
-      ),
-    );
-  }
-}
-
-class _AddButton extends StatelessWidget {
-  const _AddButton({
-    required this.canAdd,
-    required this.availableCategories,
-    required this.onAdd,
-  });
-
-  final bool canAdd;
-  final List<WidgetRecordCategory> availableCategories;
-  final void Function(WidgetRecordCategory category) onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: OutlinedButton.icon(
-        onPressed: canAdd && availableCategories.isNotEmpty
-            ? () => _showAddDialog(context)
-            : null,
-        icon: const Icon(Icons.add),
-        label: Text(canAdd ? '項目を追加' : '上限に達しました'),
-        style: OutlinedButton.styleFrom(
-          minimumSize: const Size.fromHeight(48),
+          padding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
+          tooltip: '項目を変更',
+          onPressed: availableCategories.isNotEmpty
+              ? () => _showReplaceDialog(context)
+              : null,
         ),
       ),
     );
   }
 
-  Future<void> _showAddDialog(BuildContext context) async {
+  Future<void> _showReplaceDialog(BuildContext context) async {
     final selected = await showModalBottomSheet<WidgetRecordCategory>(
       context: context,
+      backgroundColor: Colors.white,
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -225,7 +188,7 @@ class _AddButton extends StatelessWidget {
             const Padding(
               padding: EdgeInsets.all(16),
               child: Text(
-                '追加する項目を選択',
+                '変更する項目を選択',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -234,13 +197,13 @@ class _AddButton extends StatelessWidget {
             ),
             const Divider(height: 1),
             ...availableCategories.map(
-              (category) => ListTile(
+              (cat) => ListTile(
                 leading: Text(
-                  category.emoji,
+                  cat.emoji,
                   style: const TextStyle(fontSize: 24),
                 ),
-                title: Text(category.label),
-                onTap: () => Navigator.of(context).pop(category),
+                title: Text(cat.label),
+                onTap: () => Navigator.of(context).pop(cat),
               ),
             ),
             const SizedBox(height: 16),
@@ -250,7 +213,7 @@ class _AddButton extends StatelessWidget {
     );
 
     if (selected != null) {
-      onAdd(selected);
+      onReplace(selected);
     }
   }
 }

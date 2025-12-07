@@ -29,7 +29,7 @@ WidgetDataSyncService widgetDataSyncService(Ref ref, String householdId) {
 }
 
 /// ウィジェット設定プロバイダー
-@riverpod
+@Riverpod(keepAlive: true)
 class WidgetSettingsNotifier extends _$WidgetSettingsNotifier {
   @override
   Future<WidgetSettings> build() async {
@@ -39,18 +39,24 @@ class WidgetSettingsNotifier extends _$WidgetSettingsNotifier {
 
   Future<void> updateMediumWidgetSettings(MediumWidgetSettings settings) async {
     final repo = ref.read(widgetDataRepositoryProvider);
-    final current = await repo.getWidgetSettings();
+    final current = switch (state) {
+      AsyncData(:final value) => value,
+      _ => await repo.getWidgetSettings(),
+    };
     final updated = current.copyWith(mediumWidget: settings);
     await repo.saveWidgetSettings(updated);
-    ref.invalidateSelf();
+    state = AsyncData(updated);
   }
 
   Future<void> updateSmallWidgetSettings(SmallWidgetSettings settings) async {
     final repo = ref.read(widgetDataRepositoryProvider);
-    final current = await repo.getWidgetSettings();
+    final current = switch (state) {
+      AsyncData(:final value) => value,
+      _ => await repo.getWidgetSettings(),
+    };
     final updated = current.copyWith(smallWidget: settings);
     await repo.saveWidgetSettings(updated);
-    ref.invalidateSelf();
+    state = AsyncData(updated);
   }
 }
 
