@@ -39,7 +39,10 @@ class WidgetSettingsNotifier extends _$WidgetSettingsNotifier {
 
   Future<void> updateMediumWidgetSettings(MediumWidgetSettings settings) async {
     final repo = ref.read(widgetDataRepositoryProvider);
-    final current = await future;
+    final current = switch (state) {
+      AsyncData(:final value) => value,
+      _ => await repo.getWidgetSettings(),
+    };
     final updated = current.copyWith(mediumWidget: settings);
     await repo.saveWidgetSettings(updated);
     state = AsyncData(updated);
@@ -47,7 +50,10 @@ class WidgetSettingsNotifier extends _$WidgetSettingsNotifier {
 
   Future<void> updateSmallWidgetSettings(SmallWidgetSettings settings) async {
     final repo = ref.read(widgetDataRepositoryProvider);
-    final current = await future;
+    final current = switch (state) {
+      AsyncData(:final value) => value,
+      _ => await repo.getWidgetSettings(),
+    };
     final updated = current.copyWith(smallWidget: settings);
     await repo.saveWidgetSettings(updated);
     state = AsyncData(updated);

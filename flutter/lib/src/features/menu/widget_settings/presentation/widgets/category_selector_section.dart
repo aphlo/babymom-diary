@@ -180,6 +180,7 @@ class _CategoryTile extends StatelessWidget {
           color: Colors.grey,
           padding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,
+          tooltip: '項目を変更',
           onPressed: availableCategories.isNotEmpty
               ? () => _showReplaceDialog(context)
               : null,
