@@ -1,5 +1,15 @@
-variable "location" {
-  description = "Location/region for the functions"
+variable "project_id" {
+  description = "GCP Project ID"
+  type        = string
+}
+
+variable "region" {
+  description = "GCP region"
+  type        = string
+}
+
+variable "source_dir" {
+  description = "Path to Cloud Functions source code directory"
   type        = string
 }
 
@@ -7,21 +17,6 @@ variable "runtime" {
   description = "Runtime for the functions (e.g., nodejs22)"
   type        = string
   default     = "nodejs22"
-}
-
-variable "source_bucket" {
-  description = "GCS bucket containing source code"
-  type        = string
-}
-
-variable "source_object" {
-  description = "GCS object name for source code"
-  type        = string
-}
-
-variable "service_account_email" {
-  description = "Service account email for the functions"
-  type        = string
 }
 
 variable "max_instance_count" {
@@ -55,7 +50,7 @@ variable "environment_variables" {
 }
 
 variable "labels" {
-  description = "Labels to apply to the functions"
+  description = "Labels to apply to resources"
   type        = map(string)
   default     = {}
 }
