@@ -12,9 +12,9 @@ resource "google_storage_bucket" "bucket" {
     for_each = var.lifecycle_rules
     content {
       condition {
-        age                   = lifecycle_rule.value.condition.age
-        num_newer_versions    = lifecycle_rule.value.condition.num_newer_versions
-        with_state            = lifecycle_rule.value.condition.with_state
+        age                = lifecycle_rule.value.condition.age
+        num_newer_versions = lifecycle_rule.value.condition.num_newer_versions
+        with_state         = lifecycle_rule.value.condition.with_state
       }
       action {
         type          = lifecycle_rule.value.action.type
