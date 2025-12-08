@@ -23,7 +23,7 @@ class WidgetRecord {
   Map<String, dynamic> toJson() => {
         'id': id,
         'type': type.name,
-        'at': at.toIso8601String(),
+        'at': at.toUtc().toIso8601String(),
         if (amount != null) 'amount': amount,
         if (excretionVolume != null) 'excretionVolume': excretionVolume!.name,
       };
