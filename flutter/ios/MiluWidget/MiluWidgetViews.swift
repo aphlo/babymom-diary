@@ -46,17 +46,18 @@ struct SmallWidgetView: View {
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text(record.displayName)
-                            .font(.footnote)
-                            .fontWeight(.medium)
-                            .foregroundColor(WidgetColors.textPrimary(for: colorScheme))
+                            .font(.caption2)
+                            .fontWeight(.regular)
+                            .foregroundColor(WidgetColors.textSecondary(for: colorScheme))
 
-                        HStack(spacing: 4) {
+                        VStack(alignment: .leading, spacing: 1) {
                             Text(record.time)
-                                .font(.caption2)
+                                .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundColor(WidgetColors.textTime(for: colorScheme))
                             Text(record.elapsed)
-                                .font(.caption2)
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
                                 .foregroundColor(WidgetColors.textAgo(for: colorScheme))
                         }
                     }

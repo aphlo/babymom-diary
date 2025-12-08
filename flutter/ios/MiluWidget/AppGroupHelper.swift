@@ -27,7 +27,6 @@ struct AppGroupHelper {
         do {
             return try JSONDecoder().decode(WidgetData.self, from: data)
         } catch {
-            print("Failed to decode widget data: \(error)")
             return nil
         }
     }

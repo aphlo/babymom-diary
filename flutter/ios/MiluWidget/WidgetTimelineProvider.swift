@@ -224,7 +224,12 @@ struct Provider: TimelineProvider {
             return "\(minutes)分前"
         } else if interval < 86400 {
             let hours = Int(interval / 3600)
-            return "\(hours)時間前"
+            let minutes = Int((interval.truncatingRemainder(dividingBy: 3600)) / 60)
+            if minutes > 0 {
+                return "\(hours)時間\(minutes)分前"
+            } else {
+                return "\(hours)時間前"
+            }
         } else {
             let days = Int(interval / 86400)
             return "\(days)日前"
