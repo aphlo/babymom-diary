@@ -95,16 +95,6 @@ class RecordTitle extends StatelessWidget {
     }
 
     return ListTile(
-      leading: Icon(switch (record.type) {
-        RecordType.formula => Icons.local_drink,
-        RecordType.pump => Icons.local_drink_outlined,
-        RecordType.breastRight => Icons.child_care,
-        RecordType.breastLeft => Icons.child_care,
-        RecordType.pee => Icons.water_drop,
-        RecordType.poop => Icons.delete_outline,
-        RecordType.temperature => Icons.thermostat,
-        RecordType.other => Icons.more_horiz,
-      }),
       title: titleWidget,
       subtitle: subtitleWidgets.isEmpty
           ? null
