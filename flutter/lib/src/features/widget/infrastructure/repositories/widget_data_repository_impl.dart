@@ -113,7 +113,6 @@ class WidgetDataRepositoryImpl implements WidgetDataRepository {
     try {
       if (Platform.isIOS) {
         await HomeWidget.updateWidget(
-          name: _iOSWidgetName,
           iOSName: _iOSWidgetName,
         );
       } else if (Platform.isAndroid) {

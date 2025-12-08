@@ -44,7 +44,6 @@ struct AppGroupHelper {
         do {
             return try JSONDecoder().decode(WidgetSettings.self, from: data)
         } catch {
-            print("Failed to decode widget settings: \(error)")
             return .default
         }
     }

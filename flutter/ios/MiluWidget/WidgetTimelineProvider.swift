@@ -195,6 +195,7 @@ struct Provider: TimelineProvider {
     private func formatTimeFromDate(_ date: Date) -> String {
         let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "HH:mm"
+        timeFormatter.timeZone = TimeZone.current
         return timeFormatter.string(from: date)
     }
 
