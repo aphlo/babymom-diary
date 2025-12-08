@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -108,16 +109,22 @@ class WidgetDataRepositoryImpl implements WidgetDataRepository {
 
   @override
   Future<void> notifyWidgetUpdate() async {
-    // iOS（MiluWidget）とAndroid（Medium/Small両方）に更新通知を送信
+    // プラットフォームごとにウィジェット更新通知を送信
     try {
-      await HomeWidget.updateWidget(
-        iOSName: _iOSWidgetName,
-        qualifiedAndroidName: _androidWidgetName,
-      );
-
-      await HomeWidget.updateWidget(
-        qualifiedAndroidName: _androidSmallWidgetName,
-      );
+      if (Platform.isIOS) {
+        await HomeWidget.updateWidget(
+          iOSName: _iOSWidgetName,
+        );
+      } else if (Platform.isAndroid) {
+        // Medium widget
+        await HomeWidget.updateWidget(
+          qualifiedAndroidName: _androidWidgetName,
+        );
+        // Small widget
+        await HomeWidget.updateWidget(
+          qualifiedAndroidName: _androidSmallWidgetName,
+        );
+      }
     } catch (e) {
       // ウィジェット更新エラーは無視（ウィジェットが配置されていない場合など）
     }

@@ -52,7 +52,7 @@ class WidgetData {
   }
 
   Map<String, dynamic> toJson() => {
-        'lastUpdated': lastUpdated.toIso8601String(),
+        'lastUpdated': lastUpdated.toUtc().toIso8601String(),
         if (selectedChildId != null) 'selectedChildId': selectedChildId,
         'children': children.map((c) => c.toJson()).toList(),
         'recentRecords': recentRecords.map(
