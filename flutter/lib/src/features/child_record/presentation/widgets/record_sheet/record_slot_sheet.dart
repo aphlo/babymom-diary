@@ -88,7 +88,10 @@ void showRecordSlotSheet({
               children: [
                 Row(
                   children: [
-                    Icon(_iconFor(request.type)),
+                    Text(
+                      _emojiFor(request.type),
+                      style: const TextStyle(fontSize: 24),
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       (request.type == RecordType.breastLeft ||
@@ -160,12 +163,12 @@ void showRecordSlotSheet({
   );
 }
 
-IconData _iconFor(RecordType t) => switch (t) {
-      RecordType.formula => Icons.local_drink,
-      RecordType.pump => Icons.local_drink_outlined,
-      RecordType.breastRight || RecordType.breastLeft => Icons.child_care,
-      RecordType.pee => Icons.water_drop,
-      RecordType.poop => Icons.delete_outline,
-      RecordType.temperature => Icons.thermostat,
-      RecordType.other => Icons.more_horiz,
+String _emojiFor(RecordType t) => switch (t) {
+      RecordType.formula => '🍼',
+      RecordType.pump => '🥛',
+      RecordType.breastRight || RecordType.breastLeft => '🤱',
+      RecordType.pee => '💧',
+      RecordType.poop => '💩',
+      RecordType.temperature => '🌡️',
+      RecordType.other => '📝',
     };

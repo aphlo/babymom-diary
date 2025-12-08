@@ -35,7 +35,7 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
         run: |
-          echo "storeFile=./upload.jks" > flutter/android/key.properties
+          echo "storeFile=app/upload.jks" > flutter/android/key.properties
           echo "storePassword=$ANDROID_STORE_PASSWORD" >> flutter/android/key.properties
           echo "keyPassword=$ANDROID_KEY_PASSWORD" >> flutter/android/key.properties
           echo "keyAlias=$ANDROID_KEY_ALIAS" >> flutter/android/key.properties
@@ -86,10 +86,6 @@ jobs:
         run: flutter build appbundle --release --flavor prod --dart-define=FLAVOR=prod
         working-directory: flutter
 
-      - name: Get Package name
-        run: |
-          echo "PACKAGE_NAME=$(sed -nE 's/.*package="(.*)".*/\1/p' flutter/android/app/src/main/AndroidManifest.xml)" >> $GITHUB_ENV
-
       - name: Create google service account file
         env:
           GOOGLE_SERVICE_ACCOUNT_KEY_JSON_BASE64: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY_JSON_BASE64 }}
@@ -102,7 +98,7 @@ jobs:
         with:
           releaseFiles: flutter/build/app/outputs/bundle/prodRelease/app-prod-release.aab
           serviceAccountJson: flutter/android/service-account.json
-          packageName: ${{ env.PACKAGE_NAME }}
+          packageName: com.aphlo.babymomdiary
           releaseName: ${{ env.RELEASE_NAME }}
           track: production
           status: completed

@@ -10,6 +10,6 @@
     android:initialLayout="@layout/milu_widget_medium"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
-    android:previewLayout="@layout/milu_widget_medium"
+    android:previewLayout="@layout/milu_widget_medium_preview"
     android:description="@string/widget_medium_description">
 </appwidget-provider>

@@ -36,7 +36,7 @@
             android:id="@+id/child_age"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="1歳2ヶ月"
+            android:text="3ヶ月15日目"
             android:textSize="10sp"
             android:textColor="@color/widget_text_secondary" />
 
@@ -82,7 +82,7 @@
             android:id="@+id/record_ago"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="30分前"
+            android:text="1時間45分前"
             android:textSize="12sp"
             android:textStyle="bold"
             android:textColor="@color/widget_text_ago" />
