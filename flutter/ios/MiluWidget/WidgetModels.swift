@@ -90,9 +90,9 @@ struct DisplayRecord {
         case "formula":
             return "ミルク"
         case "pee":
-            return "おしっこ"
+            return "尿"
         case "poop":
-            return "うんち"
+            return "便"
         case "temperature":
             return "体温"
         case "pump":
