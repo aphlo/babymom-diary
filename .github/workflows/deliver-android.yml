@@ -35,7 +35,7 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
         run: |
-          echo "storeFile=./upload.jks" > flutter/android/key.properties
+          echo "storeFile=app/upload.jks" > flutter/android/key.properties
           echo "storePassword=$ANDROID_STORE_PASSWORD" >> flutter/android/key.properties
           echo "keyPassword=$ANDROID_KEY_PASSWORD" >> flutter/android/key.properties
           echo "keyAlias=$ANDROID_KEY_ALIAS" >> flutter/android/key.properties
