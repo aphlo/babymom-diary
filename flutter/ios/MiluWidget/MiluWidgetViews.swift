@@ -3,9 +3,27 @@ import WidgetKit
 
 struct MiluWidgetEntryView: View {
     @Environment(\.widgetFamily) var family
+    @Environment(\.colorScheme) var colorScheme
     var entry: Provider.Entry
 
     var body: some View {
+        if #available(iOS 17.0, *) {
+            content
+                .containerBackground(for: .widget) {
+                        WidgetColors.background(for: colorScheme)
+                }
+        } else {
+            content
+                .background(
+                    Group {
+                            WidgetColors.background(for: colorScheme)
+                    }
+                )
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
         switch family {
         case .systemSmall:
             SmallWidgetView(entry: entry)
@@ -40,27 +58,30 @@ struct SmallWidgetView: View {
 
             // Latest record
             if let record = entry.records.first {
-                HStack(spacing: 6) {
-                    Text(record.emoji)
-                        .font(.title3)
-
-                    VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 4) {
+                    // 1行目: 絵文字 + 種別
+                    HStack(spacing: 6) {
+                        Text(record.emoji)
+                            .font(.title3)
                         Text(record.displayName)
                             .font(.caption2)
                             .fontWeight(.regular)
                             .foregroundColor(WidgetColors.textSecondary(for: colorScheme))
-
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(record.time)
-                                .font(.title3)
-                                .fontWeight(.bold)
-                                .foregroundColor(WidgetColors.textTime(for: colorScheme))
-                            Text(record.elapsed)
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(WidgetColors.textAgo(for: colorScheme))
-                        }
                     }
+
+                    // 2行目: 記録時間
+                    Text(record.time)
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(WidgetColors.textTime(for: colorScheme))
+
+                    // 3行目: 経過時間
+                    Text(record.elapsed)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(WidgetColors.textAgo(for: colorScheme))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                 }
             } else {
                 Text("記録がありません")
@@ -112,12 +133,9 @@ struct MediumWidgetView: View {
                             .font(.title3)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 5)
-                            .background(WidgetColors.cardBackground(for: colorScheme))
-                            .cornerRadius(8)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(WidgetColors.cardBorder(for: colorScheme), lineWidth: 1)
-                            )
+                            .background(GlossyCardBackground(cornerRadius: 8, colorScheme: colorScheme))
+                            .shadow(color: Color.black.opacity(colorScheme == .dark ? 0.4 : 0.15), radius: 5, x: 0, y: 3)
+                            .overlay(GlossyCardOverlay(cornerRadius: 8, colorScheme: colorScheme))
                     }
                 }
             }
@@ -186,14 +204,56 @@ struct RecordCardView: View {
                 .font(.caption2)
                 .fontWeight(.semibold)
                 .foregroundColor(WidgetColors.textAgo(for: colorScheme))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 5)
-        .background(WidgetColors.cardBackground(for: colorScheme))
-        .cornerRadius(10)
-        .overlay(
-            RoundedRectangle(cornerRadius: 10)
+        .background(GlossyCardBackground(cornerRadius: 10, colorScheme: colorScheme))
+        .shadow(color: Color.black.opacity(colorScheme == .dark ? 0.4 : 0.15), radius: 5, x: 0, y: 3)
+        .overlay(GlossyCardOverlay(cornerRadius: 10, colorScheme: colorScheme))
+    }
+}
+
+struct GlossyCardBackground: View {
+    let cornerRadius: CGFloat
+    let colorScheme: ColorScheme
+
+    var body: some View {
+        if colorScheme == .dark {
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [Color(white: 0.26), Color(white: 0.16)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+        } else {
+            WidgetColors.cardBackground(for: colorScheme)
+                .cornerRadius(cornerRadius)
+        }
+    }
+}
+
+struct GlossyCardOverlay: View {
+    let cornerRadius: CGFloat
+    let colorScheme: ColorScheme
+
+    var body: some View {
+        if colorScheme == .dark {
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .strokeBorder(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.15), Color.white.opacity(0.02)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 0.5
+                )
+        } else {
+            RoundedRectangle(cornerRadius: cornerRadius)
                 .stroke(WidgetColors.cardBorder(for: colorScheme), lineWidth: 1)
-        )
+        }
     }
 }

@@ -56,6 +56,8 @@ struct DisplayRecord {
     let type: String
     let time: String
     let elapsed: String
+    let elapsedLine1: String
+    let elapsedLine2: String
     let isPlaceholder: Bool
 
     var emoji: String {

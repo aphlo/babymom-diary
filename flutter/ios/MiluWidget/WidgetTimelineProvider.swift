@@ -60,10 +60,13 @@ struct Provider: TimelineProvider {
         let recordTypes = normalizedDisplayTypes(from: mediumSettings.displayRecordTypes)
         let displayRecords = recordTypes.map { type in
             if let record = findLatestRecord(for: type, in: validRecords) {
+                let elapsedTwoLines = calculateElapsedTwoLinesFromIso(record.at)
                 return DisplayRecord(
                     type: record.type,
                     time: formatTime(record.at),
                     elapsed: calculateElapsed(from: record.at),
+                    elapsedLine1: elapsedTwoLines.line1,
+                    elapsedLine2: elapsedTwoLines.line2,
                     isPlaceholder: false
                 )
             } else {
@@ -71,6 +74,8 @@ struct Provider: TimelineProvider {
                     type: type,
                     time: "--:--",
                     elapsed: "",
+                    elapsedLine1: "",
+                    elapsedLine2: "",
                     isPlaceholder: true
                 )
             }
@@ -235,5 +240,43 @@ struct Provider: TimelineProvider {
             let days = Int(interval / 86400)
             return "\(days)日前"
         }
+    }
+
+    private func calculateElapsedTwoLines(_ date: Date) -> (line1: String, line2: String) {
+        let now = Date()
+        let interval = now.timeIntervalSince(date)
+
+        if interval < 60 {
+            return ("たった今", "")
+        } else if interval < 3600 {
+            let minutes = Int(interval / 60)
+            return ("\(minutes)分前", "")
+        } else if interval < 86400 {
+            let hours = Int(interval / 3600)
+            let minutes = Int((interval.truncatingRemainder(dividingBy: 3600)) / 60)
+            if minutes > 0 {
+                return ("\(hours)時間", "\(minutes)分前")
+            } else {
+                return ("\(hours)時間前", "")
+            }
+        } else {
+            let days = Int(interval / 86400)
+            return ("\(days)日前", "")
+        }
+    }
+
+    private func calculateElapsedTwoLinesFromIso(_ isoString: String) -> (line1: String, line2: String) {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+
+        guard let date = formatter.date(from: isoString) else {
+            formatter.formatOptions = [.withInternetDateTime]
+            guard let date = formatter.date(from: isoString) else {
+                return ("", "")
+            }
+            return calculateElapsedTwoLines(date)
+        }
+
+        return calculateElapsedTwoLines(date)
     }
 }
