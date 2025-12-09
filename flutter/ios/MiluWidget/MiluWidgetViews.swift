@@ -230,8 +230,14 @@ struct GlossyCardBackground: View {
                     )
                 )
         } else {
-            WidgetColors.cardBackground(for: colorScheme)
-                .cornerRadius(cornerRadius)
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [Color(white: 1.0), Color(white: 0.97)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
         }
     }
 }
@@ -252,8 +258,18 @@ struct GlossyCardOverlay: View {
                     lineWidth: 0.5
                 )
         } else {
-            RoundedRectangle(cornerRadius: cornerRadius)
-                .stroke(WidgetColors.cardBorder(for: colorScheme), lineWidth: 1)
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .strokeBorder(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.91, green: 0.44, blue: 0.53).opacity(0.2),
+                            Color(red: 0.91, green: 0.44, blue: 0.53).opacity(0.05)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 0.5
+                )
         }
     }
 }

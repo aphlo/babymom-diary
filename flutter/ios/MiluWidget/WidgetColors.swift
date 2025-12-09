@@ -4,14 +4,14 @@ import SwiftUI
 
 struct WidgetColors {
     // Light mode colors
-    static let lightBackground = Color(red: 0.961, green: 0.961, blue: 0.961) // #F5F5F5
+    static let lightBackground = Color(red: 0.98, green: 0.98, blue: 0.98) // #FAFAFA
     static let lightCardBackground = Color(red: 1.0, green: 1.0, blue: 1.0) // #FFFFFF
     static let lightCardBorder = Color(red: 0.91, green: 0.44, blue: 0.53) // #E87086
     static let lightHeaderBackground = Color(red: 1.0, green: 0.941, blue: 0.949) // #FFF0F2
-    static let lightTextPrimary = Color(red: 0.129, green: 0.129, blue: 0.129) // #212121
-    static let lightTextSecondary = Color(red: 0.459, green: 0.459, blue: 0.459) // #757575
+    static let lightTextPrimary = Color(red: 0.1, green: 0.1, blue: 0.1) // #1A1A1A
+    static let lightTextSecondary = Color(red: 0.5, green: 0.5, blue: 0.5) // #808080
     static let lightTextTime = Color(red: 0.91, green: 0.44, blue: 0.53) // #E87086
-    static let lightTextAgo = Color(red: 0.259, green: 0.259, blue: 0.259) // #424242
+    static let lightTextAgo = Color(red: 0.3, green: 0.3, blue: 0.3) // #4D4D4D
 
     // Dark mode colors
     static let darkBackground = Color(red: 0.11, green: 0.11, blue: 0.118) // #1C1C1E
