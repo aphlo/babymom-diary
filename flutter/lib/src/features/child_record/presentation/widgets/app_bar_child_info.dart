@@ -11,7 +11,14 @@ import '../../../menu/children/domain/entities/child_summary.dart';
 import '../viewmodels/record_view_model.dart';
 
 class AppBarChildInfo extends ConsumerWidget {
-  const AppBarChildInfo({super.key});
+  /// 年齢計算の基準日。
+  ///
+  /// 画面ごとに異なる基準日で年齢を表示するために使用:
+  /// - null（デフォルト）: ベビーの記録画面で使用。選択された日付（selectedDate）を基準に年齢を表示
+  /// - DateTime.now(): 予防接種画面で使用。常に現在日付を基準に年齢を表示
+  final DateTime? referenceDate;
+
+  const AppBarChildInfo({super.key, this.referenceDate});
 
   String _ageString(DateTime birthday, DateTime on) {
     if (on.isBefore(birthday)) return '--';
@@ -35,7 +42,8 @@ class AppBarChildInfo extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncHid = ref.watch(currentHouseholdIdProvider);
     final selectedId = ref.watch(selectedChildControllerProvider).value;
-    final selectedDate = ref.watch(recordViewModelProvider).selectedDate;
+    final selectedDate =
+        referenceDate ?? ref.watch(recordViewModelProvider).selectedDate;
 
     return asyncHid.when(
       loading: () => const SizedBox.shrink(),

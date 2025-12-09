@@ -42,7 +42,8 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const AppBarChildInfo(),
+        // 予防接種画面では常に現在の年齢を表示（日付選択の影響を受けない）
+        title: AppBarChildInfo(referenceDate: DateTime.now()),
         actions: [
           IconButton(
             icon: Icon(
