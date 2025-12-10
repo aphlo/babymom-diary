@@ -8,14 +8,18 @@
     <color name="primary_dark">#C4566A</color>
 
     <!-- Widget colors (Light mode) -->
-    <color name="widget_background">#FFFFFF</color>
-    <color name="widget_card_background">#FFFBFC</color>
-    <color name="widget_card_border">#E87086</color>
-    <color name="widget_header_background">#FFF0F2</color>
-    <color name="widget_text_primary">#212121</color>
-    <color name="widget_text_secondary">#757575</color>
+    <color name="widget_background">#F0F0F0</color>
+    <color name="widget_card_background_start">#FFFFFF</color>
+    <color name="widget_card_background_end">#F7F7F7</color>
+    <color name="widget_card_border_start">#33E87086</color> <!-- #E87086 with 20% opacity -->
+    <color name="widget_card_border_end">#0DE87086</color> <!-- #E87086 with 5% opacity -->
+    <color name="widget_header_background">#00000000</color> <!-- Transparent -->
+    <color name="widget_text_primary">#1A1A1A</color>
+    <color name="widget_text_secondary">#808080</color>
     <color name="widget_text_time">#E87086</color>
-    <color name="widget_text_ago">#424242</color>
-    <color name="widget_divider">#F5D0D6</color>
-    <color name="widget_action_background">#FFF5F6</color>
+    <color name="widget_text_ago">#4D4D4D</color>
+    <color name="widget_action_background_start">#FFFFFF</color>
+    <color name="widget_action_background_end">#F7F7F7</color>
+    <color name="widget_action_border_start">#33E87086</color>
+    <color name="widget_action_border_end">#0DE87086</color>
 </resources>
