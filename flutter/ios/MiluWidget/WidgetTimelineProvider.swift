@@ -236,4 +236,5 @@ struct Provider: TimelineProvider {
             return "\(days)日前"
         }
     }
+
 }

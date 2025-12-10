@@ -13,12 +13,11 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:background="@drawable/widget_header_background"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
-        android:layout_marginBottom="6dp">
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingTop="0dp"
+        android:paddingBottom="2dp"
+        android:layout_marginBottom="0dp">
 
         <TextView
             android:id="@+id/child_name"
@@ -26,7 +25,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="みる"
-            android:textSize="13sp"
+            android:textSize="15sp"
             android:textStyle="bold"
             android:textColor="@color/widget_text_primary"
             android:maxLines="1"
@@ -37,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="1歳2ヶ月"
-            android:textSize="10sp"
+            android:textSize="12sp"
             android:textColor="@color/widget_text_secondary" />
 
     </LinearLayout>
@@ -48,42 +47,52 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:gravity="center"
-        android:background="@drawable/widget_card_background"
-        android:padding="8dp">
+        android:gravity="bottom|start"
+        android:padding="0dp">
 
-        <TextView
-            android:id="@+id/record_emoji"
+        <!-- Record info (emoji + label) -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🤱"
-            android:textSize="28sp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/record_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="授乳(右)"
-            android:textSize="11sp"
-            android:textColor="@color/widget_text_secondary"
-            android:layout_marginTop="2dp" />
+            <TextView
+                android:id="@+id/record_emoji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🤱"
+                android:textSize="20sp" />
 
+            <TextView
+                android:id="@+id/record_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="授乳(右)"
+                android:textSize="12sp"
+                android:textColor="@color/widget_text_secondary"
+                android:layout_marginLeft="6dp" />
+
+        </LinearLayout>
+
+        <!-- Record time -->
         <TextView
             android:id="@+id/record_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="14:30"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/widget_text_time"
-            android:layout_marginTop="2dp" />
+            android:layout_marginTop="4dp" />
 
+        <!-- Elapsed time -->
         <TextView
             android:id="@+id/record_ago"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="30分前"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="@color/widget_text_ago" />
 
