@@ -4,13 +4,14 @@
 # This script is used as a Build Phase in Xcode
 
 # Determine which plist to use based on configuration
+# Default to PROD unless the configuration explicitly contains "-stg".
 PLIST_SRC=""
-if [[ "${CONFIGURATION}" == *"-prod"* ]] || [[ "${CONFIGURATION}" == "Release" ]]; then
-    PLIST_SRC="${PROJECT_DIR}/Runner/GoogleService-Info-prod.plist"
-    echo "Using PROD GoogleService-Info.plist"
-else
+if [[ "${CONFIGURATION}" == *"-stg"* ]]; then
     PLIST_SRC="${PROJECT_DIR}/Runner/GoogleService-Info-stg.plist"
     echo "Using STG GoogleService-Info.plist"
+else
+    PLIST_SRC="${PROJECT_DIR}/Runner/GoogleService-Info-prod.plist"
+    echo "Using PROD GoogleService-Info.plist"
 fi
 
 PLIST_DEST="${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist"

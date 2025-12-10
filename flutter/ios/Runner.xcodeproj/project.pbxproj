@@ -14,7 +14,6 @@
 		1D970D572EE1580500B75967 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D970D1F2EE153A300B75967 /* SwiftUI.framework */; };
 		1D970D642EE1580600B75967 /* MiluWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1D970D552EE1580500B75967 /* MiluWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
-		348B6EE2BF088674D8570C95 /* GoogleService-Info-stg.plist in Resources */ = {isa = PBXBuildFile; fileRef = B2153834DEDD862F142D0076 /* GoogleService-Info-stg.plist */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
@@ -100,7 +99,6 @@
 		9C4CA03A82643FC620331B7C /* Pods-Runner.debug-prod.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug-prod.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug-prod.xcconfig"; sourceTree = "<group>"; };
 		A31E0AB44340A2F1B09CE3E6 /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		A8246483F60927916B304C9B /* Pods-RunnerTests.debug-prod.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug-prod.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug-prod.xcconfig"; sourceTree = "<group>"; };
-		B2153834DEDD862F142D0076 /* GoogleService-Info-stg.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = "GoogleService-Info-stg.plist"; path = "Runner/GoogleService-Info-stg.plist"; sourceTree = "<group>"; };
 		B3AB47A54A2E8EFF8BB5CE9E /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		B93EA8F5D7ADAA2CF8D98AFD /* Pods-Runner.profile-local.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile-local.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile-local.xcconfig"; sourceTree = "<group>"; };
 		BCB6513722BDA27EBF35E2DA /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
@@ -218,7 +216,6 @@
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				EE133A68C3FA42A7E1362A87 /* Pods */,
 				9618045B443780AF94688FB2 /* Frameworks */,
-				B2153834DEDD862F142D0076 /* GoogleService-Info-stg.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -414,7 +411,6 @@
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
-				348B6EE2BF088674D8570C95 /* GoogleService-Info-stg.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -453,7 +449,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Configuration名に基づいて適切なplistをコピー\nPLIST_SRC=\"\"\nif [[ \"${CONFIGURATION}\" == *\"-prod\"* ]] || [[ \"${CONFIGURATION}\" == \"Release\" ]]; then\n    PLIST_SRC=\"${PROJECT_DIR}/Runner/GoogleService-Info-prod.plist\"\n    echo \"Using PROD GoogleService-Info.plist\"\nelse\n    PLIST_SRC=\"${PROJECT_DIR}/Runner/GoogleService-Info-stg.plist\"\n    echo \"Using STG GoogleService-Info.plist\"\nfi\n\nPLIST_DEST=\"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\"\n\nif [ -f \"$PLIST_SRC\" ]; then\n    cp \"$PLIST_SRC\" \"$PLIST_DEST\"\n    echo \"Copied: $PLIST_SRC -> $PLIST_DEST\"\nelse\n    echo \"Error: $PLIST_SRC not found\"\n    exit 1\nfi\n";
+			shellScript = "# Configuration名に基づいて適切なplistをコピー\\nPLIST_SRC=\\\"\\\"\\nif [[ \\\"${CONFIGURATION}\\\" == *\\\"-stg\\\"* ]]; then\\n    PLIST_SRC=\\\"${PROJECT_DIR}/Runner/GoogleService-Info-stg.plist\\\"\\n    echo \\\"Using STG GoogleService-Info.plist\\\"\\nelse\\n    PLIST_SRC=\\\"${PROJECT_DIR}/Runner/GoogleService-Info-prod.plist\\\"\\n    echo \\\"Using PROD GoogleService-Info.plist\\\"\\nfi\\n\\nPLIST_DEST=\\\"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\\\"\\n\\nif [ -f \\\"$PLIST_SRC\\\" ]; then\\n    cp \\\"$PLIST_SRC\\\" \\\"$PLIST_DEST\\\"\\n    echo \\\"Copied: $PLIST_SRC -> $PLIST_DEST\\\"\\nelse\\n    echo \\\"Error: $PLIST_SRC not found\\\"\\n    exit 1\\nfi\\n";
 		};
 		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
 			isa = PBXShellScriptBuildPhase;
