@@ -47,6 +47,8 @@ struct SmallWidgetView: View {
                     .font(.headline)
                     .fontWeight(.bold)
                     .foregroundColor(WidgetColors.textPrimary(for: colorScheme))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 Spacer()
             }
 
@@ -76,12 +78,15 @@ struct SmallWidgetView: View {
                         .foregroundColor(WidgetColors.textTime(for: colorScheme))
 
                     // 3行目: 経過時間
-                    Text(record.elapsed)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(WidgetColors.textAgo(for: colorScheme))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+                    HStack {
+                        Text(record.elapsed)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(WidgetColors.textAgo(for: colorScheme))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                        Spacer()
+                    }
                 }
             } else {
                 Text("記録がありません")
@@ -89,7 +94,9 @@ struct SmallWidgetView: View {
                     .foregroundColor(WidgetColors.textSecondary(for: colorScheme))
             }
         }
-        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
     }
 }
 
