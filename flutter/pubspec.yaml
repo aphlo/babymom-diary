@@ -74,9 +74,9 @@ flutter_icons:
   ios: true   
 
 flutter_native_splash:
-  image: "assets/launcher_icon/milu_adaptive_foreground.png"
+  image: "assets/launcher_icon/milu_android_transparent_icon.png"
   color: "#BD506A"
   android_12:
-    image: "assets/launcher_icon/milu_adaptive_foreground.png"
+    image: "assets/launcher_icon/milu_android_transparent_icon.png"
     color: "#BD506A"
     icon_background_color: "#BD506A"
