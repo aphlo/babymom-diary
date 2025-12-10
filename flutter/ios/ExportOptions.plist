@@ -7,16 +7,9 @@
 	<key>manageAppVersionAndBuildNumber</key>
 	<true/>
 	<key>method</key>
-	<string>app-store-connect</string>
-	<key>provisioningProfiles</key>
-	<dict>
-		<key>com.aphlo.babymomdiary</key>
-		<string>milu-provisioning-profile</string>
-	</dict>
-	<key>signingCertificate</key>
-	<string>Apple Distribution</string>
+	<string>app-store</string>
 	<key>signingStyle</key>
-	<string>manual</string>
+	<string>automatic</string>
 	<key>stripSwiftSymbols</key>
 	<true/>
 	<key>teamID</key>
