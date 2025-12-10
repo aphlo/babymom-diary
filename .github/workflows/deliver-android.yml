@@ -100,5 +100,5 @@ jobs:
           serviceAccountJson: flutter/android/service-account.json
           packageName: com.aphlo.babymomdiary
           releaseName: ${{ env.RELEASE_NAME }}
-          track: production
+          track: alpha
           status: completed
