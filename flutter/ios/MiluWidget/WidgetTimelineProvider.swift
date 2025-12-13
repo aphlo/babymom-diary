@@ -8,6 +8,7 @@ struct Provider: TimelineProvider {
             childName: "---",
             childAge: "---",
             records: [],
+            latestRecord: nil,
             settings: .default
         )
     }
@@ -34,13 +35,14 @@ struct Provider: TimelineProvider {
               let children = widgetData.children,
               !children.isEmpty else {
             return WidgetEntry(
-                date: Date(),
-                childName: "データなし",
-                childAge: "アプリを開いてください",
-                records: [],
-                settings: settings
-            )
-        }
+            date: Date(),
+            childName: "データなし",
+            childAge: "アプリを開いてください",
+            records: [],
+            latestRecord: nil,
+            settings: settings
+        )
+    }
 
         // 選択中の子供を取得
         let selectedChild: WidgetChild
@@ -64,23 +66,28 @@ struct Provider: TimelineProvider {
                     type: record.type,
                     time: formatTime(record.at),
                     elapsed: calculateElapsed(from: record.at),
-                    isPlaceholder: false
+                    isPlaceholder: false,
+                    isLatest: false
                 )
             } else {
                 return DisplayRecord(
                     type: type,
                     time: "--:--",
                     elapsed: "",
-                    isPlaceholder: true
+                    isPlaceholder: true,
+                    isLatest: false
                 )
             }
         }
+
+        let latestRecord = createLatestRecord(from: validRecords)
 
         return WidgetEntry(
             date: Date(),
             childName: selectedChild.name,
             childAge: age,
             records: Array(displayRecords.prefix(3)),
+            latestRecord: latestRecord,
             settings: settings
         )
     }
@@ -122,6 +129,23 @@ struct Provider: TimelineProvider {
         }
         formatter.formatOptions = [.withInternetDateTime]
         return formatter.date(from: isoString)
+    }
+
+    private func createLatestRecord(from records: [WidgetRecord]) -> DisplayRecord? {
+        guard let latest = records.max(by: { lhs, rhs in
+            guard let lhsDate = parseIsoDate(lhs.at), let rhsDate = parseIsoDate(rhs.at) else { return false }
+            return lhsDate < rhsDate
+        }), let latestDate = parseIsoDate(latest.at) else {
+            return nil
+        }
+
+        return DisplayRecord(
+            type: latest.type,
+            time: formatTimeFromDate(latestDate),
+            elapsed: calculateElapsedFromDate(latestDate),
+            isPlaceholder: false,
+            isLatest: true
+        )
     }
 
     private func filterValidRecords(_ records: [WidgetRecord]) -> [WidgetRecord] {
@@ -219,21 +243,21 @@ struct Provider: TimelineProvider {
         let interval = now.timeIntervalSince(date)
 
         if interval < 60 {
-            return "たった今"
+            return "<1m"
         } else if interval < 3600 {
             let minutes = Int(interval / 60)
-            return "\(minutes)分前"
+            return "\(minutes)m"
         } else if interval < 86400 {
             let hours = Int(interval / 3600)
             let minutes = Int((interval.truncatingRemainder(dividingBy: 3600)) / 60)
             if minutes > 0 {
-                return "\(hours)時間\(minutes)分前"
+                return "\(hours)h\(minutes)m"
             } else {
-                return "\(hours)時間前"
+                return "\(hours)h"
             }
         } else {
             let days = Int(interval / 86400)
-            return "\(days)日前"
+            return "\(days)d"
         }
     }
 

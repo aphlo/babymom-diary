@@ -57,6 +57,7 @@ struct DisplayRecord {
     let time: String
     let elapsed: String
     let isPlaceholder: Bool
+    let isLatest: Bool
 
     var emoji: String {
         switch type {
@@ -110,5 +111,6 @@ struct WidgetEntry: TimelineEntry {
     let childName: String
     let childAge: String
     let records: [DisplayRecord]
+    let latestRecord: DisplayRecord?
     let settings: WidgetSettings
 }
