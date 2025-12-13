@@ -12,12 +12,21 @@ struct MiluWidget: Widget {
     let kind: String = "MiluWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: Provider()) { entry in
-            MiluWidgetEntryView(entry: entry)
+        if #available(iOS 16.0, *) {
+            return StaticConfiguration(kind: kind, provider: Provider()) { entry in
+                MiluWidgetEntryView(entry: entry)
+            }
+            .configurationDisplayName("milu")
+            .description("育児記録をすばやく確認")
+            .supportedFamilies([.systemSmall, .systemMedium, .accessoryCircular])
+        } else {
+            return StaticConfiguration(kind: kind, provider: Provider()) { entry in
+                MiluWidgetEntryView(entry: entry)
+            }
+            .configurationDisplayName("milu")
+            .description("育児記録をすばやく確認")
+            .supportedFamilies([.systemSmall, .systemMedium])
         }
-        .configurationDisplayName("milu")
-        .description("育児記録をすばやく確認")
-        .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
 
@@ -31,8 +40,9 @@ struct MiluWidget: Widget {
         childName: "たろう",
         childAge: "1歳2ヶ月",
         records: [
-            DisplayRecord(type: "formula", time: "14:30", elapsed: "30分前", isPlaceholder: false)
+            DisplayRecord(type: "formula", time: "14:30", elapsed: "30分前", isPlaceholder: false, isLatest: true)
         ],
+        latestRecord: DisplayRecord(type: "formula", time: "14:30", elapsed: "30分前", isPlaceholder: false, isLatest: true),
         settings: .default
     )
 }
@@ -45,10 +55,11 @@ struct MiluWidget: Widget {
         childName: "たろう",
         childAge: "1歳2ヶ月",
         records: [
-            DisplayRecord(type: "breastRight", time: "12:00", elapsed: "2時間前", isPlaceholder: false),
-            DisplayRecord(type: "formula", time: "14:30", elapsed: "30分前", isPlaceholder: false),
-            DisplayRecord(type: "pee", time: "13:45", elapsed: "1時間前", isPlaceholder: false)
+            DisplayRecord(type: "breastRight", time: "12:00", elapsed: "2時間前", isPlaceholder: false, isLatest: false),
+            DisplayRecord(type: "formula", time: "14:30", elapsed: "30分前", isPlaceholder: false, isLatest: true),
+            DisplayRecord(type: "pee", time: "13:45", elapsed: "1時間前", isPlaceholder: false, isLatest: false)
         ],
+        latestRecord: DisplayRecord(type: "formula", time: "14:30", elapsed: "30分前", isPlaceholder: false, isLatest: true),
         settings: .default
     )
 }

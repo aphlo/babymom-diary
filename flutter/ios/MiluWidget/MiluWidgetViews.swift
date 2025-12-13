@@ -24,13 +24,26 @@ struct MiluWidgetEntryView: View {
 
     @ViewBuilder
     private var content: some View {
-        switch family {
-        case .systemSmall:
-            SmallWidgetView(entry: entry)
-        case .systemMedium:
-            MediumWidgetView(entry: entry)
-        default:
-            SmallWidgetView(entry: entry)
+        if #available(iOS 16.0, *) {
+            switch family {
+            case .systemSmall:
+                SmallWidgetView(entry: entry)
+            case .systemMedium:
+                MediumWidgetView(entry: entry)
+            case .accessoryCircular:
+                LockCircularWidgetView(entry: entry)
+            default:
+                SmallWidgetView(entry: entry)
+            }
+        } else {
+            switch family {
+            case .systemSmall:
+                SmallWidgetView(entry: entry)
+            case .systemMedium:
+                MediumWidgetView(entry: entry)
+            default:
+                SmallWidgetView(entry: entry)
+            }
         }
     }
 }
@@ -177,6 +190,42 @@ struct MediumWidgetView: View {
             return "🌡️"
         default:
             return "📝"
+        }
+    }
+}
+
+@available(iOS 16.0, *)
+struct LockCircularWidgetView: View {
+    @Environment(\.colorScheme) var colorScheme
+    var entry: WidgetEntry
+
+    var body: some View {
+        let record = entry.latestRecord ?? entry.records.first
+        ZStack {
+            if #available(iOS 17.0, *) {
+                AccessoryWidgetBackground()
+            }
+            VStack(spacing: 2) {
+                Text(record?.emoji ?? "🍼")
+                    .font(.body)
+                    .foregroundColor(WidgetColors.textPrimary(for: colorScheme))
+
+                Text(record?.time ?? "--:--")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(WidgetColors.textTime(for: colorScheme))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+
+                let elapsed = (record?.elapsed ?? "").isEmpty ? "--" : (record?.elapsed ?? "--")
+                Text(elapsed)
+                    .font(.caption2)
+                    .fontWeight(.medium)
+                    .foregroundColor(WidgetColors.textAgo(for: colorScheme))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 }
