@@ -36,12 +36,14 @@ class UnknownAction extends DeepLinkAction {
 class DeepLinkService {
   DeepLinkService(this._ref);
 
+  static const Duration _dedupWindow = Duration(seconds: 2);
+  static const String _deepLinkScheme = 'milu';
+
   final Ref _ref;
   final AppLinks _appLinks = AppLinks();
   StreamSubscription<Uri>? _subscription;
   bool _isInitialized = false;
-  String? _lastHandledUriString;
-  DateTime? _lastHandledAt;
+  final UriDeduplicator _deduplicator = UriDeduplicator();
 
   /// サービスを初期化し、ディープリンクの監視を開始
   Future<void> initialize() async {
@@ -68,7 +70,7 @@ class DeepLinkService {
   /// URIを解析してアクションに変換
   DeepLinkAction? parseUri(Uri uri) {
     // milu://record/add?type=breastRight
-    if (uri.scheme != 'milu') return null;
+    if (uri.scheme != _deepLinkScheme) return null;
 
     if (uri.host == 'record' && uri.path == '/add') {
       final typeString = uri.queryParameters['type'];
@@ -89,15 +91,10 @@ class DeepLinkService {
     if (action == null) return;
 
     // 初期リンクとストリームで二重に同じURIが届くことがあるためガードする
-    final uriString = uri.toString();
-    final now = DateTime.now();
-    if (_lastHandledUriString == uriString &&
-        _lastHandledAt != null &&
-        now.difference(_lastHandledAt!) < const Duration(seconds: 2)) {
+    if (!_deduplicator.shouldHandle(
+        uri.toString(), DateTime.now(), _dedupWindow)) {
       return;
     }
-    _lastHandledUriString = uriString;
-    _lastHandledAt = now;
 
     switch (action) {
       case AddRecordAction(:final recordType):
@@ -137,6 +134,23 @@ class DeepLinkService {
       'other' => RecordType.other,
       _ => null,
     };
+  }
+}
+
+/// シンプルなURI重複ガード
+class UriDeduplicator {
+  String? _lastUri;
+  DateTime? _lastAt;
+
+  bool shouldHandle(String uri, DateTime now, Duration window) {
+    if (_lastUri == uri &&
+        _lastAt != null &&
+        now.difference(_lastAt!) < window) {
+      return false;
+    }
+    _lastUri = uri;
+    _lastAt = now;
+    return true;
   }
 }
 

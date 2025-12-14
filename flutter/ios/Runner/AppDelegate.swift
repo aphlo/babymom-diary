@@ -7,6 +7,8 @@ import app_links
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
+  private let deepLinkScheme = "milu"
+
   private func configureFirebaseIfNeeded() {
     if FirebaseApp.app() != nil { return }
 
@@ -19,6 +21,10 @@ import app_links
         FirebaseApp.configure(options: options)
         break
       }
+    }
+
+    if FirebaseApp.app() == nil {
+      print("Error: Could not configure Firebase. No valid GoogleService-Info plist file found.")
     }
   }
 
@@ -40,11 +46,13 @@ import app_links
   ) -> Bool {
     configureFirebaseIfNeeded()
     // Short-circuit milu:// links to avoid plugins (e.g., FirebaseAuth) asserting before init.
-    if url.scheme == "milu" {
+    if url.scheme == deepLinkScheme {
       #if canImport(app_links)
       AppLinks.shared.handleLink(url: url)
-      #endif
       return true
+      #else
+      return super.application(app, open: url, options: options)
+      #endif
     }
     return super.application(app, open: url, options: options)
   }
