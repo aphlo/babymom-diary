@@ -40,6 +40,7 @@ class DeepLinkService {
   final AppLinks _appLinks = AppLinks();
   StreamSubscription<Uri>? _subscription;
   bool _isInitialized = false;
+  String? _lastHandledUriString;
 
   /// サービスを初期化し、ディープリンクの監視を開始
   Future<void> initialize() async {
@@ -85,6 +86,11 @@ class DeepLinkService {
   void _handleUri(Uri uri) {
     final action = parseUri(uri);
     if (action == null) return;
+
+    // 初期リンクとストリームで二重に同じURIが届くことがあるためガードする
+    final uriString = uri.toString();
+    if (_lastHandledUriString == uriString) return;
+    _lastHandledUriString = uriString;
 
     switch (action) {
       case AddRecordAction(:final recordType):
