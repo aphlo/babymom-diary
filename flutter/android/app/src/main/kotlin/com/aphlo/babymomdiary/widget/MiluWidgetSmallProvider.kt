@@ -82,7 +82,7 @@ open class MiluWidgetSmallProvider : HomeWidgetProvider() {
                         val recordType = latestRecord.getString("type")
                         val atDate = parseIsoDate(latestRecord.getString("at"))
 
-                        views.setTextViewText(R.id.record_emoji, getRecordEmoji(recordType))
+                        views.setImageViewResource(R.id.record_emoji, getRecordIconResId(recordType))
                         views.setTextViewText(R.id.record_label, getRecordLabel(recordType))
 
                         if (atDate != null) {
@@ -93,7 +93,7 @@ open class MiluWidgetSmallProvider : HomeWidgetProvider() {
                             views.setTextViewText(R.id.record_ago, "")
                         }
                     } else {
-                        views.setTextViewText(R.id.record_emoji, getRecordEmoji(primaryDisplayType))
+                        views.setImageViewResource(R.id.record_emoji, getRecordIconResId(primaryDisplayType))
                         views.setTextViewText(R.id.record_label, getRecordLabel(primaryDisplayType))
                         views.setTextViewText(R.id.record_time, "--")
                         views.setTextViewText(R.id.record_ago, "")
@@ -124,7 +124,7 @@ open class MiluWidgetSmallProvider : HomeWidgetProvider() {
     private fun setEmptyState(views: RemoteViews) {
         views.setTextViewText(R.id.child_name, "子ども未登録")
         views.setTextViewText(R.id.child_age, "")
-        views.setTextViewText(R.id.record_emoji, "📝")
+        views.setImageViewResource(R.id.record_emoji, R.drawable.memo)
         views.setTextViewText(R.id.record_label, "記録なし")
         views.setTextViewText(R.id.record_time, "--:--")
         views.setTextViewText(R.id.record_ago, "")
@@ -174,24 +174,22 @@ open class MiluWidgetSmallProvider : HomeWidgetProvider() {
         return latestRecord
     }
 
-    private fun getRecordEmoji(type: String): String {
+    private fun getRecordIconResId(type: String): Int {
         return when (type) {
-            "breast", "breastRight", "breastLeft" -> "🤱"
-            "formula" -> "🍼"
-            "pump" -> "🥛"
-            "pee" -> "💧"
-            "poop" -> "💩"
-            "temperature" -> "🌡️"
-            "other" -> "📝"
-            else -> "📝"
+            "breast", "breastRight", "breastLeft" -> R.drawable.jyunyuu
+            "formula" -> R.drawable.milk
+            "pump" -> R.drawable.sakubonyuu
+            "pee" -> R.drawable.nyou
+            "poop" -> R.drawable.unti
+            "temperature" -> R.drawable.taion
+            "other" -> R.drawable.memo
+            else -> R.drawable.memo
         }
     }
 
     private fun getRecordLabel(type: String): String {
         return when (type) {
-            "breast" -> "授乳"  // カテゴリ用（記録がない場合）
-            "breastRight" -> "授乳(右)"
-            "breastLeft" -> "授乳(左)"
+            "breast", "breastRight", "breastLeft" -> "授乳"
             "formula" -> "ミルク"
             "pump" -> "搾母乳"
             "pee" -> "尿"

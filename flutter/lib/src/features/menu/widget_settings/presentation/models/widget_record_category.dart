@@ -24,15 +24,9 @@ extension WidgetRecordCategoryExtension on WidgetRecordCategory {
         WidgetRecordCategory.other => 'その他',
       };
 
-  String get emoji => switch (this) {
-        WidgetRecordCategory.breast => '🤱',
-        WidgetRecordCategory.formula => '🍼',
-        WidgetRecordCategory.pump => '🥛',
-        WidgetRecordCategory.pee => '💧',
-        WidgetRecordCategory.poop => '💩',
-        WidgetRecordCategory.temperature => '🌡️',
-        WidgetRecordCategory.other => '📝',
-      };
+  String iconAssetPath({required bool isDark}) {
+    return toRecordType().iconAssetPath(isDark: isDark);
+  }
 
   /// RecordTypeに変換（保存用）
   /// breastはbreastLeftとして保存（クイックアクションで使用）

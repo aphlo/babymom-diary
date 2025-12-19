@@ -41,3 +41,20 @@ extension RecordTypeMeta on RecordType {
         RecordType.pee || RecordType.poop || RecordType.other => '数量',
       };
 }
+
+extension RecordTypeAssets on RecordType {
+  String get _baseName => switch (this) {
+        RecordType.breastRight || RecordType.breastLeft => 'jyunyuu',
+        RecordType.formula => 'milk',
+        RecordType.pump => 'sakubonyuu',
+        RecordType.pee => 'nyou',
+        RecordType.poop => 'unti',
+        RecordType.temperature => 'taion',
+        RecordType.other => 'memo',
+      };
+
+  String iconAssetPath({required bool isDark}) {
+    final suffix = isDark ? 'white' : 'black';
+    return 'assets/icons/child_record/${_baseName}_$suffix.png';
+  }
+}

@@ -76,8 +76,10 @@ struct SmallWidgetView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     // 1行目: 絵文字 + 種別
                     HStack(spacing: 6) {
-                        Text(record.emoji)
-                            .font(.title3)
+                        Image(record.imageName)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 20, height: 20)
                         Text(record.displayName)
                             .font(.caption2)
                             .fontWeight(.regular)
@@ -149,8 +151,10 @@ struct MediumWidgetView: View {
                 ForEach(0..<min(5, quickActions.count), id: \.self) { index in
                     let action = quickActions[index]
                     Link(destination: URL(string: "milu://record/add?type=\(action.type)")!) {
-                        Text(action.emoji)
-                            .font(.title3)
+                        Image(action.imageName)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 5)
                             .background(GlossyCardBackground(cornerRadius: 8, colorScheme: colorScheme))
@@ -164,32 +168,32 @@ struct MediumWidgetView: View {
         .padding(.vertical, 8)
     }
 
-    private func normalizedQuickActions(from rawTypes: [String]) -> [(type: String, emoji: String)] {
+    private func normalizedQuickActions(from rawTypes: [String]) -> [(type: String, imageName: String)] {
         let types = rawTypes.isEmpty
             ? MediumWidgetSettings.default.quickActionTypes
             : rawTypes
 
         return types.map { type in
-            (type: type, emoji: emoji(for: type))
+            (type: type, imageName: imageName(for: type))
         }
     }
 
-    private func emoji(for type: String) -> String {
+    private func imageName(for type: String) -> String {
         switch type {
         case "breast", "breastLeft", "breastRight":
-            return "🤱"
+            return "jyunyuu"
         case "formula":
-            return "🍼"
+            return "milk"
         case "pump":
-            return "🥛"
+            return "sakubonyuu"
         case "pee":
-            return "💧"
+            return "nyou"
         case "poop":
-            return "💩"
+            return "unti"
         case "temperature":
-            return "🌡️"
+            return "taion"
         default:
-            return "📝"
+            return "memo"
         }
     }
 }
@@ -206,9 +210,10 @@ struct LockCircularWidgetView: View {
                 AccessoryWidgetBackground()
             }
             VStack(spacing: 2) {
-                Text(record?.emoji ?? "🍼")
-                    .font(.body)
-                    .foregroundColor(WidgetColors.textPrimary(for: colorScheme))
+                Image(record?.imageName ?? "milk")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
 
                 Text(record?.time ?? "--:--")
                     .font(.caption)
@@ -217,7 +222,7 @@ struct LockCircularWidgetView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
 
-                let elapsed = (record?.elapsed ?? "").isEmpty ? "--" : (record?.elapsed ?? "--")
+                let elapsed = (record?.elapsedShort ?? "").isEmpty ? "--" : (record?.elapsedShort ?? "--")
                 Text(elapsed)
                     .font(.caption2)
                     .fontWeight(.medium)
@@ -236,11 +241,10 @@ struct RecordCardView: View {
 
     var body: some View {
         VStack(spacing: 1) {
-            Text(record.emoji)
-                .font(.title2)
-                .foregroundColor(record.isPlaceholder
-                    ? WidgetColors.textSecondary(for: colorScheme)
-                    : WidgetColors.textTime(for: colorScheme))
+            Image(record.imageName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 20, height: 20)
 
             Text(record.displayName)
                 .font(.caption2)
