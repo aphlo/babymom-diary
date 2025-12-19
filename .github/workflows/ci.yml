@@ -89,7 +89,7 @@ jobs:
         run: flutter test
 
   ios-swift:
-    name: iOS Swift Compilation Check
+    name: iOS Swift Analysis
     runs-on: macos-latest
     defaults:
       run:
@@ -124,7 +124,15 @@ jobs:
           cd ios
           pod install
 
-      - name: Build iOS project (Swift compilation check)
+      - name: Analyze Swift code
         run: |
           cd ios
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Debug -sdk iphonesimulator build CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+          echo "🔬 Analyzing Swift code for compilation errors..."
+          xcodebuild analyze -workspace Runner.xcworkspace -scheme Runner -sdk iphonesimulator CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO 2>&1 | tee analyze.log
+          if grep -q "error:" analyze.log; then
+            echo "❌ Swift compilation errors found:"
+            grep "error:" analyze.log
+            exit 1
+          else
+            echo "✅ No Swift compilation errors"
+          fi
