@@ -84,7 +84,7 @@ open class MiluWidgetProvider : HomeWidgetProvider() {
 
                         if (record != null) {
                             val actualType = record.getString("type")
-                            views.setTextViewText(emojiId, getRecordEmoji(actualType))
+                            views.setImageViewResource(emojiId, getRecordIconResId(actualType))
                             views.setTextViewText(labelId, getRecordLabel(actualType))
 
                             val atDate = parseIsoDate(record.getString("at"))
@@ -96,7 +96,7 @@ open class MiluWidgetProvider : HomeWidgetProvider() {
                                 views.setTextViewText(agoId, "")
                             }
                         } else {
-                            views.setTextViewText(emojiId, getRecordEmoji(recordType))
+                            views.setImageViewResource(emojiId, getRecordIconResId(recordType))
                             views.setTextViewText(labelId, getRecordLabel(recordType))
                             views.setTextViewText(timeId, "--")
                             views.setTextViewText(agoId, "")
@@ -117,7 +117,7 @@ open class MiluWidgetProvider : HomeWidgetProvider() {
                         val actionType = quickActionTypes.getString(i)
                         val buttonId = getQuickActionButtonId(i)
 
-                        views.setTextViewText(buttonId, getRecordEmoji(actionType))
+                        views.setImageViewResource(buttonId, getRecordIconResId(actionType))
 
                         // Set click intent for deep link
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse("milu://record/add?type=$actionType"))
@@ -230,16 +230,16 @@ open class MiluWidgetProvider : HomeWidgetProvider() {
         }
     }
 
-    private fun getRecordEmoji(type: String): String {
+    private fun getRecordIconResId(type: String): Int {
         return when (type) {
-            "breast", "breastRight", "breastLeft" -> "🤱"
-            "formula" -> "🍼"
-            "pump" -> "🥛"
-            "pee" -> "💧"
-            "poop" -> "💩"
-            "temperature" -> "🌡️"
-            "other" -> "📝"
-            else -> "📝"
+            "breast", "breastRight", "breastLeft" -> R.drawable.jyunyuu
+            "formula" -> R.drawable.milk
+            "pump" -> R.drawable.sakubonyuu
+            "pee" -> R.drawable.nyou
+            "poop" -> R.drawable.unti
+            "temperature" -> R.drawable.taion
+            "other" -> R.drawable.memo
+            else -> R.drawable.memo
         }
     }
 

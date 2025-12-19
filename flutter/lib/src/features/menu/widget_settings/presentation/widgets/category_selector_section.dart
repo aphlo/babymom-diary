@@ -155,12 +155,20 @@ class _CategoryTile extends StatelessWidget {
         ),
         title: Row(
           children: [
-            Text(
-              category.emoji,
-              style: const TextStyle(fontSize: 20),
+            Image.asset(
+              category.iconAssetPath(
+                isDark: Theme.of(context).brightness == Brightness.dark,
+              ),
+              width: 20,
+              height: 20,
             ),
             const SizedBox(width: 12),
-            Text(category.label),
+            Expanded(
+              child: Text(
+                category.label,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         trailing: IconButton(
@@ -198,9 +206,12 @@ class _CategoryTile extends StatelessWidget {
             const Divider(height: 1),
             ...availableCategories.map(
               (cat) => ListTile(
-                leading: Text(
-                  cat.emoji,
-                  style: const TextStyle(fontSize: 24),
+                leading: Image.asset(
+                  cat.iconAssetPath(
+                    isDark: Theme.of(context).brightness == Brightness.dark,
+                  ),
+                  width: 24,
+                  height: 24,
                 ),
                 title: Text(cat.label),
                 onTap: () => Navigator.of(context).pop(cat),

@@ -59,24 +59,22 @@ struct DisplayRecord {
     let isPlaceholder: Bool
     let isLatest: Bool
 
-    var emoji: String {
+    var imageName: String {
         switch type {
-        case "breastLeft", "breastRight":
-            return "🤱"
-        case "breast":
-            return "🤱"
+        case "breastLeft", "breastRight", "breast":
+            return "jyunyuu"
         case "formula":
-            return "🍼"
+            return "milk"
         case "pump":
-            return "🥛"
+            return "sakubonyuu"
         case "pee":
-            return "💧"
+            return "nyou"
         case "poop":
-            return "💩"
+            return "unti"
         case "temperature":
-            return "🌡️"
+            return "taion"
         default:
-            return "📝"
+            return "memo"
         }
     }
 

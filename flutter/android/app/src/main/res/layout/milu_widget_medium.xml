@@ -58,12 +58,11 @@
             android:background="@drawable/widget_card_background"
             android:padding="6dp">
 
-            <TextView
+            <ImageView
                 android:id="@+id/record1_emoji"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🤱"
-                android:textSize="20sp" />
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/jyunyuu" />
 
             <TextView
                 android:id="@+id/record1_label"
@@ -106,12 +105,11 @@
             android:background="@drawable/widget_card_background"
             android:padding="6dp">
 
-            <TextView
+            <ImageView
                 android:id="@+id/record2_emoji"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🍼"
-                android:textSize="20sp" />
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/milk" />
 
             <TextView
                 android:id="@+id/record2_label"
@@ -154,12 +152,11 @@
             android:background="@drawable/widget_card_background"
             android:padding="6dp">
 
-            <TextView
+            <ImageView
                 android:id="@+id/record3_emoji"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="💧"
-                android:textSize="20sp" />
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/nyou" />
 
             <TextView
                 android:id="@+id/record3_label"
@@ -201,63 +198,58 @@
         android:gravity="center"
         android:layout_marginTop="8dp">
 
-        <TextView
+        <ImageView
             android:id="@+id/action1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_weight="1"
             android:layout_margin="2dp"
-            android:text="🤱"
-            android:textSize="22sp"
-            android:gravity="center"
+            android:src="@drawable/jyunyuu"
+            android:scaleType="centerInside"
             android:padding="6dp"
             android:background="@drawable/widget_action_background" />
 
-        <TextView
+        <ImageView
             android:id="@+id/action2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_weight="1"
             android:layout_margin="2dp"
-            android:text="🍼"
-            android:textSize="22sp"
-            android:gravity="center"
+            android:src="@drawable/milk"
+            android:scaleType="centerInside"
             android:padding="6dp"
             android:background="@drawable/widget_action_background" />
 
-        <TextView
+        <ImageView
             android:id="@+id/action3"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_weight="1"
             android:layout_margin="2dp"
-            android:text="💧"
-            android:textSize="22sp"
-            android:gravity="center"
+            android:src="@drawable/nyou"
+            android:scaleType="centerInside"
             android:padding="6dp"
             android:background="@drawable/widget_action_background" />
 
-        <TextView
+        <ImageView
             android:id="@+id/action4"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_weight="1"
             android:layout_margin="2dp"
-            android:text="💩"
-            android:textSize="22sp"
-            android:gravity="center"
+            android:src="@drawable/unti"
+            android:scaleType="centerInside"
             android:padding="6dp"
             android:background="@drawable/widget_action_background" />
 
-        <TextView
+        <ImageView
             android:id="@+id/action5"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_weight="1"
             android:layout_margin="2dp"
-            android:text="🌡️"
-            android:textSize="22sp"
-            android:gravity="center"
+            android:src="@drawable/taion"
+            android:scaleType="centerInside"
             android:padding="6dp"
             android:background="@drawable/widget_action_background" />
 

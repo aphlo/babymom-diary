@@ -88,9 +88,12 @@ void showRecordSlotSheet({
               children: [
                 Row(
                   children: [
-                    Text(
-                      _emojiFor(request.type),
-                      style: const TextStyle(fontSize: 24),
+                    Image.asset(
+                      request.type.iconAssetPath(
+                        isDark: Theme.of(context).brightness == Brightness.dark,
+                      ),
+                      width: 24,
+                      height: 24,
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -162,13 +165,3 @@ void showRecordSlotSheet({
     },
   );
 }
-
-String _emojiFor(RecordType t) => switch (t) {
-      RecordType.formula => '🍼',
-      RecordType.pump => '🥛',
-      RecordType.breastRight || RecordType.breastLeft => '🤱',
-      RecordType.pee => '💧',
-      RecordType.poop => '💩',
-      RecordType.temperature => '🌡️',
-      RecordType.other => '📝',
-    };
