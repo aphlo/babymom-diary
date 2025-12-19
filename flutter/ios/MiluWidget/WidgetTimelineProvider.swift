@@ -62,18 +62,18 @@ struct Provider: TimelineProvider {
         let recordTypes = normalizedDisplayTypes(from: mediumSettings.displayRecordTypes)
         let displayRecords = recordTypes.map { type in
             if let record = findLatestRecord(for: type, in: validRecords) {
-                return DisplayRecord(
                     type: record.type,
                     time: formatTime(record.at),
-                    elapsed: calculateElapsed(from: record.at),
+                    elapsed: calculateElapsedJapanese(from: record.at),
+                    elapsedShort: calculateElapsedShort(from: record.at),
                     isPlaceholder: false,
                     isLatest: false
                 )
             } else {
-                return DisplayRecord(
                     type: type,
                     time: "--:--",
                     elapsed: "",
+                    elapsedShort: "",
                     isPlaceholder: true,
                     isLatest: false
                 )
@@ -142,7 +142,8 @@ struct Provider: TimelineProvider {
         return DisplayRecord(
             type: latest.type,
             time: formatTimeFromDate(latestDate),
-            elapsed: calculateElapsedFromDate(latestDate),
+            elapsed: calculateElapsedJapaneseFromDate(latestDate),
+            elapsedShort: calculateElapsedShortFromDate(latestDate),
             isPlaceholder: false,
             isLatest: true
         )
@@ -223,22 +224,44 @@ struct Provider: TimelineProvider {
         return timeFormatter.string(from: date)
     }
 
-    private func calculateElapsed(from isoString: String) -> String {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    // MARK: - Elapsed Time (Japanese for Home Screen)
 
-        guard let date = formatter.date(from: isoString) else {
-            formatter.formatOptions = [.withInternetDateTime]
-            guard let date = formatter.date(from: isoString) else {
-                return ""
-            }
-            return calculateElapsedFromDate(date)
-        }
-
-        return calculateElapsedFromDate(date)
+    private func calculateElapsedJapanese(from isoString: String) -> String {
+        guard let date = parseIsoDate(isoString) else { return "" }
+        return calculateElapsedJapaneseFromDate(date)
     }
 
-    private func calculateElapsedFromDate(_ date: Date) -> String {
+    private func calculateElapsedJapaneseFromDate(_ date: Date) -> String {
+        let now = Date()
+        let interval = now.timeIntervalSince(date)
+
+        if interval < 60 {
+            return "たった今"
+        } else if interval < 3600 {
+            let minutes = Int(interval / 60)
+            return "\(minutes)分前"
+        } else if interval < 86400 {
+            let hours = Int(interval / 3600)
+            let minutes = Int((interval.truncatingRemainder(dividingBy: 3600)) / 60)
+            if minutes > 0 {
+                return "\(hours)時間\(minutes)分前"
+            } else {
+                return "\(hours)時間前"
+            }
+        } else {
+            let days = Int(interval / 86400)
+            return "\(days)日前"
+        }
+    }
+
+    // MARK: - Elapsed Time (Short for Lock Screen)
+
+    private func calculateElapsedShort(from isoString: String) -> String {
+        guard let date = parseIsoDate(isoString) else { return "" }
+        return calculateElapsedShortFromDate(date)
+    }
+
+    private func calculateElapsedShortFromDate(_ date: Date) -> String {
         let now = Date()
         let interval = now.timeIntervalSince(date)
 

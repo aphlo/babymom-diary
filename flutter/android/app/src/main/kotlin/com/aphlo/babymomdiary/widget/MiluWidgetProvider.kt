@@ -245,9 +245,7 @@ open class MiluWidgetProvider : HomeWidgetProvider() {
 
     private fun getRecordLabel(type: String): String {
         return when (type) {
-            "breast" -> "授乳"  // カテゴリ用（記録がない場合）
-            "breastRight" -> "授乳(右)"
-            "breastLeft" -> "授乳(左)"
+            "breast", "breastRight", "breastLeft" -> "授乳"
             "formula" -> "ミルク"
             "pump" -> "搾母乳"
             "pee" -> "尿"

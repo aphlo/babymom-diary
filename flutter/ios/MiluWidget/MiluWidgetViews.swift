@@ -222,7 +222,7 @@ struct LockCircularWidgetView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
 
-                let elapsed = (record?.elapsed ?? "").isEmpty ? "--" : (record?.elapsed ?? "--")
+                let elapsed = (record?.elapsedShort ?? "").isEmpty ? "--" : (record?.elapsedShort ?? "--")
                 Text(elapsed)
                     .font(.caption2)
                     .fontWeight(.medium)

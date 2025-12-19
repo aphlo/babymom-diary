@@ -56,6 +56,7 @@ struct DisplayRecord {
     let type: String
     let time: String
     let elapsed: String
+    let elapsedShort: String
     let isPlaceholder: Bool
     let isLatest: Bool
 
@@ -80,11 +81,7 @@ struct DisplayRecord {
 
     var displayName: String {
         switch type {
-        case "breastLeft":
-            return "授乳(左)"
-        case "breastRight":
-            return "授乳(右)"
-        case "breast":
+        case "breastLeft", "breastRight", "breast":
             return "授乳"
         case "formula":
             return "ミルク"
