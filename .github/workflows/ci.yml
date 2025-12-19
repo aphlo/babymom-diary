@@ -127,12 +127,4 @@ jobs:
       - name: Build iOS project (Swift compilation check)
         run: |
           cd ios
-          xcodebuild \
-            -workspace Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Debug \
-            -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 15' \
-            clean build \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Debug -sdk iphonesimulator build CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
