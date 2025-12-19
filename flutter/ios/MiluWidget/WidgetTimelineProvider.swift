@@ -62,6 +62,7 @@ struct Provider: TimelineProvider {
         let recordTypes = normalizedDisplayTypes(from: mediumSettings.displayRecordTypes)
         let displayRecords = recordTypes.map { type in
             if let record = findLatestRecord(for: type, in: validRecords) {
+                return DisplayRecord(
                     type: record.type,
                     time: formatTime(record.at),
                     elapsed: calculateElapsedJapanese(from: record.at),
@@ -70,6 +71,7 @@ struct Provider: TimelineProvider {
                     isLatest: false
                 )
             } else {
+                return DisplayRecord(
                     type: type,
                     time: "--:--",
                     elapsed: "",

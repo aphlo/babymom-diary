@@ -40,9 +40,9 @@ struct MiluWidget: Widget {
         childName: "たろう",
         childAge: "1歳2ヶ月",
         records: [
-            DisplayRecord(type: "formula", time: "14:30", elapsed: "30分前", isPlaceholder: false, isLatest: true)
+            DisplayRecord(type: "formula", time: "14:30", elapsed: "30分前", elapsedShort: "30m", isPlaceholder: false, isLatest: true)
         ],
-        latestRecord: DisplayRecord(type: "formula", time: "14:30", elapsed: "30分前", isPlaceholder: false, isLatest: true),
+        latestRecord: DisplayRecord(type: "formula", time: "14:30", elapsed: "30分前", elapsedShort: "30m", isPlaceholder: false, isLatest: true),
         settings: .default
     )
 }
@@ -55,11 +55,11 @@ struct MiluWidget: Widget {
         childName: "たろう",
         childAge: "1歳2ヶ月",
         records: [
-            DisplayRecord(type: "breastRight", time: "12:00", elapsed: "2時間前", isPlaceholder: false, isLatest: false),
-            DisplayRecord(type: "formula", time: "14:30", elapsed: "30分前", isPlaceholder: false, isLatest: true),
-            DisplayRecord(type: "pee", time: "13:45", elapsed: "1時間前", isPlaceholder: false, isLatest: false)
+            DisplayRecord(type: "breastRight", time: "12:00", elapsed: "2時間前", elapsedShort: "2h", isPlaceholder: false, isLatest: false),
+            DisplayRecord(type: "formula", time: "14:30", elapsed: "30分前", elapsedShort: "30m", isPlaceholder: false, isLatest: true),
+            DisplayRecord(type: "pee", time: "13:45", elapsed: "1時間前", elapsedShort: "1h", isPlaceholder: false, isLatest: false)
         ],
-        latestRecord: DisplayRecord(type: "formula", time: "14:30", elapsed: "30分前", isPlaceholder: false, isLatest: true),
+        latestRecord: DisplayRecord(type: "formula", time: "14:30", elapsed: "30分前", elapsedShort: "30m", isPlaceholder: false, isLatest: true),
         settings: .default
     )
 }
