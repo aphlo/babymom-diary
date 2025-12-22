@@ -1,38 +1,27 @@
-import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-@immutable
-class EditCalendarEventState {
-  const EditCalendarEventState({
-    required this.eventId,
-    required this.title,
-    required this.memo,
-    required this.allDay,
-    required this.startDate,
-    required this.startTime,
-    required this.endDate,
-    required this.endTime,
-    required this.selectedIconPath,
-    required this.availableIconPaths,
-    this.titleError,
-    this.dateTimeError,
-    this.isSubmitting = false,
-    this.isDeleting = false,
-  });
+part 'edit_calendar_event_state.freezed.dart';
 
-  final String eventId;
-  final String title;
-  final String memo;
-  final bool allDay;
-  final DateTime startDate;
-  final TimeOfDay startTime;
-  final DateTime endDate;
-  final TimeOfDay endTime;
-  final String selectedIconPath;
-  final List<String> availableIconPaths;
-  final String? titleError;
-  final String? dateTimeError;
-  final bool isSubmitting;
-  final bool isDeleting;
+@freezed
+sealed class EditCalendarEventState with _$EditCalendarEventState {
+  const EditCalendarEventState._();
+
+  const factory EditCalendarEventState({
+    required String eventId,
+    required String title,
+    required String memo,
+    required bool allDay,
+    required DateTime startDate,
+    required TimeOfDay startTime,
+    required DateTime endDate,
+    required TimeOfDay endTime,
+    required String selectedIconPath,
+    required List<String> availableIconPaths,
+    String? titleError,
+    String? dateTimeError,
+    @Default(false) bool isSubmitting,
+    @Default(false) bool isDeleting,
+  }) = _EditCalendarEventState;
 
   bool get canSubmit {
     if (title.trim().isEmpty || isSubmitting || isDeleting) {
@@ -72,65 +61,18 @@ class EditCalendarEventState {
       endTime.minute,
     );
   }
-
-  EditCalendarEventState copyWith({
-    String? eventId,
-    String? title,
-    String? memo,
-    bool? allDay,
-    DateTime? startDate,
-    TimeOfDay? startTime,
-    DateTime? endDate,
-    TimeOfDay? endTime,
-    String? selectedIconPath,
-    List<String>? availableIconPaths,
-    String? titleError,
-    String? dateTimeError,
-    bool? isSubmitting,
-    bool? isDeleting,
-  }) {
-    return EditCalendarEventState(
-      eventId: eventId ?? this.eventId,
-      title: title ?? this.title,
-      memo: memo ?? this.memo,
-      allDay: allDay ?? this.allDay,
-      startDate: startDate ?? this.startDate,
-      startTime: startTime ?? this.startTime,
-      endDate: endDate ?? this.endDate,
-      endTime: endTime ?? this.endTime,
-      selectedIconPath: selectedIconPath ?? this.selectedIconPath,
-      availableIconPaths: availableIconPaths ?? this.availableIconPaths,
-      titleError: titleError,
-      dateTimeError: dateTimeError,
-      isSubmitting: isSubmitting ?? this.isSubmitting,
-      isDeleting: isDeleting ?? this.isDeleting,
-    );
-  }
 }
 
-class TimeOfDay {
-  const TimeOfDay({required this.hour, required this.minute});
+@freezed
+sealed class TimeOfDay with _$TimeOfDay {
+  const TimeOfDay._();
 
-  final int hour;
-  final int minute;
+  const factory TimeOfDay({
+    required int hour,
+    required int minute,
+  }) = _TimeOfDay;
 
-  static TimeOfDay fromDateTime(DateTime dateTime) {
+  factory TimeOfDay.fromDateTime(DateTime dateTime) {
     return TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
   }
-
-  TimeOfDay copyWith({int? hour, int? minute}) {
-    return TimeOfDay(
-      hour: hour ?? this.hour,
-      minute: minute ?? this.minute,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is TimeOfDay && other.hour == hour && other.minute == minute;
-  }
-
-  @override
-  int get hashCode => hour.hashCode ^ minute.hashCode;
 }

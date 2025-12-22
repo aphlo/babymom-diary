@@ -37,6 +37,7 @@ class VaccineReservationViewModel extends _$VaccineReservationViewModel {
       state = state.copyWith(
         isLoading: false,
         error: '子どもが選択されていません',
+        isDuplicateError: false,
       );
       return;
     }
@@ -48,6 +49,7 @@ class VaccineReservationViewModel extends _$VaccineReservationViewModel {
       state = state.copyWith(
         isLoading: false,
         error: '子どもが選択されていません',
+        isDuplicateError: false,
       );
       return;
     }
@@ -70,28 +72,43 @@ class VaccineReservationViewModel extends _$VaccineReservationViewModel {
       state = state.copyWith(
         isLoading: false,
         availableVaccines: filteredVaccines,
+        error: null,
+        isDuplicateError: false,
       );
     } catch (error) {
       state = state.copyWith(
         isLoading: false,
         error: 'データの取得に失敗しました: $error',
+        isDuplicateError: false,
       );
     }
   }
 
   /// 予約日時を設定
   void setScheduledDate(DateTime date) {
-    state = state.copyWith(scheduledDate: date);
+    state = state.copyWith(
+      scheduledDate: date,
+      error: null,
+      isDuplicateError: false,
+    );
   }
 
   /// 記録種別を設定
   void setRecordType(VaccineRecordType recordType) {
-    state = state.copyWith(recordType: recordType);
+    state = state.copyWith(
+      recordType: recordType,
+      error: null,
+      isDuplicateError: false,
+    );
   }
 
   /// アコーディオンの開閉状態を切り替え
   void toggleAccordion() {
-    state = state.copyWith(isAccordionExpanded: !state.isAccordionExpanded);
+    state = state.copyWith(
+      isAccordionExpanded: !state.isAccordionExpanded,
+      error: null,
+      isDuplicateError: false,
+    );
   }
 
   /// 同時接種ワクチンを選択/選択解除
@@ -108,7 +125,11 @@ class VaccineReservationViewModel extends _$VaccineReservationViewModel {
       currentSelected.add(vaccine);
     }
 
-    state = state.copyWith(selectedAdditionalVaccines: currentSelected);
+    state = state.copyWith(
+      selectedAdditionalVaccines: currentSelected,
+      error: null,
+      isDuplicateError: false,
+    );
   }
 
   /// 予約を作成
@@ -120,6 +141,7 @@ class VaccineReservationViewModel extends _$VaccineReservationViewModel {
       state = state.copyWith(
         isSubmitting: false,
         error: '子どもが選択されていません',
+        isDuplicateError: false,
       );
       return false;
     }
@@ -129,11 +151,16 @@ class VaccineReservationViewModel extends _$VaccineReservationViewModel {
       state = state.copyWith(
         isSubmitting: false,
         error: '子どもが選択されていません',
+        isDuplicateError: false,
       );
       return false;
     }
 
-    state = state.copyWith(isSubmitting: true, error: null);
+    state = state.copyWith(
+      isSubmitting: true,
+      error: null,
+      isDuplicateError: false,
+    );
 
     try {
       final householdId = childContext.householdId;
@@ -143,6 +170,7 @@ class VaccineReservationViewModel extends _$VaccineReservationViewModel {
         state = state.copyWith(
           isSubmitting: false,
           error: '予約情報が不正です',
+          isDuplicateError: false,
         );
         return false;
       }
@@ -163,7 +191,11 @@ class VaccineReservationViewModel extends _$VaccineReservationViewModel {
         );
       }
 
-      state = state.copyWith(isSubmitting: false);
+      state = state.copyWith(
+        isSubmitting: false,
+        error: null,
+        isDuplicateError: false,
+      );
       return true;
     } on DuplicateScheduleDateException catch (e) {
       state = state.copyWith(
@@ -176,6 +208,7 @@ class VaccineReservationViewModel extends _$VaccineReservationViewModel {
       state = state.copyWith(
         isSubmitting: false,
         error: '予約の作成に失敗しました: $error',
+        isDuplicateError: false,
       );
       return false;
     }

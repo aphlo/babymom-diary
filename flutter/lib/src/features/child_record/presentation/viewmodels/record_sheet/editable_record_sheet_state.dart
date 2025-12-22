@@ -1,93 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../child_record.dart';
 import '../../models/record_draft.dart';
 
+part 'editable_record_sheet_state.freezed.dart';
+
 /// EditableRecordSheetViewModel の引数
-@immutable
-class EditableRecordSheetViewModelArgs {
-  const EditableRecordSheetViewModelArgs({
-    required this.initialDraft,
-    required this.isNew,
-  });
-
-  final RecordDraft initialDraft;
-  final bool isNew;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is EditableRecordSheetViewModelArgs &&
-        other.initialDraft == initialDraft &&
-        other.isNew == isNew;
-  }
-
-  @override
-  int get hashCode => Object.hash(initialDraft, isNew);
+@freezed
+sealed class EditableRecordSheetViewModelArgs
+    with _$EditableRecordSheetViewModelArgs {
+  const factory EditableRecordSheetViewModelArgs({
+    required RecordDraft initialDraft,
+    required bool isNew,
+  }) = _EditableRecordSheetViewModelArgs;
 }
 
 /// EditableRecordSheetViewModel の状態
-@immutable
-class EditableRecordSheetState {
-  EditableRecordSheetState({
-    required this.draft,
-    required this.timeOfDay,
-    required this.minutesInput,
-    required this.amountInput,
-    required this.noteInput,
+@freezed
+sealed class EditableRecordSheetState with _$EditableRecordSheetState {
+  const EditableRecordSheetState._();
+
+  const factory EditableRecordSheetState({
+    required RecordDraft draft,
+    required TimeOfDay timeOfDay,
+    required String minutesInput,
+    required String amountInput,
+    required String noteInput,
     required Set<String> selectedTags,
-    this.selectedVolume,
-    this.durationError,
-    this.volumeError,
-  }) : selectedTags = Set.unmodifiable(selectedTags);
-
-  final RecordDraft draft;
-  final TimeOfDay timeOfDay;
-  final String minutesInput;
-  final String amountInput;
-  final String noteInput;
-  final Set<String> selectedTags;
-  final ExcretionVolume? selectedVolume;
-  final String? durationError;
-  final String? volumeError;
-
-  static const Object _sentinel = Object();
+    ExcretionVolume? selectedVolume,
+    String? durationError,
+    String? volumeError,
+  }) = _EditableRecordSheetState;
 
   RecordType get type => draft.type;
 
-  EditableRecordSheetState copyWith({
-    RecordDraft? draft,
-    TimeOfDay? timeOfDay,
-    String? minutesInput,
-    String? amountInput,
-    String? noteInput,
-    Set<String>? selectedTags,
-    Object? selectedVolume = _sentinel,
-    Object? durationError = _sentinel,
-    Object? volumeError = _sentinel,
-  }) {
-    return EditableRecordSheetState(
-      draft: draft ?? this.draft,
-      timeOfDay: timeOfDay ?? this.timeOfDay,
-      minutesInput: minutesInput ?? this.minutesInput,
-      amountInput: amountInput ?? this.amountInput,
-      noteInput: noteInput ?? this.noteInput,
-      selectedTags: selectedTags != null
-          ? Set.unmodifiable(selectedTags)
-          : this.selectedTags,
-      selectedVolume: selectedVolume == _sentinel
-          ? this.selectedVolume
-          : selectedVolume as ExcretionVolume?,
-      durationError: durationError == _sentinel
-          ? this.durationError
-          : durationError as String?,
-      volumeError:
-          volumeError == _sentinel ? this.volumeError : volumeError as String?,
-    );
-  }
-
   /// 初期状態を構築
-  static EditableRecordSheetState initial({
+  factory EditableRecordSheetState.initial({
     required RecordDraft initialDraft,
     required bool isNew,
   }) {

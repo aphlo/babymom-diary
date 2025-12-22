@@ -48,7 +48,6 @@ class GrowthChartViewModel extends _$GrowthChartViewModel {
 
     return GrowthChartState.initial().copyWith(
       childSummary: summary,
-      replaceChildSummary: true,
       isLoadingChild: childContext == null,
     );
   }
@@ -78,7 +77,6 @@ class GrowthChartViewModel extends _$GrowthChartViewModel {
           error: (error, stackTrace) {
             state = state.copyWith(
               childSummary: null,
-              replaceChildSummary: true,
               isLoadingChild: false,
               chartData: const AsyncValue<GrowthChartData>.data(
                 GrowthChartData.empty,
@@ -113,7 +111,6 @@ class GrowthChartViewModel extends _$GrowthChartViewModel {
 
     state = state.copyWith(
       childSummary: summary,
-      replaceChildSummary: true,
       isLoadingChild: false,
     );
 

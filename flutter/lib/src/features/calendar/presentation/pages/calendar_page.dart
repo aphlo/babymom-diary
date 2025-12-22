@@ -47,41 +47,38 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           if (!mounted) {
             return;
           }
-          if (event.message != null) {
-            messenger.showSnackBar(
-              SnackBar(content: Text(event.message!)),
-            );
-            viewModel.clearUiEvent();
-            return;
-          }
-          if (event.openSettings == true) {
-            viewModel.clearUiEvent();
-            await navigator.push(
-              MaterialPageRoute(
-                builder: (_) => const CalendarSettingsPage(),
-              ),
-            );
-            return;
-          }
-          final request = event.openAddEvent;
-          if (request == null) {
-            viewModel.clearUiEvent();
-            return;
-          }
-          viewModel.clearUiEvent();
-          if (!mounted) {
-            return;
-          }
-          final result = await router.push<CalendarEventModel>(
-            '/calendar/add',
-            extra: request.initialDate,
+          await event.map(
+            showMessage: (value) async {
+              messenger.showSnackBar(
+                SnackBar(content: Text(value.message)),
+              );
+              viewModel.clearUiEvent();
+            },
+            openSettings: (_) async {
+              viewModel.clearUiEvent();
+              await navigator.push(
+                MaterialPageRoute(
+                  builder: (_) => const CalendarSettingsPage(),
+                ),
+              );
+            },
+            openAddEvent: (value) async {
+              viewModel.clearUiEvent();
+              if (!mounted) {
+                return;
+              }
+              final result = await router.push<CalendarEventModel>(
+                '/calendar/add',
+                extra: value.request.initialDate,
+              );
+              if (!mounted) {
+                return;
+              }
+              if (result != null) {
+                await viewModel.handleAddEventResult(result);
+              }
+            },
           );
-          if (!mounted) {
-            return;
-          }
-          if (result != null) {
-            await viewModel.handleAddEventResult(result);
-          }
         });
       },
     );

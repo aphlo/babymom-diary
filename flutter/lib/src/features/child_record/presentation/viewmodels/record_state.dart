@@ -1,98 +1,63 @@
-import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../child_record.dart';
 import '../models/record_draft.dart';
 import '../models/record_item_model.dart';
 
-@immutable
-class RecordSlotRequest {
-  const RecordSlotRequest({
-    required this.date,
-    required this.hour,
-    required this.type,
-    required this.records,
-  });
+part 'record_state.freezed.dart';
 
-  final DateTime date;
-  final int hour;
-  final RecordType type;
-  final List<RecordItemModel> records;
+@freezed
+sealed class RecordSlotRequest with _$RecordSlotRequest {
+  const factory RecordSlotRequest({
+    required DateTime date,
+    required int hour,
+    required RecordType type,
+    required List<RecordItemModel> records,
+  }) = _RecordSlotRequest;
 }
 
-@immutable
-class RecordEditorRequest {
-  const RecordEditorRequest({
-    required this.draft,
-    required this.isNew,
-  });
-
-  final RecordDraft draft;
-  final bool isNew;
+@freezed
+sealed class RecordEditorRequest with _$RecordEditorRequest {
+  const factory RecordEditorRequest({
+    required RecordDraft draft,
+    required bool isNew,
+  }) = _RecordEditorRequest;
 }
 
-@immutable
-class RecordUiEvent {
-  const RecordUiEvent._({
-    this.message,
-    this.openSlot,
-    this.openEditor,
-  });
+@freezed
+sealed class RecordUiEvent with _$RecordUiEvent {
+  const factory RecordUiEvent({
+    String? message,
+    RecordSlotRequest? openSlot,
+    RecordEditorRequest? openEditor,
+  }) = _RecordUiEvent;
 
-  final String? message;
-  final RecordSlotRequest? openSlot;
-  final RecordEditorRequest? openEditor;
+  factory RecordUiEvent.showMessage(String message) =>
+      RecordUiEvent(message: message);
 
-  const RecordUiEvent.showMessage(String message)
-      : this._(message: message, openSlot: null, openEditor: null);
+  factory RecordUiEvent.openSlot(RecordSlotRequest request) =>
+      RecordUiEvent(openSlot: request);
 
-  const RecordUiEvent.openSlot(RecordSlotRequest request)
-      : this._(message: null, openSlot: request, openEditor: null);
-
-  const RecordUiEvent.openEditor(RecordEditorRequest request)
-      : this._(message: null, openSlot: null, openEditor: request);
+  factory RecordUiEvent.openEditor(RecordEditorRequest request) =>
+      RecordUiEvent(openEditor: request);
 }
 
-@immutable
-class RecordPageState {
-  const RecordPageState({
-    required this.selectedDate,
-    required this.selectedTabIndex,
-    this.isProcessing = false,
-    this.pendingUiEvent,
-    this.activeDraft,
-  });
-
-  final DateTime selectedDate;
-  final int selectedTabIndex;
-  final bool isProcessing;
-  final RecordUiEvent? pendingUiEvent;
-  final RecordDraft? activeDraft;
-
-  RecordPageState copyWith({
-    DateTime? selectedDate,
-    int? selectedTabIndex,
-    bool? isProcessing,
+@freezed
+sealed class RecordPageState with _$RecordPageState {
+  const factory RecordPageState({
+    required DateTime selectedDate,
+    required int selectedTabIndex,
+    @Default(false) bool isProcessing,
     RecordUiEvent? pendingUiEvent,
     RecordDraft? activeDraft,
-  }) {
-    return RecordPageState(
-      selectedDate: selectedDate ?? this.selectedDate,
-      selectedTabIndex: selectedTabIndex ?? this.selectedTabIndex,
-      isProcessing: isProcessing ?? this.isProcessing,
-      pendingUiEvent: pendingUiEvent,
-      activeDraft: activeDraft,
-    );
-  }
+  }) = _RecordPageState;
 
-  static RecordPageState initial() {
+  factory RecordPageState.initial() {
     final now = DateTime.now();
     final normalized = DateTime(now.year, now.month, now.day);
     return RecordPageState(
       selectedDate: normalized,
       selectedTabIndex: 0,
-      isProcessing: false,
-      pendingUiEvent: null,
-      activeDraft: null,
     );
   }
 }

@@ -42,7 +42,7 @@ final class CalendarSettingsViewModelProvider extends $NotifierProvider<
 }
 
 String _$calendarSettingsViewModelHash() =>
-    r'60bce3110b66040f2480aa047e9fb6df4206770a';
+    r'21d97c196d33652c80b286940af833d3f5c75ea5';
 
 abstract class _$CalendarSettingsViewModel
     extends $Notifier<CalendarSettingsState> {

@@ -24,7 +24,7 @@ class VaccineVisibilitySettingsViewModel
   Future<void> initialize({
     required String householdId,
   }) async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.clearError().copyWith(isLoading: true);
 
     try {
       final repository = ref.read(vaccineVisibilitySettingsRepositoryProvider);
@@ -77,7 +77,7 @@ class VaccineVisibilitySettingsViewModel
   Future<bool> saveSettings({
     required String householdId,
   }) async {
-    state = state.copyWith(isSaving: true, clearError: true);
+    state = state.clearError().copyWith(isSaving: true);
 
     try {
       final repository = ref.read(vaccineVisibilitySettingsRepositoryProvider);
@@ -130,6 +130,6 @@ class VaccineVisibilitySettingsViewModel
 
   /// エラーをクリア
   void clearError() {
-    state = state.copyWith(clearError: true);
+    state = state.clearError();
   }
 }

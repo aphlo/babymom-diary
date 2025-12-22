@@ -1,13 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class MomDiaryDto {
-  const MomDiaryDto({
-    required this.date,
-    this.content,
-  });
+part 'mom_diary_dto.freezed.dart';
 
-  final DateTime date;
-  final String? content;
+@freezed
+sealed class MomDiaryDto with _$MomDiaryDto {
+  const MomDiaryDto._();
+
+  const factory MomDiaryDto({
+    required DateTime date,
+    String? content,
+  }) = _MomDiaryDto;
 
   factory MomDiaryDto.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> doc,

@@ -1,72 +1,66 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:babymom_diary/src/core/utils/date_formatter.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_settings.dart';
 import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
 
-@immutable
-class CalendarUiEvent {
-  const CalendarUiEvent._({this.message, this.openAddEvent, this.openSettings});
+part 'calendar_state.freezed.dart';
 
-  final String? message;
-  final AddEventRequest? openAddEvent;
-  final bool? openSettings;
-
-  const CalendarUiEvent.showMessage(String message)
-      : this._(message: message, openAddEvent: null, openSettings: null);
-
-  const CalendarUiEvent.openAddEvent(AddEventRequest request)
-      : this._(message: null, openAddEvent: request, openSettings: null);
-
-  const CalendarUiEvent.openSettings()
-      : this._(message: null, openAddEvent: null, openSettings: true);
+@freezed
+sealed class CalendarUiEvent with _$CalendarUiEvent {
+  const factory CalendarUiEvent.showMessage(String message) = _ShowMessage;
+  const factory CalendarUiEvent.openAddEvent(AddEventRequest request) =
+      _OpenAddEvent;
+  const factory CalendarUiEvent.openSettings() = _OpenSettings;
 }
 
-@immutable
-class AddEventRequest {
-  const AddEventRequest({
-    required this.initialDate,
-    required this.children,
-    required this.initialChildId,
-  });
-
-  final DateTime initialDate;
-  final List<ChildSummary> children;
-  final String? initialChildId;
+@freezed
+sealed class AddEventRequest with _$AddEventRequest {
+  const factory AddEventRequest({
+    required DateTime initialDate,
+    required List<ChildSummary> children,
+    required String? initialChildId,
+  }) = _AddEventRequest;
 }
 
-@immutable
-class CalendarState {
-  CalendarState({
-    required this.focusedDay,
-    required this.selectedDay,
+@freezed
+sealed class CalendarState with _$CalendarState {
+  const CalendarState._();
+
+  const factory CalendarState({
+    required DateTime focusedDay,
+    required DateTime selectedDay,
     required Map<DateTime, List<CalendarEvent>> eventsByDay,
-    required this.eventsAsync,
-    required this.householdId,
+    required AsyncValue<List<CalendarEvent>> eventsAsync,
+    required String? householdId,
     required List<ChildSummary> availableChildren,
-    required this.selectedChildId,
-    required this.calendarSettings,
-    this.pendingUiEvent,
-  })  : eventsByDay =
-            Map<DateTime, List<CalendarEvent>>.unmodifiable(eventsByDay.map(
-          (key, value) =>
-              MapEntry(key, List<CalendarEvent>.unmodifiable(value)),
-        )),
-        availableChildren = List<ChildSummary>.unmodifiable(availableChildren);
+    required String? selectedChildId,
+    required CalendarSettings calendarSettings,
+    CalendarUiEvent? pendingUiEvent,
+  }) = _CalendarState;
 
-  final DateTime focusedDay;
-  final DateTime selectedDay;
-  final Map<DateTime, List<CalendarEvent>> eventsByDay;
-  final AsyncValue<List<CalendarEvent>> eventsAsync;
-  final String? householdId;
-  final List<ChildSummary> availableChildren;
-  final String? selectedChildId;
-  final CalendarSettings calendarSettings;
-  final CalendarUiEvent? pendingUiEvent;
+  factory CalendarState.initial() {
+    final now = DateTime.now();
+    final normalized = DateTime(now.year, now.month, now.day);
+    final initialEvents =
+        AsyncValue<List<CalendarEvent>>.data(const <CalendarEvent>[]);
+    final eventsByDay = <DateTime, List<CalendarEvent>>{};
+    final children = <ChildSummary>[];
+    return CalendarState(
+      focusedDay: normalized,
+      selectedDay: normalized,
+      eventsByDay: _normalizeEventsByDay(eventsByDay),
+      eventsAsync: initialEvents,
+      householdId: null,
+      availableChildren: List<ChildSummary>.unmodifiable(children),
+      selectedChildId: null,
+      calendarSettings:
+          const CalendarSettings(startingDayOfWeek: false), // デフォルトは日曜始まり
+      pendingUiEvent: null,
+    );
+  }
 
   bool get isLoadingEvents => eventsAsync.isLoading;
 
@@ -92,49 +86,17 @@ class CalendarState {
     final key = DateTime(day.year, day.month, day.day);
     return eventsByDay[key] ?? const <CalendarEvent>[];
   }
+}
 
-  CalendarState copyWith({
-    DateTime? focusedDay,
-    DateTime? selectedDay,
-    Map<DateTime, List<CalendarEvent>>? eventsByDay,
-    AsyncValue<List<CalendarEvent>>? eventsAsync,
-    String? householdId,
-    List<ChildSummary>? availableChildren,
-    String? selectedChildId,
-    CalendarSettings? calendarSettings,
-    CalendarUiEvent? pendingUiEvent,
-  }) {
-    return CalendarState(
-      focusedDay: focusedDay ?? this.focusedDay,
-      selectedDay: selectedDay ?? this.selectedDay,
-      eventsByDay: eventsByDay ?? this.eventsByDay,
-      eventsAsync: eventsAsync ?? this.eventsAsync,
-      householdId: householdId ?? this.householdId,
-      availableChildren: availableChildren ?? this.availableChildren,
-      selectedChildId: selectedChildId ?? this.selectedChildId,
-      calendarSettings: calendarSettings ?? this.calendarSettings,
-      pendingUiEvent: pendingUiEvent,
-    );
-  }
-
-  static CalendarState initial() {
-    final now = DateTime.now();
-    final normalized = DateTime(now.year, now.month, now.day);
-    final initialEvents =
-        AsyncValue<List<CalendarEvent>>.data(const <CalendarEvent>[]);
-    final eventsByDay = <DateTime, List<CalendarEvent>>{};
-    final children = <ChildSummary>[];
-    return CalendarState(
-      focusedDay: normalized,
-      selectedDay: normalized,
-      eventsByDay: eventsByDay,
-      eventsAsync: initialEvents,
-      householdId: null,
-      availableChildren: children,
-      selectedChildId: null,
-      calendarSettings:
-          const CalendarSettings(startingDayOfWeek: false), // デフォルトは日曜始まり
-      pendingUiEvent: null,
-    );
-  }
+Map<DateTime, List<CalendarEvent>> _normalizeEventsByDay(
+  Map<DateTime, List<CalendarEvent>> eventsByDay,
+) {
+  return Map<DateTime, List<CalendarEvent>>.unmodifiable(
+    eventsByDay.map(
+      (key, value) => MapEntry(
+        key,
+        List<CalendarEvent>.unmodifiable(value),
+      ),
+    ),
+  );
 }
