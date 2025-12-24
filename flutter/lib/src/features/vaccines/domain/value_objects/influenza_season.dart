@@ -1,31 +1,29 @@
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-@immutable
-class InfluenzaSeasonDefinition {
-  const InfluenzaSeasonDefinition({
-    required this.index,
-    required this.periodId,
-    required this.firstDoseNumber,
-    required this.secondDoseNumber,
-  });
+part 'influenza_season.freezed.dart';
 
-  final int index;
-  final String periodId;
-  final int firstDoseNumber;
-  final int secondDoseNumber;
+@freezed
+sealed class InfluenzaSeasonDefinition with _$InfluenzaSeasonDefinition {
+  const InfluenzaSeasonDefinition._();
+
+  const factory InfluenzaSeasonDefinition({
+    required int index,
+    required String periodId,
+    required int firstDoseNumber,
+    required int secondDoseNumber,
+  }) = _InfluenzaSeasonDefinition;
 
   List<int> get doseNumbers => <int>[firstDoseNumber, secondDoseNumber];
 }
 
-@immutable
-class InfluenzaSeasonSchedule {
-  const InfluenzaSeasonSchedule({
-    required this.definition,
-    this.seasonStart,
-  });
+@freezed
+sealed class InfluenzaSeasonSchedule with _$InfluenzaSeasonSchedule {
+  const InfluenzaSeasonSchedule._();
 
-  final InfluenzaSeasonDefinition definition;
-  final DateTime? seasonStart;
+  const factory InfluenzaSeasonSchedule({
+    required InfluenzaSeasonDefinition definition,
+    DateTime? seasonStart,
+  }) = _InfluenzaSeasonSchedule;
 
   int get seasonIndex => definition.index;
   int get firstDoseNumber => definition.firstDoseNumber;

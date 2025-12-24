@@ -63,6 +63,8 @@ abstract mixin class $GrowthChartStateCopyWith<$Res> {
       AsyncValue<GrowthChartData> chartData,
       ChildSummary? childSummary,
       bool isLoadingChild});
+
+  $ChildSummaryCopyWith<$Res>? get childSummary;
 }
 
 /// @nodoc
@@ -101,6 +103,20 @@ class _$GrowthChartStateCopyWithImpl<$Res>
           : isLoadingChild // ignore: cast_nullable_to_non_nullable
               as bool,
     ));
+  }
+
+  /// Create a copy of GrowthChartState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $ChildSummaryCopyWith<$Res>? get childSummary {
+    if (_self.childSummary == null) {
+      return null;
+    }
+
+    return $ChildSummaryCopyWith<$Res>(_self.childSummary!, (value) {
+      return _then(_self.copyWith(childSummary: value));
+    });
   }
 }
 
@@ -341,6 +357,9 @@ abstract mixin class _$GrowthChartStateCopyWith<$Res>
       AsyncValue<GrowthChartData> chartData,
       ChildSummary? childSummary,
       bool isLoadingChild});
+
+  @override
+  $ChildSummaryCopyWith<$Res>? get childSummary;
 }
 
 /// @nodoc
@@ -379,6 +398,20 @@ class __$GrowthChartStateCopyWithImpl<$Res>
           : isLoadingChild // ignore: cast_nullable_to_non_nullable
               as bool,
     ));
+  }
+
+  /// Create a copy of GrowthChartState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $ChildSummaryCopyWith<$Res>? get childSummary {
+    if (_self.childSummary == null) {
+      return null;
+    }
+
+    return $ChildSummaryCopyWith<$Res>(_self.childSummary!, (value) {
+      return _then(_self.copyWith(childSummary: value));
+    });
   }
 }
 

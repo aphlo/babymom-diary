@@ -1,35 +1,20 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
 import '../../../../../core/types/gender.dart';
 
-class ChildSummary {
-  const ChildSummary({
-    required this.id,
-    required this.name,
-    required this.birthday,
-    this.dueDate,
-    required this.gender,
-  });
+part 'child_summary.freezed.dart';
 
-  final String id;
-  final String name;
-  final DateTime birthday;
-  final DateTime? dueDate;
-  final Gender gender;
+@freezed
+sealed class ChildSummary with _$ChildSummary {
+  const ChildSummary._();
 
-  ChildSummary copyWith({
-    String? id,
-    String? name,
-    DateTime? birthday,
+  const factory ChildSummary({
+    required String id,
+    required String name,
+    required DateTime birthday,
     DateTime? dueDate,
-    Gender? gender,
-  }) {
-    return ChildSummary(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      birthday: birthday ?? this.birthday,
-      dueDate: dueDate ?? this.dueDate,
-      gender: gender ?? this.gender,
-    );
-  }
+    required Gender gender,
+  }) = _ChildSummary;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -39,7 +24,7 @@ class ChildSummary {
         'gender': gender.key,
       };
 
-  factory ChildSummary.fromJson(Map<String, dynamic> json) {
+  static ChildSummary fromJson(Map<String, dynamic> json) {
     final birthdayRaw = json['birthday'];
     final dueDateRaw = json['dueDate'];
     return ChildSummary(
@@ -52,21 +37,4 @@ class ChildSummary {
       gender: genderFromKey(json['gender'] as String?),
     );
   }
-
-  bool isSameAs(ChildSummary other) {
-    return id == other.id &&
-        name == other.name &&
-        birthday == other.birthday &&
-        dueDate == other.dueDate &&
-        gender == other.gender;
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is ChildSummary && isSameAs(other);
-  }
-
-  @override
-  int get hashCode => Object.hash(id, name, birthday, dueDate, gender);
 }

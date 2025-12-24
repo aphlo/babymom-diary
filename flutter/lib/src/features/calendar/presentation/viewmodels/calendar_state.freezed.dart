@@ -808,6 +808,7 @@ abstract mixin class $CalendarStateCopyWith<$Res> {
       CalendarSettings calendarSettings,
       CalendarUiEvent? pendingUiEvent});
 
+  $CalendarSettingsCopyWith<$Res> get calendarSettings;
   $CalendarUiEventCopyWith<$Res>? get pendingUiEvent;
 }
 
@@ -872,6 +873,16 @@ class _$CalendarStateCopyWithImpl<$Res>
           : pendingUiEvent // ignore: cast_nullable_to_non_nullable
               as CalendarUiEvent?,
     ));
+  }
+
+  /// Create a copy of CalendarState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $CalendarSettingsCopyWith<$Res> get calendarSettings {
+    return $CalendarSettingsCopyWith<$Res>(_self.calendarSettings, (value) {
+      return _then(_self.copyWith(calendarSettings: value));
+    });
   }
 
   /// Create a copy of CalendarState
@@ -1220,6 +1231,8 @@ abstract mixin class _$CalendarStateCopyWith<$Res>
       CalendarUiEvent? pendingUiEvent});
 
   @override
+  $CalendarSettingsCopyWith<$Res> get calendarSettings;
+  @override
   $CalendarUiEventCopyWith<$Res>? get pendingUiEvent;
 }
 
@@ -1284,6 +1297,16 @@ class __$CalendarStateCopyWithImpl<$Res>
           : pendingUiEvent // ignore: cast_nullable_to_non_nullable
               as CalendarUiEvent?,
     ));
+  }
+
+  /// Create a copy of CalendarState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $CalendarSettingsCopyWith<$Res> get calendarSettings {
+    return $CalendarSettingsCopyWith<$Res>(_self.calendarSettings, (value) {
+      return _then(_self.copyWith(calendarSettings: value));
+    });
   }
 
   /// Create a copy of CalendarState

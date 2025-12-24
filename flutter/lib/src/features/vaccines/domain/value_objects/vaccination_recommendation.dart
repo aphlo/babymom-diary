@@ -1,23 +1,19 @@
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'vaccination_recommendation.freezed.dart';
 
 enum RecommendationSource {
   noteConstraint,
   masterSchedule,
 }
 
-@immutable
-class VaccinationRecommendation {
-  const VaccinationRecommendation({
-    required this.doseNumber,
-    required this.source,
-    this.startDate,
-    this.endDate,
-    this.labels = const <String>[],
-  });
-
-  final int doseNumber;
-  final RecommendationSource source;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final List<String> labels;
+@freezed
+sealed class VaccinationRecommendation with _$VaccinationRecommendation {
+  const factory VaccinationRecommendation({
+    required int doseNumber,
+    required RecommendationSource source,
+    DateTime? startDate,
+    DateTime? endDate,
+    @Default(<String>[]) List<String> labels,
+  }) = _VaccinationRecommendation;
 }
