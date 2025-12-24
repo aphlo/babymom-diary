@@ -1,18 +1,17 @@
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-@immutable
-class HouseholdMember {
-  const HouseholdMember({
-    required this.uid,
-    required this.displayName,
-    required this.role,
-    required this.joinedAt,
-  });
+part 'household_member.freezed.dart';
 
-  final String uid;
-  final String displayName;
-  final String role; // 'admin' or 'member'
-  final DateTime joinedAt;
+@freezed
+sealed class HouseholdMember with _$HouseholdMember {
+  const HouseholdMember._();
+
+  const factory HouseholdMember({
+    required String uid,
+    required String displayName,
+    required String role, // 'admin' or 'member'
+    required DateTime joinedAt,
+  }) = _HouseholdMember;
 
   bool get isAdmin => role == 'admin';
 }

@@ -54,6 +54,8 @@ abstract mixin class $CalendarSettingsStateCopyWith<$Res> {
       _$CalendarSettingsStateCopyWithImpl;
   @useResult
   $Res call({CalendarSettings settings, bool isLoading, String? error});
+
+  $CalendarSettingsCopyWith<$Res> get settings;
 }
 
 /// @nodoc
@@ -87,6 +89,16 @@ class _$CalendarSettingsStateCopyWithImpl<$Res>
           : error // ignore: cast_nullable_to_non_nullable
               as String?,
     ));
+  }
+
+  /// Create a copy of CalendarSettingsState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $CalendarSettingsCopyWith<$Res> get settings {
+    return $CalendarSettingsCopyWith<$Res>(_self.settings, (value) {
+      return _then(_self.copyWith(settings: value));
+    });
   }
 }
 
@@ -299,6 +311,9 @@ abstract mixin class _$CalendarSettingsStateCopyWith<$Res>
   @override
   @useResult
   $Res call({CalendarSettings settings, bool isLoading, String? error});
+
+  @override
+  $CalendarSettingsCopyWith<$Res> get settings;
 }
 
 /// @nodoc
@@ -332,6 +347,16 @@ class __$CalendarSettingsStateCopyWithImpl<$Res>
           : error // ignore: cast_nullable_to_non_nullable
               as String?,
     ));
+  }
+
+  /// Create a copy of CalendarSettingsState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $CalendarSettingsCopyWith<$Res> get settings {
+    return $CalendarSettingsCopyWith<$Res>(_self.settings, (value) {
+      return _then(_self.copyWith(settings: value));
+    });
   }
 }
 

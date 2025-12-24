@@ -82,8 +82,7 @@ class AppBarChildInfo extends ConsumerWidget {
           final age = _ageString(birthday, selectedDate);
 
           final snapshotValue = snapshotState.value;
-          final shouldSaveSnapshot =
-              snapshotValue == null || !snapshotValue.isSameAs(d);
+          final shouldSaveSnapshot = snapshotValue == null || snapshotValue != d;
           if (shouldSaveSnapshot) {
             SchedulerBinding.instance.addPostFrameCallback((_) {
               snapshotNotifier.save(d);

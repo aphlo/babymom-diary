@@ -1,16 +1,14 @@
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-@immutable
-class VaccinationPeriod {
-  const VaccinationPeriod({
-    required this.id,
-    required this.label,
-    required this.order,
-  });
+part 'vaccination_period.freezed.dart';
 
-  final String id;
-  final String label;
-  final int order;
+@freezed
+sealed class VaccinationPeriod with _$VaccinationPeriod {
+  const factory VaccinationPeriod({
+    required String id,
+    required String label,
+    required int order,
+  }) = _VaccinationPeriod;
 }
 
 const List<VaccinationPeriod> standardVaccinationPeriods = <VaccinationPeriod>[

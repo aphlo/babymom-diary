@@ -117,19 +117,66 @@ analyzer:
 
 **残タスク:** なし（Phase 1完了）
 
-### Phase 2: シンプルなDomain Entities（優先度：中）
+### Phase 2: シンプルなDomain Entities（優先度：中）✅ 完了
 
-**対象**: ビジネスロジックが少ないEntity
+**対象**: ビジネスロジックが少ないEntity/Value Object
 
-**例**:
-- CalendarEvent (lib/src/features/calendar/domain/entities/calendar_event.dart)
-  - 計算プロパティあり: startDateOnly, endDateOnly
-  - 手動equals/hashCode実装（82行）
+**完了したファイル（2025-12-24）:**
 
-- DoseRecord (lib/src/features/vaccines/domain/entities/dose_record.dart)
-  - 条件付きcopyWith（clearReservationGroupフラグ）
-  - ビジネスロジックメソッド: markAsScheduled(), markAsCompleted()
-  - 手動equals/hashCode実装（107行）
+#### Entities（9ファイル）
+- ✅ `lib/src/features/calendar/domain/entities/calendar_event.dart`
+  - 計算プロパティあり: startDateOnly, endDateOnly, occursOn()
+  - 手動equals/hashCode/copyWith削除（82行→28行）
+
+- ✅ `lib/src/features/calendar/domain/entities/calendar_settings.dart`
+  - 手動equals/hashCode/copyWith/toString削除（33行→12行）
+
+- ✅ `lib/src/features/vaccines/domain/entities/dose_record.dart`
+  - 条件付きcopyWith（clearReservationGroupフラグ）→ clearReservationGroup()メソッドに変更
+  - ビジネスロジックメソッド: markAsScheduled(), markAsScheduledWithGroup(), markAsCompleted()を保持
+  - 手動equals/hashCode/copyWith/toString削除（105行→58行）
+
+- ✅ `lib/src/features/vaccines/domain/entities/reservation_group.dart`
+  - ReservationGroupMember + VaccinationReservationGroup の2クラス
+  - 手動copyWith削除（56行→27行）
+
+- ✅ `lib/src/features/vaccines/domain/entities/vaccine_reservation_request.dart`
+  - clearReservationGroupフラグ → clearReservationGroup()メソッドに変更
+  - 手動equals/hashCode/copyWith/toString削除（72行→24行）
+
+- ✅ `lib/src/features/force_update/domain/entities/update_requirement.dart`
+  - シンプルな構造（17行→14行）
+
+- ✅ `lib/src/features/menu/household/domain/entities/household_member.dart`
+  - isAdmin getterを保持（18行→17行）
+
+- ✅ `lib/src/features/menu/children/domain/entities/child_summary.dart`
+  - カスタムtoJson/fromJsonを保持（フォールバック処理あり）
+  - isSameAs()メソッドは不要（freezed自動生成の==に置換）
+  - 手動copyWith/equals/hashCode削除（72行→40行）
+
+- ✅ `lib/src/features/ads/domain/entities/ad_config.dart`
+  - factory AdConfig.test/production → static メソッドに変更
+  - （29行→27行）
+
+#### Value Objects（4ファイル）
+- ✅ `lib/src/features/force_update/domain/value_objects/app_version.dart`
+  - Comparable<AppVersion>インターフェース実装を保持
+  - 比較演算子（<, >, <=, >=）を保持
+  - factory AppVersion.parse()を保持
+  - 手動equals/hashCode削除（80行→68行）
+
+- ✅ `lib/src/features/vaccines/domain/value_objects/vaccination_period.dart`
+  - グローバル定数 standardVaccinationPeriods を保持
+  - （36行→33行）
+
+- ✅ `lib/src/features/vaccines/domain/value_objects/vaccination_recommendation.dart`
+  - @Default使用（23行→19行）
+
+- ✅ `lib/src/features/vaccines/domain/value_objects/influenza_season.dart`
+  - InfluenzaSeasonDefinition + InfluenzaSeasonSchedule の2クラス
+  - getter, seasonLabel()メソッドを保持
+  - （42行→40行）
 
 ### Phase 3: Infrastructure層の一部（優先度：低）
 
@@ -345,7 +392,7 @@ sealed class Rectangle with _$Rectangle {
 | Phase | 対象 | 進捗 | 完了日 |
 |-------|------|------|--------|
 | Phase 1 | Presentation層State | ✅ 15/15 | 2025-12-22 |
-| Phase 2 | Domain Entities | ⏳ 未着手 | - |
+| Phase 2 | Domain Entities/Value Objects | ✅ 13/13 | 2025-12-24 |
 | Phase 3 | Infrastructure層DTO | 🔄 1/10+ | - |
 | Phase 4 | 対象外（手動維持） | - | - |
 
@@ -353,6 +400,14 @@ sealed class Rectangle with _$Rectangle {
 
 ## 更新履歴
 
+- 2025-12-24: Phase 2完了（Domain Entities/Value Objectsをfreezed化、計13ファイル）
+  - Entities: CalendarEvent, CalendarSettings, DoseRecord, ReservationGroup, VaccineReservationRequest, UpdateRequirement, HouseholdMember, ChildSummary, AdConfig
+  - Value Objects: AppVersion, VaccinationPeriod, VaccinationRecommendation, InfluenzaSeasonSchedule
+  - 主な変更点:
+    - clearReservationGroupフラグ → clearReservationGroup()メソッドに変更（DoseRecord, VaccineReservationRequest）
+    - factory → staticメソッドに変更（AdConfig）
+    - isSameAs() → ==演算子に置換（ChildSummary）
+    - Comparable<AppVersion>インターフェース実装を保持
 - 2025-12-22: Phase 1完了（追加2ファイル: WidgetSettingsState, VaccineVisibilitySettingsState）
   - 計15ファイルのState/Paramsをfreezed化
 - 2025-12-22: Phase 1完了（Presentation層State/Paramsをfreezed化、計13ファイル + Params）
