@@ -30,12 +30,6 @@ void main() {
         expect(newState.error, 'エラーメッセージ');
       });
 
-      test('clearError=true で error を null にできる', () {
-        final state = const VaccineDetailState().copyWith(error: 'エラーメッセージ');
-        final newState = state.copyWith(clearError: true);
-        expect(newState.error, isNull);
-      });
-
       test('doseStatuses を更新できる', () {
         const state = VaccineDetailState();
         final statuses = {
@@ -72,17 +66,6 @@ void main() {
         final newState = state.copyWith(recommendation: recommendation);
         expect(newState.recommendation?.doseNumber, 1);
         expect(newState.recommendation?.message, contains('2024年3月15日'));
-      });
-
-      test('clearRecommendation=true で recommendation を null にできる', () {
-        const recommendation = DoseRecommendationInfo(
-          doseNumber: 1,
-          message: 'メッセージ',
-        );
-        final state =
-            const VaccineDetailState().copyWith(recommendation: recommendation);
-        final newState = state.copyWith(clearRecommendation: true);
-        expect(newState.recommendation, isNull);
       });
     });
   });

@@ -1,57 +1,39 @@
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'vaccine_visibility_settings_state.freezed.dart';
 
 /// ワクチン表示設定画面の状態
-@immutable
-class VaccineVisibilitySettingsState {
-  const VaccineVisibilitySettingsState({
-    this.isLoading = false,
-    this.error,
-    this.visibilitySettings = const {},
-    this.vaccines = const [],
-    this.isSaving = false,
-  });
+@freezed
+sealed class VaccineVisibilitySettingsState
+    with _$VaccineVisibilitySettingsState {
+  const VaccineVisibilitySettingsState._();
 
-  /// ローディング中かどうか
-  final bool isLoading;
+  const factory VaccineVisibilitySettingsState({
+    /// ローディング中かどうか
+    @Default(false) bool isLoading,
 
-  /// エラーメッセージ
-  final String? error;
-
-  /// ワクチンIDをキーとした表示設定マップ
-  final Map<String, bool> visibilitySettings;
-
-  /// 全てのワクチン情報（id, name）
-  final List<VaccineDisplayInfo> vaccines;
-
-  /// 保存中かどうか
-  final bool isSaving;
-
-  VaccineVisibilitySettingsState copyWith({
-    bool? isLoading,
+    /// エラーメッセージ
     String? error,
-    Map<String, bool>? visibilitySettings,
-    List<VaccineDisplayInfo>? vaccines,
-    bool? isSaving,
-    bool clearError = false,
-  }) {
-    return VaccineVisibilitySettingsState(
-      isLoading: isLoading ?? this.isLoading,
-      error: clearError ? null : (error ?? this.error),
-      visibilitySettings: visibilitySettings ?? this.visibilitySettings,
-      vaccines: vaccines ?? this.vaccines,
-      isSaving: isSaving ?? this.isSaving,
-    );
-  }
+
+    /// ワクチンIDをキーとした表示設定マップ
+    @Default({}) Map<String, bool> visibilitySettings,
+
+    /// 全てのワクチン情報（id, name）
+    @Default([]) List<VaccineDisplayInfo> vaccines,
+
+    /// 保存中かどうか
+    @Default(false) bool isSaving,
+  }) = _VaccineVisibilitySettingsState;
+
+  /// エラーをクリアした新しい状態を返す
+  VaccineVisibilitySettingsState clearError() => copyWith(error: null);
 }
 
 /// ワクチンの表示情報
-@immutable
-class VaccineDisplayInfo {
-  const VaccineDisplayInfo({
-    required this.id,
-    required this.name,
-  });
-
-  final String id;
-  final String name;
+@freezed
+sealed class VaccineDisplayInfo with _$VaccineDisplayInfo {
+  const factory VaccineDisplayInfo({
+    required String id,
+    required String name,
+  }) = _VaccineDisplayInfo;
 }

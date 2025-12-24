@@ -1,79 +1,33 @@
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-@immutable
-class ConcurrentVaccineMember {
-  const ConcurrentVaccineMember({
-    required this.vaccineId,
-    required this.vaccineName,
-    required this.doseId,
-    required this.doseNumber,
-  });
+part 'concurrent_vaccines_state.freezed.dart';
 
-  final String vaccineId;
-  final String vaccineName;
-  final String doseId;
-  final int doseNumber; // UI表示用
+@freezed
+sealed class ConcurrentVaccineMember with _$ConcurrentVaccineMember {
+  const factory ConcurrentVaccineMember({
+    required String vaccineId,
+    required String vaccineName,
+    required String doseId,
+    required int doseNumber, // UI表示用
+  }) = _ConcurrentVaccineMember;
 }
 
-@immutable
-class ConcurrentVaccinesState {
-  const ConcurrentVaccinesState({
-    this.isLoading = false,
-    this.error,
-    this.members = const <ConcurrentVaccineMember>[],
-  });
-
-  final bool isLoading;
-  final String? error;
-  final List<ConcurrentVaccineMember> members;
-
-  ConcurrentVaccinesState copyWith({
-    bool? isLoading,
+@freezed
+sealed class ConcurrentVaccinesState with _$ConcurrentVaccinesState {
+  const factory ConcurrentVaccinesState({
+    @Default(false) bool isLoading,
     String? error,
-    List<ConcurrentVaccineMember>? members,
-    bool clearError = false,
-  }) {
-    return ConcurrentVaccinesState(
-      isLoading: isLoading ?? this.isLoading,
-      error: clearError ? null : (error ?? this.error),
-      members: members ?? this.members,
-    );
-  }
+    @Default(<ConcurrentVaccineMember>[]) List<ConcurrentVaccineMember> members,
+  }) = _ConcurrentVaccinesState;
 }
 
-@immutable
-class ConcurrentVaccinesParams {
-  const ConcurrentVaccinesParams({
-    required this.householdId,
-    required this.childId,
-    required this.reservationGroupId,
-    required this.currentVaccineId,
-    required this.currentDoseId,
-  });
-
-  final String householdId;
-  final String childId;
-  final String reservationGroupId;
-  final String currentVaccineId;
-  final String currentDoseId;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ConcurrentVaccinesParams &&
-          runtimeType == other.runtimeType &&
-          householdId == other.householdId &&
-          childId == other.childId &&
-          reservationGroupId == other.reservationGroupId &&
-          currentVaccineId == other.currentVaccineId &&
-          currentDoseId == other.currentDoseId;
-
-  @override
-  int get hashCode => Object.hash(
-        householdId,
-        childId,
-        reservationGroupId,
-        currentVaccineId,
-        currentDoseId,
-      );
+@freezed
+sealed class ConcurrentVaccinesParams with _$ConcurrentVaccinesParams {
+  const factory ConcurrentVaccinesParams({
+    required String householdId,
+    required String childId,
+    required String reservationGroupId,
+    required String currentVaccineId,
+    required String currentDoseId,
+  }) = _ConcurrentVaccinesParams;
 }

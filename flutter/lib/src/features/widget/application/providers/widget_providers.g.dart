@@ -180,7 +180,7 @@ final class WidgetSettingsNotifierProvider
 }
 
 String _$widgetSettingsNotifierHash() =>
-    r'd8411e90ab8d4e6901f0bc6390f86b73ff7929ba';
+    r'5d0b3c6720adcb4e5d1ccd3e97cff76d5072cd01';
 
 /// ウィジェット設定プロバイダー
 

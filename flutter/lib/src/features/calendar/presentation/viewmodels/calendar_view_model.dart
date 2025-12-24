@@ -500,7 +500,14 @@ class CalendarViewModel extends _$CalendarViewModel {
     for (final entry in map.entries) {
       entry.value.sort((a, b) => a.start.compareTo(b.start));
     }
-    return map;
+    return Map<DateTime, List<CalendarEvent>>.unmodifiable(
+      map.map(
+        (key, value) => MapEntry(
+          key,
+          List<CalendarEvent>.unmodifiable(value),
+        ),
+      ),
+    );
   }
 
   static DateTime _normalizeDate(DateTime date) =>

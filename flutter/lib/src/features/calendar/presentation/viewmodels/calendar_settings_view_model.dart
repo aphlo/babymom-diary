@@ -33,7 +33,11 @@ class CalendarSettingsViewModel extends _$CalendarSettingsViewModel {
     try {
       state = state.copyWith(isLoading: true, error: null);
       final settings = await repository.getSettings();
-      state = state.copyWith(settings: settings, isLoading: false);
+      state = state.copyWith(
+        settings: settings,
+        isLoading: false,
+        error: null,
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -52,7 +56,11 @@ class CalendarSettingsViewModel extends _$CalendarSettingsViewModel {
         startingDayOfWeek: startingDayOfWeek,
       );
       await repository.saveSettings(newSettings);
-      state = state.copyWith(settings: newSettings, isLoading: false);
+      state = state.copyWith(
+        settings: newSettings,
+        isLoading: false,
+        error: null,
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,

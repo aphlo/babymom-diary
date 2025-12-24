@@ -36,7 +36,11 @@ class ConcurrentVaccinesViewModel extends _$ConcurrentVaccinesViewModel {
       );
 
       if (group == null) {
-        state = state.copyWith(isLoading: false, members: const []);
+        state = state.copyWith(
+          isLoading: false,
+          members: const [],
+          error: null,
+        );
         return;
       }
 
@@ -47,7 +51,11 @@ class ConcurrentVaccinesViewModel extends _$ConcurrentVaccinesViewModel {
       );
 
       if (otherMembers.isEmpty) {
-        state = state.copyWith(isLoading: false, members: const []);
+        state = state.copyWith(
+          isLoading: false,
+          members: const [],
+          error: null,
+        );
         return;
       }
 
@@ -86,6 +94,7 @@ class ConcurrentVaccinesViewModel extends _$ConcurrentVaccinesViewModel {
       state = state.copyWith(
         isLoading: false,
         members: List<ConcurrentVaccineMember>.unmodifiable(resolvedMembers),
+        error: null,
       );
     } catch (_) {
       state = state.copyWith(

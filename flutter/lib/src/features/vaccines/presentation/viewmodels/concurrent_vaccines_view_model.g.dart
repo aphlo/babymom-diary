@@ -61,7 +61,7 @@ final class ConcurrentVaccinesViewModelProvider extends $NotifierProvider<
 }
 
 String _$concurrentVaccinesViewModelHash() =>
-    r'aeee2caaaaea4d31e3e133f81b58bc18760d1fef';
+    r'7fa8fa6f729dc50be3ccfb2515c7b1ddce12f354';
 
 final class ConcurrentVaccinesViewModelFamily extends $Family
     with
