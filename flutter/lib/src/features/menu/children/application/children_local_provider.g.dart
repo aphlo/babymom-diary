@@ -49,7 +49,7 @@ final class ChildrenLocalProvider
   }
 }
 
-String _$childrenLocalHash() => r'7291171650514f937543a8fe403e09fa046c70b6';
+String _$childrenLocalHash() => r'0238a91c3ee962c755af593b36a9c8f4b87c33fc';
 
 final class ChildrenLocalFamily extends $Family
     with

@@ -1,39 +1,32 @@
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../child_record/domain/value/record_type.dart';
 
+part 'widget_settings.freezed.dart';
+
 /// 横長ウィジェット（Medium）の設定
-@immutable
-class MediumWidgetSettings {
+@Freezed(toJson: false, fromJson: false)
+sealed class MediumWidgetSettings with _$MediumWidgetSettings {
+  const MediumWidgetSettings._();
+
   /// 3列で表示する3種類のRecordType
-  final List<RecordType> displayRecordTypes;
-
   /// 下部に表示する5つのクイックアクション
-  final List<RecordType> quickActionTypes;
-
-  const MediumWidgetSettings({
-    this.displayRecordTypes = const [
+  const factory MediumWidgetSettings({
+    @Default([
       RecordType.breastRight,
       RecordType.formula,
       RecordType.pee,
-    ],
-    this.quickActionTypes = const [
+    ])
+    List<RecordType> displayRecordTypes,
+    @Default([
       RecordType.breastLeft,
       RecordType.formula,
       RecordType.pee,
       RecordType.poop,
       RecordType.temperature,
-    ],
-  });
-
-  MediumWidgetSettings copyWith({
-    List<RecordType>? displayRecordTypes,
-    List<RecordType>? quickActionTypes,
-  }) =>
-      MediumWidgetSettings(
-        displayRecordTypes: displayRecordTypes ?? this.displayRecordTypes,
-        quickActionTypes: quickActionTypes ?? this.quickActionTypes,
-      );
+    ])
+    List<RecordType> quickActionTypes,
+  }) = _MediumWidgetSettings;
 
   Map<String, dynamic> toJson() => {
         'displayRecordTypes': displayRecordTypes.map((t) => t.name).toList(),
@@ -58,48 +51,21 @@ class MediumWidgetSettings {
           ],
     );
   }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is MediumWidgetSettings &&
-          runtimeType == other.runtimeType &&
-          _listEquals(displayRecordTypes, other.displayRecordTypes) &&
-          _listEquals(quickActionTypes, other.quickActionTypes);
-
-  @override
-  int get hashCode => Object.hash(
-        Object.hashAll(displayRecordTypes),
-        Object.hashAll(quickActionTypes),
-      );
-
-  bool _listEquals<T>(List<T> a, List<T> b) {
-    if (a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
 }
 
 /// 正方形ウィジェット（Small）の設定
-@immutable
-class SmallWidgetSettings {
+@Freezed(toJson: false, fromJson: false)
+sealed class SmallWidgetSettings with _$SmallWidgetSettings {
+  const SmallWidgetSettings._();
+
   /// 表示するRecordType（nullで全種類）
-  final RecordType? filterRecordType;
-
-  const SmallWidgetSettings({
-    this.filterRecordType,
-  });
-
-  SmallWidgetSettings copyWith({
+  const factory SmallWidgetSettings({
     RecordType? filterRecordType,
-    bool clearFilter = false,
-  }) =>
-      SmallWidgetSettings(
-        filterRecordType:
-            clearFilter ? null : (filterRecordType ?? this.filterRecordType),
-      );
+  }) = _SmallWidgetSettings;
+
+  /// filterRecordTypeをnullにクリアする
+  SmallWidgetSettings clearFilter() =>
+      const SmallWidgetSettings(filterRecordType: null);
 
   Map<String, dynamic> toJson() => {
         if (filterRecordType != null)
@@ -113,37 +79,17 @@ class SmallWidgetSettings {
           filterType != null ? RecordType.values.byName(filterType) : null,
     );
   }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SmallWidgetSettings &&
-          runtimeType == other.runtimeType &&
-          filterRecordType == other.filterRecordType;
-
-  @override
-  int get hashCode => filterRecordType.hashCode;
 }
 
 /// ウィジェット設定全体
-@immutable
-class WidgetSettings {
-  final MediumWidgetSettings mediumWidget;
-  final SmallWidgetSettings smallWidget;
+@Freezed(toJson: false, fromJson: false)
+sealed class WidgetSettings with _$WidgetSettings {
+  const WidgetSettings._();
 
-  const WidgetSettings({
-    this.mediumWidget = const MediumWidgetSettings(),
-    this.smallWidget = const SmallWidgetSettings(),
-  });
-
-  WidgetSettings copyWith({
-    MediumWidgetSettings? mediumWidget,
-    SmallWidgetSettings? smallWidget,
-  }) =>
-      WidgetSettings(
-        mediumWidget: mediumWidget ?? this.mediumWidget,
-        smallWidget: smallWidget ?? this.smallWidget,
-      );
+  const factory WidgetSettings({
+    @Default(MediumWidgetSettings()) MediumWidgetSettings mediumWidget,
+    @Default(SmallWidgetSettings()) SmallWidgetSettings smallWidget,
+  }) = _WidgetSettings;
 
   Map<String, dynamic> toJson() => {
         'mediumWidget': mediumWidget.toJson(),
@@ -162,15 +108,4 @@ class WidgetSettings {
           : const SmallWidgetSettings(),
     );
   }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is WidgetSettings &&
-          runtimeType == other.runtimeType &&
-          mediumWidget == other.mediumWidget &&
-          smallWidget == other.smallWidget;
-
-  @override
-  int get hashCode => Object.hash(mediumWidget, smallWidget);
 }

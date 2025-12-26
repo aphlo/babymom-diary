@@ -1,22 +1,23 @@
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'vaccine_visibility_settings.freezed.dart';
 
 /// ワクチンの表示・非表示設定
 ///
 /// 世帯単位で管理され、特定のワクチンを画面上で表示するかどうかを制御します。
-@immutable
-class VaccineVisibilitySettings {
-  const VaccineVisibilitySettings({
-    required this.householdId,
-    required this.visibilityMap,
-  });
+@freezed
+sealed class VaccineVisibilitySettings with _$VaccineVisibilitySettings {
+  const VaccineVisibilitySettings._();
 
-  /// 世帯ID
-  final String householdId;
+  const factory VaccineVisibilitySettings({
+    /// 世帯ID
+    required String householdId,
 
-  /// ワクチンIDをキーとした表示設定マップ
-  /// true: 表示, false: 非表示
-  /// キーが存在しない場合はデフォルトで表示
-  final Map<String, bool> visibilityMap;
+    /// ワクチンIDをキーとした表示設定マップ
+    /// true: 表示, false: 非表示
+    /// キーが存在しない場合はデフォルトで表示
+    required Map<String, bool> visibilityMap,
+  }) = _VaccineVisibilitySettings;
 
   /// 指定されたワクチンIDが表示されるべきかどうか
   bool isVisible(String vaccineId) {
@@ -47,15 +48,5 @@ class VaccineVisibilitySettings {
         .where((entry) => !entry.value)
         .map((entry) => entry.key)
         .toList();
-  }
-
-  VaccineVisibilitySettings copyWith({
-    String? householdId,
-    Map<String, bool>? visibilityMap,
-  }) {
-    return VaccineVisibilitySettings(
-      householdId: householdId ?? this.householdId,
-      visibilityMap: visibilityMap ?? this.visibilityMap,
-    );
   }
 }

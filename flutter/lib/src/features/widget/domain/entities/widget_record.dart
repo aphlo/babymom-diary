@@ -1,24 +1,22 @@
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../child_record/domain/value/excretion_volume.dart';
 import '../../../child_record/domain/value/record_type.dart';
 
-/// ウィジェットに表示する記録情報
-@immutable
-class WidgetRecord {
-  final String id;
-  final RecordType type;
-  final DateTime at;
-  final double? amount;
-  final ExcretionVolume? excretionVolume;
+part 'widget_record.freezed.dart';
 
-  const WidgetRecord({
-    required this.id,
-    required this.type,
-    required this.at,
-    this.amount,
-    this.excretionVolume,
-  });
+/// ウィジェットに表示する記録情報
+@Freezed(toJson: false, fromJson: false)
+sealed class WidgetRecord with _$WidgetRecord {
+  const WidgetRecord._();
+
+  const factory WidgetRecord({
+    required String id,
+    required RecordType type,
+    required DateTime at,
+    double? amount,
+    ExcretionVolume? excretionVolume,
+  }) = _WidgetRecord;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -37,18 +35,4 @@ class WidgetRecord {
             ? ExcretionVolume.values.byName(json['excretionVolume'] as String)
             : null,
       );
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is WidgetRecord &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          type == other.type &&
-          at == other.at &&
-          amount == other.amount &&
-          excretionVolume == other.excretionVolume;
-
-  @override
-  int get hashCode => Object.hash(id, type, at, amount, excretionVolume);
 }
