@@ -1,17 +1,17 @@
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'widget_child.freezed.dart';
 
 /// ウィジェットに表示する子供情報
-@immutable
-class WidgetChild {
-  final String id;
-  final String name;
-  final DateTime birthday;
+@Freezed(toJson: false, fromJson: false)
+sealed class WidgetChild with _$WidgetChild {
+  const WidgetChild._();
 
-  const WidgetChild({
-    required this.id,
-    required this.name,
-    required this.birthday,
-  });
+  const factory WidgetChild({
+    required String id,
+    required String name,
+    required DateTime birthday,
+  }) = _WidgetChild;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -24,16 +24,4 @@ class WidgetChild {
         name: json['name'] as String,
         birthday: DateTime.parse(json['birthday'] as String),
       );
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is WidgetChild &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          name == other.name &&
-          birthday == other.birthday;
-
-  @override
-  int get hashCode => Object.hash(id, name, birthday);
 }

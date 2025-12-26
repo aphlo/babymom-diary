@@ -1,26 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_category.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_requirement.dart';
 
-class DoseEntryDto {
-  const DoseEntryDto({
-    required this.doseId,
-    required this.status,
-    this.scheduledDate,
-    this.reservationGroupId,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+part 'vaccination_record.freezed.dart';
 
-  final String doseId;
-  final DoseStatus status;
-  final DateTime? scheduledDate;
-  final String? reservationGroupId;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+@freezed
+sealed class DoseEntryDto with _$DoseEntryDto {
+  const DoseEntryDto._();
+
+  const factory DoseEntryDto({
+    required String doseId,
+    required DoseStatus status,
+    DateTime? scheduledDate,
+    String? reservationGroupId,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+  }) = _DoseEntryDto;
 
   factory DoseEntryDto.fromJson(String doseId, Map<String, dynamic> json) {
     final statusString = json['status'] as String?;
@@ -32,17 +31,6 @@ class DoseEntryDto {
       createdAt: (json['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (json['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
-  }
-
-  static DoseStatus? _parseDoseStatus(String? value) {
-    switch (value) {
-      case 'scheduled':
-        return DoseStatus.scheduled;
-      case 'completed':
-        return DoseStatus.completed;
-      default:
-        return null;
-    }
   }
 
   Map<String, dynamic> toJson() {
@@ -66,6 +54,17 @@ class DoseEntryDto {
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
+  }
+}
+
+DoseStatus? _parseDoseStatus(String? value) {
+  switch (value) {
+    case 'scheduled':
+      return DoseStatus.scheduled;
+    case 'completed':
+      return DoseStatus.completed;
+    default:
+      return null;
   }
 }
 
