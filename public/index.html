@@ -3,332 +3,26 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>milu - 赤ちゃんの授乳記録と予防接種管理</title>
+    <title>milu</title>
     <meta name="description" content="miluだけで育児がまとまる。授乳も成長曲線も予防接種もまとめて管理できる育児記録アプリです。">
     <meta name="theme-color" content="#FF8FA3">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/favicon.png">
-    <link rel="apple-touch-icon" href="/favicon.png">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
 
     <!-- OGP -->
     <meta property="og:title" content="milu - 赤ちゃんをmilu あなたをmilu">
     <meta property="og:description" content="miluだけで育児がまとまる。授乳も成長曲線も予防接種もまとめて管理できる育児記録アプリです。">
     <meta property="og:type" content="website">
 
-    <!-- Fonts -->
+    <!-- Fonts: Fredoka (headings) + Nunito (body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      :root {
-        --primary: #FF8FA3;
-        --primary-dark: #E57A8C;
-        --text: #333333;
-        --text-light: #666666;
-        --bg-light: #FFF5F7;
-        --white: #FFFFFF;
-      }
-
-      body {
-        font-family: 'Noto Sans JP', sans-serif;
-        color: var(--text);
-        line-height: 1.8;
-        background: var(--white);
-      }
-
-      /* Header */
-      header {
-        background: var(--white);
-        padding: 16px 24px;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 100;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      }
-
-      .header-content {
-        max-width: 1200px;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .logo {
-        font-size: 28px;
-        font-weight: 700;
-        color: var(--primary);
-        text-decoration: none;
-      }
-
-      /* Hero Section */
-      .hero {
-        background: linear-gradient(135deg, var(--bg-light) 0%, var(--white) 100%);
-        padding: 140px 24px 80px;
-        text-align: center;
-      }
-
-      .hero-content {
-        max-width: 800px;
-        margin: 0 auto;
-      }
-
-      .hero-tagline {
-        font-size: 18px;
-        color: var(--primary);
-        font-weight: 500;
-        margin-bottom: 16px;
-      }
-
-      .hero-title {
-        font-size: 42px;
-        font-weight: 700;
-        line-height: 1.4;
-        margin-bottom: 24px;
-        color: var(--text);
-      }
-
-      .hero-title span {
-        color: var(--primary);
-      }
-
-      .hero-description {
-        font-size: 18px;
-        color: var(--text-light);
-        margin-bottom: 40px;
-      }
-
-      .store-buttons {
-        display: flex;
-        gap: 16px;
-        justify-content: center;
-        flex-wrap: wrap;
-      }
-
-      .store-button {
-        display: inline-flex;
-        align-items: center;
-        gap: 12px;
-        background: var(--text);
-        color: var(--white);
-        padding: 14px 28px;
-        border-radius: 12px;
-        text-decoration: none;
-        font-weight: 500;
-        transition: transform 0.2s, box-shadow 0.2s;
-      }
-
-      .store-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-      }
-
-      .store-button svg {
-        width: 24px;
-        height: 24px;
-        fill: currentColor;
-      }
-
-      /* Features Section */
-      .features {
-        padding: 100px 24px;
-        background: var(--white);
-      }
-
-      .section-title {
-        text-align: center;
-        font-size: 32px;
-        font-weight: 700;
-        margin-bottom: 60px;
-        color: var(--text);
-      }
-
-      .section-title span {
-        color: var(--primary);
-      }
-
-      .features-grid {
-        max-width: 1000px;
-        margin: 0 auto;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 40px;
-      }
-
-      .feature-card {
-        background: var(--bg-light);
-        border-radius: 24px;
-        padding: 40px 32px;
-        text-align: center;
-        transition: transform 0.3s, box-shadow 0.3s;
-      }
-
-      .feature-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 32px rgba(255, 143, 163, 0.2);
-      }
-
-      .feature-icon {
-        width: 72px;
-        height: 72px;
-        background: var(--primary);
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 24px;
-        font-size: 32px;
-      }
-
-      .feature-title {
-        font-size: 20px;
-        font-weight: 700;
-        margin-bottom: 12px;
-        color: var(--text);
-      }
-
-      .feature-description {
-        font-size: 15px;
-        color: var(--text-light);
-        line-height: 1.8;
-      }
-
-      /* Benefits Section */
-      .benefits {
-        padding: 100px 24px;
-        background: var(--bg-light);
-      }
-
-      .benefits-list {
-        max-width: 800px;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        gap: 32px;
-      }
-
-      .benefit-item {
-        background: var(--white);
-        border-radius: 20px;
-        padding: 32px 40px;
-        display: flex;
-        align-items: center;
-        gap: 24px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-      }
-
-      .benefit-number {
-        width: 48px;
-        height: 48px;
-        background: var(--primary);
-        color: var(--white);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        font-weight: 700;
-        flex-shrink: 0;
-      }
-
-      .benefit-text {
-        font-size: 18px;
-        font-weight: 500;
-        color: var(--text);
-      }
-
-      /* CTA Section */
-      .cta {
-        padding: 100px 24px;
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-        text-align: center;
-        color: var(--white);
-      }
-
-      .cta-title {
-        font-size: 32px;
-        font-weight: 700;
-        margin-bottom: 16px;
-      }
-
-      .cta-description {
-        font-size: 18px;
-        margin-bottom: 40px;
-        opacity: 0.9;
-      }
-
-      .cta .store-buttons {
-        justify-content: center;
-      }
-
-      .cta .store-button {
-        background: var(--white);
-        color: var(--text);
-      }
-
-      /* Footer */
-      footer {
-        background: var(--text);
-        color: var(--white);
-        padding: 40px 24px;
-        text-align: center;
-      }
-
-      .footer-logo {
-        font-size: 24px;
-        font-weight: 700;
-        color: var(--primary);
-        margin-bottom: 16px;
-      }
-
-      .footer-text {
-        font-size: 14px;
-        opacity: 0.7;
-      }
-
-      /* Responsive */
-      @media (max-width: 768px) {
-        .hero {
-          padding: 120px 20px 60px;
-        }
-
-        .hero-title {
-          font-size: 28px;
-        }
-
-        .hero-description {
-          font-size: 16px;
-        }
-
-        .section-title {
-          font-size: 24px;
-        }
-
-        .feature-card {
-          padding: 32px 24px;
-        }
-
-        .benefit-item {
-          padding: 24px;
-          flex-direction: column;
-          text-align: center;
-        }
-
-        .cta-title {
-          font-size: 24px;
-        }
-      }
-    </style>
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <!-- Header -->
@@ -340,17 +34,212 @@
 
     <!-- Hero Section -->
     <section class="hero">
-      <div class="hero-content">
-        <p class="hero-tagline">赤ちゃんをmilu あなたをmilu</p>
-        <h1 class="hero-title">
-          <span>milu</span>だけで<br>育児がまとまる
-        </h1>
-        <p class="hero-description">
-          授乳も成長曲線も予防接種も、まとめて管理。<br>
-          忙しい毎日の育児をシンプルにサポートします。
-        </p>
+      <div class="hero-container">
+        <div class="hero-content">
+          <div class="hero-badge animate-fade-in">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z"/>
+            </svg>
+            赤ちゃんをmilu あなたをmilu
+          </div>
+          <h1 class="hero-title animate-fade-in delay-100">
+            <span class="highlight">milu</span>だけで<br>
+            <span class="underline-decoration">育児がまとまる</span>
+          </h1>
+          <p class="hero-description animate-fade-in delay-200">
+            授乳も成長曲線も予防接種も、まとめて管理。<br>
+            忙しい毎日の育児をシンプルにサポートします。
+          </p>
+          <div class="store-buttons animate-fade-in delay-300">
+            <a href="https://apps.apple.com/jp/app/milu-%E8%B5%A4%E3%81%A1%E3%82%83%E3%82%93%E3%81%AE%E6%8E%88%E4%B9%B3%E8%A8%98%E9%8C%B2%E3%81%A8%E4%BA%88%E9%98%B2%E6%8E%A5%E7%A8%AE%E7%AE%A1%E7%90%86/id6754955821?l=en-US" class="store-button">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+              </svg>
+              App Store
+            </a>
+            <a href="#" class="store-button">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+              </svg>
+              Google Play
+            </a>
+          </div>
+        </div>
+        <div class="hero-visual animate-fade-in delay-400">
+          <div class="phone-mockup-container">
+            <div class="floating-decoration decoration-1"></div>
+            <div class="floating-decoration decoration-2"></div>
+            <div class="floating-decoration decoration-3"></div>
+            <div class="mascot mascot-bear">
+              <img src="milu_bear.png" alt="miluベアー">
+            </div>
+            <div class="mascot mascot-cat">
+              <img src="milu_cat.png" alt="miluキャット">
+            </div>
+            <div class="phone-mockup">
+              <div class="phone-screen">
+                <img src="home_page.png" alt="miluホーム画面">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+      <div class="section-header animate-fade-in">
+        <h2 class="section-title"><span class="highlight">milu</span>の特徴</h2>
+        <p class="section-description">育児に必要な機能がすべて揃っています</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card animate-fade-in delay-100">
+          <div class="feature-icon">
+            <!-- Baby bottle icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">授乳・ミルク記録</h3>
+          <p class="feature-description">
+            授乳時間やミルクの量をワンタップで簡単記録。毎日の授乳リズムが一目でわかります。
+          </p>
+        </div>
+        <div class="feature-card animate-fade-in delay-200">
+          <div class="feature-icon">
+            <!-- Growth chart icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">成長曲線</h3>
+          <p class="feature-description">
+            身長・体重を記録して成長曲線をチェック。お子さまの成長を可視化できます。
+          </p>
+        </div>
+        <div class="feature-card animate-fade-in delay-300">
+          <div class="feature-icon">
+            <!-- Vaccine/syringe icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">予防接種管理</h3>
+          <p class="feature-description">
+            複雑な予防接種スケジュールを自動で管理。接種漏れを防いで安心です。
+          </p>
+        </div>
+        <div class="feature-card animate-fade-in delay-100">
+          <div class="feature-icon">
+            <!-- Calendar icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">カレンダー</h3>
+          <p class="feature-description">
+            予防接種の日程や行事をカレンダーで一括管理。大切な予定を見逃しません。
+          </p>
+        </div>
+        <div class="feature-card animate-fade-in delay-200">
+          <div class="feature-icon">
+            <!-- Family/users icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">パートナー共有</h3>
+          <p class="feature-description">
+            パートナーと育児を共有できる。二人で協力して育児に取り組めます。
+          </p>
+        </div>
+        <div class="feature-card animate-fade-in delay-300">
+          <div class="feature-icon">
+            <!-- Sparkles icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">シンプル設計</h3>
+          <p class="feature-description">
+            忙しい育児中でも迷わず使える。シンプルで直感的なデザインです。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- App Showcase Section -->
+    <section class="showcase">
+      <div class="showcase-container">
+        <div class="showcase-grid">
+          <div class="showcase-content animate-fade-in">
+            <h2 class="showcase-title">
+              すべての育児記録を<br>
+              <span class="highlight">ひとつのアプリで</span>
+            </h2>
+            <p class="showcase-description">
+              複数のアプリを使い分ける必要はありません。<br>
+              miluだけで、育児のすべてを管理できます。
+            </p>
+            <div class="benefit-list">
+              <div class="benefit-item">
+                <div class="benefit-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <div class="benefit-text">
+                  <h4>まとめて管理</h4>
+                  <p>授乳・成長曲線・予防接種を一括管理</p>
+                </div>
+              </div>
+              <div class="benefit-item">
+                <div class="benefit-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <div class="benefit-text">
+                  <h4>カレンダー連携</h4>
+                  <p>予防接種の日程や行事を一目で確認</p>
+                </div>
+              </div>
+              <div class="benefit-item">
+                <div class="benefit-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </div>
+                <div class="benefit-text">
+                  <h4>家族で共有</h4>
+                  <p>パートナーとリアルタイムで情報共有</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="showcase-visual animate-fade-in delay-200">
+            <div class="showcase-phone">
+              <div class="showcase-phone-screen">
+                <img src="growth_curve.png" alt="成長曲線">
+              </div>
+            </div>
+            <div class="showcase-phone">
+              <div class="showcase-phone-screen">
+                <img src="vaccine_page.png" alt="予防接種管理">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+      <div class="cta-content animate-fade-in">
+        <h2 class="cta-title">今すぐmiluをはじめよう</h2>
+        <p class="cta-description">無料でダウンロードして、育児をもっとシンプルに。</p>
         <div class="store-buttons">
-          <a href="https://apps.apple.com/jp/app/milu-%E8%B5%A4%E3%81%A1%E3%82%83%E3%82%93%E3%81%AE%E6%8E%88%E4%B9%B3%E8%A8%98%E9%8C%B2%E3%81%A8%E4%BA%88%E9%98%B2%E6%8E%A5%E7%A8%AE%E7%AE%A1%E7%90%86/id6754955821?l=en-US" class="store-button">
+          <a href="https://apps.apple.com/jp/app/milu-%E8%B5%A8%E3%81%A1%E3%82%83%E3%82%93%E3%81%AE%E6%8E%88%E4%B9%B3%E8%A8%98%E9%8C%B2%E3%81%A8%E4%BA%88%E9%98%B2%E6%8E%A5%E7%A8%AE%E7%AE%A1%E7%90%86/id6754955821?l=en-US" class="store-button">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
             </svg>
@@ -366,104 +255,45 @@
       </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="features">
-      <h2 class="section-title"><span>milu</span>の特徴</h2>
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">&#x1F37C;</div>
-          <h3 class="feature-title">授乳・ミルク記録</h3>
-          <p class="feature-description">
-            授乳時間やミルクの量をワンタップで簡単記録。
-            毎日の授乳リズムが一目でわかります。
-          </p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">&#x1F4C8;</div>
-          <h3 class="feature-title">成長曲線</h3>
-          <p class="feature-description">
-            身長・体重を記録して成長曲線をチェック。
-            お子さまの成長を可視化できます。
-          </p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">&#x1F489;</div>
-          <h3 class="feature-title">予防接種管理</h3>
-          <p class="feature-description">
-            複雑な予防接種スケジュールを自動で管理。
-            接種漏れを防いで安心です。
-          </p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">&#x1F4C5;</div>
-          <h3 class="feature-title">カレンダー</h3>
-          <p class="feature-description">
-            予防接種の日程や行事をカレンダーで一括管理。
-            大切な予定を見逃しません。
-          </p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">&#x1F46A;</div>
-          <h3 class="feature-title">パートナー共有</h3>
-          <p class="feature-description">
-            パートナーと育児を共有できる。
-            二人で協力して育児に取り組めます。
-          </p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">&#x2728;</div>
-          <h3 class="feature-title">シンプル設計</h3>
-          <p class="feature-description">
-            忙しい育児中でも迷わず使える。
-            シンプルで直感的なデザインです。
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Benefits Section -->
-    <section class="benefits">
-      <h2 class="section-title"><span>milu</span>でできること</h2>
-      <div class="benefits-list">
-        <div class="benefit-item">
-          <div class="benefit-number">1</div>
-          <p class="benefit-text">授乳も成長曲線も予防接種もまとめて管理</p>
-        </div>
-        <div class="benefit-item">
-          <div class="benefit-number">2</div>
-          <p class="benefit-text">予防接種の日程や行事はカレンダーで一括管理</p>
-        </div>
-        <div class="benefit-item">
-          <div class="benefit-number">3</div>
-          <p class="benefit-text">パートナーと育児を共有できる</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta">
-      <h2 class="cta-title">今すぐmiluをはじめよう</h2>
-      <p class="cta-description">無料でダウンロードして、育児をもっとシンプルに。</p>
-      <div class="store-buttons">
-        <a href="https://apps.apple.com/jp/app/milu-%E8%B5%A4%E3%81%A1%E3%82%83%E3%82%93%E3%81%AE%E6%8E%88%E4%B9%B3%E8%A8%98%E9%8C%B2%E3%81%A8%E4%BA%88%E9%98%B2%E6%8E%A5%E7%A8%AE%E7%AE%A1%E7%90%86/id6754955821?l=en-US" class="store-button">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-          </svg>
-          App Store
-        </a>
-        <a href="#" class="store-button">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
-          </svg>
-          Google Play
-        </a>
-      </div>
-    </section>
-
     <!-- Footer -->
     <footer>
-      <div class="footer-logo">milu</div>
-      <p class="footer-text">&copy; 2025 aphlo All rights reserved.</p>
+      <div class="footer-content">
+        <div class="footer-logo">milu</div>
+        <nav class="footer-links">
+          <a href="https://striped-polonium-ee6.notion.site/milu-2b1de238aa60803697b1f06f3c32d2ec?source=copy_link">プライバシーポリシー</a>
+          <a href="https://striped-polonium-ee6.notion.site/milu-2b1de238aa6080acb2a3cbe274d05564?source=copy_link">利用規約</a>
+        </nav>
+        <p class="footer-copyright">&copy; 2025 aphlo All rights reserved.</p>
+      </div>
     </footer>
+
+    <!-- Intersection Observer for scroll animations -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const observerOptions = {
+          threshold: 0.1,
+          rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.style.animationPlayState = 'running';
+              observer.unobserve(entry.target);
+            }
+          });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-fade-in').forEach(el => {
+          el.style.animationPlayState = 'paused';
+          observer.observe(el);
+        });
+
+        // Hero animations should play immediately
+        document.querySelectorAll('.hero .animate-fade-in').forEach(el => {
+          el.style.animationPlayState = 'running';
+        });
+      });
+    </script>
   </body>
 </html>
