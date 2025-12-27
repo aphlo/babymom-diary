@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/firebase/household_service.dart';
+import '../../../../../core/types/child_icon.dart';
 import '../../../../../core/types/gender.dart';
 import '../../application/child_color_provider.dart';
 import '../../application/children_local_provider.dart';
@@ -49,6 +50,7 @@ class _EditChildPageState extends ConsumerState<EditChildPage> {
         birthday: birthday,
         dueDate: dueDate,
         color: color,
+        icon: childIconFromKey(data['icon'] as String?),
       );
     }
     if (!mounted) return;
@@ -72,7 +74,6 @@ class _EditChildPageState extends ConsumerState<EditChildPage> {
           ? const Center(child: CircularProgressIndicator())
           : SafeArea(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
                 child: ChildForm(
                   initial: _initial,
                   onSubmit: (form) async {
@@ -87,6 +88,7 @@ class _EditChildPageState extends ConsumerState<EditChildPage> {
                         gender: form.gender,
                         birthday: form.birthday,
                         dueDate: form.dueDate,
+                        icon: form.icon,
                       );
 
                       // 色をSharedPreferencesに保存
@@ -100,6 +102,7 @@ class _EditChildPageState extends ConsumerState<EditChildPage> {
                         birthday: form.birthday,
                         dueDate: form.dueDate,
                         gender: form.gender,
+                        icon: form.icon,
                       );
                       await ref
                           .read(childrenLocalProvider(hid).notifier)

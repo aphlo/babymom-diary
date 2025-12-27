@@ -19,6 +19,7 @@ mixin _$ChildSummary {
   DateTime get birthday;
   DateTime? get dueDate;
   Gender get gender;
+  ChildIcon get icon;
 
   /// Create a copy of ChildSummary
   /// with the given fields replaced by the non-null parameter values.
@@ -38,16 +39,17 @@ mixin _$ChildSummary {
             (identical(other.birthday, birthday) ||
                 other.birthday == birthday) &&
             (identical(other.dueDate, dueDate) || other.dueDate == dueDate) &&
-            (identical(other.gender, gender) || other.gender == gender));
+            (identical(other.gender, gender) || other.gender == gender) &&
+            (identical(other.icon, icon) || other.icon == icon));
   }
 
   @override
   int get hashCode =>
-      Object.hash(runtimeType, id, name, birthday, dueDate, gender);
+      Object.hash(runtimeType, id, name, birthday, dueDate, gender, icon);
 
   @override
   String toString() {
-    return 'ChildSummary(id: $id, name: $name, birthday: $birthday, dueDate: $dueDate, gender: $gender)';
+    return 'ChildSummary(id: $id, name: $name, birthday: $birthday, dueDate: $dueDate, gender: $gender, icon: $icon)';
   }
 }
 
@@ -62,7 +64,8 @@ abstract mixin class $ChildSummaryCopyWith<$Res> {
       String name,
       DateTime birthday,
       DateTime? dueDate,
-      Gender gender});
+      Gender gender,
+      ChildIcon icon});
 }
 
 /// @nodoc
@@ -82,6 +85,7 @@ class _$ChildSummaryCopyWithImpl<$Res> implements $ChildSummaryCopyWith<$Res> {
     Object? birthday = null,
     Object? dueDate = freezed,
     Object? gender = null,
+    Object? icon = null,
   }) {
     return _then(_self.copyWith(
       id: null == id
@@ -104,6 +108,10 @@ class _$ChildSummaryCopyWithImpl<$Res> implements $ChildSummaryCopyWith<$Res> {
           ? _self.gender
           : gender // ignore: cast_nullable_to_non_nullable
               as Gender,
+      icon: null == icon
+          ? _self.icon
+          : icon // ignore: cast_nullable_to_non_nullable
+              as ChildIcon,
     ));
   }
 }
@@ -200,15 +208,15 @@ extension ChildSummaryPatterns on ChildSummary {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(String id, String name, DateTime birthday,
-            DateTime? dueDate, Gender gender)?
+            DateTime? dueDate, Gender gender, ChildIcon icon)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _ChildSummary() when $default != null:
-        return $default(
-            _that.id, _that.name, _that.birthday, _that.dueDate, _that.gender);
+        return $default(_that.id, _that.name, _that.birthday, _that.dueDate,
+            _that.gender, _that.icon);
       case _:
         return orElse();
     }
@@ -230,14 +238,14 @@ extension ChildSummaryPatterns on ChildSummary {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(String id, String name, DateTime birthday,
-            DateTime? dueDate, Gender gender)
+            DateTime? dueDate, Gender gender, ChildIcon icon)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _ChildSummary():
-        return $default(
-            _that.id, _that.name, _that.birthday, _that.dueDate, _that.gender);
+        return $default(_that.id, _that.name, _that.birthday, _that.dueDate,
+            _that.gender, _that.icon);
     }
   }
 
@@ -256,14 +264,14 @@ extension ChildSummaryPatterns on ChildSummary {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(String id, String name, DateTime birthday,
-            DateTime? dueDate, Gender gender)?
+            DateTime? dueDate, Gender gender, ChildIcon icon)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _ChildSummary() when $default != null:
-        return $default(
-            _that.id, _that.name, _that.birthday, _that.dueDate, _that.gender);
+        return $default(_that.id, _that.name, _that.birthday, _that.dueDate,
+            _that.gender, _that.icon);
       case _:
         return null;
     }
@@ -278,7 +286,8 @@ class _ChildSummary extends ChildSummary {
       required this.name,
       required this.birthday,
       this.dueDate,
-      required this.gender})
+      required this.gender,
+      required this.icon})
       : super._();
 
   @override
@@ -291,6 +300,8 @@ class _ChildSummary extends ChildSummary {
   final DateTime? dueDate;
   @override
   final Gender gender;
+  @override
+  final ChildIcon icon;
 
   /// Create a copy of ChildSummary
   /// with the given fields replaced by the non-null parameter values.
@@ -310,16 +321,17 @@ class _ChildSummary extends ChildSummary {
             (identical(other.birthday, birthday) ||
                 other.birthday == birthday) &&
             (identical(other.dueDate, dueDate) || other.dueDate == dueDate) &&
-            (identical(other.gender, gender) || other.gender == gender));
+            (identical(other.gender, gender) || other.gender == gender) &&
+            (identical(other.icon, icon) || other.icon == icon));
   }
 
   @override
   int get hashCode =>
-      Object.hash(runtimeType, id, name, birthday, dueDate, gender);
+      Object.hash(runtimeType, id, name, birthday, dueDate, gender, icon);
 
   @override
   String toString() {
-    return 'ChildSummary(id: $id, name: $name, birthday: $birthday, dueDate: $dueDate, gender: $gender)';
+    return 'ChildSummary(id: $id, name: $name, birthday: $birthday, dueDate: $dueDate, gender: $gender, icon: $icon)';
   }
 }
 
@@ -336,7 +348,8 @@ abstract mixin class _$ChildSummaryCopyWith<$Res>
       String name,
       DateTime birthday,
       DateTime? dueDate,
-      Gender gender});
+      Gender gender,
+      ChildIcon icon});
 }
 
 /// @nodoc
@@ -357,6 +370,7 @@ class __$ChildSummaryCopyWithImpl<$Res>
     Object? birthday = null,
     Object? dueDate = freezed,
     Object? gender = null,
+    Object? icon = null,
   }) {
     return _then(_ChildSummary(
       id: null == id
@@ -379,6 +393,10 @@ class __$ChildSummaryCopyWithImpl<$Res>
           ? _self.gender
           : gender // ignore: cast_nullable_to_non_nullable
               as Gender,
+      icon: null == icon
+          ? _self.icon
+          : icon // ignore: cast_nullable_to_non_nullable
+              as ChildIcon,
     ));
   }
 }

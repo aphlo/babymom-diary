@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/core/types/child_icon.dart';
 import 'package:babymom_diary/src/features/menu/children/application/child_color_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
 
@@ -12,11 +13,13 @@ class ChildListTile extends ConsumerWidget {
     required this.id,
     required this.name,
     required this.subtitle,
+    required this.icon,
   });
 
   final String id;
   final String name;
   final String subtitle;
+  final ChildIcon icon;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -53,8 +56,16 @@ class ChildListTile extends ConsumerWidget {
         children: [
           CircleAvatar(
             backgroundColor: color,
-            radius: 16,
-            child: const Icon(Icons.child_care, color: Colors.white),
+            radius: 20,
+            child: Transform.translate(
+              offset: const Offset(0, 3),
+              child: Image.asset(
+                icon.assetPath,
+                width: 48,
+                height: 48,
+                fit: BoxFit.contain,
+              ),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(

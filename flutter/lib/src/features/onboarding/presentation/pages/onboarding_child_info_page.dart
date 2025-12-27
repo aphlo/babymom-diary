@@ -47,14 +47,15 @@ class _OnboardingChildInfoPageState
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'あなたの子どもの情報を登録すると、成長記録や予防接種の予定をスムーズに管理できます。',
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Text(
+                  'あなたの子どもの情報を登録すると、成長記録や予防接種の予定をスムーズに管理できます。',
+                ),
               ),
-              const SizedBox(height: 16),
               ChildForm(
                 onSubmit: (data) async {
                   setState(() => _isProcessing = true);
@@ -70,6 +71,7 @@ class _OnboardingChildInfoPageState
                       gender: data.gender,
                       birthday: data.birthday,
                       dueDate: data.dueDate,
+                      icon: data.icon,
                     );
 
                     await ref
