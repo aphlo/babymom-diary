@@ -71,6 +71,7 @@ class MenuPage extends ConsumerWidget {
                 id: children[i].id,
                 name: children[i].name,
                 subtitle: _formatBirthday(children[i].birthday),
+                icon: children[i].icon,
               ),
               const Divider(height: 0),
             ],
