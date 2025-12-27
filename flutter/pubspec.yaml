@@ -61,6 +61,7 @@ flutter:
     - assets/fonts/
     - assets/icons/
     - assets/icons/child_record/
+    - assets/icons/animals/
     - assets/data/
   fonts:
     - family: MPLUSRounded1c
