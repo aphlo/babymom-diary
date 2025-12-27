@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../../../core/types/child_icon.dart';
 import '../../../../../core/types/gender.dart';
 
 part 'child_summary.freezed.dart';
@@ -14,6 +15,7 @@ sealed class ChildSummary with _$ChildSummary {
     required DateTime birthday,
     DateTime? dueDate,
     required Gender gender,
+    required ChildIcon icon,
   }) = _ChildSummary;
 
   Map<String, dynamic> toJson() => {
@@ -22,6 +24,7 @@ sealed class ChildSummary with _$ChildSummary {
         'birthday': birthday.toIso8601String(),
         if (dueDate != null) 'dueDate': dueDate!.toIso8601String(),
         'gender': gender.key,
+        'icon': icon.key,
       };
 
   static ChildSummary fromJson(Map<String, dynamic> json) {
@@ -35,6 +38,7 @@ sealed class ChildSummary with _$ChildSummary {
           : DateTime.now(), // フォールバック
       dueDate: dueDateRaw is String ? DateTime.parse(dueDateRaw) : null,
       gender: genderFromKey(json['gender'] as String?),
+      icon: childIconFromKey(json['icon'] as String?),
     );
   }
 }

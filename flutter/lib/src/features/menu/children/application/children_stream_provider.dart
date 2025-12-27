@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/firebase/household_service.dart';
+import '../../../../core/types/child_icon.dart';
 import '../../../../core/types/gender.dart';
 import '../data/infrastructure/child_firestore_data_source.dart';
 import '../domain/entities/child_summary.dart';
@@ -25,6 +26,7 @@ Stream<List<ChildSummary>> childrenStream(Ref ref, String householdId) {
         birthday: birthday,
         dueDate: dueDate,
         gender: genderFromKey(data['gender'] as String?),
+        icon: childIconFromKey(data['icon'] as String?),
       );
     }).toList();
   });

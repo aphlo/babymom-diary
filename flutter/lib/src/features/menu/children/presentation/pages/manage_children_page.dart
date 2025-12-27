@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/firebase/household_service.dart';
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/types/child_icon.dart';
 import '../../../../../core/types/gender.dart';
-import '../../application/child_color_provider.dart';
 import '../../application/children_stream_provider.dart';
 import '../../domain/entities/child_summary.dart';
 
@@ -59,15 +59,9 @@ class ManageChildrenPage extends ConsumerWidget {
           );
         }
         final child = children[index];
-        final color = ref
-            .read(childColorProvider.notifier)
-            .getColor(child.id, defaultColor: AppColors.primary);
         return ListTile(
           tileColor: Colors.white,
-          leading: CircleAvatar(
-            backgroundColor: color,
-            child: const Icon(Icons.child_care, color: Colors.white),
-          ),
+          leading: Image.asset(child.icon.assetPath, width: 40, height: 40),
           title: Text(child.name),
           subtitle: Text(
             '${_formatBirthday(child.birthday)} ${child.gender.labelJa}',

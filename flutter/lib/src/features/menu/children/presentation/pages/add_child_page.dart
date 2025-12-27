@@ -26,7 +26,6 @@ class _AddChildPageState extends ConsumerState<AddChildPage> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
           child: ChildForm(
             onSubmit: (data) async {
               final householdId =
@@ -40,6 +39,7 @@ class _AddChildPageState extends ConsumerState<AddChildPage> {
                   gender: data.gender,
                   birthday: data.birthday,
                   dueDate: data.dueDate,
+                  icon: data.icon,
                 );
 
                 // 色をSharedPreferencesに保存

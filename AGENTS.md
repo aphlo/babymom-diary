@@ -348,6 +348,16 @@ firebase deploy --only firestore:rules,firestore:indexes
 - Selected child state managed globally
 - Local caching with snapshot support for viewing other children
 
+## Code Review Guidelines (Codex for milu)
+
+- Security/Privacy: Never log PII (child/household IDs, birthdays, names), tokens, or Firebase configs; avoid persisting secrets or auth artifacts in plain text.
+- Error handling: Do not swallow exceptions; surface user-impacting failures with safe copy and recovery paths; prefer typed errors over generic catches.
+- Flutter/Riverpod: Enforce null-safety, check mounted/cancellation before updating UI state, avoid unnecessary rebuilds (prefer `ConsumerWidget` splits/select), and keep providers slim.
+- Architecture boundaries: Domain must stay free of Flutter/Firebase/infra imports; flow is UI → ViewModel → UseCase → Repository → Data source; ViewModels should not fetch/store `householdId`/`childId` directly—read shared providers.
+- Data conventions: Use `doseId` (not `doseNumber`), keep entities/value objects immutable (`@immutable`), respect Firestore paths under `households/{householdId}/children/{childId}/...`, and use mappers between layers.
+- Testing: New/changed logic requires corresponding tests (especially domain services/use cases); missing tests are P1 with “追加推奨”; avoid breaking existing coverage.
+- Documentation: Treat typos or broken expressions in docs as P1; keep flavor and setup instructions accurate.
+
 ## Documentation References
 
 - `README.md` - Monorepo overview and quick start
