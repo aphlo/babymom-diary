@@ -305,6 +305,22 @@ header {
   fill: currentColor;
 }
 
+.store-badge {
+  display: inline-block;
+  transition: all 0.25s ease-out;
+}
+
+.store-badge:hover {
+  transform: translateY(-3px);
+  filter: drop-shadow(0 8px 24px rgba(31, 41, 55, 0.2));
+}
+
+.store-badge img {
+  display: block;
+  height: 48px;
+  width: auto;
+}
+
 /* Phone Mockup Area */
 .hero-visual {
   display: flex;
