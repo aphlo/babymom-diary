@@ -122,6 +122,8 @@ class _EditableRecordSheetState extends ConsumerState<EditableRecordSheet> {
               : () => _openManageTagsDialog(householdId),
           noteController: _noteController,
         ),
+      // 離乳食は別シートで管理するためここでは処理しない
+      RecordType.babyFood => const SizedBox.shrink(),
     };
 
     final children = <Widget>[

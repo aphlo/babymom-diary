@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../baby_food/domain/entities/baby_food_record.dart';
 import '../../child_record.dart';
 import '../models/record_item_model.dart';
 import 'dashed_table_border.dart';
 import 'record_table_cell.dart';
+
+/// 離乳食セルタップ時のコールバック
+typedef BabyFoodSlotTapCallback = void Function(int hour);
 
 class RecordTable extends StatefulWidget {
   const RecordTable({
@@ -12,12 +16,20 @@ class RecordTable extends StatefulWidget {
     required this.onSlotTap,
     required this.scrollStorageKey,
     required this.selectedDate,
+    this.babyFoodRecords = const [],
+    this.onBabyFoodSlotTap,
   });
 
   final List<RecordItemModel> records;
   final RecordSlotTapCallback onSlotTap;
   final PageStorageKey<String> scrollStorageKey;
   final DateTime selectedDate;
+
+  /// 離乳食記録（別コレクションから取得）
+  final List<BabyFoodRecord> babyFoodRecords;
+
+  /// 離乳食セルタップ時のコールバック
+  final BabyFoodSlotTapCallback? onBabyFoodSlotTap;
 
   static const double headerRowHeight = 44.0;
   static const double bodyRowHeight = 32.0;
@@ -27,10 +39,11 @@ class RecordTable extends StatefulWidget {
     1: FlexColumnWidth(1.0),
     2: FlexColumnWidth(1.0),
     3: FlexColumnWidth(1.0),
-    4: FlexColumnWidth(1.0),
+    4: FlexColumnWidth(1.0), // 離乳食
     5: FlexColumnWidth(1.0),
     6: FlexColumnWidth(1.0),
-    7: FlexColumnWidth(2.0),
+    7: FlexColumnWidth(1.0),
+    8: FlexColumnWidth(2.0),
   };
 
   static const _borderDashPattern = <double>[1.5, 2.5];
@@ -107,6 +120,7 @@ class _RecordTableState extends State<RecordTable> {
     '授乳',
     'ミルク',
     '搾母乳',
+    '離乳食',
     '尿',
     '便',
     '体温',
@@ -128,6 +142,7 @@ class _RecordTableState extends State<RecordTable> {
         widget.records.where((e) => e.type == RecordType.pee).length;
     final totalPoopCount =
         widget.records.where((e) => e.type == RecordType.poop).length;
+    final totalBabyFoodCount = widget.babyFoodRecords.length;
 
     final totalsRow = _TotalsRow(
       borderSide: borderSide,
@@ -143,6 +158,10 @@ class _RecordTableState extends State<RecordTable> {
         _TotalValue(
           value: totalPumpMl.toStringAsFixed(0),
           unit: 'ml',
+        ),
+        _TotalValue(
+          value: totalBabyFoodCount > 0 ? '$totalBabyFoodCount' : '',
+          unit: totalBabyFoodCount > 0 ? '回' : '',
         ),
         _TotalValue(
           value: '$totalPeeCount',
@@ -237,18 +256,77 @@ class _RecordTableState extends State<RecordTable> {
                                     : Colors.pink.shade50,
                               ),
                               children: [
+                                // 時間列
                                 SizedBox(
                                   height: RecordTable.bodyRowHeight,
                                   child: Center(child: Text('$hour')),
                                 ),
-                                for (final types in _columnTypes)
-                                  RecordTableCell(
-                                    records: widget.records,
-                                    hour: hour,
-                                    types: types,
-                                    onTap: widget.onSlotTap,
-                                    rowHeight: RecordTable.bodyRowHeight,
-                                  ),
+                                // 授乳
+                                RecordTableCell(
+                                  records: widget.records,
+                                  hour: hour,
+                                  types: const [
+                                    RecordType.breastLeft,
+                                    RecordType.breastRight
+                                  ],
+                                  onTap: widget.onSlotTap,
+                                  rowHeight: RecordTable.bodyRowHeight,
+                                ),
+                                // ミルク
+                                RecordTableCell(
+                                  records: widget.records,
+                                  hour: hour,
+                                  types: const [RecordType.formula],
+                                  onTap: widget.onSlotTap,
+                                  rowHeight: RecordTable.bodyRowHeight,
+                                ),
+                                // 搾母乳
+                                RecordTableCell(
+                                  records: widget.records,
+                                  hour: hour,
+                                  types: const [RecordType.pump],
+                                  onTap: widget.onSlotTap,
+                                  rowHeight: RecordTable.bodyRowHeight,
+                                ),
+                                // 離乳食（別コレクション）
+                                _BabyFoodTableCell(
+                                  babyFoodRecords: widget.babyFoodRecords,
+                                  hour: hour,
+                                  onTap: widget.onBabyFoodSlotTap,
+                                  rowHeight: RecordTable.bodyRowHeight,
+                                ),
+                                // 尿
+                                RecordTableCell(
+                                  records: widget.records,
+                                  hour: hour,
+                                  types: const [RecordType.pee],
+                                  onTap: widget.onSlotTap,
+                                  rowHeight: RecordTable.bodyRowHeight,
+                                ),
+                                // 便
+                                RecordTableCell(
+                                  records: widget.records,
+                                  hour: hour,
+                                  types: const [RecordType.poop],
+                                  onTap: widget.onSlotTap,
+                                  rowHeight: RecordTable.bodyRowHeight,
+                                ),
+                                // 体温
+                                RecordTableCell(
+                                  records: widget.records,
+                                  hour: hour,
+                                  types: const [RecordType.temperature],
+                                  onTap: widget.onSlotTap,
+                                  rowHeight: RecordTable.bodyRowHeight,
+                                ),
+                                // その他
+                                RecordTableCell(
+                                  records: widget.records,
+                                  hour: hour,
+                                  types: const [RecordType.other],
+                                  onTap: widget.onSlotTap,
+                                  rowHeight: RecordTable.bodyRowHeight,
+                                ),
                               ],
                             ),
                         ],
@@ -270,16 +348,6 @@ class _RecordTableState extends State<RecordTable> {
     );
   }
 }
-
-const _columnTypes = <List<RecordType>>[
-  [RecordType.breastLeft, RecordType.breastRight],
-  [RecordType.formula],
-  [RecordType.pump],
-  [RecordType.pee],
-  [RecordType.poop],
-  [RecordType.temperature],
-  [RecordType.other],
-];
 
 class _TotalsRow extends StatelessWidget {
   const _TotalsRow({
@@ -387,4 +455,65 @@ double _sumAmount(List<RecordItemModel> records, RecordType type) {
   return records
       .where((e) => e.type == type)
       .fold<double>(0, (sum, e) => sum + (e.amount ?? 0));
+}
+
+/// 離乳食用のテーブルセル
+class _BabyFoodTableCell extends StatelessWidget {
+  const _BabyFoodTableCell({
+    required this.babyFoodRecords,
+    required this.hour,
+    required this.onTap,
+    required this.rowHeight,
+  });
+
+  final List<BabyFoodRecord> babyFoodRecords;
+  final int hour;
+  final BabyFoodSlotTapCallback? onTap;
+  final double rowHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    // 指定時間帯の離乳食記録を取得
+    final recordsInHour = babyFoodRecords.where((record) {
+      return record.recordedAt.hour == hour;
+    }).toList();
+
+    final hasRecords = recordsInHour.isNotEmpty;
+
+    return GestureDetector(
+      onTap: onTap != null ? () => onTap!(hour) : null,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        height: rowHeight,
+        child: Center(
+          child: hasRecords
+              ? Container(
+                  width: 24,
+                  height: 24,
+                  decoration: const BoxDecoration(
+                    color: Colors.orange,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: recordsInHour.length > 1
+                        ? Text(
+                            '${recordsInHour.length}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.restaurant,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                  ),
+                )
+              : null,
+        ),
+      ),
+    );
+  }
 }

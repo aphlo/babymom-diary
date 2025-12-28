@@ -109,6 +109,8 @@ class EditableRecordSheetViewModel extends _$EditableRecordSheetViewModel {
       RecordType.temperature => _buildAmountRecord(base, at),
       RecordType.pee || RecordType.poop => _buildExcretionRecord(base, at),
       RecordType.other => _buildOtherRecord(base, at),
+      // 離乳食は別コレクションで管理するためここでは処理しない
+      RecordType.babyFood => null,
     };
   }
 

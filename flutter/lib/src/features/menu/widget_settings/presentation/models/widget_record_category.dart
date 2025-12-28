@@ -51,5 +51,7 @@ extension WidgetRecordCategoryExtension on WidgetRecordCategory {
         RecordType.poop => WidgetRecordCategory.poop,
         RecordType.temperature => WidgetRecordCategory.temperature,
         RecordType.other => WidgetRecordCategory.other,
+        // 離乳食は別コレクションで管理、ホームウィジェット未対応
+        RecordType.babyFood => WidgetRecordCategory.other,
       };
 }
