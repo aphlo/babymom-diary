@@ -1,15 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:babymom_diary/src/features/vaccines/domain/entities/reservation_group.dart';
 
-class ReservationGroupMemberDto {
-  const ReservationGroupMemberDto({
-    required this.vaccineId,
-    required this.doseId,
-  });
+part 'reservation_group.freezed.dart';
 
-  final String vaccineId;
-  final String doseId;
+@freezed
+sealed class ReservationGroupMemberDto with _$ReservationGroupMemberDto {
+  const ReservationGroupMemberDto._();
+
+  const factory ReservationGroupMemberDto({
+    required String vaccineId,
+    required String doseId,
+  }) = _ReservationGroupMemberDto;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
         'vaccineId': vaccineId,
@@ -24,24 +27,19 @@ class ReservationGroupMemberDto {
   }
 }
 
-class ReservationGroupDto {
-  const ReservationGroupDto({
-    required this.id,
-    required this.childId,
-    required this.scheduledDate,
-    required this.status,
-    required this.members,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+@freezed
+sealed class ReservationGroupDto with _$ReservationGroupDto {
+  const ReservationGroupDto._();
 
-  final String id;
-  final String childId;
-  final DateTime scheduledDate;
-  final ReservationGroupStatus status;
-  final List<ReservationGroupMemberDto> members;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  const factory ReservationGroupDto({
+    required String id,
+    required String childId,
+    required DateTime scheduledDate,
+    required ReservationGroupStatus status,
+    required List<ReservationGroupMemberDto> members,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+  }) = _ReservationGroupDto;
 
   factory ReservationGroupDto.fromSnapshot(
     DocumentSnapshot<Map<String, dynamic>> snapshot,
@@ -103,32 +101,15 @@ class ReservationGroupDto {
         'createdAt': Timestamp.fromDate(createdAt),
         'updatedAt': Timestamp.fromDate(updatedAt),
       };
+}
 
-  ReservationGroupDto copyWith({
-    DateTime? scheduledDate,
-    ReservationGroupStatus? status,
-    List<ReservationGroupMemberDto>? members,
-    DateTime? updatedAt,
-  }) {
-    return ReservationGroupDto(
-      id: id,
-      childId: childId,
-      scheduledDate: scheduledDate ?? this.scheduledDate,
-      status: status ?? this.status,
-      members: members ?? this.members,
-      createdAt: createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
-  }
-
-  static ReservationGroupStatus? _parseStatus(String? value) {
-    switch (value) {
-      case 'scheduled':
-        return ReservationGroupStatus.scheduled;
-      case 'completed':
-        return ReservationGroupStatus.completed;
-      default:
-        return null;
-    }
+ReservationGroupStatus? _parseStatus(String? value) {
+  switch (value) {
+    case 'scheduled':
+      return ReservationGroupStatus.scheduled;
+    case 'completed':
+      return ReservationGroupStatus.completed;
+    default:
+      return null;
   }
 }

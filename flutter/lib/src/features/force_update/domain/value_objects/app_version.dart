@@ -1,19 +1,19 @@
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'app_version.freezed.dart';
 
 /// アプリのセマンティックバージョンを表す値オブジェクト。
 ///
 /// major.minor.patch 形式のバージョン比較をサポートする。
-@immutable
-class AppVersion implements Comparable<AppVersion> {
-  final int major;
-  final int minor;
-  final int patch;
+@freezed
+sealed class AppVersion with _$AppVersion implements Comparable<AppVersion> {
+  const AppVersion._();
 
-  const AppVersion({
-    required this.major,
-    required this.minor,
-    required this.patch,
-  });
+  const factory AppVersion({
+    required int major,
+    required int minor,
+    required int patch,
+  }) = _AppVersion;
 
   /// バージョン文字列をパースして [AppVersion] を生成する。
   ///
@@ -62,18 +62,6 @@ class AppVersion implements Comparable<AppVersion> {
   bool operator >(AppVersion other) => compareTo(other) > 0;
   bool operator <=(AppVersion other) => compareTo(other) <= 0;
   bool operator >=(AppVersion other) => compareTo(other) >= 0;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is AppVersion &&
-          runtimeType == other.runtimeType &&
-          major == other.major &&
-          minor == other.minor &&
-          patch == other.patch;
-
-  @override
-  int get hashCode => Object.hash(major, minor, patch);
 
   @override
   String toString() => '$major.$minor.$patch';

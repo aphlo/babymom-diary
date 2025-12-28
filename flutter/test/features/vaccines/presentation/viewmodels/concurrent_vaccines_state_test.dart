@@ -25,13 +25,6 @@ void main() {
         expect(newState.error, 'エラーメッセージ');
       });
 
-      test('clearError=true で error を null にできる', () {
-        final state =
-            const ConcurrentVaccinesState().copyWith(error: 'エラーメッセージ');
-        final newState = state.copyWith(clearError: true);
-        expect(newState.error, isNull);
-      });
-
       test('members を更新できる', () {
         const state = ConcurrentVaccinesState();
         const member = ConcurrentVaccineMember(

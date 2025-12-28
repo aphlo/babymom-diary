@@ -42,7 +42,7 @@ class RecordViewModel extends _$RecordViewModel {
     final context = ref.read(childContextProvider).value;
     if (context == null) {
       state = state.copyWith(
-        pendingUiEvent: const RecordUiEvent.showMessage('データの読み込み中です'),
+        pendingUiEvent: RecordUiEvent.showMessage('データの読み込み中です'),
       );
       return;
     }
@@ -51,7 +51,7 @@ class RecordViewModel extends _$RecordViewModel {
     final childId = context.selectedChildId;
     if (childId == null || childId.isEmpty) {
       state = state.copyWith(
-        pendingUiEvent: const RecordUiEvent.showMessage('子どもの情報が見つかりません'),
+        pendingUiEvent: RecordUiEvent.showMessage('子どもの情報が見つかりません'),
       );
       return;
     }
@@ -79,7 +79,7 @@ class RecordViewModel extends _$RecordViewModel {
     } catch (_) {
       state = state.copyWith(
         isProcessing: false,
-        pendingUiEvent: const RecordUiEvent.showMessage('記録の保存に失敗しました'),
+        pendingUiEvent: RecordUiEvent.showMessage('記録の保存に失敗しました'),
       );
     }
   }
@@ -88,7 +88,7 @@ class RecordViewModel extends _$RecordViewModel {
     final context = ref.read(childContextProvider).value;
     if (context == null) {
       state = state.copyWith(
-        pendingUiEvent: const RecordUiEvent.showMessage('データの読み込み中です'),
+        pendingUiEvent: RecordUiEvent.showMessage('データの読み込み中です'),
       );
       return;
     }
@@ -97,7 +97,7 @@ class RecordViewModel extends _$RecordViewModel {
     final childId = context.selectedChildId;
     if (childId == null || childId.isEmpty) {
       state = state.copyWith(
-        pendingUiEvent: const RecordUiEvent.showMessage('子どもの情報が見つかりません'),
+        pendingUiEvent: RecordUiEvent.showMessage('子どもの情報が見つかりません'),
       );
       return;
     }
@@ -109,12 +109,12 @@ class RecordViewModel extends _$RecordViewModel {
       await deleteRecordWithSync(childId: childId, id: recordId);
       state = state.copyWith(
         isProcessing: false,
-        pendingUiEvent: const RecordUiEvent.showMessage('記録を削除しました'),
+        pendingUiEvent: RecordUiEvent.showMessage('記録を削除しました'),
       );
     } catch (_) {
       state = state.copyWith(
         isProcessing: false,
-        pendingUiEvent: const RecordUiEvent.showMessage('記録の削除に失敗しました'),
+        pendingUiEvent: RecordUiEvent.showMessage('記録の削除に失敗しました'),
       );
     }
   }
@@ -159,7 +159,7 @@ class RecordViewModel extends _$RecordViewModel {
     final context = ref.read(childContextProvider).value;
     if (context == null || !context.hasSelectedChild) {
       state = state.copyWith(
-        pendingUiEvent: const RecordUiEvent.showMessage(
+        pendingUiEvent: RecordUiEvent.showMessage(
           '記録を行うには、メニューから子どもを登録してください。',
         ),
       );

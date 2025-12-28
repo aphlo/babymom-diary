@@ -229,16 +229,16 @@ void main() {
         expect(s.recordType, VaccineRecordType.completed);
       });
 
-      test('copyWithでerrorはデフォルトでnullになる', () {
+      test('copyWithは指定していないerrorを保持する', () {
         final s1 = state.copyWith(error: 'エラー');
         final s2 = s1.copyWith(isLoading: true);
-        expect(s2.error, isNull);
+        expect(s2.error, 'エラー');
       });
 
-      test('copyWithでisDuplicateErrorはデフォルトでfalseになる', () {
+      test('copyWithは指定していないisDuplicateErrorを保持する', () {
         final s1 = state.copyWith(isDuplicateError: true);
         final s2 = s1.copyWith(isLoading: true);
-        expect(s2.isDuplicateError, false);
+        expect(s2.isDuplicateError, true);
       });
     });
 

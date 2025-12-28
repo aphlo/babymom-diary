@@ -60,7 +60,7 @@ final class VaccineDetailViewModelProvider
 }
 
 String _$vaccineDetailViewModelHash() =>
-    r'eb77ef06d6998ee22f04f42ed49907bde9d04ae1';
+    r'9d34682a7b4bfd54433665d86bb2955cb475fd24';
 
 final class VaccineDetailViewModelFamily extends $Family
     with

@@ -41,7 +41,7 @@ final class CalendarViewModelProvider
   }
 }
 
-String _$calendarViewModelHash() => r'dfef1746654f9e12d179b807c7da7187bd7c2296';
+String _$calendarViewModelHash() => r'dd12e804f5388f8019b45d46e237870627cbc6ea';
 
 abstract class _$CalendarViewModel extends $Notifier<CalendarState> {
   CalendarState build();

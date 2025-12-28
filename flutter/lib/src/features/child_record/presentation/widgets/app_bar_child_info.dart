@@ -83,7 +83,7 @@ class AppBarChildInfo extends ConsumerWidget {
 
           final snapshotValue = snapshotState.value;
           final shouldSaveSnapshot =
-              snapshotValue == null || !snapshotValue.isSameAs(d);
+              snapshotValue == null || snapshotValue != d;
           if (shouldSaveSnapshot) {
             SchedulerBinding.instance.addPostFrameCallback((_) {
               snapshotNotifier.save(d);

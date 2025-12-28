@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/firebase/household_service.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../menu/children/application/child_color_provider.dart';
+import '../../../../core/types/child_icon.dart';
 import '../../../menu/children/application/children_stream_provider.dart';
 import '../../../menu/children/application/selected_child_provider.dart';
 
@@ -38,13 +37,8 @@ class ChildSwitcher extends ConsumerWidget {
                       value: child.id,
                       child: Row(
                         children: [
-                          CircleAvatar(
-                            radius: 8,
-                            backgroundColor: ref
-                                .watch(childColorProvider.notifier)
-                                .getColor(child.id,
-                                    defaultColor: AppColors.primary),
-                          ),
+                          Image.asset(child.icon.assetPath,
+                              width: 16, height: 16),
                           const SizedBox(width: 8),
                           Text(child.name),
                         ],

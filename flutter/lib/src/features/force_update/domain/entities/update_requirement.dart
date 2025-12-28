@@ -1,16 +1,14 @@
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../value_objects/app_version.dart';
 
-@immutable
-class UpdateRequirement {
-  final AppVersion minimumVersion;
-  final String message;
-  final String storeUrl;
+part 'update_requirement.freezed.dart';
 
-  const UpdateRequirement({
-    required this.minimumVersion,
-    required this.message,
-    required this.storeUrl,
-  });
+@freezed
+sealed class UpdateRequirement with _$UpdateRequirement {
+  const factory UpdateRequirement({
+    required AppVersion minimumVersion,
+    required String message,
+    required String storeUrl,
+  }) = _UpdateRequirement;
 }

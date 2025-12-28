@@ -147,7 +147,11 @@ void main() {
         final stateWithEvent = state.copyWith(
           pendingUiEvent: const CalendarUiEvent.showMessage('テスト'),
         );
-        expect(stateWithEvent.pendingUiEvent?.message, 'テスト');
+        stateWithEvent.pendingUiEvent?.map(
+          showMessage: (value) => expect(value.message, 'テスト'),
+          openAddEvent: (_) => fail('unexpected event'),
+          openSettings: (_) => fail('unexpected event'),
+        );
 
         // クリア（copyWith で pendingUiEvent を null にするには明示的に渡す）
         final clearedState = stateWithEvent.copyWith(pendingUiEvent: null);
@@ -159,16 +163,20 @@ void main() {
   group('CalendarUiEvent', () {
     test('showMessage は正しいメッセージを持つ', () {
       const event = CalendarUiEvent.showMessage('エラーメッセージ');
-      expect(event.message, 'エラーメッセージ');
-      expect(event.openAddEvent, isNull);
-      expect(event.openSettings, isNull);
+      event.map(
+        showMessage: (value) => expect(value.message, 'エラーメッセージ'),
+        openAddEvent: (_) => fail('unexpected event'),
+        openSettings: (_) => fail('unexpected event'),
+      );
     });
 
     test('openSettings は openSettings フラグを持つ', () {
       const event = CalendarUiEvent.openSettings();
-      expect(event.message, isNull);
-      expect(event.openAddEvent, isNull);
-      expect(event.openSettings, true);
+      event.map(
+        showMessage: (_) => fail('unexpected event'),
+        openAddEvent: (_) => fail('unexpected event'),
+        openSettings: (_) => expect(true, true),
+      );
     });
   });
 

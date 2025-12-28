@@ -217,6 +217,21 @@ class FeatureViewModel extends _$FeatureViewModel {
 - **Widget Sizes:** Small (latest record), Medium (3 recent records)
 - **Documentation:** `docs/adr/001-home-widget-architecture.md`, `docs/spec/home_widget_spec.md`
 
+### 8. Baby Food (離乳食)
+- **Feature Path:** `flutter/lib/src/features/baby_food/`
+- **Separate Collection:** Uses `baby_food_records` collection (not `childRecords`)
+- **Data Structure:**
+  - `BabyFoodRecord`: 記録単位（複数の食材を含む）
+  - `BabyFoodItem`: 各食材（食材名、カテゴリ、量、単位）
+  - `CustomIngredient`: ユーザー追加のカスタム食材
+- **Food Categories:** 8カテゴリ（米・パン・麺、魚、肉、野菜、果物、乳製品、大豆製品、その他）
+- **Amount Units:** 大さじ、小さじ、ml、g（量の入力は任意）
+- **RecordType Integration:** `RecordType.babyFood` を追加（授乳表に列として表示）
+- **Firestore Schema:**
+  - Records: `households/{householdId}/children/{childId}/baby_food_records/{recordId}`
+  - Custom Ingredients: `households/{householdId}/custom_ingredients/{ingredientId}`
+- **Documentation:** `docs/spec/baby_food_spec.md`
+
 ## Important Conventions
 
 ### Naming
@@ -361,3 +376,4 @@ firebase deploy --only firestore:rules,firestore:indexes
 - `docs/adr/001-home-widget-architecture.md` - Home Widget architecture decision record
 - `docs/spec/home_widget_spec.md` - Home Widget feature specification
 - `docs/spec/home_widget_setup.md` - Home Widget setup guide
+- `docs/spec/baby_food_spec.md` - Baby Food (離乳食) feature specification

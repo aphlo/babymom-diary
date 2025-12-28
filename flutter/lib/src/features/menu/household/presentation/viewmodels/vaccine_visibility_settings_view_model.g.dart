@@ -50,7 +50,7 @@ final class VaccineVisibilitySettingsViewModelProvider
 }
 
 String _$vaccineVisibilitySettingsViewModelHash() =>
-    r'98835c6a3a4a8d590eeacecb100fbcbbc77002b8';
+    r'f73f0eab674030e9a1525fa98b75e0bfcea27576';
 
 /// ワクチン表示設定画面のViewModel
 

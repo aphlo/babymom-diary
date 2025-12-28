@@ -1,23 +1,22 @@
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-@immutable
-class AdConfig {
-  final String bannerAdUnitId;
-  final bool isTestMode;
+part 'ad_config.freezed.dart';
 
-  const AdConfig({
-    required this.bannerAdUnitId,
-    required this.isTestMode,
-  });
+@freezed
+sealed class AdConfig with _$AdConfig {
+  const factory AdConfig({
+    required String bannerAdUnitId,
+    required bool isTestMode,
+  }) = _AdConfig;
 
-  factory AdConfig.test() {
+  static AdConfig test() {
     return const AdConfig(
       bannerAdUnitId: 'ca-app-pub-3940256099942544/6300978111', // Android
       isTestMode: true,
     );
   }
 
-  factory AdConfig.production({
+  static AdConfig production({
     required String bannerAdUnitId,
   }) {
     return AdConfig(

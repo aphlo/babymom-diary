@@ -1,38 +1,24 @@
-import 'package:meta/meta.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'widget_child.dart';
 import 'widget_record.dart';
 
-/// ウィジェットと共有するデータ
-@immutable
-class WidgetData {
-  final DateTime lastUpdated;
-  final String? selectedChildId;
-  final List<WidgetChild> children;
-  final Map<String, List<WidgetRecord>> recentRecords;
+part 'widget_data.freezed.dart';
 
-  const WidgetData({
-    required this.lastUpdated,
-    this.selectedChildId,
-    this.children = const [],
-    this.recentRecords = const {},
-  });
+/// ウィジェットと共有するデータ
+@Freezed(toJson: false, fromJson: false)
+sealed class WidgetData with _$WidgetData {
+  const WidgetData._();
+
+  const factory WidgetData({
+    required DateTime lastUpdated,
+    String? selectedChildId,
+    @Default([]) List<WidgetChild> children,
+    @Default({}) Map<String, List<WidgetRecord>> recentRecords,
+  }) = _WidgetData;
 
   factory WidgetData.empty() => WidgetData(
         lastUpdated: DateTime.now(),
-      );
-
-  WidgetData copyWith({
-    DateTime? lastUpdated,
-    String? selectedChildId,
-    List<WidgetChild>? children,
-    Map<String, List<WidgetRecord>>? recentRecords,
-  }) =>
-      WidgetData(
-        lastUpdated: lastUpdated ?? this.lastUpdated,
-        selectedChildId: selectedChildId ?? this.selectedChildId,
-        children: children ?? this.children,
-        recentRecords: recentRecords ?? this.recentRecords,
       );
 
   /// 選択中の子供の直近の記録を取得
@@ -83,36 +69,5 @@ class WidgetData {
         ),
       ),
     );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is WidgetData &&
-          runtimeType == other.runtimeType &&
-          lastUpdated == other.lastUpdated &&
-          selectedChildId == other.selectedChildId &&
-          _listEquals(children, other.children) &&
-          _mapEquals(recentRecords, other.recentRecords);
-
-  @override
-  int get hashCode =>
-      Object.hash(lastUpdated, selectedChildId, children, recentRecords);
-
-  bool _listEquals<T>(List<T> a, List<T> b) {
-    if (a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
-
-  bool _mapEquals<K, V>(Map<K, List<V>> a, Map<K, List<V>> b) {
-    if (a.length != b.length) return false;
-    for (final key in a.keys) {
-      if (!b.containsKey(key)) return false;
-      if (!_listEquals(a[key]!, b[key]!)) return false;
-    }
-    return true;
   }
 }

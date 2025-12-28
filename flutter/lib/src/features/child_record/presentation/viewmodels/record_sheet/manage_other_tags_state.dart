@@ -1,31 +1,13 @@
-import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'manage_other_tags_state.freezed.dart';
 
 /// ManageOtherTagsViewModel の状態
-@immutable
-class ManageOtherTagsState {
-  const ManageOtherTagsState({
-    this.input = '',
-    this.isSubmitting = false,
-    this.errorMessage,
-  });
-
-  static const Object _sentinel = Object();
-
-  final String input;
-  final bool isSubmitting;
-  final String? errorMessage;
-
-  ManageOtherTagsState copyWith({
-    String? input,
-    bool? isSubmitting,
-    Object? errorMessage = _sentinel,
-  }) {
-    return ManageOtherTagsState(
-      input: input ?? this.input,
-      isSubmitting: isSubmitting ?? this.isSubmitting,
-      errorMessage: errorMessage == _sentinel
-          ? this.errorMessage
-          : errorMessage as String?,
-    );
-  }
+@freezed
+sealed class ManageOtherTagsState with _$ManageOtherTagsState {
+  const factory ManageOtherTagsState({
+    @Default('') String input,
+    @Default(false) bool isSubmitting,
+    String? errorMessage,
+  }) = _ManageOtherTagsState;
 }

@@ -1,33 +1,21 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../models/mom_diary_ui_model.dart';
 
-@immutable
-class MomDiaryPageState {
-  const MomDiaryPageState({
-    required this.focusMonth,
-    required this.monthlyDiary,
-    this.householdId,
-  });
+part 'mom_diary_page_state.freezed.dart';
 
-  final DateTime focusMonth;
-  final AsyncValue<MomDiaryMonthlyUiModel> monthlyDiary;
-  final String? householdId;
+@freezed
+sealed class MomDiaryPageState with _$MomDiaryPageState {
+  const MomDiaryPageState._();
 
-  MomDiaryPageState copyWith({
-    DateTime? focusMonth,
-    AsyncValue<MomDiaryMonthlyUiModel>? monthlyDiary,
+  const factory MomDiaryPageState({
+    required DateTime focusMonth,
+    required AsyncValue<MomDiaryMonthlyUiModel> monthlyDiary,
     String? householdId,
-  }) {
-    return MomDiaryPageState(
-      focusMonth: focusMonth ?? this.focusMonth,
-      monthlyDiary: monthlyDiary ?? this.monthlyDiary,
-      householdId: householdId ?? this.householdId,
-    );
-  }
+  }) = _MomDiaryPageState;
 
-  static MomDiaryPageState initial() {
+  factory MomDiaryPageState.initial() {
     final now = DateTime.now();
     final normalized = DateTime(now.year, now.month);
     return MomDiaryPageState(

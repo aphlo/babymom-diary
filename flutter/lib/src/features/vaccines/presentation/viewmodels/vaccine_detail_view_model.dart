@@ -79,7 +79,7 @@ class VaccineDetailViewModel extends _$VaccineDetailViewModel {
                 _doseNumbers.isNotEmpty ? _doseNumbers.first : null,
             pendingDoseNumber:
                 _doseNumbers.isNotEmpty ? _doseNumbers.first : null,
-            clearRecommendation: true,
+            recommendation: null,
           );
         }
       }
@@ -128,8 +128,7 @@ class VaccineDetailViewModel extends _$VaccineDetailViewModel {
       activeDoseNumber: activeDose,
       pendingDoseNumber: pendingDose,
       recommendation: recommendation,
-      clearRecommendation: recommendation == null,
-      clearError: true,
+      error: null,
     );
   }
 
@@ -295,13 +294,15 @@ class VaccineDetailViewModel extends _$VaccineDetailViewModel {
     if (resolvedCompletedDate == null) {
       state = state.copyWith(
         error: '接種日が設定されていません',
-        clearError: false,
       );
       return;
     }
 
     try {
-      state = state.copyWith(isLoading: true, clearError: true);
+      state = state.copyWith(
+        isLoading: true,
+        error: null,
+      );
 
       final groupId = state.doseStatuses[doseNumber]?.reservationGroupId;
 
@@ -374,7 +375,10 @@ class VaccineDetailViewModel extends _$VaccineDetailViewModel {
     }
 
     try {
-      state = state.copyWith(isLoading: true, clearError: true);
+      state = state.copyWith(
+        isLoading: true,
+        error: null,
+      );
 
       String? groupId = reservationGroupId ??
           state.doseStatuses[doseNumber]?.reservationGroupId;
@@ -458,7 +462,10 @@ class VaccineDetailViewModel extends _$VaccineDetailViewModel {
     }
 
     try {
-      state = state.copyWith(isLoading: true, clearError: true);
+      state = state.copyWith(
+        isLoading: true,
+        error: null,
+      );
 
       final groupId = reservationGroupId ??
           state.doseStatuses[doseNumber]?.reservationGroupId;
@@ -520,7 +527,10 @@ class VaccineDetailViewModel extends _$VaccineDetailViewModel {
     }
 
     try {
-      state = state.copyWith(isLoading: true, clearError: true);
+      state = state.copyWith(
+        isLoading: true,
+        error: null,
+      );
 
       String? groupId = reservationGroupId ??
           state.doseStatuses[doseNumber]?.reservationGroupId;

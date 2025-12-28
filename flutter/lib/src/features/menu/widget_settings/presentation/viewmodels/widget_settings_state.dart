@@ -1,50 +1,34 @@
-import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../widget/domain/entities/widget_settings.dart';
 import '../models/widget_record_category.dart';
 
+part 'widget_settings_state.freezed.dart';
+
 /// ウィジェット設定画面の状態
-@immutable
-class WidgetSettingsState {
-  const WidgetSettingsState({
-    required this.displayCategories,
-    required this.quickActionCategories,
-    this.isLoading = false,
-    this.isSaving = false,
-  });
+@freezed
+sealed class WidgetSettingsState with _$WidgetSettingsState {
+  const WidgetSettingsState._();
 
-  /// 直近の記録表示カテゴリ（最大3つ）
-  final List<WidgetRecordCategory> displayCategories;
+  const factory WidgetSettingsState({
+    /// 直近の記録表示カテゴリ（最大3つ）
+    required List<WidgetRecordCategory> displayCategories,
 
-  /// クイックアクションカテゴリ（最大5つ）
-  final List<WidgetRecordCategory> quickActionCategories;
+    /// クイックアクションカテゴリ（最大5つ）
+    required List<WidgetRecordCategory> quickActionCategories,
 
-  /// 読み込み中かどうか
-  final bool isLoading;
+    /// 読み込み中かどうか
+    @Default(false) bool isLoading,
 
-  /// 保存中かどうか
-  final bool isSaving;
+    /// 保存中かどうか
+    @Default(false) bool isSaving,
+  }) = _WidgetSettingsState;
 
   /// 直近の記録表示の最大数
   static const int maxDisplayCategories = 3;
 
   /// クイックアクションの最大数
   static const int maxQuickActionCategories = 5;
-
-  WidgetSettingsState copyWith({
-    List<WidgetRecordCategory>? displayCategories,
-    List<WidgetRecordCategory>? quickActionCategories,
-    bool? isLoading,
-    bool? isSaving,
-  }) {
-    return WidgetSettingsState(
-      displayCategories: displayCategories ?? this.displayCategories,
-      quickActionCategories:
-          quickActionCategories ?? this.quickActionCategories,
-      isLoading: isLoading ?? this.isLoading,
-      isSaving: isSaving ?? this.isSaving,
-    );
-  }
 
   /// 直近の記録表示で選択可能なカテゴリ（現在選択中のものを除く）
   List<WidgetRecordCategory> get availableDisplayCategories =>

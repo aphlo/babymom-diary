@@ -2,7 +2,9 @@ import 'package:babymom_diary/src/core/theme/app_colors.dart';
 import 'package:babymom_diary/src/core/widgets/bottom_save_button.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../../core/types/child_icon.dart';
 import '../../../../../core/types/gender.dart';
+import 'child_icon_picker.dart';
 
 class ChildFormData {
   final String name;
@@ -10,6 +12,7 @@ class ChildFormData {
   final DateTime birthday;
   final DateTime? dueDate;
   final Color color;
+  final ChildIcon icon;
 
   const ChildFormData({
     required this.name,
@@ -17,6 +20,7 @@ class ChildFormData {
     required this.birthday,
     this.dueDate,
     this.color = Colors.blueAccent,
+    this.icon = ChildIcon.bear,
   });
 }
 
@@ -46,6 +50,7 @@ class _ChildFormState extends State<ChildForm> {
   DateTime? _birthday;
   DateTime? _dueDate;
   Color _pickedColor = AppColors.primary;
+  ChildIcon _pickedIcon = ChildIcon.bear;
 
   @override
   void initState() {
@@ -64,6 +69,7 @@ class _ChildFormState extends State<ChildForm> {
       }
       final inPalette = _palette.any((c) => c.toARGB32() == i.color.toARGB32());
       _pickedColor = inPalette ? i.color : AppColors.primary;
+      _pickedIcon = i.icon;
     } else {
       // 新規追加の場合、デフォルト値を設定
       _nameCtrl.text = '';
@@ -71,6 +77,7 @@ class _ChildFormState extends State<ChildForm> {
       _birthday = null;
       _dueDate = null;
       _pickedColor = AppColors.primary;
+      _pickedIcon = ChildIcon.bear;
     }
   }
 
@@ -130,6 +137,7 @@ class _ChildFormState extends State<ChildForm> {
       birthday: _birthday!,
       dueDate: _dueDate,
       color: _pickedColor,
+      icon: _pickedIcon,
     );
 
     await widget.onSubmit(data);
@@ -137,66 +145,81 @@ class _ChildFormState extends State<ChildForm> {
 
   @override
   Widget build(BuildContext context) {
+    const horizontalPadding = EdgeInsets.symmetric(horizontal: 16);
+
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextFormField(
-            controller: _nameCtrl,
-            decoration: const InputDecoration(
-              labelText: '名前',
+          const SizedBox(height: 16),
+          Padding(
+            padding: horizontalPadding,
+            child: TextFormField(
+              controller: _nameCtrl,
+              decoration: const InputDecoration(
+                labelText: '名前',
+              ),
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? '名前を入力してください' : null,
             ),
-            validator: (v) =>
-                (v == null || v.trim().isEmpty) ? '名前を入力してください' : null,
           ),
           const SizedBox(height: 12),
-          DropdownButtonFormField<Gender>(
-            initialValue: _gender,
-            decoration: const InputDecoration(labelText: '性別'),
-            items: const [
-              DropdownMenuItem(value: Gender.male, child: Text('男の子')),
-              DropdownMenuItem(value: Gender.female, child: Text('女の子')),
-            ],
-            validator: (v) => v == null ? '性別を選択してください' : null,
-            onChanged: (v) => setState(() => _gender = v),
+          Padding(
+            padding: horizontalPadding,
+            child: DropdownButtonFormField<Gender>(
+              initialValue: _gender,
+              decoration: const InputDecoration(labelText: '性別'),
+              items: const [
+                DropdownMenuItem(value: Gender.male, child: Text('男の子')),
+                DropdownMenuItem(value: Gender.female, child: Text('女の子')),
+              ],
+              validator: (v) => v == null ? '性別を選択してください' : null,
+              onChanged: (v) => setState(() => _gender = v),
+            ),
           ),
           const SizedBox(height: 12),
-          TextFormField(
-            controller: _birthdayCtrl,
-            readOnly: true,
-            showCursor: false,
-            decoration: const InputDecoration(
-              labelText: '誕生日',
-              hintText: '選択してください',
+          Padding(
+            padding: horizontalPadding,
+            child: TextFormField(
+              controller: _birthdayCtrl,
+              readOnly: true,
+              showCursor: false,
+              decoration: const InputDecoration(
+                labelText: '誕生日',
+                hintText: '選択してください',
+              ),
+              validator: (v) => _birthday == null ? '誕生日を選択してください' : null,
+              onTap: _pickBirthday,
             ),
-            validator: (v) => _birthday == null ? '誕生日を選択してください' : null,
-            onTap: _pickBirthday,
           ),
           const SizedBox(height: 12),
-          TextFormField(
-            controller: _dueDateCtrl,
-            readOnly: true,
-            showCursor: false,
-            decoration: InputDecoration(
-              labelText: '出産予定日（任意）',
-              hintText: '選択してください',
-              suffixIcon: _dueDate != null
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        setState(() {
-                          _dueDate = null;
-                          _dueDateCtrl.clear();
-                        });
-                      },
-                    )
-                  : null,
+          Padding(
+            padding: horizontalPadding,
+            child: TextFormField(
+              controller: _dueDateCtrl,
+              readOnly: true,
+              showCursor: false,
+              decoration: InputDecoration(
+                labelText: '出産予定日（任意）',
+                hintText: '選択してください',
+                suffixIcon: _dueDate != null
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          setState(() {
+                            _dueDate = null;
+                            _dueDateCtrl.clear();
+                          });
+                        },
+                      )
+                    : null,
+              ),
+              onTap: _pickDueDate,
             ),
-            onTap: _pickDueDate,
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 8, left: 12),
+            padding: const EdgeInsets.only(top: 8, left: 28),
             child: Text(
               '出産予定日は修正月齢で早産児の成長曲線を表示するために使用します。',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -205,34 +228,40 @@ class _ChildFormState extends State<ChildForm> {
             ),
           ),
           const SizedBox(height: 16),
-          Text('カラー', style: Theme.of(context).textTheme.bodyMedium),
+          Padding(
+            padding: horizontalPadding,
+            child: Text('カラー', style: Theme.of(context).textTheme.bodyMedium),
+          ),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final c in _palette)
-                GestureDetector(
-                  onTap: () => setState(() => _pickedColor = c),
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: c,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: _pickedColor.toARGB32() == c.toARGB32()
-                            ? Colors.black
-                            : Colors.transparent,
-                        width: 2,
+          Padding(
+            padding: horizontalPadding,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final c in _palette)
+                  GestureDetector(
+                    onTap: () => setState(() => _pickedColor = c),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: c,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: _pickedColor.toARGB32() == c.toARGB32()
+                              ? Colors.black
+                              : Colors.transparent,
+                          width: 2,
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 8, left: 12),
+            padding: const EdgeInsets.only(top: 8, left: 28),
             child: Text(
               'カラーの設定は共有されません。',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -240,10 +269,24 @@ class _ChildFormState extends State<ChildForm> {
                   ),
             ),
           ),
-          const SizedBox(height: 24),
-          SaveButton(
-            onPressed: _submit,
+          const SizedBox(height: 16),
+          Padding(
+            padding: horizontalPadding,
+            child: Text('アイコン', style: Theme.of(context).textTheme.bodyMedium),
           ),
+          const SizedBox(height: 8),
+          ChildIconPicker(
+            selectedIcon: _pickedIcon,
+            onChanged: (icon) => setState(() => _pickedIcon = icon),
+          ),
+          const SizedBox(height: 24),
+          Padding(
+            padding: horizontalPadding,
+            child: SaveButton(
+              onPressed: _submit,
+            ),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
