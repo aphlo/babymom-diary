@@ -173,6 +173,17 @@ class MenuPage extends ConsumerWidget {
               onTap: () => _launchExternalUrl(context, _privacyUrl),
               trailing: const Icon(Icons.open_in_new),
             ),
+            const Divider(height: 0),
+            ListTile(
+              leading: const Icon(Icons.article_outlined),
+              title: const Text('ライセンス'),
+              onTap: () => showLicensePage(
+                context: context,
+                applicationName: 'milu',
+                applicationLegalese: '© 2025 aphlo',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+            ),
           ],
         ),
         const AppVersionFooter(),
