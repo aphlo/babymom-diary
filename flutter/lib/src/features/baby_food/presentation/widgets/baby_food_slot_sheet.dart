@@ -38,14 +38,20 @@ void showBabyFoodSlotSheet({
   }
 
   Future<void> addNewRecord() async {
-    // 現在時刻を使用（分単位まで）
     final now = DateTime.now();
+    final isCurrentHour = selectedDate.year == now.year &&
+        selectedDate.month == now.month &&
+        selectedDate.day == now.day &&
+        hour == now.hour;
+
+    // 現在時刻の時間帯をタップした場合のみ現在時刻を使用
+    // それ以外はタップした時間帯の0分を使用
     final recordedAt = DateTime(
       selectedDate.year,
       selectedDate.month,
       selectedDate.day,
-      now.hour,
-      now.minute,
+      isCurrentHour ? now.hour : hour,
+      isCurrentHour ? now.minute : 0,
     );
     final draft = BabyFoodDraft.newRecord(recordedAt: recordedAt);
     await openBabyFoodEditor(draft);
