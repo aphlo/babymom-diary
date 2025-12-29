@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/baby_food_record.dart';
 import '../../domain/entities/custom_ingredient.dart';
-import '../../domain/value_objects/baby_food_reaction.dart';
 import '../models/baby_food_draft.dart';
 import '../providers/baby_food_providers.dart';
 import '../viewmodels/baby_food_sheet_view_model.dart';
@@ -194,118 +193,60 @@ class _BabyFoodRecordTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final time = TimeOfDay.fromDateTime(record.recordedAt);
     final timeStr = time.format(context);
+    final timeTextStyle = theme.textTheme.bodySmall
+            ?.copyWith(color: theme.colorScheme.onSurfaceVariant) ??
+        const TextStyle(fontSize: 12, color: Colors.black54);
     final itemsSummary = record.items.map((item) {
       final name = item.ingredientName;
       final amount = item.amountDisplay;
       return amount != null ? '$name ($amount)' : name;
     }).join(', ');
 
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: ListTile(
-        leading: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 時刻（上揃え）
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(
               timeStr,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
+              style: timeTextStyle,
             ),
-          ],
-        ),
-        title: Text(
-          itemsSummary,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 14),
-        ),
-        subtitle: record.items.isNotEmpty
-            ? _ReactionSummary(items: record.items)
-            : null,
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) {
-            if (value == 'edit') {
-              onEdit();
-            } else if (value == 'delete') {
-              onDelete();
-            }
-          },
-          itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: 'edit',
-              child: Row(
-                children: [
-                  Icon(Icons.edit, size: 20),
-                  SizedBox(width: 8),
-                  Text('編集'),
-                ],
-              ),
+          ),
+          const SizedBox(width: 12),
+          // 食材一覧（改行して全て表示）
+          Expanded(
+            child: Text(
+              itemsSummary,
+              style: theme.textTheme.bodyMedium,
             ),
-            const PopupMenuItem(
-              value: 'delete',
-              child: Row(
-                children: [
-                  Icon(Icons.delete, size: 20, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('削除', style: TextStyle(color: Colors.red)),
-                ],
-              ),
-            ),
-          ],
-        ),
-        onTap: onEdit,
+          ),
+          const SizedBox(width: 8),
+          // 編集・削除ボタン
+          IconButton(
+            onPressed: onEdit,
+            tooltip: '編集',
+            icon: const Icon(Icons.edit_outlined),
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+          ),
+          IconButton(
+            onPressed: onDelete,
+            tooltip: '削除',
+            icon: const Icon(Icons.delete_outline),
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+          ),
+        ],
       ),
     );
   }
 }
 
-/// 反応のサマリーを表示
-class _ReactionSummary extends StatelessWidget {
-  const _ReactionSummary({required this.items});
-
-  final List<dynamic> items;
-
-  @override
-  Widget build(BuildContext context) {
-    final reactions = items
-        .map((item) => item.reaction as BabyFoodReaction?)
-        .where((r) => r != null)
-        .toList();
-
-    if (reactions.isEmpty) return const SizedBox.shrink();
-
-    final goodCount = reactions.where((r) => r == BabyFoodReaction.good).length;
-    final normalCount =
-        reactions.where((r) => r == BabyFoodReaction.normal).length;
-    final badCount = reactions.where((r) => r == BabyFoodReaction.bad).length;
-
-    return Row(
-      children: [
-        if (goodCount > 0) ...[
-          Icon(Icons.sentiment_very_satisfied,
-              size: 16, color: Colors.green.shade600),
-          const SizedBox(width: 2),
-          Text('$goodCount', style: TextStyle(color: Colors.green.shade600)),
-          const SizedBox(width: 8),
-        ],
-        if (normalCount > 0) ...[
-          Icon(Icons.sentiment_neutral,
-              size: 16, color: Colors.orange.shade600),
-          const SizedBox(width: 2),
-          Text('$normalCount', style: TextStyle(color: Colors.orange.shade600)),
-          const SizedBox(width: 8),
-        ],
-        if (badCount > 0) ...[
-          Icon(Icons.sentiment_very_dissatisfied,
-              size: 16, color: Colors.red.shade600),
-          const SizedBox(width: 2),
-          Text('$badCount', style: TextStyle(color: Colors.red.shade600)),
-        ],
-      ],
-    );
-  }
-}

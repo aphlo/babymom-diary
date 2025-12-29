@@ -61,6 +61,14 @@ class CustomIngredientFirestoreDataSource {
     await _collectionRef.doc(ingredient.id).set(dto.toJson());
   }
 
+  /// カスタム食材を更新（名前の変更）
+  Future<void> update({
+    required String ingredientId,
+    required String newName,
+  }) async {
+    await _collectionRef.doc(ingredientId).update({'name': newName});
+  }
+
   /// カスタム食材を削除
   Future<void> delete(String ingredientId) async {
     await _collectionRef.doc(ingredientId).delete();

@@ -5,6 +5,7 @@ import '../../application/usecases/add_custom_ingredient.dart';
 import '../../application/usecases/delete_baby_food_record.dart';
 import '../../application/usecases/delete_custom_ingredient.dart';
 import '../../application/usecases/update_baby_food_record.dart';
+import '../../application/usecases/update_custom_ingredient.dart';
 import '../../application/usecases/watch_baby_food_records.dart';
 import '../../application/usecases/watch_custom_ingredients.dart';
 import '../../domain/entities/baby_food_record.dart';
@@ -15,7 +16,6 @@ import '../../infrastructure/repositories/baby_food_record_repository_impl.dart'
 import '../../infrastructure/repositories/custom_ingredient_repository_impl.dart';
 import '../../infrastructure/sources/baby_food_firestore_data_source.dart';
 import '../../infrastructure/sources/custom_ingredient_firestore_data_source.dart';
-import '../../infrastructure/sources/hidden_ingredients_firestore_data_source.dart';
 
 part 'baby_food_providers.g.dart';
 
@@ -32,12 +32,6 @@ BabyFoodFirestoreDataSource babyFoodDataSource(Ref ref, String householdId) {
 CustomIngredientFirestoreDataSource customIngredientDataSource(
     Ref ref, String householdId) {
   return CustomIngredientFirestoreDataSource(householdId: householdId);
-}
-
-@riverpod
-HiddenIngredientsFirestoreDataSource hiddenIngredientsDataSource(
-    Ref ref, String householdId) {
-  return HiddenIngredientsFirestoreDataSource(householdId: householdId);
 }
 
 // ============================================================================
@@ -92,6 +86,13 @@ AddCustomIngredient addCustomIngredientUseCase(Ref ref, String householdId) {
 }
 
 @riverpod
+UpdateCustomIngredient updateCustomIngredientUseCase(
+    Ref ref, String householdId) {
+  final repository = ref.watch(customIngredientRepositoryProvider(householdId));
+  return UpdateCustomIngredient(repository: repository);
+}
+
+@riverpod
 DeleteCustomIngredient deleteCustomIngredientUseCase(
     Ref ref, String householdId) {
   final repository = ref.watch(customIngredientRepositoryProvider(householdId));
@@ -139,17 +140,6 @@ Stream<List<CustomIngredient>> customIngredients(
 ) {
   final useCase = ref.watch(watchCustomIngredientsUseCaseProvider(householdId));
   return useCase.call();
-}
-
-/// 非表示食材IDを監視
-@riverpod
-Stream<Set<String>> hiddenIngredients(
-  Ref ref,
-  String householdId,
-) {
-  final dataSource =
-      ref.watch(hiddenIngredientsDataSourceProvider(householdId));
-  return dataSource.watch();
 }
 
 /// 離乳食記録のクエリパラメータ

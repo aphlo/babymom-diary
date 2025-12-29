@@ -30,19 +30,13 @@ class BabyFoodTab extends ConsumerWidget {
     );
     final customIngredientsAsync =
         ref.watch(customIngredientsProvider(householdId));
-    final hiddenIngredientsAsync =
-        ref.watch(hiddenIngredientsProvider(householdId));
 
     return recordsAsync.when(
       data: (records) => customIngredientsAsync.when(
-        data: (customIngredients) => hiddenIngredientsAsync.when(
-          data: (hiddenIngredients) => _BabyFoodIngredientList(
-            records: records,
-            customIngredients: customIngredients,
-            hiddenIngredients: hiddenIngredients,
-          ),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('エラー: $e')),
+        data: (customIngredients) => _BabyFoodIngredientList(
+          householdId: householdId,
+          records: records,
+          customIngredients: customIngredients,
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('エラー: $e')),
@@ -55,14 +49,14 @@ class BabyFoodTab extends ConsumerWidget {
 
 class _BabyFoodIngredientList extends StatelessWidget {
   const _BabyFoodIngredientList({
+    required this.householdId,
     required this.records,
     required this.customIngredients,
-    required this.hiddenIngredients,
   });
 
+  final String householdId;
   final List<BabyFoodRecord> records;
   final List<CustomIngredient> customIngredients;
-  final Set<String> hiddenIngredients;
 
   @override
   Widget build(BuildContext context) {
@@ -91,12 +85,12 @@ class _BabyFoodIngredientList extends StatelessWidget {
             child: TabBarView(
               children: FoodCategory.values.map((category) {
                 return _CategoryIngredientList(
+                  householdId: householdId,
                   category: category,
                   ingredientStats: ingredientStats,
                   customIngredients: customIngredients
                       .where((i) => i.category == category)
                       .toList(),
-                  hiddenIngredients: hiddenIngredients,
                 );
               }).toList(),
             ),
@@ -144,32 +138,40 @@ class _BabyFoodIngredientList extends StatelessWidget {
   }
 }
 
-class _CategoryIngredientList extends StatelessWidget {
+class _CategoryIngredientList extends ConsumerWidget {
   const _CategoryIngredientList({
+    required this.householdId,
     required this.category,
     required this.ingredientStats,
     required this.customIngredients,
-    required this.hiddenIngredients,
   });
 
+  final String householdId;
   final FoodCategory category;
   final Map<String, _IngredientStat> ingredientStats;
   final List<CustomIngredient> customIngredients;
-  final Set<String> hiddenIngredients;
 
   @override
-  Widget build(BuildContext context) {
-    // プリセット食材を取得（非表示を除く）
-    final visiblePresetIngredients = category.presetIngredients
-        .where((name) => !hiddenIngredients.contains(name))
-        .toList();
+  Widget build(BuildContext context, WidgetRef ref) {
+    // プリセット食材を取得
+    final presetIngredients = category.presetIngredients;
+
+    // リストの項目数:
+    // プリセット食材 + カスタム食材セクションヘッダー（カスタム食材がある場合）
+    // + カスタム食材 + 食材追加ボタン
+    final hasCustomIngredients = customIngredients.isNotEmpty;
+    final totalItems = presetIngredients.length +
+        (hasCustomIngredients ? 1 : 0) + // セクションヘッダー
+        customIngredients.length +
+        1; // 食材追加ボタン
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: visiblePresetIngredients.length + customIngredients.length,
+      itemCount: totalItems,
       itemBuilder: (context, index) {
-        if (index < visiblePresetIngredients.length) {
-          final ingredientName = visiblePresetIngredients[index];
+        // プリセット食材
+        if (index < presetIngredients.length) {
+          final ingredientName = presetIngredients[index];
           final stat = ingredientStats[ingredientName];
           return _IngredientListTile(
             ingredientName: ingredientName,
@@ -177,19 +179,323 @@ class _CategoryIngredientList extends StatelessWidget {
             reaction: stat?.latestReaction,
             eatCount: stat?.eatCount ?? 0,
           );
-        } else {
-          final customIngredient =
-              customIngredients[index - visiblePresetIngredients.length];
+        }
+
+        final offsetIndex = index - presetIngredients.length;
+
+        // カスタム食材セクションヘッダー
+        if (hasCustomIngredients && offsetIndex == 0) {
+          return const _SectionHeader(title: '追加した食材');
+        }
+
+        // カスタム食材
+        final customIndex = hasCustomIngredients ? offsetIndex - 1 : offsetIndex;
+        if (customIndex < customIngredients.length) {
+          final customIngredient = customIngredients[customIndex];
           final stat = ingredientStats[customIngredient.id];
-          return _IngredientListTile(
-            ingredientName: customIngredient.name,
+          return _CustomIngredientListTile(
+            householdId: householdId,
+            ingredient: customIngredient,
             hasEaten: stat?.hasEaten ?? false,
             reaction: stat?.latestReaction,
             eatCount: stat?.eatCount ?? 0,
           );
         }
+
+        // 食材追加ボタン
+        return _AddIngredientButton(
+          householdId: householdId,
+          category: category,
+        );
       },
     );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey.shade600,
+        ),
+      ),
+    );
+  }
+}
+
+class _AddIngredientButton extends ConsumerWidget {
+  const _AddIngredientButton({
+    required this.householdId,
+    required this.category,
+  });
+
+  final String householdId;
+  final FoodCategory category;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      leading: const Icon(Icons.add, color: Colors.pink),
+      title: const Text(
+        '食材を追加',
+        style: TextStyle(color: Colors.pink),
+      ),
+      onTap: () => _showAddIngredientDialog(context, ref),
+    );
+  }
+
+  Future<void> _showAddIngredientDialog(
+      BuildContext context, WidgetRef ref) async {
+    final controller = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+        title: Text('${category.label}に食材を追加'),
+        content: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: '食材名を入力',
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(controller.text),
+            child: const Text('追加'),
+          ),
+        ],
+      ),
+    );
+
+    if (name != null && name.trim().isNotEmpty && context.mounted) {
+      final useCase = ref.read(addCustomIngredientUseCaseProvider(householdId));
+      try {
+        await useCase.call(name: name.trim(), category: category);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('「$name」を追加しました')),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('追加に失敗しました: $e')),
+          );
+        }
+      }
+    }
+  }
+}
+
+class _CustomIngredientListTile extends ConsumerWidget {
+  const _CustomIngredientListTile({
+    required this.householdId,
+    required this.ingredient,
+    required this.hasEaten,
+    required this.reaction,
+    required this.eatCount,
+  });
+
+  final String householdId;
+  final CustomIngredient ingredient;
+  final bool hasEaten;
+  final BabyFoodReaction? reaction;
+  final int eatCount;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListTile(
+      title: Text(ingredient.name),
+      subtitle: hasEaten
+          ? Text(
+              '$eatCount回食べた',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+              ),
+            )
+          : null,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 食べた/未の表示
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: hasEaten ? Colors.green.shade50 : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: hasEaten ? Colors.green.shade200 : Colors.grey.shade300,
+              ),
+            ),
+            child: Text(
+              hasEaten ? '食べた' : '未',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: hasEaten ? Colors.green.shade700 : Colors.grey.shade500,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          // 反応の表示
+          if (reaction != null)
+            _ReactionIcon(reaction: reaction!)
+          else
+            const SizedBox(
+              width: 32,
+              child: Center(
+                child: Text(
+                  '-',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+            ),
+          // 3点リーダーメニュー
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.grey),
+            onSelected: (value) {
+              switch (value) {
+                case 'edit':
+                  _showEditDialog(context, ref);
+                case 'delete':
+                  _showDeleteConfirmation(context, ref);
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'edit',
+                child: Row(
+                  children: [
+                    Icon(Icons.edit, size: 20),
+                    SizedBox(width: 8),
+                    Text('編集'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete, size: 20, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('削除', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showEditDialog(BuildContext context, WidgetRef ref) async {
+    final controller = TextEditingController(text: ingredient.name);
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('食材を編集'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: '食材名を入力',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(controller.text),
+            child: const Text('保存'),
+          ),
+        ],
+      ),
+    );
+
+    if (newName != null && newName.trim().isNotEmpty && context.mounted) {
+      final useCase =
+          ref.read(updateCustomIngredientUseCaseProvider(householdId));
+      try {
+        await useCase.call(ingredientId: ingredient.id, newName: newName.trim());
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('「$newName」に変更しました')),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('編集に失敗しました: $e')),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _showDeleteConfirmation(
+      BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('食材を削除'),
+        content: Text('「${ingredient.name}」を削除しますか？\n\n'
+            '※過去の記録からは削除されません。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('削除'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final useCase =
+          ref.read(deleteCustomIngredientUseCaseProvider(householdId));
+      try {
+        await useCase.call(ingredientId: ingredient.id);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('「${ingredient.name}」を削除しました')),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('削除に失敗しました: $e')),
+          );
+        }
+      }
+    }
   }
 }
 

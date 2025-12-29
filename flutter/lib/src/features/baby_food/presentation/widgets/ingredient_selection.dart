@@ -10,7 +10,6 @@ class IngredientSelection extends StatelessWidget {
     required this.expandedCategory,
     required this.selectedIngredientIds,
     required this.customIngredients,
-    required this.hiddenIngredients,
     required this.onCategoryTap,
     required this.onIngredientToggle,
   });
@@ -18,7 +17,6 @@ class IngredientSelection extends StatelessWidget {
   final FoodCategory? expandedCategory;
   final Set<String> selectedIngredientIds;
   final List<CustomIngredient> customIngredients;
-  final Set<String> hiddenIngredients;
   final void Function(FoodCategory category) onCategoryTap;
   final void Function({
     required String ingredientId,
@@ -44,7 +42,6 @@ class IngredientSelection extends StatelessWidget {
               category: category,
               selectedIngredientIds: selectedIngredientIds,
               customIngredients: _getCustomIngredientsForCategory(category),
-              hiddenIngredients: hiddenIngredients,
               onIngredientToggle: onIngredientToggle,
             ),
           const SizedBox(height: 8),
@@ -54,11 +51,9 @@ class IngredientSelection extends StatelessWidget {
   }
 
   int _getSelectedCountForCategory(FoodCategory category) {
-    // プリセット食材のカウント（非表示を除く）
+    // プリセット食材のカウント
     int count = category.presetIngredients
-        .where((name) =>
-            !hiddenIngredients.contains(name) &&
-            selectedIngredientIds.contains(name))
+        .where((name) => selectedIngredientIds.contains(name))
         .length;
 
     // カスタム食材のカウント
@@ -147,14 +142,12 @@ class _IngredientList extends StatelessWidget {
     required this.category,
     required this.selectedIngredientIds,
     required this.customIngredients,
-    required this.hiddenIngredients,
     required this.onIngredientToggle,
   });
 
   final FoodCategory category;
   final Set<String> selectedIngredientIds;
   final List<CustomIngredient> customIngredients;
-  final Set<String> hiddenIngredients;
   final void Function({
     required String ingredientId,
     required String ingredientName,
@@ -164,10 +157,7 @@ class _IngredientList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 非表示食材を除外
-    final presetIngredients = category.presetIngredients
-        .where((name) => !hiddenIngredients.contains(name))
-        .toList();
+    final presetIngredients = category.presetIngredients;
 
     return Container(
       padding: const EdgeInsets.all(12),

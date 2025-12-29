@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/milu_infinite_time_picker.dart';
 import '../../domain/value_objects/food_category.dart';
 import '../models/baby_food_draft.dart';
-import '../providers/baby_food_providers.dart';
 import '../viewmodels/baby_food_sheet_state.dart';
 import '../viewmodels/baby_food_sheet_view_model.dart';
 import 'amount_input.dart';
@@ -33,13 +32,6 @@ class _BabyFoodSheetState extends ConsumerState<BabyFoodSheet> {
   Widget build(BuildContext context) {
     final state = ref.watch(_viewModelProvider);
     final viewModel = ref.read(_viewModelProvider.notifier);
-    final hiddenIngredientsAsync =
-        ref.watch(hiddenIngredientsProvider(widget.args.householdId));
-    final hiddenIngredients = hiddenIngredientsAsync.when(
-      data: (data) => data,
-      loading: () => <String>{},
-      error: (_, __) => <String>{},
-    );
 
     // エラーメッセージの表示
     ref.listen<BabyFoodSheetState>(_viewModelProvider, (previous, next) {
@@ -94,7 +86,6 @@ class _BabyFoodSheetState extends ConsumerState<BabyFoodSheet> {
                         .map((item) => item.ingredientId)
                         .toSet(),
                     customIngredients: state.customIngredients,
-                    hiddenIngredients: hiddenIngredients,
                     onCategoryTap: viewModel.toggleCategory,
                     onIngredientToggle: ({
                       required String ingredientId,
@@ -323,7 +314,7 @@ class _StepIndicator extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('食材の追加について'),
         content: const Text(
-          'メニュー画面から離乳食の食材を追加してください。\n\n'
+          'ベビーの記録画面の「離乳食」タブから食材を追加してください。\n\n'
           '追加した食材は、すべての記録で選択できるようになります。',
         ),
         actions: [

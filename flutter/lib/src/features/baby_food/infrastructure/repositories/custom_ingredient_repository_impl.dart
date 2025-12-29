@@ -32,6 +32,11 @@ class CustomIngredientRepositoryImpl implements CustomIngredientRepository {
   }
 
   @override
+  Future<void> update({required String ingredientId, required String newName}) {
+    return _dataSource.update(ingredientId: ingredientId, newName: newName);
+  }
+
+  @override
   Future<void> delete(String ingredientId) {
     return _dataSource.delete(ingredientId);
   }

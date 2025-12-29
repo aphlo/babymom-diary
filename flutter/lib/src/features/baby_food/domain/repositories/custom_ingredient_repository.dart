@@ -15,6 +15,9 @@ abstract class CustomIngredientRepository {
   /// カスタム食材を追加
   Future<void> add(CustomIngredient ingredient);
 
+  /// カスタム食材を更新（名前の変更）
+  Future<void> update({required String ingredientId, required String newName});
+
   /// カスタム食材を削除
   Future<void> delete(String ingredientId);
 }
