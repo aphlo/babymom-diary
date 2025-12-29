@@ -119,40 +119,53 @@ class _AmountInputCardState extends State<_AmountInputCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1行目: 食材名（左） + 単位・量入力（右）
-          _buildNameAndAmountRow(),
+          // 1行目: 食材名
+          _buildNameRow(),
+          const SizedBox(height: 12),
+          // 2行目: 量ラベル + 単位・量入力
+          _buildAmountRow(),
           const Divider(height: 16),
-          // 2行目: 反応アイコン + アレルギーチェック
+          // 3行目: 反応ラベル + 反応アイコン + アレルギーチェック
           _buildReactionAndAllergyRow(),
           const Divider(height: 16),
-          // 3行目: メモ（複数行入力可能）
+          // 4行目: メモ（複数行入力可能）
           _buildMemoRow(),
         ],
       ),
     );
   }
 
-  /// 1行目: 食材名（左） + 単位・量入力（右）
-  Widget _buildNameAndAmountRow() {
+  /// 1行目: 食材名
+  Widget _buildNameRow() {
+    return Text(
+      widget.item.ingredientName,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+
+  /// 2行目: 量ラベル + 単位・量入力
+  Widget _buildAmountRow() {
     final currentUnit = widget.item.unit;
 
     return Row(
       children: [
-        // 食材名
-        Expanded(
-          flex: 2,
+        // ラベル
+        SizedBox(
+          width: 32,
           child: Text(
-            widget.item.ingredientName,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+            '量',
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey.shade600,
             ),
           ),
         ),
         const SizedBox(width: 8),
         // 単位選択（タップでドラムロール表示）
         Expanded(
-          flex: 2,
           child: GestureDetector(
             onTap: () => _showUnitPicker(context, currentUnit),
             child: Container(
@@ -188,7 +201,6 @@ class _AmountInputCardState extends State<_AmountInputCard> {
         const SizedBox(width: 8),
         // 量入力フィールド
         Expanded(
-          flex: 2,
           child: SizedBox(
             height: 36,
             child: TextField(
@@ -200,7 +212,7 @@ class _AmountInputCardState extends State<_AmountInputCard> {
               ],
               style: const TextStyle(fontSize: 13),
               decoration: InputDecoration(
-                hintText: '量',
+                hintText: '数値',
                 hintStyle: TextStyle(fontSize: 12, color: Colors.grey.shade400),
                 border: const OutlineInputBorder(),
                 contentPadding:
@@ -218,64 +230,83 @@ class _AmountInputCardState extends State<_AmountInputCard> {
     );
   }
 
-  /// 2行目: 反応選択 + アレルギーチェック
+  /// 3行目: 反応ラベル + 反応選択 + アレルギーチェック
   Widget _buildReactionAndAllergyRow() {
-    return Row(
-      children: [
-        // 反応選択（動物アイコン）
-        _ReactionImageButton(
-          childIcon: widget.childIcon,
-          reaction: BabyFoodReaction.good,
-          isSelected: widget.item.reaction == BabyFoodReaction.good,
-          onTap: () => widget.onReactionChanged(
-              widget.item.reaction == BabyFoodReaction.good
-                  ? null
-                  : BabyFoodReaction.good),
-        ),
-        const SizedBox(width: 8),
-        _ReactionImageButton(
-          childIcon: widget.childIcon,
-          reaction: BabyFoodReaction.normal,
-          isSelected: widget.item.reaction == BabyFoodReaction.normal,
-          onTap: () => widget.onReactionChanged(
-              widget.item.reaction == BabyFoodReaction.normal
-                  ? null
-                  : BabyFoodReaction.normal),
-        ),
-        const SizedBox(width: 8),
-        _ReactionImageButton(
-          childIcon: widget.childIcon,
-          reaction: BabyFoodReaction.bad,
-          isSelected: widget.item.reaction == BabyFoodReaction.bad,
-          onTap: () => widget.onReactionChanged(
-              widget.item.reaction == BabyFoodReaction.bad
-                  ? null
-                  : BabyFoodReaction.bad),
-        ),
-        const Spacer(),
-        // アレルギーチェック
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'アレルギー',
+    // 反応ボタンの高さ（画像56 + 間隔4 + ラベル約16）
+    const reactionButtonHeight = 76.0;
+
+    return SizedBox(
+      height: reactionButtonHeight,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // ラベル（垂直中央）
+          SizedBox(
+            width: 32,
+            child: Text(
+              '反応',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 13,
                 color: Colors.grey.shade600,
               ),
             ),
-            Checkbox(
-              value: widget.item.hasAllergy ?? false,
-              onChanged: (value) {
-                widget.onAllergyChanged(value == true ? true : null);
-              },
-              activeColor: Colors.red,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              visualDensity: VisualDensity.compact,
-            ),
-          ],
-        ),
-      ],
+          ),
+          const SizedBox(width: 8),
+          // 反応選択（動物アイコン）
+          _ReactionImageButton(
+            childIcon: widget.childIcon,
+            reaction: BabyFoodReaction.good,
+            isSelected: widget.item.reaction == BabyFoodReaction.good,
+            onTap: () => widget.onReactionChanged(
+                widget.item.reaction == BabyFoodReaction.good
+                    ? null
+                    : BabyFoodReaction.good),
+          ),
+          const SizedBox(width: 8),
+          _ReactionImageButton(
+            childIcon: widget.childIcon,
+            reaction: BabyFoodReaction.normal,
+            isSelected: widget.item.reaction == BabyFoodReaction.normal,
+            onTap: () => widget.onReactionChanged(
+                widget.item.reaction == BabyFoodReaction.normal
+                    ? null
+                    : BabyFoodReaction.normal),
+          ),
+          const SizedBox(width: 8),
+          _ReactionImageButton(
+            childIcon: widget.childIcon,
+            reaction: BabyFoodReaction.bad,
+            isSelected: widget.item.reaction == BabyFoodReaction.bad,
+            onTap: () => widget.onReactionChanged(
+                widget.item.reaction == BabyFoodReaction.bad
+                    ? null
+                    : BabyFoodReaction.bad),
+          ),
+          const Spacer(),
+          // アレルギーチェック
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'アレルギー',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              Checkbox(
+                value: widget.item.hasAllergy ?? false,
+                onChanged: (value) {
+                  widget.onAllergyChanged(value == true ? true : null);
+                },
+                activeColor: Colors.red,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -294,18 +325,22 @@ class _AmountInputCardState extends State<_AmountInputCard> {
             children: [
               // ヘッダー
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(color: Colors.grey.shade300),
                   ),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      child: const Text('キャンセル'),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          child: const Text('キャンセル'),
+                        ),
+                      ),
                     ),
                     const Text(
                       '単位を選択',
@@ -314,12 +349,18 @@ class _AmountInputCardState extends State<_AmountInputCard> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        widget.onUnitChanged(AmountUnit.values[selectedIndex]);
-                        Navigator.of(ctx).pop();
-                      },
-                      child: const Text('完了'),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            widget.onUnitChanged(
+                                AmountUnit.values[selectedIndex]);
+                            Navigator.of(ctx).pop();
+                          },
+                          child: const Text('完了'),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -351,26 +392,50 @@ class _AmountInputCardState extends State<_AmountInputCard> {
     );
   }
 
-  /// 3行目: メモ入力（複数行）
+  /// 4行目: メモラベル + メモ入力（複数行）
   Widget _buildMemoRow() {
-    return TextField(
-      controller: _memoController,
-      maxLength: 100,
-      maxLines: null,
-      minLines: 1,
-      keyboardType: TextInputType.multiline,
-      style: const TextStyle(fontSize: 14),
-      decoration: InputDecoration(
-        hintText: 'メモを入力',
-        hintStyle: TextStyle(fontSize: 12, color: Colors.grey.shade400),
-        border: const OutlineInputBorder(),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        isDense: true,
-        counterText: '',
-      ),
-      onChanged: (value) {
-        widget.onMemoChanged(value.isEmpty ? null : value);
-      },
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ラベル
+        Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: SizedBox(
+            width: 32,
+            child: Text(
+              'メモ',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        // メモ入力フィールド
+        Expanded(
+          child: TextField(
+            controller: _memoController,
+            maxLength: 100,
+            maxLines: null,
+            minLines: 1,
+            keyboardType: TextInputType.multiline,
+            style: const TextStyle(fontSize: 14),
+            decoration: InputDecoration(
+              hintText: 'メモを入力',
+              hintStyle: TextStyle(fontSize: 12, color: Colors.grey.shade400),
+              border: const OutlineInputBorder(),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              isDense: true,
+              counterText: '',
+            ),
+            onChanged: (value) {
+              widget.onMemoChanged(value.isEmpty ? null : value);
+            },
+          ),
+        ),
+      ],
     );
   }
 }

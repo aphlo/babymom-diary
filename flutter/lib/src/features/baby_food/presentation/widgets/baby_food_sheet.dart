@@ -305,7 +305,7 @@ class _StepIndicator extends StatelessWidget {
             ),
           if (isAmountStep)
             Text(
-              '反応や量の入力は任意です',
+              '量や反応の入力は任意です',
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.grey.shade600,

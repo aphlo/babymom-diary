@@ -43,7 +43,7 @@ class RecordTable extends StatefulWidget {
     5: FlexColumnWidth(1.0),
     6: FlexColumnWidth(1.0),
     7: FlexColumnWidth(1.0),
-    8: FlexColumnWidth(2.0),
+    8: FlexColumnWidth(1.0),
   };
 
   static const _borderDashPattern = <double>[1.5, 2.5];

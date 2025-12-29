@@ -49,10 +49,10 @@ sealed class BabyFoodItem with _$BabyFoodItem {
     // 大さじ・小さじは単位を先に表示（例: "大さじ1"）
     // ml・gは数値を先に表示（例: "30ml"）
     return switch (unit!) {
-      AmountUnit.tablespoon || AmountUnit.teaspoon =>
+      AmountUnit.tablespoon ||
+      AmountUnit.teaspoon =>
         '${unit!.shortLabel}$formattedAmount',
-      AmountUnit.ml || AmountUnit.gram =>
-        '$formattedAmount${unit!.shortLabel}',
+      AmountUnit.ml || AmountUnit.gram => '$formattedAmount${unit!.shortLabel}',
     };
   }
 }
