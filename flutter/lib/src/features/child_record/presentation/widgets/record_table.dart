@@ -490,25 +490,19 @@ class _BabyFoodTableCell extends StatelessWidget {
               ? Container(
                   width: 24,
                   height: 24,
-                  decoration: const BoxDecoration(
-                    color: Colors.orange,
+                  decoration: BoxDecoration(
+                    color: Colors.yellow.shade700,
                     shape: BoxShape.circle,
                   ),
                   child: Center(
-                    child: recordsInHour.length > 1
-                        ? Text(
-                            '${recordsInHour.length}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )
-                        : const Icon(
-                            Icons.restaurant,
-                            color: Colors.white,
-                            size: 14,
-                          ),
+                    child: Text(
+                      '${recordsInHour.length}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 )
               : null,
