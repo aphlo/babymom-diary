@@ -40,12 +40,19 @@ sealed class BabyFoodItem with _$BabyFoodItem {
   /// 量が記録されているかどうか
   bool get hasAmount => amount != null && unit != null;
 
-  /// 量の表示文字列（例: "5大さじ", "30g"）
+  /// 量の表示文字列（例: "大さじ1", "30g"）
   String? get amountDisplay {
     if (!hasAmount) return null;
     final formattedAmount = amount == amount!.truncate()
         ? amount!.truncate().toString()
         : amount.toString();
-    return '$formattedAmount${unit!.shortLabel}';
+    // 大さじ・小さじは単位を先に表示（例: "大さじ1"）
+    // ml・gは数値を先に表示（例: "30ml"）
+    return switch (unit!) {
+      AmountUnit.tablespoon || AmountUnit.teaspoon =>
+        '${unit!.shortLabel}$formattedAmount',
+      AmountUnit.ml || AmountUnit.gram =>
+        '$formattedAmount${unit!.shortLabel}',
+    };
   }
 }

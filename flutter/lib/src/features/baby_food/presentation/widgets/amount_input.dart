@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/types/child_icon.dart';
 import '../../domain/value_objects/amount_unit.dart';
 import '../../domain/value_objects/baby_food_reaction.dart';
 import '../models/baby_food_draft.dart';
@@ -11,6 +12,7 @@ class AmountInput extends StatelessWidget {
   const AmountInput({
     super.key,
     required this.items,
+    required this.childIcon,
     required this.onAmountChanged,
     required this.onUnitChanged,
     required this.onReactionChanged,
@@ -19,6 +21,7 @@ class AmountInput extends StatelessWidget {
   });
 
   final List<BabyFoodItemDraft> items;
+  final ChildIcon childIcon;
   final void Function(String ingredientId, double? amount) onAmountChanged;
   final void Function(String ingredientId, AmountUnit unit) onUnitChanged;
   final void Function(String ingredientId, BabyFoodReaction? reaction)
@@ -36,6 +39,7 @@ class AmountInput extends StatelessWidget {
         final item = items[index];
         return _AmountInputCard(
           item: item,
+          childIcon: childIcon,
           onAmountChanged: (amount) =>
               onAmountChanged(item.ingredientId, amount),
           onUnitChanged: (unit) => onUnitChanged(item.ingredientId, unit),
@@ -53,6 +57,7 @@ class AmountInput extends StatelessWidget {
 class _AmountInputCard extends StatefulWidget {
   const _AmountInputCard({
     required this.item,
+    required this.childIcon,
     required this.onAmountChanged,
     required this.onUnitChanged,
     required this.onReactionChanged,
@@ -61,6 +66,7 @@ class _AmountInputCard extends StatefulWidget {
   });
 
   final BabyFoodItemDraft item;
+  final ChildIcon childIcon;
   final void Function(double? amount) onAmountChanged;
   final void Function(AmountUnit unit) onUnitChanged;
   final void Function(BabyFoodReaction? reaction) onReactionChanged;
@@ -113,11 +119,11 @@ class _AmountInputCardState extends State<_AmountInputCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1行目: 食材名（左） + 反応アイコン（右）
-          _buildNameAndReactionRow(),
+          // 1行目: 食材名（左） + 単位・量入力（右）
+          _buildNameAndAmountRow(),
           const Divider(height: 16),
-          // 2行目: 単位 + 数値 + アレルギーチェック
-          _buildAmountAndAllergyRow(),
+          // 2行目: 反応アイコン + アレルギーチェック
+          _buildReactionAndAllergyRow(),
           const Divider(height: 16),
           // 3行目: メモ（複数行入力可能）
           _buildMemoRow(),
@@ -126,69 +132,32 @@ class _AmountInputCardState extends State<_AmountInputCard> {
     );
   }
 
-  /// 1行目: 食材名（左） + 反応アイコン（右）
-  Widget _buildNameAndReactionRow() {
-    return Row(
-      children: [
-        // 食材名
-        Text(
-          widget.item.ingredientName,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const Spacer(),
-        // 反応選択
-        _ReactionIconButton(
-          reaction: BabyFoodReaction.good,
-          icon: Icons.sentiment_very_satisfied,
-          color: Colors.green,
-          isSelected: widget.item.reaction == BabyFoodReaction.good,
-          onTap: () => widget.onReactionChanged(
-              widget.item.reaction == BabyFoodReaction.good
-                  ? null
-                  : BabyFoodReaction.good),
-        ),
-        const SizedBox(width: 4),
-        _ReactionIconButton(
-          reaction: BabyFoodReaction.normal,
-          icon: Icons.sentiment_neutral,
-          color: Colors.orange,
-          isSelected: widget.item.reaction == BabyFoodReaction.normal,
-          onTap: () => widget.onReactionChanged(
-              widget.item.reaction == BabyFoodReaction.normal
-                  ? null
-                  : BabyFoodReaction.normal),
-        ),
-        const SizedBox(width: 4),
-        _ReactionIconButton(
-          reaction: BabyFoodReaction.bad,
-          icon: Icons.sentiment_very_dissatisfied,
-          color: Colors.red,
-          isSelected: widget.item.reaction == BabyFoodReaction.bad,
-          onTap: () => widget.onReactionChanged(
-              widget.item.reaction == BabyFoodReaction.bad
-                  ? null
-                  : BabyFoodReaction.bad),
-        ),
-      ],
-    );
-  }
-
-  /// 2行目: 単位選択 + 量入力 + アレルギーチェック
-  Widget _buildAmountAndAllergyRow() {
+  /// 1行目: 食材名（左） + 単位・量入力（右）
+  Widget _buildNameAndAmountRow() {
     final currentUnit = widget.item.unit;
 
     return Row(
       children: [
+        // 食材名
+        Expanded(
+          flex: 2,
+          child: Text(
+            widget.item.ingredientName,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
         // 単位選択（タップでドラムロール表示）
         Expanded(
+          flex: 2,
           child: GestureDetector(
             onTap: () => _showUnitPicker(context, currentUnit),
             child: Container(
-              height: 40,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              height: 36,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey.shade400),
                 borderRadius: BorderRadius.circular(4),
@@ -199,7 +168,7 @@ class _AmountInputCardState extends State<_AmountInputCard> {
                     child: Text(
                       currentUnit?.label ?? '単位',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         color: currentUnit != null
                             ? Colors.black87
                             : Colors.grey.shade400,
@@ -208,6 +177,7 @@ class _AmountInputCardState extends State<_AmountInputCard> {
                   ),
                   Icon(
                     Icons.arrow_drop_down,
+                    size: 20,
                     color: Colors.grey.shade600,
                   ),
                 ],
@@ -218,8 +188,9 @@ class _AmountInputCardState extends State<_AmountInputCard> {
         const SizedBox(width: 8),
         // 量入力フィールド
         Expanded(
+          flex: 2,
           child: SizedBox(
-            height: 40,
+            height: 36,
             child: TextField(
               controller: _amountController,
               keyboardType:
@@ -227,13 +198,13 @@ class _AmountInputCardState extends State<_AmountInputCard> {
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
               ],
-              style: const TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 13),
               decoration: InputDecoration(
-                hintText: '量（任意）',
+                hintText: '量',
                 hintStyle: TextStyle(fontSize: 12, color: Colors.grey.shade400),
                 border: const OutlineInputBorder(),
                 contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 isDense: true,
               ),
               onChanged: (value) {
@@ -243,7 +214,45 @@ class _AmountInputCardState extends State<_AmountInputCard> {
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  /// 2行目: 反応選択 + アレルギーチェック
+  Widget _buildReactionAndAllergyRow() {
+    return Row(
+      children: [
+        // 反応選択（動物アイコン）
+        _ReactionImageButton(
+          childIcon: widget.childIcon,
+          reaction: BabyFoodReaction.good,
+          isSelected: widget.item.reaction == BabyFoodReaction.good,
+          onTap: () => widget.onReactionChanged(
+              widget.item.reaction == BabyFoodReaction.good
+                  ? null
+                  : BabyFoodReaction.good),
+        ),
         const SizedBox(width: 8),
+        _ReactionImageButton(
+          childIcon: widget.childIcon,
+          reaction: BabyFoodReaction.normal,
+          isSelected: widget.item.reaction == BabyFoodReaction.normal,
+          onTap: () => widget.onReactionChanged(
+              widget.item.reaction == BabyFoodReaction.normal
+                  ? null
+                  : BabyFoodReaction.normal),
+        ),
+        const SizedBox(width: 8),
+        _ReactionImageButton(
+          childIcon: widget.childIcon,
+          reaction: BabyFoodReaction.bad,
+          isSelected: widget.item.reaction == BabyFoodReaction.bad,
+          onTap: () => widget.onReactionChanged(
+              widget.item.reaction == BabyFoodReaction.bad
+                  ? null
+                  : BabyFoodReaction.bad),
+        ),
+        const Spacer(),
         // アレルギーチェック
         Row(
           mainAxisSize: MainAxisSize.min,
@@ -366,39 +375,100 @@ class _AmountInputCardState extends State<_AmountInputCard> {
   }
 }
 
-class _ReactionIconButton extends StatelessWidget {
-  const _ReactionIconButton({
+/// 反応選択用の画像ボタン
+class _ReactionImageButton extends StatelessWidget {
+  const _ReactionImageButton({
+    required this.childIcon,
     required this.reaction,
-    required this.icon,
-    required this.color,
     required this.isSelected,
     required this.onTap,
   });
 
+  final ChildIcon childIcon;
   final BabyFoodReaction reaction;
-  final IconData icon;
-  final Color color;
   final bool isSelected;
   final VoidCallback onTap;
+
+  String get _imagePath {
+    return switch (reaction) {
+      BabyFoodReaction.good => childIcon.goodReactionPath,
+      BabyFoodReaction.normal => childIcon.normalReactionPath,
+      BabyFoodReaction.bad => childIcon.badReactionPath,
+    };
+  }
+
+  String get _label {
+    return switch (reaction) {
+      BabyFoodReaction.good => 'すき',
+      BabyFoodReaction.normal => 'ふつう',
+      BabyFoodReaction.bad => 'にがて',
+    };
+  }
+
+  Color get _borderColor {
+    if (!isSelected) return Colors.grey.shade300;
+    return switch (reaction) {
+      BabyFoodReaction.good => Colors.green,
+      BabyFoodReaction.normal => Colors.orange,
+      BabyFoodReaction.bad => Colors.red,
+    };
+  }
+
+  Color get _backgroundColor {
+    if (!isSelected) return Colors.transparent;
+    return switch (reaction) {
+      BabyFoodReaction.good => Colors.green.withValues(alpha: 0.1),
+      BabyFoodReaction.normal => Colors.orange.withValues(alpha: 0.1),
+      BabyFoodReaction.bad => Colors.red.withValues(alpha: 0.1),
+    };
+  }
+
+  Color get _labelColor {
+    if (!isSelected) return Colors.grey.shade500;
+    return switch (reaction) {
+      BabyFoodReaction.good => Colors.green.shade700,
+      BabyFoodReaction.normal => Colors.orange.shade700,
+      BabyFoodReaction.bad => Colors.red.shade700,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.2) : Colors.transparent,
-          border: Border.all(
-            color: isSelected ? color : Colors.grey.shade300,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: _backgroundColor,
+              border: Border.all(
+                color: _borderColor,
+                width: isSelected ? 2 : 1,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Opacity(
+              opacity: isSelected ? 1.0 : 0.5,
+              child: Image.asset(
+                _imagePath,
+                fit: BoxFit.contain,
+              ),
+            ),
           ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(
-          icon,
-          size: 20,
-          color: isSelected ? color : Colors.grey.shade400,
-        ),
+          const SizedBox(height: 4),
+          Text(
+            _label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              color: _labelColor,
+            ),
+          ),
+        ],
       ),
     );
   }

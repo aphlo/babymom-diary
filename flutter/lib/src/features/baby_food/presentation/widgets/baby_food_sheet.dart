@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/types/child_icon.dart';
 import '../../../../core/widgets/milu_infinite_time_picker.dart';
+import '../../../menu/children/application/child_context_provider.dart';
 import '../../domain/value_objects/food_category.dart';
 import '../models/baby_food_draft.dart';
 import '../viewmodels/baby_food_sheet_state.dart';
@@ -103,6 +105,12 @@ class _BabyFoodSheetState extends ConsumerState<BabyFoodSheet> {
                   )
                 : AmountInput(
                     items: state.selectedItems,
+                    childIcon: ref
+                            .watch(childContextProvider)
+                            .value
+                            ?.selectedChildSummary
+                            ?.icon ??
+                        ChildIcon.bear,
                     onAmountChanged: viewModel.updateItemAmount,
                     onUnitChanged: viewModel.updateItemUnit,
                     onReactionChanged: viewModel.updateItemReaction,
