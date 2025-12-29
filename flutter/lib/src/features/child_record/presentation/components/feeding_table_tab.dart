@@ -5,6 +5,9 @@ import '../../child_record.dart';
 import '../providers/daily_records_provider.dart';
 import '../../../ads/application/services/banner_ad_manager.dart';
 import '../../../ads/presentation/widgets/banner_ad_widget.dart';
+import '../../../baby_food/domain/entities/baby_food_record.dart';
+import '../../../baby_food/presentation/providers/baby_food_providers.dart';
+import '../../../baby_food/presentation/widgets/baby_food_slot_sheet.dart';
 import '../../../menu/children/application/child_context_provider.dart';
 import '../models/record_draft.dart';
 import '../models/record_item_model.dart';
@@ -118,9 +121,11 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
 
     // ChildContext と selectedChildId が揃っている場合のみ記録を取得
     final selectedChildId = childContext?.selectedChildId;
-    final recordsAsync = (childContext != null &&
-            selectedChildId != null &&
-            selectedChildId.isNotEmpty)
+    final hasValidContext = childContext != null &&
+        selectedChildId != null &&
+        selectedChildId.isNotEmpty;
+
+    final recordsAsync = hasValidContext
         ? ref.watch(dailyRecordsProvider(DailyRecordsQuery(
             householdId: childContext.householdId,
             childId: selectedChildId,
@@ -128,16 +133,60 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
           )))
         : const AsyncValue<List<RecordItemModel>>.data(<RecordItemModel>[]);
 
+    // 離乳食記録を取得
+    final babyFoodRecordsAsync = hasValidContext
+        ? ref.watch(dailyBabyFoodRecordsProvider(DailyBabyFoodRecordsQuery(
+            householdId: childContext.householdId,
+            childId: selectedChildId,
+            date: selectedDate,
+          )))
+        : const AsyncValue<List<BabyFoodRecord>>.data(<BabyFoodRecord>[]);
+
+    // カスタム食材を取得
+    final customIngredientsAsync = hasValidContext
+        ? ref.watch(customIngredientsProvider(childContext.householdId))
+        : null;
+
     void handleSlotTap(int hour, RecordType type) {
       final records = recordsAsync.value ?? const <RecordItemModel>[];
       notifier.openSlotDetails(hour: hour, type: type, allRecords: records);
+    }
+
+    void handleBabyFoodSlotTap(int hour) {
+      if (!hasValidContext) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('記録を行うには、メニューから子どもを登録してください。')),
+        );
+        return;
+      }
+
+      final babyFoodRecords = babyFoodRecordsAsync.value ?? <BabyFoodRecord>[];
+      final recordsInHour = babyFoodRecords
+          .where((record) => record.recordedAt.hour == hour)
+          .toList();
+      final customIngredients = customIngredientsAsync?.value ?? [];
+
+      // bottom sheetで記録一覧を表示
+      showBabyFoodSlotSheet(
+        context: context,
+        ref: ref,
+        householdId: childContext.householdId,
+        childId: selectedChildId,
+        selectedDate: selectedDate,
+        hour: hour,
+        recordsInHour: recordsInHour,
+        customIngredients: customIngredients,
+      );
     }
 
     final scrollStorageKey = PageStorageKey<String>(
       'record_table_scroll_${selectedDate.toIso8601String()}',
     );
 
-    Widget buildRecordTable(List<RecordItemModel> records) {
+    Widget buildRecordTable(
+      List<RecordItemModel> records,
+      List<BabyFoodRecord> babyFoodRecords,
+    ) {
       return Column(
         children: [
           Expanded(
@@ -148,8 +197,12 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
                   onSlotTap: handleSlotTap,
                   scrollStorageKey: scrollStorageKey,
                   selectedDate: selectedDate,
+                  babyFoodRecords: babyFoodRecords,
+                  onBabyFoodSlotTap: handleBabyFoodSlotTap,
                 ),
                 if ((recordsAsync.isLoading && !recordsAsync.hasValue) ||
+                    (babyFoodRecordsAsync.isLoading &&
+                        !babyFoodRecordsAsync.hasValue) ||
                     state.isProcessing)
                   const Positioned(
                     right: 16,
@@ -168,16 +221,18 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
       );
     }
 
-    return recordsAsync.when(
-      data: buildRecordTable,
-      loading: () {
-        final records = recordsAsync.value;
-        if (records != null) {
-          return buildRecordTable(records);
-        }
-        return const Center(child: CircularProgressIndicator());
-      },
-      error: (e, _) => Center(child: Text('Error: $e')),
-    );
+    // 両方のデータが揃ったら表示
+    final records = recordsAsync.value ?? <RecordItemModel>[];
+    final babyFoodRecords = babyFoodRecordsAsync.value ?? <BabyFoodRecord>[];
+
+    if (recordsAsync.isLoading && !recordsAsync.hasValue) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (recordsAsync.hasError) {
+      return Center(child: Text('Error: ${recordsAsync.error}'));
+    }
+
+    return buildRecordTable(records, babyFoodRecords);
   }
 }

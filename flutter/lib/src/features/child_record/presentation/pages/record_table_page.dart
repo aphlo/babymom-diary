@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../menu/children/application/child_context_provider.dart';
+import '../components/baby_food_tab.dart';
 import '../components/feeding_table_tab.dart';
 import '../components/growth_chart_tab.dart';
 import '../viewmodels/record_view_model.dart';
@@ -24,7 +25,7 @@ class _RecordTablePageState extends ConsumerState<RecordTablePage>
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: 2,
+      length: 3,
       vsync: this,
       initialIndex: 0,
     );
@@ -122,6 +123,7 @@ class _RecordTablePageState extends ConsumerState<RecordTablePage>
               unselectedLabelStyle: theme.textTheme.bodyMedium,
               tabs: const [
                 Tab(text: '授乳表'),
+                Tab(text: '離乳食'),
                 Tab(text: '成長曲線'),
               ],
             ),
@@ -132,6 +134,7 @@ class _RecordTablePageState extends ConsumerState<RecordTablePage>
         controller: _tabController,
         children: const [
           FeedingTableTab(),
+          BabyFoodTab(),
           GrowthChartTab(),
         ],
       ),
