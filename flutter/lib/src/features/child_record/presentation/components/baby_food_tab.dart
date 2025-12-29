@@ -111,13 +111,14 @@ class _BabyFoodIngredientList extends StatelessWidget {
         final key = item.ingredientId;
         if (stats.containsKey(key)) {
           // 既存の食材を更新
+          // recordsは最新順なので、最初に見つかった反応を維持する
           final existing = stats[key]!;
           stats[key] = _IngredientStat(
             ingredientId: item.ingredientId,
             ingredientName: item.ingredientName,
             category: item.category,
             hasEaten: true,
-            latestReaction: item.reaction ?? existing.latestReaction,
+            latestReaction: existing.latestReaction ?? item.reaction,
             eatCount: existing.eatCount + 1,
           );
         } else {
