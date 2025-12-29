@@ -189,7 +189,8 @@ class _CategoryIngredientList extends ConsumerWidget {
         }
 
         // カスタム食材
-        final customIndex = hasCustomIngredients ? offsetIndex - 1 : offsetIndex;
+        final customIndex =
+            hasCustomIngredients ? offsetIndex - 1 : offsetIndex;
         if (customIndex < customIngredients.length) {
           final customIngredient = customIngredients[customIndex];
           final stat = ingredientStats[customIngredient.id];
@@ -440,7 +441,8 @@ class _CustomIngredientListTile extends ConsumerWidget {
       final useCase =
           ref.read(updateCustomIngredientUseCaseProvider(householdId));
       try {
-        await useCase.call(ingredientId: ingredient.id, newName: newName.trim());
+        await useCase.call(
+            ingredientId: ingredient.id, newName: newName.trim());
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('「$newName」に変更しました')),
