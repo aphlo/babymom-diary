@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/types/child_icon.dart';
-import '../../../../core/widgets/milu_infinite_time_picker.dart';
 import '../../../menu/children/application/child_context_provider.dart';
 import '../../../menu/children/application/selected_child_provider.dart';
 import '../../domain/value_objects/food_category.dart';
@@ -11,6 +10,8 @@ import '../viewmodels/baby_food_sheet_state.dart';
 import '../viewmodels/baby_food_sheet_view_model.dart';
 import 'amount_input.dart';
 import 'ingredient_selection.dart';
+import 'step_indicator.dart';
+import 'time_picker_tile.dart';
 
 /// 離乳食記録シート
 class BabyFoodSheet extends ConsumerStatefulWidget {
@@ -83,13 +84,13 @@ class _BabyFoodSheetState extends ConsumerState<BabyFoodSheet> {
       body: Column(
         children: [
           // 時刻選択
-          _TimePickerTile(
+          TimePickerTile(
             value: state.timeOfDay,
             onChanged: viewModel.setTimeOfDay,
           ),
           const Divider(height: 1),
           // ステップインジケーター
-          _StepIndicator(
+          StepIndicator(
             currentStep: state.currentStep,
             stepTitle: stepTitle,
           ),
@@ -134,64 +135,13 @@ class _BabyFoodSheetState extends ConsumerState<BabyFoodSheet> {
           ),
           // 選択中の食材サマリー（食材選択ステップのみ）
           if (state.isIngredientSelectionStep && state.selectedItems.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: Colors.pink.shade50,
-              child: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.pink, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '選択中: ${state.selectedItemsSummary}',
-                      style: const TextStyle(fontSize: 14),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _SelectedItemsSummary(summary: state.selectedItemsSummary),
           // ボトムボタン
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  if (state.isAmountInputStep) ...[
-                    OutlinedButton(
-                      onPressed: viewModel.previousStep,
-                      child: const Text('戻る'),
-                    ),
-                    const SizedBox(width: 12),
-                  ],
-                  Expanded(
-                    child: state.isIngredientSelectionStep
-                        ? FilledButton(
-                            onPressed:
-                                state.canProceed ? viewModel.nextStep : null,
-                            child: const Text('次へ'),
-                          )
-                        : FilledButton.icon(
-                            onPressed: state.canSave
-                                ? () => _handleSave(context)
-                                : null,
-                            icon: state.isProcessing
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Icon(Icons.save),
-                            label: const Text('保存'),
-                          ),
-                  ),
-                ],
-              ),
-            ),
+          _BottomButtons(
+            state: state,
+            onPreviousStep: viewModel.previousStep,
+            onNextStep: viewModel.nextStep,
+            onSave: () => _handleSave(context),
           ),
         ],
       ),
@@ -229,122 +179,95 @@ class _BabyFoodSheetState extends ConsumerState<BabyFoodSheet> {
     );
 
     if (confirmed == true && mounted) {
-      // 削除を示す特別な結果を返す
-      navigator.pop(const _DeleteResult());
+      final viewModel = ref.read(_viewModelProvider.notifier);
+      final success = await viewModel.delete();
+      if (success && mounted) {
+        navigator.pop(const _DeleteResult());
+      }
     }
   }
 }
 
-class _TimePickerTile extends StatelessWidget {
-  const _TimePickerTile({
-    required this.value,
-    required this.onChanged,
-  });
+/// 選択中の食材サマリー
+class _SelectedItemsSummary extends StatelessWidget {
+  const _SelectedItemsSummary({required this.summary});
 
-  final TimeOfDay value;
-  final ValueChanged<TimeOfDay> onChanged;
+  final String summary;
 
   @override
   Widget build(BuildContext context) {
-    final formatted = value.format(context);
-    return ListTile(
-      leading: const Icon(Icons.access_time),
-      title: const Text('記録時間'),
-      trailing: FilledButton.tonalIcon(
-        onPressed: () async {
-          final picked = await showMiluInfiniteTimePicker(
-            context,
-            initialTime: value,
-          );
-          if (picked != null) {
-            onChanged(picked);
-          }
-        },
-        icon: const Icon(Icons.edit, size: 18),
-        label: Text(formatted),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: Colors.pink.shade50,
+      child: Row(
+        children: [
+          const Icon(Icons.check_circle, color: Colors.pink, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '選択中: $summary',
+              style: const TextStyle(fontSize: 14),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _StepIndicator extends StatelessWidget {
-  const _StepIndicator({
-    required this.currentStep,
-    required this.stepTitle,
+/// ボトムボタン
+class _BottomButtons extends StatelessWidget {
+  const _BottomButtons({
+    required this.state,
+    required this.onPreviousStep,
+    required this.onNextStep,
+    required this.onSave,
   });
 
-  final int currentStep;
-  final String stepTitle;
+  final BabyFoodSheetState state;
+  final VoidCallback onPreviousStep;
+  final VoidCallback onNextStep;
+  final VoidCallback onSave;
 
   @override
   Widget build(BuildContext context) {
-    final isIngredientStep = currentStep == 0;
-    final isAmountStep = currentStep == 1;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: Colors.grey.shade100,
-      child: Row(
-        children: [
-          Text(
-            stepTitle,
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 16,
-            ),
-          ),
-          const Spacer(),
-          if (isIngredientStep)
-            GestureDetector(
-              onTap: () => _showIngredientHelpDialog(context),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.help_outline,
-                    size: 16,
-                    color: Colors.grey.shade600,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '記録したい食材がない場合は',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                      decoration: TextDecoration.underline,
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            if (state.isAmountInputStep) ...[
+              OutlinedButton(
+                onPressed: onPreviousStep,
+                child: const Text('戻る'),
+              ),
+              const SizedBox(width: 12),
+            ],
+            Expanded(
+              child: state.isIngredientSelectionStep
+                  ? FilledButton(
+                      onPressed: state.canProceed ? onNextStep : null,
+                      child: const Text('次へ'),
+                    )
+                  : FilledButton.icon(
+                      onPressed: state.canSave ? onSave : null,
+                      icon: state.isProcessing
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.save),
+                      label: const Text('保存'),
                     ),
-                  ),
-                ],
-              ),
             ),
-          if (isAmountStep)
-            Text(
-              '量や反応の入力は任意です',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  void _showIngredientHelpDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('食材の追加について'),
-        content: const Text(
-          'ベビーの記録画面の「離乳食」タブから食材を追加してください。\n\n'
-          '追加した食材は、すべての記録で選択できるようになります。',
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('閉じる'),
-          ),
-        ],
       ),
     );
   }

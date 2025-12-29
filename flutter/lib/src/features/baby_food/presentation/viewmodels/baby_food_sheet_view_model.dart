@@ -280,4 +280,26 @@ class BabyFoodSheetViewModel extends _$BabyFoodSheetViewModel {
   void clearError() {
     state = state.copyWith(errorMessage: null);
   }
+
+  /// 削除処理
+  Future<bool> delete() async {
+    final recordId = state.existingId;
+    if (recordId == null) return false;
+
+    state = state.copyWith(isProcessing: true, errorMessage: null);
+
+    try {
+      final deleteUseCase =
+          ref.read(deleteBabyFoodRecordUseCaseProvider(_householdId));
+      await deleteUseCase.call(childId: _childId, recordId: recordId);
+      state = state.copyWith(isProcessing: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isProcessing: false,
+        errorMessage: '削除に失敗しました: $e',
+      );
+      return false;
+    }
+  }
 }
