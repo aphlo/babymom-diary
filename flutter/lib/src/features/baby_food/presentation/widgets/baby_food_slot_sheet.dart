@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../menu/children/application/selected_child_provider.dart';
 import '../../domain/entities/baby_food_record.dart';
 import '../../domain/entities/custom_ingredient.dart';
 import '../models/baby_food_draft.dart';
@@ -99,90 +100,138 @@ void showBabyFoodSlotSheet({
       final records = recordsInHour.toList()
         ..sort((a, b) => a.recordedAt.compareTo(b.recordedAt));
       final hasRecord = records.isNotEmpty;
-      return DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: 0.6,
-        minChildSize: 0.4,
-        maxChildSize: 0.9,
-        builder: (_, controller) {
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Image.asset(
-                      'assets/icons/child_record/babyfood_black.png',
-                      width: 24,
-                      height: 24,
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      '離乳食',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${hour.toString().padLeft(2, '0')}:00 の記録',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).maybePop(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text('合計: ${records.length}件'),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: hasRecord
-                      ? ListView.builder(
-                          controller: controller,
-                          itemCount: records.length,
-                          itemBuilder: (_, i) {
-                            final record = records[i];
-                            return _BabyFoodRecordTile(
-                              record: record,
-                              onEdit: () => editRecord(record),
-                              onDelete: () => confirmDelete(record),
-                            );
-                          },
-                        )
-                      : Center(
-                          child: Text(
-                            '${hour.toString().padLeft(2, '0')}:00 の記録はありません',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(color: Colors.black54),
-                          ),
-                        ),
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: addNewRecord,
-                    icon: const Icon(Icons.add),
-                    label: const Text('記録を追加'),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+      return _BabyFoodSlotSheetContent(
+        childId: childId,
+        hour: hour,
+        records: records,
+        hasRecord: hasRecord,
+        onAddNewRecord: addNewRecord,
+        onEditRecord: editRecord,
+        onDeleteRecord: confirmDelete,
+        parentContext: context,
       );
     },
   );
+}
+
+/// 離乳食スロットシートのコンテンツ（子供切り替え時に閉じる機能付き）
+class _BabyFoodSlotSheetContent extends ConsumerWidget {
+  const _BabyFoodSlotSheetContent({
+    required this.childId,
+    required this.hour,
+    required this.records,
+    required this.hasRecord,
+    required this.onAddNewRecord,
+    required this.onEditRecord,
+    required this.onDeleteRecord,
+    required this.parentContext,
+  });
+
+  final String childId;
+  final int hour;
+  final List<BabyFoodRecord> records;
+  final bool hasRecord;
+  final VoidCallback onAddNewRecord;
+  final void Function(BabyFoodRecord) onEditRecord;
+  final void Function(BabyFoodRecord) onDeleteRecord;
+  final BuildContext parentContext;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 選択中の子供が変更されたらシートを閉じる
+    ref.listen<AsyncValue<String?>>(selectedChildControllerProvider,
+        (previous, next) {
+      final nextChildId = next.value;
+      // 初期ロード時はスキップ（previous == null）
+      // 実際に子供が切り替わった時のみ閉じる
+      if (previous != null && nextChildId != null && nextChildId != childId) {
+        Navigator.of(context).pop();
+      }
+    });
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.9,
+      builder: (_, controller) {
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Image.asset(
+                    'assets/icons/child_record/babyfood_black.png',
+                    width: 24,
+                    height: 24,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    '離乳食',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${hour.toString().padLeft(2, '0')}:00 の記録',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(parentContext).maybePop(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text('合計: ${records.length}件'),
+              const SizedBox(height: 8),
+              Expanded(
+                child: hasRecord
+                    ? ListView.builder(
+                        controller: controller,
+                        itemCount: records.length,
+                        itemBuilder: (_, i) {
+                          final record = records[i];
+                          return _BabyFoodRecordTile(
+                            record: record,
+                            onEdit: () => onEditRecord(record),
+                            onDelete: () => onDeleteRecord(record),
+                          );
+                        },
+                      )
+                    : Center(
+                        child: Text(
+                          '${hour.toString().padLeft(2, '0')}:00 の記録はありません',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: Colors.black54),
+                        ),
+                      ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: onAddNewRecord,
+                  icon: const Icon(Icons.add),
+                  label: const Text('記録を追加'),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 /// 離乳食記録の1件を表示するタイル

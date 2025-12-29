@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/types/child_icon.dart';
 import '../../../../core/widgets/milu_infinite_time_picker.dart';
 import '../../../menu/children/application/child_context_provider.dart';
+import '../../../menu/children/application/selected_child_provider.dart';
 import '../../domain/value_objects/food_category.dart';
 import '../models/baby_food_draft.dart';
 import '../viewmodels/baby_food_sheet_state.dart';
@@ -34,6 +35,19 @@ class _BabyFoodSheetState extends ConsumerState<BabyFoodSheet> {
   Widget build(BuildContext context) {
     final state = ref.watch(_viewModelProvider);
     final viewModel = ref.read(_viewModelProvider.notifier);
+
+    // 選択中の子供が変更されたらシートを閉じる
+    ref.listen<AsyncValue<String?>>(selectedChildControllerProvider,
+        (previous, next) {
+      final nextChildId = next.value;
+      // 初期ロード時はスキップ（previous == null）
+      // 実際に子供が切り替わった時のみ閉じる
+      if (previous != null &&
+          nextChildId != null &&
+          nextChildId != widget.args.childId) {
+        Navigator.of(context).pop();
+      }
+    });
 
     // エラーメッセージの表示
     ref.listen<BabyFoodSheetState>(_viewModelProvider, (previous, next) {
