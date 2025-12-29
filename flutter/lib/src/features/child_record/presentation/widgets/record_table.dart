@@ -160,8 +160,8 @@ class _RecordTableState extends State<RecordTable> {
           unit: 'ml',
         ),
         _TotalValue(
-          value: totalBabyFoodCount > 0 ? '$totalBabyFoodCount' : '',
-          unit: totalBabyFoodCount > 0 ? '回' : '',
+          value: '$totalBabyFoodCount',
+          unit: '回',
         ),
         _TotalValue(
           value: '$totalPeeCount',
