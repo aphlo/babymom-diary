@@ -16,6 +16,7 @@ import '../../infrastructure/repositories/baby_food_record_repository_impl.dart'
 import '../../infrastructure/repositories/custom_ingredient_repository_impl.dart';
 import '../../infrastructure/sources/baby_food_firestore_data_source.dart';
 import '../../infrastructure/sources/custom_ingredient_firestore_data_source.dart';
+import '../../infrastructure/sources/hidden_ingredients_firestore_data_source.dart';
 
 part 'baby_food_providers.g.dart';
 
@@ -32,6 +33,12 @@ BabyFoodFirestoreDataSource babyFoodDataSource(Ref ref, String householdId) {
 CustomIngredientFirestoreDataSource customIngredientDataSource(
     Ref ref, String householdId) {
   return CustomIngredientFirestoreDataSource(householdId: householdId);
+}
+
+@riverpod
+HiddenIngredientsFirestoreDataSource hiddenIngredientsDataSource(
+    Ref ref, String householdId) {
+  return HiddenIngredientsFirestoreDataSource(householdId: householdId);
 }
 
 // ============================================================================
@@ -140,6 +147,17 @@ Stream<List<CustomIngredient>> customIngredients(
 ) {
   final useCase = ref.watch(watchCustomIngredientsUseCaseProvider(householdId));
   return useCase.call();
+}
+
+/// 非表示食材IDを監視
+@riverpod
+Stream<Set<String>> hiddenIngredients(
+  Ref ref,
+  String householdId,
+) {
+  final dataSource =
+      ref.watch(hiddenIngredientsDataSourceProvider(householdId));
+  return dataSource.watch();
 }
 
 /// 離乳食記録のクエリパラメータ

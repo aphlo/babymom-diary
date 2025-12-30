@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/types/child_icon.dart';
 import '../../../baby_food/domain/entities/baby_food_record.dart';
 import '../../../baby_food/domain/entities/custom_ingredient.dart';
 import '../../../baby_food/domain/value_objects/baby_food_reaction.dart';
@@ -30,13 +31,24 @@ class BabyFoodTab extends ConsumerWidget {
     );
     final customIngredientsAsync =
         ref.watch(customIngredientsProvider(householdId));
+    final hiddenIngredientsAsync =
+        ref.watch(hiddenIngredientsProvider(householdId));
+
+    // 選択中の子供のアイコンを取得
+    final childIcon = childContext.selectedChildSummary?.icon ?? ChildIcon.bear;
 
     return recordsAsync.when(
       data: (records) => customIngredientsAsync.when(
-        data: (customIngredients) => _BabyFoodIngredientList(
-          householdId: householdId,
-          records: records,
-          customIngredients: customIngredients,
+        data: (customIngredients) => hiddenIngredientsAsync.when(
+          data: (hiddenIngredients) => _BabyFoodIngredientList(
+            householdId: householdId,
+            records: records,
+            customIngredients: customIngredients,
+            hiddenIngredients: hiddenIngredients,
+            childIcon: childIcon,
+          ),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(child: Text('エラー: $e')),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('エラー: $e')),
@@ -52,11 +64,15 @@ class _BabyFoodIngredientList extends StatelessWidget {
     required this.householdId,
     required this.records,
     required this.customIngredients,
+    required this.hiddenIngredients,
+    required this.childIcon,
   });
 
   final String householdId;
   final List<BabyFoodRecord> records;
   final List<CustomIngredient> customIngredients;
+  final Set<String> hiddenIngredients;
+  final ChildIcon childIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +107,8 @@ class _BabyFoodIngredientList extends StatelessWidget {
                   customIngredients: customIngredients
                       .where((i) => i.category == category)
                       .toList(),
+                  hiddenIngredients: hiddenIngredients,
+                  childIcon: childIcon,
                 );
               }).toList(),
             ),
@@ -120,6 +138,8 @@ class _BabyFoodIngredientList extends StatelessWidget {
             hasEaten: true,
             latestReaction: existing.latestReaction ?? item.reaction,
             eatCount: existing.eatCount + 1,
+            // アレルギーは一度でもtrueなら維持
+            hasAllergy: existing.hasAllergy || (item.hasAllergy ?? false),
           );
         } else {
           // 新しい食材を追加
@@ -130,6 +150,7 @@ class _BabyFoodIngredientList extends StatelessWidget {
             hasEaten: true,
             latestReaction: item.reaction,
             eatCount: 1,
+            hasAllergy: item.hasAllergy ?? false,
           );
         }
       }
@@ -145,25 +166,35 @@ class _CategoryIngredientList extends ConsumerWidget {
     required this.category,
     required this.ingredientStats,
     required this.customIngredients,
+    required this.hiddenIngredients,
+    required this.childIcon,
   });
 
   final String householdId;
   final FoodCategory category;
   final Map<String, _IngredientStat> ingredientStats;
   final List<CustomIngredient> customIngredients;
+  final Set<String> hiddenIngredients;
+  final ChildIcon childIcon;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // プリセット食材を取得
-    final presetIngredients = category.presetIngredients;
+    // プリセット食材を取得（非表示を除外）
+    final visiblePresetIngredients = category.presetIngredients
+        .where((name) => !hiddenIngredients.contains(name))
+        .toList();
+    // カスタム食材（非表示を除外）
+    final visibleCustomIngredients = customIngredients
+        .where((i) => !hiddenIngredients.contains(i.id))
+        .toList();
 
     // リストの項目数:
     // プリセット食材 + カスタム食材セクションヘッダー（カスタム食材がある場合）
     // + カスタム食材 + 食材追加ボタン
-    final hasCustomIngredients = customIngredients.isNotEmpty;
-    final totalItems = presetIngredients.length +
+    final hasCustomIngredients = visibleCustomIngredients.isNotEmpty;
+    final totalItems = visiblePresetIngredients.length +
         (hasCustomIngredients ? 1 : 0) + // セクションヘッダー
-        customIngredients.length +
+        visibleCustomIngredients.length +
         1; // 食材追加ボタン
 
     return ListView.builder(
@@ -171,18 +202,20 @@ class _CategoryIngredientList extends ConsumerWidget {
       itemCount: totalItems,
       itemBuilder: (context, index) {
         // プリセット食材
-        if (index < presetIngredients.length) {
-          final ingredientName = presetIngredients[index];
+        if (index < visiblePresetIngredients.length) {
+          final ingredientName = visiblePresetIngredients[index];
           final stat = ingredientStats[ingredientName];
           return _IngredientListTile(
             ingredientName: ingredientName,
             hasEaten: stat?.hasEaten ?? false,
             reaction: stat?.latestReaction,
             eatCount: stat?.eatCount ?? 0,
+            hasAllergy: stat?.hasAllergy ?? false,
+            childIcon: childIcon,
           );
         }
 
-        final offsetIndex = index - presetIngredients.length;
+        final offsetIndex = index - visiblePresetIngredients.length;
 
         // カスタム食材セクションヘッダー
         if (hasCustomIngredients && offsetIndex == 0) {
@@ -192,8 +225,8 @@ class _CategoryIngredientList extends ConsumerWidget {
         // カスタム食材
         final customIndex =
             hasCustomIngredients ? offsetIndex - 1 : offsetIndex;
-        if (customIndex < customIngredients.length) {
-          final customIngredient = customIngredients[customIndex];
+        if (customIndex < visibleCustomIngredients.length) {
+          final customIngredient = visibleCustomIngredients[customIndex];
           final stat = ingredientStats[customIngredient.id];
           return _CustomIngredientListTile(
             householdId: householdId,
@@ -201,6 +234,8 @@ class _CategoryIngredientList extends ConsumerWidget {
             hasEaten: stat?.hasEaten ?? false,
             reaction: stat?.latestReaction,
             eatCount: stat?.eatCount ?? 0,
+            hasAllergy: stat?.hasAllergy ?? false,
+            childIcon: childIcon,
           );
         }
 
@@ -315,6 +350,8 @@ class _CustomIngredientListTile extends ConsumerWidget {
     required this.hasEaten,
     required this.reaction,
     required this.eatCount,
+    required this.hasAllergy,
+    required this.childIcon,
   });
 
   final String householdId;
@@ -322,11 +359,39 @@ class _CustomIngredientListTile extends ConsumerWidget {
   final bool hasEaten;
   final BabyFoodReaction? reaction;
   final int eatCount;
+  final bool hasAllergy;
+  final ChildIcon childIcon;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ListTile(
-      title: Text(ingredient.name),
+      title: Row(
+        children: [
+          Text(
+            ingredient.name,
+            style: hasAllergy ? const TextStyle(color: Colors.red) : null,
+          ),
+          if (hasAllergy) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.red.shade200),
+              ),
+              child: Text(
+                'アレルギー',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.red.shade700,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
       subtitle: hasEaten
           ? Text(
               '$eatCount回食べた',
@@ -361,10 +426,10 @@ class _CustomIngredientListTile extends ConsumerWidget {
           const SizedBox(width: 8),
           // 反応の表示
           if (reaction != null)
-            _ReactionIcon(reaction: reaction!)
+            _ReactionIcon(reaction: reaction!, childIcon: childIcon)
           else
             const SizedBox(
-              width: 32,
+              width: 44,
               child: Center(
                 child: Text(
                   '-',
@@ -508,17 +573,47 @@ class _IngredientListTile extends StatelessWidget {
     required this.hasEaten,
     required this.reaction,
     required this.eatCount,
+    required this.hasAllergy,
+    required this.childIcon,
   });
 
   final String ingredientName;
   final bool hasEaten;
   final BabyFoodReaction? reaction;
   final int eatCount;
+  final bool hasAllergy;
+  final ChildIcon childIcon;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(ingredientName),
+      title: Row(
+        children: [
+          Text(
+            ingredientName,
+            style: hasAllergy ? const TextStyle(color: Colors.red) : null,
+          ),
+          if (hasAllergy) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.red.shade200),
+              ),
+              child: Text(
+                'アレルギー',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.red.shade700,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
       subtitle: hasEaten
           ? Text(
               '$eatCount回食べた',
@@ -553,10 +648,10 @@ class _IngredientListTile extends StatelessWidget {
           const SizedBox(width: 8),
           // 反応の表示
           if (reaction != null)
-            _ReactionIcon(reaction: reaction!)
+            _ReactionIcon(reaction: reaction!, childIcon: childIcon)
           else
             const SizedBox(
-              width: 32,
+              width: 44,
               child: Center(
                 child: Text(
                   '-',
@@ -571,28 +666,43 @@ class _IngredientListTile extends StatelessWidget {
 }
 
 class _ReactionIcon extends StatelessWidget {
-  const _ReactionIcon({required this.reaction});
+  const _ReactionIcon({
+    required this.reaction,
+    required this.childIcon,
+  });
 
   final BabyFoodReaction reaction;
+  final ChildIcon childIcon;
+
+  String get _imagePath {
+    return switch (reaction) {
+      BabyFoodReaction.good => childIcon.goodReactionPath,
+      BabyFoodReaction.normal => childIcon.normalReactionPath,
+      BabyFoodReaction.bad => childIcon.badReactionPath,
+    };
+  }
+
+  Color get _backgroundColor {
+    return switch (reaction) {
+      BabyFoodReaction.good => Colors.green.withValues(alpha: 0.1),
+      BabyFoodReaction.normal => Colors.orange.withValues(alpha: 0.1),
+      BabyFoodReaction.bad => Colors.red.withValues(alpha: 0.1),
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
-    final (icon, color) = switch (reaction) {
-      BabyFoodReaction.good => (Icons.sentiment_very_satisfied, Colors.green),
-      BabyFoodReaction.normal => (Icons.sentiment_neutral, Colors.orange),
-      BabyFoodReaction.bad => (Icons.sentiment_very_dissatisfied, Colors.red),
-    };
-
     return Container(
+      width: 44,
+      height: 44,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: _backgroundColor,
         shape: BoxShape.circle,
       ),
-      child: Icon(
-        icon,
-        size: 24,
-        color: color,
+      child: Image.asset(
+        _imagePath,
+        fit: BoxFit.contain,
       ),
     );
   }
@@ -607,6 +717,7 @@ class _IngredientStat {
     required this.hasEaten,
     required this.latestReaction,
     required this.eatCount,
+    required this.hasAllergy,
   });
 
   final String ingredientId;
@@ -615,4 +726,5 @@ class _IngredientStat {
   final bool hasEaten;
   final BabyFoodReaction? latestReaction;
   final int eatCount;
+  final bool hasAllergy;
 }
