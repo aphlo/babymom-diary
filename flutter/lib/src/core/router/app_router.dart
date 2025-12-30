@@ -28,6 +28,8 @@ import '../../features/vaccines/presentation/models/vaccine_info.dart';
 import '../../features/vaccines/presentation/viewmodels/vaccine_detail_state.dart';
 import '../../features/menu/widget_settings/presentation/pages/widget_settings_page.dart';
 import '../../features/menu/ingredient_settings/presentation/pages/ingredient_settings_page.dart';
+import '../../features/baby_food/presentation/pages/ingredient_detail_page.dart';
+import '../../features/baby_food/domain/value_objects/food_category.dart';
 
 part 'app_router.g.dart';
 
@@ -218,6 +220,24 @@ GoRouter appRouter(Ref ref) {
         name: 'ingredient_settings',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: IngredientSettingsPage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/baby-food/ingredient-detail',
+        name: 'ingredient_detail',
+        pageBuilder: (context, state) {
+          final params = state.extra as Map<String, dynamic>;
+          final ingredientId = params['ingredientId'] as String;
+          final ingredientName = params['ingredientName'] as String;
+          final category = params['category'] as FoodCategory;
+          return CupertinoPage(
+            child: IngredientDetailPage(
+              ingredientId: ingredientId,
+              ingredientName: ingredientName,
+              category: category,
+            ),
+          );
+        },
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

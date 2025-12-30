@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/types/child_icon.dart';
 import '../../../baby_food/domain/entities/baby_food_record.dart';
@@ -205,13 +206,19 @@ class _CategoryIngredientList extends ConsumerWidget {
         if (index < visiblePresetIngredients.length) {
           final ingredientName = visiblePresetIngredients[index];
           final stat = ingredientStats[ingredientName];
-          return _IngredientListTile(
-            ingredientName: ingredientName,
-            hasEaten: stat?.hasEaten ?? false,
-            reaction: stat?.latestReaction,
-            eatCount: stat?.eatCount ?? 0,
-            hasAllergy: stat?.hasAllergy ?? false,
-            childIcon: childIcon,
+          return Column(
+            children: [
+              _IngredientListTile(
+                ingredientId: ingredientName,
+                ingredientName: ingredientName,
+                category: category,
+                hasEaten: stat?.hasEaten ?? false,
+                reaction: stat?.latestReaction,
+                hasAllergy: stat?.hasAllergy ?? false,
+                childIcon: childIcon,
+              ),
+              const Divider(height: 1),
+            ],
           );
         }
 
@@ -228,14 +235,19 @@ class _CategoryIngredientList extends ConsumerWidget {
         if (customIndex < visibleCustomIngredients.length) {
           final customIngredient = visibleCustomIngredients[customIndex];
           final stat = ingredientStats[customIngredient.id];
-          return _CustomIngredientListTile(
-            householdId: householdId,
-            ingredient: customIngredient,
-            hasEaten: stat?.hasEaten ?? false,
-            reaction: stat?.latestReaction,
-            eatCount: stat?.eatCount ?? 0,
-            hasAllergy: stat?.hasAllergy ?? false,
-            childIcon: childIcon,
+          return Column(
+            children: [
+              _CustomIngredientListTile(
+                householdId: householdId,
+                ingredient: customIngredient,
+                category: category,
+                hasEaten: stat?.hasEaten ?? false,
+                reaction: stat?.latestReaction,
+                hasAllergy: stat?.hasAllergy ?? false,
+                childIcon: childIcon,
+              ),
+              const Divider(height: 1),
+            ],
           );
         }
 
@@ -347,29 +359,64 @@ class _CustomIngredientListTile extends ConsumerWidget {
   const _CustomIngredientListTile({
     required this.householdId,
     required this.ingredient,
+    required this.category,
     required this.hasEaten,
     required this.reaction,
-    required this.eatCount,
     required this.hasAllergy,
     required this.childIcon,
   });
 
   final String householdId;
   final CustomIngredient ingredient;
+  final FoodCategory category;
   final bool hasEaten;
   final BabyFoodReaction? reaction;
-  final int eatCount;
   final bool hasAllergy;
   final ChildIcon childIcon;
+
+  void _navigateToDetail(BuildContext context) {
+    context.push(
+      '/baby-food/ingredient-detail',
+      extra: {
+        'ingredientId': ingredient.id,
+        'ingredientName': ingredient.name,
+        'category': category,
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ListTile(
+      onTap: () => _navigateToDetail(context),
+      leading: Container(
+        width: 64,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: hasEaten ? Colors.green.shade50 : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: hasEaten ? Colors.green.shade200 : Colors.grey.shade300,
+          ),
+        ),
+        child: Text(
+          hasEaten ? '食べた' : 'まだ',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: hasEaten ? Colors.green.shade700 : Colors.grey.shade500,
+          ),
+        ),
+      ),
       title: Row(
         children: [
-          Text(
-            ingredient.name,
-            style: hasAllergy ? const TextStyle(color: Colors.red) : null,
+          Flexible(
+            child: Text(
+              ingredient.name,
+              style: hasAllergy ? const TextStyle(color: Colors.red) : null,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           if (hasAllergy) ...[
             const SizedBox(width: 8),
@@ -392,51 +439,12 @@ class _CustomIngredientListTile extends ConsumerWidget {
           ],
         ],
       ),
-      subtitle: hasEaten
-          ? Text(
-              '$eatCount回食べた',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
-            )
-          : null,
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 食べた/未の表示
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: hasEaten ? Colors.green.shade50 : Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: hasEaten ? Colors.green.shade200 : Colors.grey.shade300,
-              ),
-            ),
-            child: Text(
-              hasEaten ? '食べた' : '未',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: hasEaten ? Colors.green.shade700 : Colors.grey.shade500,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
           // 反応の表示
           if (reaction != null)
-            _ReactionIcon(reaction: reaction!, childIcon: childIcon)
-          else
-            const SizedBox(
-              width: 44,
-              child: Center(
-                child: Text(
-                  '-',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ),
-            ),
+            _ReactionIcon(reaction: reaction!, childIcon: childIcon),
           // 3点リーダーメニュー
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.grey),
@@ -569,29 +577,66 @@ class _CustomIngredientListTile extends ConsumerWidget {
 
 class _IngredientListTile extends StatelessWidget {
   const _IngredientListTile({
+    required this.ingredientId,
     required this.ingredientName,
+    required this.category,
     required this.hasEaten,
     required this.reaction,
-    required this.eatCount,
     required this.hasAllergy,
     required this.childIcon,
   });
 
+  final String ingredientId;
   final String ingredientName;
+  final FoodCategory category;
   final bool hasEaten;
   final BabyFoodReaction? reaction;
-  final int eatCount;
   final bool hasAllergy;
   final ChildIcon childIcon;
+
+  void _navigateToDetail(BuildContext context) {
+    context.push(
+      '/baby-food/ingredient-detail',
+      extra: {
+        'ingredientId': ingredientId,
+        'ingredientName': ingredientName,
+        'category': category,
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      onTap: () => _navigateToDetail(context),
+      leading: Container(
+        width: 64,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: hasEaten ? Colors.green.shade50 : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: hasEaten ? Colors.green.shade200 : Colors.grey.shade300,
+          ),
+        ),
+        child: Text(
+          hasEaten ? '食べた' : 'まだ',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: hasEaten ? Colors.green.shade700 : Colors.grey.shade500,
+          ),
+        ),
+      ),
       title: Row(
         children: [
-          Text(
-            ingredientName,
-            style: hasAllergy ? const TextStyle(color: Colors.red) : null,
+          Flexible(
+            child: Text(
+              ingredientName,
+              style: hasAllergy ? const TextStyle(color: Colors.red) : null,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           if (hasAllergy) ...[
             const SizedBox(width: 8),
@@ -614,53 +659,9 @@ class _IngredientListTile extends StatelessWidget {
           ],
         ],
       ),
-      subtitle: hasEaten
-          ? Text(
-              '$eatCount回食べた',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
-            )
+      trailing: reaction != null
+          ? _ReactionIcon(reaction: reaction!, childIcon: childIcon)
           : null,
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 食べた/未の表示
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: hasEaten ? Colors.green.shade50 : Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: hasEaten ? Colors.green.shade200 : Colors.grey.shade300,
-              ),
-            ),
-            child: Text(
-              hasEaten ? '食べた' : '未',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: hasEaten ? Colors.green.shade700 : Colors.grey.shade500,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          // 反応の表示
-          if (reaction != null)
-            _ReactionIcon(reaction: reaction!, childIcon: childIcon)
-          else
-            const SizedBox(
-              width: 44,
-              child: Center(
-                child: Text(
-                  '-',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ),
-            ),
-        ],
-      ),
     );
   }
 }
@@ -690,20 +691,50 @@ class _ReactionIcon extends StatelessWidget {
     };
   }
 
+  String get _label {
+    return switch (reaction) {
+      BabyFoodReaction.good => 'すき',
+      BabyFoodReaction.normal => 'ふつう',
+      BabyFoodReaction.bad => 'にがて',
+    };
+  }
+
+  Color get _labelColor {
+    return switch (reaction) {
+      BabyFoodReaction.good => Colors.green.shade700,
+      BabyFoodReaction.normal => Colors.orange.shade700,
+      BabyFoodReaction.bad => Colors.red.shade700,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 44,
-      height: 44,
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: _backgroundColor,
-        shape: BoxShape.circle,
-      ),
-      child: Image.asset(
-        _imagePath,
-        fit: BoxFit.contain,
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: _backgroundColor,
+            shape: BoxShape.circle,
+          ),
+          child: Image.asset(
+            _imagePath,
+            fit: BoxFit.contain,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          _label,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            color: _labelColor,
+          ),
+        ),
+      ],
     );
   }
 }
