@@ -88,18 +88,13 @@ class _AllergyWarningCard extends StatelessWidget {
   }
 }
 
-/// 記録がない場合のカード
+/// 記録がない場合の表示
 class _EmptyRecordsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.pink.shade200),
-      ),
-      child: const Center(
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 32),
+      child: Center(
         child: Text(
           '記録がありません',
           style: TextStyle(color: Colors.grey),
