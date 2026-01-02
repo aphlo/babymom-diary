@@ -30,6 +30,7 @@ class PresetIngredientTile extends ConsumerWidget {
       return Container(
         decoration: decoration,
         child: ListTile(
+          contentPadding: const EdgeInsets.only(left: 16, right: 8),
           title: Text(
             ingredientName,
             style: TextStyle(color: Colors.grey.shade500),
@@ -47,6 +48,7 @@ class PresetIngredientTile extends ConsumerWidget {
     return Container(
       decoration: decoration,
       child: ListTile(
+        contentPadding: const EdgeInsets.only(left: 16, right: 8),
         title: Text(ingredientName),
         trailing: IconButton(
           icon: Icon(Icons.close, color: Colors.grey.shade600),
