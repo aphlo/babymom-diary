@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/types/child_icon.dart';
 import '../../../../baby_food/domain/entities/custom_ingredient.dart';
@@ -8,7 +7,7 @@ import 'add_ingredient_button.dart';
 import 'ingredient_list_tiles.dart';
 import 'ingredient_stat.dart';
 
-class CategoryIngredientList extends ConsumerWidget {
+class CategoryIngredientList extends StatelessWidget {
   const CategoryIngredientList({
     super.key,
     required this.householdId,
@@ -27,7 +26,7 @@ class CategoryIngredientList extends ConsumerWidget {
   final ChildIcon childIcon;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     // プリセット食材を取得（非表示を除外）
     final visiblePresetIngredients = category.presetIngredients
         .where((name) => !hiddenIngredients.contains(name))
@@ -37,12 +36,8 @@ class CategoryIngredientList extends ConsumerWidget {
         .where((i) => !hiddenIngredients.contains(i.id))
         .toList();
 
-    // リストの項目数:
-    // プリセット食材 + カスタム食材セクションヘッダー（カスタム食材がある場合）
-    // + カスタム食材 + 食材追加ボタン
-    final hasCustomIngredients = visibleCustomIngredients.isNotEmpty;
+    // プリセット食材 + カスタム食材 + 食材追加ボタン
     final totalItems = visiblePresetIngredients.length +
-        (hasCustomIngredients ? 1 : 0) + // セクションヘッダー
         visibleCustomIngredients.length +
         1; // 食材追加ボタン
 
@@ -65,22 +60,15 @@ class CategoryIngredientList extends ConsumerWidget {
           );
         }
 
-        final offsetIndex = index - visiblePresetIngredients.length;
+        final customIndex = index - visiblePresetIngredients.length;
 
-        // カスタム食材セクションヘッダー
-        if (hasCustomIngredients && offsetIndex == 0) {
-          return const SectionHeader(title: '追加した食材');
-        }
-
-        // カスタム食材
-        final customIndex =
-            hasCustomIngredients ? offsetIndex - 1 : offsetIndex;
+        // カスタム食材（プリセット食材と同じUIで表示）
         if (customIndex < visibleCustomIngredients.length) {
           final customIngredient = visibleCustomIngredients[customIndex];
           final stat = ingredientStats[customIngredient.id];
-          return CustomIngredientListTile(
-            householdId: householdId,
-            ingredient: customIngredient,
+          return IngredientListTile(
+            ingredientId: customIngredient.id,
+            ingredientName: customIngredient.name,
             category: category,
             hasEaten: stat?.hasEaten ?? false,
             reaction: stat?.latestReaction,
@@ -95,27 +83,6 @@ class CategoryIngredientList extends ConsumerWidget {
           category: category,
         );
       },
-    );
-  }
-}
-
-class SectionHeader extends StatelessWidget {
-  const SectionHeader({super.key, required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: Colors.grey.shade600,
-        ),
-      ),
     );
   }
 }
