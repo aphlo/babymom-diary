@@ -13,14 +13,14 @@ class BabyFoodFirestoreDataSource {
   final String householdId;
   final FirebaseFirestore _firestore;
 
-  /// コレクションパス: households/{householdId}/children/{childId}/baby_food_records
+  /// コレクションパス: households/{householdId}/children/{childId}/babyFoodRecords
   CollectionReference<Map<String, dynamic>> _collectionRef(String childId) {
     return _firestore
         .collection('households')
         .doc(householdId)
         .collection('children')
         .doc(childId)
-        .collection('baby_food_records');
+        .collection('babyFoodRecords');
   }
 
   /// 指定した日の離乳食記録を取得

@@ -234,7 +234,7 @@
 
 ベビーの記録画面のタブ構成に「離乳食」タブを追加し、授乳表タブと成長曲線タブの間に配置する。
 離乳食タブでは食材カテゴリごとのサブタブを表示し、各カテゴリで「食べたかどうか」「子供の反応」を確認できる。
-データは `baby_food_records` を集計して表示する。
+データは `babyFoodRecords` を集計して表示する。
 
 **重要**: 食材管理画面で非表示に設定された食材は、離乳食タブにも表示されない。
 
@@ -470,7 +470,7 @@ CustomIngredient
 ### 5.1 離乳食記録
 
 ```
-households/{householdId}/children/{childId}/baby_food_records/{recordId}
+households/{householdId}/children/{childId}/babyFoodRecords/{recordId}
 ├── recorded_at: Timestamp
 ├── items: [
 │   {
@@ -611,7 +611,7 @@ households/{householdId}/hidden_ingredients/{documentId}
 - 離乳食タブは食材カテゴリごとのサブタブを表示
 - 各食材行に「食べた/未」「反応（good/normal/bad）」を表示
 - 反応アイコンは子供のアイコンに対応（例: bear_good / bear_normal / bear_bad）
-- 表示データは `baby_food_records` の集計結果を使用（案A）
+- 表示データは `babyFoodRecords` の集計結果を使用（案A）
 
 ---
 

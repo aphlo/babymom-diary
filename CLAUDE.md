@@ -219,7 +219,7 @@ class FeatureViewModel extends _$FeatureViewModel {
 
 ### 8. Baby Food (離乳食)
 - **Feature Path:** `flutter/lib/src/features/baby_food/`
-- **Separate Collection:** Uses `baby_food_records` collection (not `childRecords`)
+- **Separate Collection:** Uses `babyFoodRecords` collection (not `childRecords`)
 - **Data Structure:**
   - `BabyFoodRecord`: 記録単位（複数の食材を含む）
   - `BabyFoodItem`: 各食材（食材名、カテゴリ、量、単位）
@@ -228,7 +228,7 @@ class FeatureViewModel extends _$FeatureViewModel {
 - **Amount Units:** 大さじ、小さじ、ml、g（量の入力は任意）
 - **RecordType Integration:** `RecordType.babyFood` を追加（授乳表に列として表示）
 - **Firestore Schema:**
-  - Records: `households/{householdId}/children/{childId}/baby_food_records/{recordId}`
+  - Records: `households/{householdId}/children/{childId}/babyFoodRecords/{recordId}`
   - Custom Ingredients: `households/{householdId}/custom_ingredients/{ingredientId}`
 - **Documentation:** `docs/spec/baby_food_spec.md`
 
