@@ -53,6 +53,8 @@ class IngredientDetailPage extends ConsumerWidget {
 
     final customIngredientsAsync =
         ref.watch(customIngredientsProvider(householdId));
+    final hiddenIngredientsAsync =
+        ref.watch(hiddenIngredientsProvider(householdId));
 
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
@@ -75,6 +77,7 @@ class IngredientDetailPage extends ConsumerWidget {
                     householdId: householdId,
                     childId: childId,
                     customIngredientsAsync: customIngredientsAsync,
+                    hiddenIngredientsAsync: hiddenIngredientsAsync,
                   ),
                 );
               },
@@ -123,6 +126,7 @@ class IngredientDetailPage extends ConsumerWidget {
     required String householdId,
     required String childId,
     required AsyncValue<List<CustomIngredient>> customIngredientsAsync,
+    required AsyncValue<Set<String>> hiddenIngredientsAsync,
   }) async {
     // 該当する記録を検索
     final record = allRecords.firstWhere(
@@ -131,6 +135,7 @@ class IngredientDetailPage extends ConsumerWidget {
 
     // カスタム食材を取得
     final customIngredients = customIngredientsAsync.value ?? [];
+    final hiddenIngredients = hiddenIngredientsAsync.value ?? <String>{};
 
     // ドラフトを作成（選択された食材のみにフィルタリング）
     final fullDraft = BabyFoodDraft.fromRecord(record);
@@ -145,6 +150,7 @@ class IngredientDetailPage extends ConsumerWidget {
       childId: childId,
       initialDraft: draft,
       customIngredients: customIngredients,
+      hiddenIngredients: hiddenIngredients,
       skipIngredientSelection: true,
     );
 

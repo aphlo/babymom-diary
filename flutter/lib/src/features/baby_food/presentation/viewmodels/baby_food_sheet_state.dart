@@ -28,6 +28,9 @@ sealed class BabyFoodSheetState with _$BabyFoodSheetState {
     /// カスタム食材リスト
     required List<CustomIngredient> customIngredients,
 
+    /// 非表示食材のIDセット
+    required Set<String> hiddenIngredients,
+
     /// メモ
     String? note,
 
@@ -50,6 +53,7 @@ sealed class BabyFoodSheetState with _$BabyFoodSheetState {
   factory BabyFoodSheetState.initial({
     required BabyFoodDraft draft,
     required List<CustomIngredient> customIngredients,
+    required Set<String> hiddenIngredients,
     int initialStep = 0,
     bool skippedIngredientSelection = false,
   }) {
@@ -59,6 +63,7 @@ sealed class BabyFoodSheetState with _$BabyFoodSheetState {
       selectedItems: List.from(draft.items),
       expandedCategory: null,
       customIngredients: customIngredients,
+      hiddenIngredients: hiddenIngredients,
       note: draft.note,
       isProcessing: false,
       errorMessage: null,

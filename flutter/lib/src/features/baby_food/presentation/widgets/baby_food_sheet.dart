@@ -103,6 +103,7 @@ class _BabyFoodSheetState extends ConsumerState<BabyFoodSheet> {
                         .map((item) => item.ingredientId)
                         .toSet(),
                     customIngredients: state.customIngredients,
+                    hiddenIngredients: state.hiddenIngredients,
                     onCategoryTap: viewModel.toggleCategory,
                     onIngredientToggle: ({
                       required String ingredientId,
