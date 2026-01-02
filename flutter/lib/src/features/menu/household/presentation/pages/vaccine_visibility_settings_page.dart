@@ -96,6 +96,7 @@ class _VaccineVisibilitySettingsPageState
                 return Card(
                   margin:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  color: Colors.white,
                   child: SwitchListTile(
                     title: Text(
                       vaccine.name,
