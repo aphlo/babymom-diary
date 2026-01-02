@@ -18,6 +18,7 @@ class BabyFoodSheetArgs {
     required this.childId,
     required this.initialDraft,
     required this.customIngredients,
+    this.skipIngredientSelection = false,
   });
 
   final String householdId;
@@ -25,18 +26,22 @@ class BabyFoodSheetArgs {
   final BabyFoodDraft initialDraft;
   final List<CustomIngredient> customIngredients;
 
+  /// 食材選択ステップをスキップして量入力ステップから開始するか
+  final bool skipIngredientSelection;
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is BabyFoodSheetArgs &&
         other.householdId == householdId &&
         other.childId == childId &&
-        other.initialDraft.existingId == initialDraft.existingId;
+        other.initialDraft.existingId == initialDraft.existingId &&
+        other.skipIngredientSelection == skipIngredientSelection;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(householdId, childId, initialDraft.existingId);
+  int get hashCode => Object.hash(
+      householdId, childId, initialDraft.existingId, skipIngredientSelection);
 }
 
 @riverpod
@@ -51,6 +56,8 @@ class BabyFoodSheetViewModel extends _$BabyFoodSheetViewModel {
     return BabyFoodSheetState.initial(
       draft: args.initialDraft,
       customIngredients: args.customIngredients,
+      initialStep: args.skipIngredientSelection ? 1 : 0,
+      skippedIngredientSelection: args.skipIngredientSelection,
     );
   }
 

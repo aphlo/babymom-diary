@@ -238,7 +238,7 @@ class _BottomButtons extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            if (state.isAmountInputStep) ...[
+            if (state.showBackButton) ...[
               OutlinedButton(
                 onPressed: onPreviousStep,
                 child: const Text('戻る'),

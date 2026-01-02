@@ -48,12 +48,12 @@ class ReactionDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 32,
-          height: 32,
+          width: 40,
+          height: 40,
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
             color: _backgroundColor,
@@ -64,11 +64,11 @@ class ReactionDisplay extends StatelessWidget {
             fit: BoxFit.contain,
           ),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(height: 2),
         Text(
           _label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 10,
             fontWeight: FontWeight.w500,
             color: _labelColor,
           ),

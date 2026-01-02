@@ -44,6 +44,9 @@ mixin _$BabyFoodSheetState {
   /// 既存レコードのID（編集時のみ）
   String? get existingId;
 
+  /// 食材選択ステップをスキップしたかどうか
+  bool get skippedIngredientSelection;
+
   /// Create a copy of BabyFoodSheetState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -74,7 +77,11 @@ mixin _$BabyFoodSheetState {
                 other.errorMessage == errorMessage) &&
             (identical(other.isNew, isNew) || other.isNew == isNew) &&
             (identical(other.existingId, existingId) ||
-                other.existingId == existingId));
+                other.existingId == existingId) &&
+            (identical(other.skippedIngredientSelection,
+                    skippedIngredientSelection) ||
+                other.skippedIngredientSelection ==
+                    skippedIngredientSelection));
   }
 
   @override
@@ -89,11 +96,12 @@ mixin _$BabyFoodSheetState {
       isProcessing,
       errorMessage,
       isNew,
-      existingId);
+      existingId,
+      skippedIngredientSelection);
 
   @override
   String toString() {
-    return 'BabyFoodSheetState(currentStep: $currentStep, timeOfDay: $timeOfDay, selectedItems: $selectedItems, expandedCategory: $expandedCategory, customIngredients: $customIngredients, note: $note, isProcessing: $isProcessing, errorMessage: $errorMessage, isNew: $isNew, existingId: $existingId)';
+    return 'BabyFoodSheetState(currentStep: $currentStep, timeOfDay: $timeOfDay, selectedItems: $selectedItems, expandedCategory: $expandedCategory, customIngredients: $customIngredients, note: $note, isProcessing: $isProcessing, errorMessage: $errorMessage, isNew: $isNew, existingId: $existingId, skippedIngredientSelection: $skippedIngredientSelection)';
   }
 }
 
@@ -113,7 +121,8 @@ abstract mixin class $BabyFoodSheetStateCopyWith<$Res> {
       bool isProcessing,
       String? errorMessage,
       bool isNew,
-      String? existingId});
+      String? existingId,
+      bool skippedIngredientSelection});
 }
 
 /// @nodoc
@@ -139,6 +148,7 @@ class _$BabyFoodSheetStateCopyWithImpl<$Res>
     Object? errorMessage = freezed,
     Object? isNew = null,
     Object? existingId = freezed,
+    Object? skippedIngredientSelection = null,
   }) {
     return _then(_self.copyWith(
       currentStep: null == currentStep
@@ -181,6 +191,10 @@ class _$BabyFoodSheetStateCopyWithImpl<$Res>
           ? _self.existingId
           : existingId // ignore: cast_nullable_to_non_nullable
               as String?,
+      skippedIngredientSelection: null == skippedIngredientSelection
+          ? _self.skippedIngredientSelection
+          : skippedIngredientSelection // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -286,7 +300,8 @@ extension BabyFoodSheetStatePatterns on BabyFoodSheetState {
             bool isProcessing,
             String? errorMessage,
             bool isNew,
-            String? existingId)?
+            String? existingId,
+            bool skippedIngredientSelection)?
         $default, {
     required TResult orElse(),
   }) {
@@ -303,7 +318,8 @@ extension BabyFoodSheetStatePatterns on BabyFoodSheetState {
             _that.isProcessing,
             _that.errorMessage,
             _that.isNew,
-            _that.existingId);
+            _that.existingId,
+            _that.skippedIngredientSelection);
       case _:
         return orElse();
     }
@@ -334,7 +350,8 @@ extension BabyFoodSheetStatePatterns on BabyFoodSheetState {
             bool isProcessing,
             String? errorMessage,
             bool isNew,
-            String? existingId)
+            String? existingId,
+            bool skippedIngredientSelection)
         $default,
   ) {
     final _that = this;
@@ -350,7 +367,8 @@ extension BabyFoodSheetStatePatterns on BabyFoodSheetState {
             _that.isProcessing,
             _that.errorMessage,
             _that.isNew,
-            _that.existingId);
+            _that.existingId,
+            _that.skippedIngredientSelection);
     }
   }
 
@@ -378,7 +396,8 @@ extension BabyFoodSheetStatePatterns on BabyFoodSheetState {
             bool isProcessing,
             String? errorMessage,
             bool isNew,
-            String? existingId)?
+            String? existingId,
+            bool skippedIngredientSelection)?
         $default,
   ) {
     final _that = this;
@@ -394,7 +413,8 @@ extension BabyFoodSheetStatePatterns on BabyFoodSheetState {
             _that.isProcessing,
             _that.errorMessage,
             _that.isNew,
-            _that.existingId);
+            _that.existingId,
+            _that.skippedIngredientSelection);
       case _:
         return null;
     }
@@ -414,7 +434,8 @@ class _BabyFoodSheetState extends BabyFoodSheetState {
       this.isProcessing = false,
       this.errorMessage,
       required this.isNew,
-      this.existingId})
+      this.existingId,
+      this.skippedIngredientSelection = false})
       : _selectedItems = selectedItems,
         _customIngredients = customIngredients,
         super._();
@@ -475,6 +496,11 @@ class _BabyFoodSheetState extends BabyFoodSheetState {
   @override
   final String? existingId;
 
+  /// 食材選択ステップをスキップしたかどうか
+  @override
+  @JsonKey()
+  final bool skippedIngredientSelection;
+
   /// Create a copy of BabyFoodSheetState
   /// with the given fields replaced by the non-null parameter values.
   @override
@@ -505,7 +531,11 @@ class _BabyFoodSheetState extends BabyFoodSheetState {
                 other.errorMessage == errorMessage) &&
             (identical(other.isNew, isNew) || other.isNew == isNew) &&
             (identical(other.existingId, existingId) ||
-                other.existingId == existingId));
+                other.existingId == existingId) &&
+            (identical(other.skippedIngredientSelection,
+                    skippedIngredientSelection) ||
+                other.skippedIngredientSelection ==
+                    skippedIngredientSelection));
   }
 
   @override
@@ -520,11 +550,12 @@ class _BabyFoodSheetState extends BabyFoodSheetState {
       isProcessing,
       errorMessage,
       isNew,
-      existingId);
+      existingId,
+      skippedIngredientSelection);
 
   @override
   String toString() {
-    return 'BabyFoodSheetState(currentStep: $currentStep, timeOfDay: $timeOfDay, selectedItems: $selectedItems, expandedCategory: $expandedCategory, customIngredients: $customIngredients, note: $note, isProcessing: $isProcessing, errorMessage: $errorMessage, isNew: $isNew, existingId: $existingId)';
+    return 'BabyFoodSheetState(currentStep: $currentStep, timeOfDay: $timeOfDay, selectedItems: $selectedItems, expandedCategory: $expandedCategory, customIngredients: $customIngredients, note: $note, isProcessing: $isProcessing, errorMessage: $errorMessage, isNew: $isNew, existingId: $existingId, skippedIngredientSelection: $skippedIngredientSelection)';
   }
 }
 
@@ -546,7 +577,8 @@ abstract mixin class _$BabyFoodSheetStateCopyWith<$Res>
       bool isProcessing,
       String? errorMessage,
       bool isNew,
-      String? existingId});
+      String? existingId,
+      bool skippedIngredientSelection});
 }
 
 /// @nodoc
@@ -572,6 +604,7 @@ class __$BabyFoodSheetStateCopyWithImpl<$Res>
     Object? errorMessage = freezed,
     Object? isNew = null,
     Object? existingId = freezed,
+    Object? skippedIngredientSelection = null,
   }) {
     return _then(_BabyFoodSheetState(
       currentStep: null == currentStep
@@ -614,6 +647,10 @@ class __$BabyFoodSheetStateCopyWithImpl<$Res>
           ? _self.existingId
           : existingId // ignore: cast_nullable_to_non_nullable
               as String?,
+      skippedIngredientSelection: null == skippedIngredientSelection
+          ? _self.skippedIngredientSelection
+          : skippedIngredientSelection // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }

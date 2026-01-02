@@ -11,10 +11,12 @@ class IngredientDetailBody extends StatelessWidget {
     super.key,
     required this.records,
     required this.childIcon,
+    this.onRecordTap,
   });
 
   final List<IngredientRecordInfo> records;
   final ChildIcon childIcon;
+  final void Function(IngredientRecordInfo record)? onRecordTap;
 
   /// 日付でグループ化された記録を返す
   Map<String, List<IngredientRecordInfo>> _groupByDate() {
@@ -50,6 +52,7 @@ class IngredientDetailBody extends StatelessWidget {
             _DateSectionContent(
               records: entry.value,
               childIcon: childIcon,
+              onRecordTap: onRecordTap,
             ),
             const SizedBox(height: 12),
           ],
@@ -176,10 +179,12 @@ class _DateSectionContent extends StatelessWidget {
   const _DateSectionContent({
     required this.records,
     required this.childIcon,
+    this.onRecordTap,
   });
 
   final List<IngredientRecordInfo> records;
   final ChildIcon childIcon;
+  final void Function(IngredientRecordInfo record)? onRecordTap;
 
   @override
   Widget build(BuildContext context) {
@@ -202,6 +207,8 @@ class _DateSectionContent extends StatelessWidget {
             IngredientRecordTile(
               record: records[i],
               childIcon: childIcon,
+              onTap:
+                  onRecordTap != null ? () => onRecordTap!(records[i]) : null,
             ),
             if (i < records.length - 1) const Divider(height: 1),
           ],
