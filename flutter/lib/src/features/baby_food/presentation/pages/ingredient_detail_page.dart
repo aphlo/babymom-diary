@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/types/child_icon.dart';
+import '../../../ads/application/services/banner_ad_manager.dart';
+import '../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../../menu/children/application/child_context_provider.dart';
 import '../../domain/entities/baby_food_record.dart';
 import '../../domain/entities/custom_ingredient.dart';
@@ -55,26 +57,33 @@ class IngredientDetailPage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
       appBar: AppBar(title: Text(ingredientName)),
-      body: recordsAsync.when(
-        data: (records) {
-          // この食材を含む記録をフィルタリング
-          final ingredientRecords = _filterRecordsForIngredient(records);
-          return IngredientDetailBody(
-            records: ingredientRecords,
-            childIcon: childIcon,
-            onRecordTap: (recordInfo) => _handleRecordTap(
-              context: context,
-              ref: ref,
-              recordInfo: recordInfo,
-              allRecords: records,
-              householdId: householdId,
-              childId: childId,
-              customIngredientsAsync: customIngredientsAsync,
+      body: Column(
+        children: [
+          Expanded(
+            child: recordsAsync.when(
+              data: (records) {
+                // この食材を含む記録をフィルタリング
+                final ingredientRecords = _filterRecordsForIngredient(records);
+                return IngredientDetailBody(
+                  records: ingredientRecords,
+                  childIcon: childIcon,
+                  onRecordTap: (recordInfo) => _handleRecordTap(
+                    context: context,
+                    ref: ref,
+                    recordInfo: recordInfo,
+                    allRecords: records,
+                    householdId: householdId,
+                    childId: childId,
+                    customIngredientsAsync: customIngredientsAsync,
+                  ),
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text('エラー: $e')),
             ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('エラー: $e')),
+          ),
+          const BannerAdWidget(slot: BannerAdSlot.babyFood),
+        ],
       ),
     );
   }

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/types/child_icon.dart';
+import '../../../ads/application/services/banner_ad_manager.dart';
+import '../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../../baby_food/domain/entities/baby_food_record.dart';
 import '../../../baby_food/domain/entities/custom_ingredient.dart';
 import '../../../baby_food/domain/value_objects/baby_food_reaction.dart';
@@ -114,6 +116,8 @@ class _BabyFoodIngredientList extends StatelessWidget {
               }).toList(),
             ),
           ),
+          // 広告バナー
+          const BannerAdWidget(slot: BannerAdSlot.babyFood),
         ],
       ),
     );
