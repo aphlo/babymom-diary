@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/app_colors.dart';
 import '../viewmodels/widget_settings_view_model.dart';
 import '../widgets/category_selector_section.dart';
 
@@ -13,6 +14,7 @@ class WidgetSettingsPage extends ConsumerWidget {
     final viewModel = ref.read(widgetSettingsViewModelProvider.notifier);
 
     return Scaffold(
+      backgroundColor: AppColors.pageBackground,
       appBar: AppBar(
         title: const Text('ウィジェット設定'),
       ),

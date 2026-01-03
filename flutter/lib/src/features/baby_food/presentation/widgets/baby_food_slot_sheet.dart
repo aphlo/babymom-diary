@@ -19,6 +19,7 @@ void showBabyFoodSlotSheet({
   required int hour,
   required List<BabyFoodRecord> recordsInHour,
   required List<CustomIngredient> customIngredients,
+  required Set<String> hiddenIngredients,
 }) {
   Future<void> openBabyFoodEditor(BabyFoodDraft initialDraft) async {
     await Navigator.of(context).maybePop();
@@ -29,6 +30,7 @@ void showBabyFoodSlotSheet({
       childId: childId,
       initialDraft: initialDraft,
       customIngredients: customIngredients,
+      hiddenIngredients: hiddenIngredients,
     );
 
     await showBabyFoodSheet(

@@ -28,6 +28,9 @@ sealed class BabyFoodSheetState with _$BabyFoodSheetState {
     /// カスタム食材リスト
     required List<CustomIngredient> customIngredients,
 
+    /// 非表示食材のIDセット
+    required Set<String> hiddenIngredients,
+
     /// メモ
     String? note,
 
@@ -42,23 +45,31 @@ sealed class BabyFoodSheetState with _$BabyFoodSheetState {
 
     /// 既存レコードのID（編集時のみ）
     String? existingId,
+
+    /// 食材選択ステップをスキップしたかどうか
+    @Default(false) bool skippedIngredientSelection,
   }) = _BabyFoodSheetState;
 
   factory BabyFoodSheetState.initial({
     required BabyFoodDraft draft,
     required List<CustomIngredient> customIngredients,
+    required Set<String> hiddenIngredients,
+    int initialStep = 0,
+    bool skippedIngredientSelection = false,
   }) {
     return BabyFoodSheetState(
-      currentStep: 0,
+      currentStep: initialStep,
       timeOfDay: draft.timeOfDay,
       selectedItems: List.from(draft.items),
       expandedCategory: null,
       customIngredients: customIngredients,
+      hiddenIngredients: hiddenIngredients,
       note: draft.note,
       isProcessing: false,
       errorMessage: null,
       isNew: draft.isNew,
       existingId: draft.existingId,
+      skippedIngredientSelection: skippedIngredientSelection,
     );
   }
 
@@ -67,6 +78,10 @@ sealed class BabyFoodSheetState with _$BabyFoodSheetState {
 
   /// 量入力ステップかどうか
   bool get isAmountInputStep => currentStep == 1;
+
+  /// 戻るボタンを表示するかどうか
+  /// 量入力ステップで、かつ食材選択をスキップしていない場合のみ表示
+  bool get showBackButton => isAmountInputStep && !skippedIngredientSelection;
 
   /// 次へボタンが有効かどうか
   bool get canProceed => selectedItems.isNotEmpty;

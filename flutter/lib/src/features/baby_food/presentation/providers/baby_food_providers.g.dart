@@ -183,6 +183,97 @@ final class CustomIngredientDataSourceFamily extends $Family
   String toString() => r'customIngredientDataSourceProvider';
 }
 
+@ProviderFor(hiddenIngredientsDataSource)
+const hiddenIngredientsDataSourceProvider =
+    HiddenIngredientsDataSourceFamily._();
+
+final class HiddenIngredientsDataSourceProvider extends $FunctionalProvider<
+        HiddenIngredientsFirestoreDataSource,
+        HiddenIngredientsFirestoreDataSource,
+        HiddenIngredientsFirestoreDataSource>
+    with $Provider<HiddenIngredientsFirestoreDataSource> {
+  const HiddenIngredientsDataSourceProvider._(
+      {required HiddenIngredientsDataSourceFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'hiddenIngredientsDataSourceProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$hiddenIngredientsDataSourceHash();
+
+  @override
+  String toString() {
+    return r'hiddenIngredientsDataSourceProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<HiddenIngredientsFirestoreDataSource> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  HiddenIngredientsFirestoreDataSource create(Ref ref) {
+    final argument = this.argument as String;
+    return hiddenIngredientsDataSource(
+      ref,
+      argument,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(HiddenIngredientsFirestoreDataSource value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<HiddenIngredientsFirestoreDataSource>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is HiddenIngredientsDataSourceProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$hiddenIngredientsDataSourceHash() =>
+    r'6e8aec03b605b6a98e04e685492b9bbf8e380207';
+
+final class HiddenIngredientsDataSourceFamily extends $Family
+    with
+        $FunctionalFamilyOverride<HiddenIngredientsFirestoreDataSource,
+            String> {
+  const HiddenIngredientsDataSourceFamily._()
+      : super(
+          retry: null,
+          name: r'hiddenIngredientsDataSourceProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  HiddenIngredientsDataSourceProvider call(
+    String householdId,
+  ) =>
+      HiddenIngredientsDataSourceProvider._(argument: householdId, from: this);
+
+  @override
+  String toString() => r'hiddenIngredientsDataSourceProvider';
+}
+
 @ProviderFor(babyFoodRecordRepository)
 const babyFoodRecordRepositoryProvider = BabyFoodRecordRepositoryFamily._();
 
@@ -1336,4 +1427,88 @@ final class CustomIngredientsFamily extends $Family
 
   @override
   String toString() => r'customIngredientsProvider';
+}
+
+/// 非表示食材IDを監視
+
+@ProviderFor(hiddenIngredients)
+const hiddenIngredientsProvider = HiddenIngredientsFamily._();
+
+/// 非表示食材IDを監視
+
+final class HiddenIngredientsProvider extends $FunctionalProvider<
+        AsyncValue<Set<String>>, Set<String>, Stream<Set<String>>>
+    with $FutureModifier<Set<String>>, $StreamProvider<Set<String>> {
+  /// 非表示食材IDを監視
+  const HiddenIngredientsProvider._(
+      {required HiddenIngredientsFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'hiddenIngredientsProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$hiddenIngredientsHash();
+
+  @override
+  String toString() {
+    return r'hiddenIngredientsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<Set<String>> $createElement(
+          $ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<Set<String>> create(Ref ref) {
+    final argument = this.argument as String;
+    return hiddenIngredients(
+      ref,
+      argument,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is HiddenIngredientsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$hiddenIngredientsHash() => r'53f1d9498a9b4f52af82d3fd91e538676f74ebc9';
+
+/// 非表示食材IDを監視
+
+final class HiddenIngredientsFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<Set<String>>, String> {
+  const HiddenIngredientsFamily._()
+      : super(
+          retry: null,
+          name: r'hiddenIngredientsProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// 非表示食材IDを監視
+
+  HiddenIngredientsProvider call(
+    String householdId,
+  ) =>
+      HiddenIngredientsProvider._(argument: householdId, from: this);
+
+  @override
+  String toString() => r'hiddenIngredientsProvider';
 }

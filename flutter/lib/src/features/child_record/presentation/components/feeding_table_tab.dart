@@ -147,6 +147,11 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
         ? ref.watch(customIngredientsProvider(childContext.householdId))
         : null;
 
+    // 非表示食材を取得
+    final hiddenIngredientsAsync = hasValidContext
+        ? ref.watch(hiddenIngredientsProvider(childContext.householdId))
+        : null;
+
     void handleSlotTap(int hour, RecordType type) {
       final records = recordsAsync.value ?? const <RecordItemModel>[];
       notifier.openSlotDetails(hour: hour, type: type, allRecords: records);
@@ -165,6 +170,7 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
           .where((record) => record.recordedAt.hour == hour)
           .toList();
       final customIngredients = customIngredientsAsync?.value ?? [];
+      final hiddenIngredients = hiddenIngredientsAsync?.value ?? <String>{};
 
       // bottom sheetで記録一覧を表示
       showBabyFoodSlotSheet(
@@ -176,6 +182,7 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
         hour: hour,
         recordsInHour: recordsInHour,
         customIngredients: customIngredients,
+        hiddenIngredients: hiddenIngredients,
       );
     }
 

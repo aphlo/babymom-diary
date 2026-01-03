@@ -103,6 +103,7 @@ class _BabyFoodSheetState extends ConsumerState<BabyFoodSheet> {
                         .map((item) => item.ingredientId)
                         .toSet(),
                     customIngredients: state.customIngredients,
+                    hiddenIngredients: state.hiddenIngredients,
                     onCategoryTap: viewModel.toggleCategory,
                     onIngredientToggle: ({
                       required String ingredientId,
@@ -238,7 +239,7 @@ class _BottomButtons extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            if (state.isAmountInputStep) ...[
+            if (state.showBackButton) ...[
               OutlinedButton(
                 onPressed: onPreviousStep,
                 child: const Text('戻る'),

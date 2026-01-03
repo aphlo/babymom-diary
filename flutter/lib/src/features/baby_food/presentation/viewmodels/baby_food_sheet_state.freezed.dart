@@ -29,6 +29,9 @@ mixin _$BabyFoodSheetState {
   /// カスタム食材リスト
   List<CustomIngredient> get customIngredients;
 
+  /// 非表示食材のIDセット
+  Set<String> get hiddenIngredients;
+
   /// メモ
   String? get note;
 
@@ -43,6 +46,9 @@ mixin _$BabyFoodSheetState {
 
   /// 既存レコードのID（編集時のみ）
   String? get existingId;
+
+  /// 食材選択ステップをスキップしたかどうか
+  bool get skippedIngredientSelection;
 
   /// Create a copy of BabyFoodSheetState
   /// with the given fields replaced by the non-null parameter values.
@@ -67,6 +73,8 @@ mixin _$BabyFoodSheetState {
                 other.expandedCategory == expandedCategory) &&
             const DeepCollectionEquality()
                 .equals(other.customIngredients, customIngredients) &&
+            const DeepCollectionEquality()
+                .equals(other.hiddenIngredients, hiddenIngredients) &&
             (identical(other.note, note) || other.note == note) &&
             (identical(other.isProcessing, isProcessing) ||
                 other.isProcessing == isProcessing) &&
@@ -74,7 +82,11 @@ mixin _$BabyFoodSheetState {
                 other.errorMessage == errorMessage) &&
             (identical(other.isNew, isNew) || other.isNew == isNew) &&
             (identical(other.existingId, existingId) ||
-                other.existingId == existingId));
+                other.existingId == existingId) &&
+            (identical(other.skippedIngredientSelection,
+                    skippedIngredientSelection) ||
+                other.skippedIngredientSelection ==
+                    skippedIngredientSelection));
   }
 
   @override
@@ -85,15 +97,17 @@ mixin _$BabyFoodSheetState {
       const DeepCollectionEquality().hash(selectedItems),
       expandedCategory,
       const DeepCollectionEquality().hash(customIngredients),
+      const DeepCollectionEquality().hash(hiddenIngredients),
       note,
       isProcessing,
       errorMessage,
       isNew,
-      existingId);
+      existingId,
+      skippedIngredientSelection);
 
   @override
   String toString() {
-    return 'BabyFoodSheetState(currentStep: $currentStep, timeOfDay: $timeOfDay, selectedItems: $selectedItems, expandedCategory: $expandedCategory, customIngredients: $customIngredients, note: $note, isProcessing: $isProcessing, errorMessage: $errorMessage, isNew: $isNew, existingId: $existingId)';
+    return 'BabyFoodSheetState(currentStep: $currentStep, timeOfDay: $timeOfDay, selectedItems: $selectedItems, expandedCategory: $expandedCategory, customIngredients: $customIngredients, hiddenIngredients: $hiddenIngredients, note: $note, isProcessing: $isProcessing, errorMessage: $errorMessage, isNew: $isNew, existingId: $existingId, skippedIngredientSelection: $skippedIngredientSelection)';
   }
 }
 
@@ -109,11 +123,13 @@ abstract mixin class $BabyFoodSheetStateCopyWith<$Res> {
       List<BabyFoodItemDraft> selectedItems,
       FoodCategory? expandedCategory,
       List<CustomIngredient> customIngredients,
+      Set<String> hiddenIngredients,
       String? note,
       bool isProcessing,
       String? errorMessage,
       bool isNew,
-      String? existingId});
+      String? existingId,
+      bool skippedIngredientSelection});
 }
 
 /// @nodoc
@@ -134,11 +150,13 @@ class _$BabyFoodSheetStateCopyWithImpl<$Res>
     Object? selectedItems = null,
     Object? expandedCategory = freezed,
     Object? customIngredients = null,
+    Object? hiddenIngredients = null,
     Object? note = freezed,
     Object? isProcessing = null,
     Object? errorMessage = freezed,
     Object? isNew = null,
     Object? existingId = freezed,
+    Object? skippedIngredientSelection = null,
   }) {
     return _then(_self.copyWith(
       currentStep: null == currentStep
@@ -161,6 +179,10 @@ class _$BabyFoodSheetStateCopyWithImpl<$Res>
           ? _self.customIngredients
           : customIngredients // ignore: cast_nullable_to_non_nullable
               as List<CustomIngredient>,
+      hiddenIngredients: null == hiddenIngredients
+          ? _self.hiddenIngredients
+          : hiddenIngredients // ignore: cast_nullable_to_non_nullable
+              as Set<String>,
       note: freezed == note
           ? _self.note
           : note // ignore: cast_nullable_to_non_nullable
@@ -181,6 +203,10 @@ class _$BabyFoodSheetStateCopyWithImpl<$Res>
           ? _self.existingId
           : existingId // ignore: cast_nullable_to_non_nullable
               as String?,
+      skippedIngredientSelection: null == skippedIngredientSelection
+          ? _self.skippedIngredientSelection
+          : skippedIngredientSelection // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -282,11 +308,13 @@ extension BabyFoodSheetStatePatterns on BabyFoodSheetState {
             List<BabyFoodItemDraft> selectedItems,
             FoodCategory? expandedCategory,
             List<CustomIngredient> customIngredients,
+            Set<String> hiddenIngredients,
             String? note,
             bool isProcessing,
             String? errorMessage,
             bool isNew,
-            String? existingId)?
+            String? existingId,
+            bool skippedIngredientSelection)?
         $default, {
     required TResult orElse(),
   }) {
@@ -299,11 +327,13 @@ extension BabyFoodSheetStatePatterns on BabyFoodSheetState {
             _that.selectedItems,
             _that.expandedCategory,
             _that.customIngredients,
+            _that.hiddenIngredients,
             _that.note,
             _that.isProcessing,
             _that.errorMessage,
             _that.isNew,
-            _that.existingId);
+            _that.existingId,
+            _that.skippedIngredientSelection);
       case _:
         return orElse();
     }
@@ -330,11 +360,13 @@ extension BabyFoodSheetStatePatterns on BabyFoodSheetState {
             List<BabyFoodItemDraft> selectedItems,
             FoodCategory? expandedCategory,
             List<CustomIngredient> customIngredients,
+            Set<String> hiddenIngredients,
             String? note,
             bool isProcessing,
             String? errorMessage,
             bool isNew,
-            String? existingId)
+            String? existingId,
+            bool skippedIngredientSelection)
         $default,
   ) {
     final _that = this;
@@ -346,11 +378,13 @@ extension BabyFoodSheetStatePatterns on BabyFoodSheetState {
             _that.selectedItems,
             _that.expandedCategory,
             _that.customIngredients,
+            _that.hiddenIngredients,
             _that.note,
             _that.isProcessing,
             _that.errorMessage,
             _that.isNew,
-            _that.existingId);
+            _that.existingId,
+            _that.skippedIngredientSelection);
     }
   }
 
@@ -374,11 +408,13 @@ extension BabyFoodSheetStatePatterns on BabyFoodSheetState {
             List<BabyFoodItemDraft> selectedItems,
             FoodCategory? expandedCategory,
             List<CustomIngredient> customIngredients,
+            Set<String> hiddenIngredients,
             String? note,
             bool isProcessing,
             String? errorMessage,
             bool isNew,
-            String? existingId)?
+            String? existingId,
+            bool skippedIngredientSelection)?
         $default,
   ) {
     final _that = this;
@@ -390,11 +426,13 @@ extension BabyFoodSheetStatePatterns on BabyFoodSheetState {
             _that.selectedItems,
             _that.expandedCategory,
             _that.customIngredients,
+            _that.hiddenIngredients,
             _that.note,
             _that.isProcessing,
             _that.errorMessage,
             _that.isNew,
-            _that.existingId);
+            _that.existingId,
+            _that.skippedIngredientSelection);
       case _:
         return null;
     }
@@ -410,13 +448,16 @@ class _BabyFoodSheetState extends BabyFoodSheetState {
       required final List<BabyFoodItemDraft> selectedItems,
       this.expandedCategory,
       required final List<CustomIngredient> customIngredients,
+      required final Set<String> hiddenIngredients,
       this.note,
       this.isProcessing = false,
       this.errorMessage,
       required this.isNew,
-      this.existingId})
+      this.existingId,
+      this.skippedIngredientSelection = false})
       : _selectedItems = selectedItems,
         _customIngredients = customIngredients,
+        _hiddenIngredients = hiddenIngredients,
         super._();
 
   /// 現在のステップ（0: 食材選択, 1: 量入力）
@@ -454,6 +495,18 @@ class _BabyFoodSheetState extends BabyFoodSheetState {
     return EqualUnmodifiableListView(_customIngredients);
   }
 
+  /// 非表示食材のIDセット
+  final Set<String> _hiddenIngredients;
+
+  /// 非表示食材のIDセット
+  @override
+  Set<String> get hiddenIngredients {
+    if (_hiddenIngredients is EqualUnmodifiableSetView)
+      return _hiddenIngredients;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableSetView(_hiddenIngredients);
+  }
+
   /// メモ
   @override
   final String? note;
@@ -474,6 +527,11 @@ class _BabyFoodSheetState extends BabyFoodSheetState {
   /// 既存レコードのID（編集時のみ）
   @override
   final String? existingId;
+
+  /// 食材選択ステップをスキップしたかどうか
+  @override
+  @JsonKey()
+  final bool skippedIngredientSelection;
 
   /// Create a copy of BabyFoodSheetState
   /// with the given fields replaced by the non-null parameter values.
@@ -498,6 +556,8 @@ class _BabyFoodSheetState extends BabyFoodSheetState {
                 other.expandedCategory == expandedCategory) &&
             const DeepCollectionEquality()
                 .equals(other._customIngredients, _customIngredients) &&
+            const DeepCollectionEquality()
+                .equals(other._hiddenIngredients, _hiddenIngredients) &&
             (identical(other.note, note) || other.note == note) &&
             (identical(other.isProcessing, isProcessing) ||
                 other.isProcessing == isProcessing) &&
@@ -505,7 +565,11 @@ class _BabyFoodSheetState extends BabyFoodSheetState {
                 other.errorMessage == errorMessage) &&
             (identical(other.isNew, isNew) || other.isNew == isNew) &&
             (identical(other.existingId, existingId) ||
-                other.existingId == existingId));
+                other.existingId == existingId) &&
+            (identical(other.skippedIngredientSelection,
+                    skippedIngredientSelection) ||
+                other.skippedIngredientSelection ==
+                    skippedIngredientSelection));
   }
 
   @override
@@ -516,15 +580,17 @@ class _BabyFoodSheetState extends BabyFoodSheetState {
       const DeepCollectionEquality().hash(_selectedItems),
       expandedCategory,
       const DeepCollectionEquality().hash(_customIngredients),
+      const DeepCollectionEquality().hash(_hiddenIngredients),
       note,
       isProcessing,
       errorMessage,
       isNew,
-      existingId);
+      existingId,
+      skippedIngredientSelection);
 
   @override
   String toString() {
-    return 'BabyFoodSheetState(currentStep: $currentStep, timeOfDay: $timeOfDay, selectedItems: $selectedItems, expandedCategory: $expandedCategory, customIngredients: $customIngredients, note: $note, isProcessing: $isProcessing, errorMessage: $errorMessage, isNew: $isNew, existingId: $existingId)';
+    return 'BabyFoodSheetState(currentStep: $currentStep, timeOfDay: $timeOfDay, selectedItems: $selectedItems, expandedCategory: $expandedCategory, customIngredients: $customIngredients, hiddenIngredients: $hiddenIngredients, note: $note, isProcessing: $isProcessing, errorMessage: $errorMessage, isNew: $isNew, existingId: $existingId, skippedIngredientSelection: $skippedIngredientSelection)';
   }
 }
 
@@ -542,11 +608,13 @@ abstract mixin class _$BabyFoodSheetStateCopyWith<$Res>
       List<BabyFoodItemDraft> selectedItems,
       FoodCategory? expandedCategory,
       List<CustomIngredient> customIngredients,
+      Set<String> hiddenIngredients,
       String? note,
       bool isProcessing,
       String? errorMessage,
       bool isNew,
-      String? existingId});
+      String? existingId,
+      bool skippedIngredientSelection});
 }
 
 /// @nodoc
@@ -567,11 +635,13 @@ class __$BabyFoodSheetStateCopyWithImpl<$Res>
     Object? selectedItems = null,
     Object? expandedCategory = freezed,
     Object? customIngredients = null,
+    Object? hiddenIngredients = null,
     Object? note = freezed,
     Object? isProcessing = null,
     Object? errorMessage = freezed,
     Object? isNew = null,
     Object? existingId = freezed,
+    Object? skippedIngredientSelection = null,
   }) {
     return _then(_BabyFoodSheetState(
       currentStep: null == currentStep
@@ -594,6 +664,10 @@ class __$BabyFoodSheetStateCopyWithImpl<$Res>
           ? _self._customIngredients
           : customIngredients // ignore: cast_nullable_to_non_nullable
               as List<CustomIngredient>,
+      hiddenIngredients: null == hiddenIngredients
+          ? _self._hiddenIngredients
+          : hiddenIngredients // ignore: cast_nullable_to_non_nullable
+              as Set<String>,
       note: freezed == note
           ? _self.note
           : note // ignore: cast_nullable_to_non_nullable
@@ -614,6 +688,10 @@ class __$BabyFoodSheetStateCopyWithImpl<$Res>
           ? _self.existingId
           : existingId // ignore: cast_nullable_to_non_nullable
               as String?,
+      skippedIngredientSelection: null == skippedIngredientSelection
+          ? _self.skippedIngredientSelection
+          : skippedIngredientSelection // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
