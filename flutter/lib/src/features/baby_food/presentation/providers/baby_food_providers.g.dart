@@ -1512,3 +1512,98 @@ final class HiddenIngredientsFamily extends $Family
   @override
   String toString() => r'hiddenIngredientsProvider';
 }
+
+/// 特定食材の記録を取得（フィルタリング済み）
+
+@ProviderFor(ingredientRecords)
+const ingredientRecordsProvider = IngredientRecordsFamily._();
+
+/// 特定食材の記録を取得（フィルタリング済み）
+
+final class IngredientRecordsProvider extends $FunctionalProvider<
+    List<IngredientRecordInfo>,
+    List<IngredientRecordInfo>,
+    List<IngredientRecordInfo>> with $Provider<List<IngredientRecordInfo>> {
+  /// 特定食材の記録を取得（フィルタリング済み）
+  const IngredientRecordsProvider._(
+      {required IngredientRecordsFamily super.from,
+      required IngredientRecordsQuery super.argument})
+      : super(
+          retry: null,
+          name: r'ingredientRecordsProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$ingredientRecordsHash();
+
+  @override
+  String toString() {
+    return r'ingredientRecordsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<List<IngredientRecordInfo>> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  List<IngredientRecordInfo> create(Ref ref) {
+    final argument = this.argument as IngredientRecordsQuery;
+    return ingredientRecords(
+      ref,
+      argument,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<IngredientRecordInfo> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<IngredientRecordInfo>>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is IngredientRecordsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$ingredientRecordsHash() => r'5e14238041dd201c93614799903f73fa87994702';
+
+/// 特定食材の記録を取得（フィルタリング済み）
+
+final class IngredientRecordsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<List<IngredientRecordInfo>,
+            IngredientRecordsQuery> {
+  const IngredientRecordsFamily._()
+      : super(
+          retry: null,
+          name: r'ingredientRecordsProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// 特定食材の記録を取得（フィルタリング済み）
+
+  IngredientRecordsProvider call(
+    IngredientRecordsQuery query,
+  ) =>
+      IngredientRecordsProvider._(argument: query, from: this);
+
+  @override
+  String toString() => r'ingredientRecordsProvider';
+}
