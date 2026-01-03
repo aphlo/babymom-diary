@@ -13,14 +13,12 @@ class IngredientDetailArgs {
     required this.ingredientId,
     required this.ingredientName,
     required this.category,
-    required this.isCustomIngredient,
   });
 
   final String householdId;
   final String ingredientId;
   final String ingredientName;
   final FoodCategory category;
-  final bool isCustomIngredient;
 
   @override
   bool operator ==(Object other) {
@@ -43,9 +41,17 @@ class IngredientDetailViewModel extends _$IngredientDetailViewModel {
   IngredientDetailState build(IngredientDetailArgs args) {
     _householdId = args.householdId;
     _ingredientId = args.ingredientId;
+
+    // customIngredientsProviderを監視してisCustomIngredientを動的に判定
+    final customIngredientsAsync =
+        ref.watch(customIngredientsProvider(_householdId));
+    final isCustomIngredient =
+        customIngredientsAsync.value?.any((c) => c.id == _ingredientId) ??
+            false;
+
     return IngredientDetailState.initial(
       ingredientName: args.ingredientName,
-      isCustomIngredient: args.isCustomIngredient,
+      isCustomIngredient: isCustomIngredient,
     );
   }
 
@@ -67,11 +73,18 @@ class IngredientDetailViewModel extends _$IngredientDetailViewModel {
         ingredientId: _ingredientId,
         newName: newName,
       );
+
+      // 破棄済みなら状態更新しない
+      if (!ref.mounted) return;
+
       state = state.copyWith(
         isProcessing: false,
         currentIngredientName: newName,
       );
     } catch (e) {
+      // 破棄済みなら状態更新しない
+      if (!ref.mounted) return;
+
       state = state.copyWith(
         isProcessing: false,
         pendingUiEvent: const IngredientDetailUiEvent.showMessage(
@@ -89,11 +102,18 @@ class IngredientDetailViewModel extends _$IngredientDetailViewModel {
       final useCase =
           ref.read(deleteCustomIngredientUseCaseProvider(_householdId));
       await useCase.call(ingredientId: _ingredientId);
+
+      // 破棄済みなら状態更新しない
+      if (!ref.mounted) return;
+
       state = state.copyWith(
         isProcessing: false,
         pendingUiEvent: const IngredientDetailUiEvent.navigateBack(),
       );
     } catch (e) {
+      // 破棄済みなら状態更新しない
+      if (!ref.mounted) return;
+
       state = state.copyWith(
         isProcessing: false,
         pendingUiEvent: const IngredientDetailUiEvent.showMessage(

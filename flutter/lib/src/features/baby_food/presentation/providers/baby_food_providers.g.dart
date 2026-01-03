@@ -1521,9 +1521,10 @@ const ingredientRecordsProvider = IngredientRecordsFamily._();
 /// 特定食材の記録を取得（フィルタリング済み）
 
 final class IngredientRecordsProvider extends $FunctionalProvider<
-    List<IngredientRecordInfo>,
-    List<IngredientRecordInfo>,
-    List<IngredientRecordInfo>> with $Provider<List<IngredientRecordInfo>> {
+        AsyncValue<List<IngredientRecordInfo>>,
+        AsyncValue<List<IngredientRecordInfo>>,
+        AsyncValue<List<IngredientRecordInfo>>>
+    with $Provider<AsyncValue<List<IngredientRecordInfo>>> {
   /// 特定食材の記録を取得（フィルタリング済み）
   const IngredientRecordsProvider._(
       {required IngredientRecordsFamily super.from,
@@ -1548,12 +1549,12 @@ final class IngredientRecordsProvider extends $FunctionalProvider<
 
   @$internal
   @override
-  $ProviderElement<List<IngredientRecordInfo>> $createElement(
+  $ProviderElement<AsyncValue<List<IngredientRecordInfo>>> $createElement(
           $ProviderPointer pointer) =>
       $ProviderElement(pointer);
 
   @override
-  List<IngredientRecordInfo> create(Ref ref) {
+  AsyncValue<List<IngredientRecordInfo>> create(Ref ref) {
     final argument = this.argument as IngredientRecordsQuery;
     return ingredientRecords(
       ref,
@@ -1562,10 +1563,11 @@ final class IngredientRecordsProvider extends $FunctionalProvider<
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(List<IngredientRecordInfo> value) {
+  Override overrideWithValue(AsyncValue<List<IngredientRecordInfo>> value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<List<IngredientRecordInfo>>(value),
+      providerOverride:
+          $SyncValueProvider<AsyncValue<List<IngredientRecordInfo>>>(value),
     );
   }
 
@@ -1580,13 +1582,13 @@ final class IngredientRecordsProvider extends $FunctionalProvider<
   }
 }
 
-String _$ingredientRecordsHash() => r'5e14238041dd201c93614799903f73fa87994702';
+String _$ingredientRecordsHash() => r'e5ba7c955c0ccbb8e0e8df6dafa69f9d496bf51f';
 
 /// 特定食材の記録を取得（フィルタリング済み）
 
 final class IngredientRecordsFamily extends $Family
     with
-        $FunctionalFamilyOverride<List<IngredientRecordInfo>,
+        $FunctionalFamilyOverride<AsyncValue<List<IngredientRecordInfo>>,
             IngredientRecordsQuery> {
   const IngredientRecordsFamily._()
       : super(

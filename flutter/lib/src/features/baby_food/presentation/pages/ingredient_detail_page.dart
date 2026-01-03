@@ -45,11 +45,9 @@ class IngredientDetailPage extends ConsumerWidget {
     final childId = childContext.selectedChildId!;
     final childIcon = childContext.selectedChildSummary?.icon ?? ChildIcon.bear;
 
-    // カスタム食材かどうかを判定
+    // カスタム食材リスト（FABと記録タップ時に必要）
     final customIngredientsAsync =
         ref.watch(customIngredientsProvider(householdId));
-    final isCustomIngredient =
-        customIngredientsAsync.value?.any((c) => c.id == ingredientId) ?? false;
 
     // ViewModelの引数を作成
     final args = IngredientDetailArgs(
@@ -57,7 +55,6 @@ class IngredientDetailPage extends ConsumerWidget {
       ingredientId: ingredientId,
       ingredientName: ingredientName,
       category: category,
-      isCustomIngredient: isCustomIngredient,
     );
 
     // ViewModelを監視
@@ -92,7 +89,7 @@ class IngredientDetailPage extends ConsumerWidget {
       childId: childId,
       ingredientId: ingredientId,
     );
-    final ingredientRecords =
+    final ingredientRecordsAsync =
         ref.watch(ingredientRecordsProvider(recordsQuery));
 
     // 全記録（編集時に必要）
@@ -147,19 +144,23 @@ class IngredientDetailPage extends ConsumerWidget {
       body: Column(
         children: [
           Expanded(
-            child: IngredientDetailBody(
-              records: ingredientRecords,
-              childIcon: childIcon,
-              onRecordTap: (recordInfo) => _handleRecordTap(
-                context: context,
-                recordInfo: recordInfo,
-                allRecordsAsync: allRecordsAsync,
-                householdId: householdId,
-                childId: childId,
-                ingredientId: ingredientId,
-                customIngredientsAsync: customIngredientsAsync,
-                hiddenIngredientsAsync: hiddenIngredientsAsync,
+            child: ingredientRecordsAsync.when(
+              data: (records) => IngredientDetailBody(
+                records: records,
+                childIcon: childIcon,
+                onRecordTap: (recordInfo) => _handleRecordTap(
+                  context: context,
+                  recordInfo: recordInfo,
+                  allRecordsAsync: allRecordsAsync,
+                  householdId: householdId,
+                  childId: childId,
+                  ingredientId: ingredientId,
+                  customIngredientsAsync: customIngredientsAsync,
+                  hiddenIngredientsAsync: hiddenIngredientsAsync,
+                ),
               ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text('エラー: $e')),
             ),
           ),
           const BannerAdWidget(slot: BannerAdSlot.babyFood),

@@ -60,7 +60,7 @@ final class IngredientDetailViewModelProvider extends $NotifierProvider<
 }
 
 String _$ingredientDetailViewModelHash() =>
-    r'a80ec43facebae16065d05483c7df7e1c4c49842';
+    r'a1217e2e01b9f446462639ed0b35fcfdb0d97604';
 
 final class IngredientDetailViewModelFamily extends $Family
     with

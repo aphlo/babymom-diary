@@ -216,7 +216,7 @@ class IngredientRecordsQuery {
 
 /// 特定食材の記録を取得（フィルタリング済み）
 @riverpod
-List<IngredientRecordInfo> ingredientRecords(
+AsyncValue<List<IngredientRecordInfo>> ingredientRecords(
   Ref ref,
   IngredientRecordsQuery query,
 ) {
@@ -227,25 +227,30 @@ List<IngredientRecordInfo> ingredientRecords(
     ),
   );
 
-  final records = recordsAsync.value ?? [];
-  final result = <IngredientRecordInfo>[];
+  return recordsAsync.when(
+    data: (records) {
+      final result = <IngredientRecordInfo>[];
 
-  for (final record in records) {
-    for (final item in record.items) {
-      if (item.ingredientId == query.ingredientId) {
-        result.add(IngredientRecordInfo(
-          recordId: record.id,
-          recordedAt: record.recordedAt,
-          amount: item.amountDisplay,
-          reaction: item.reaction,
-          memo: item.memo,
-          hasAllergy: item.hasAllergy ?? false,
-        ));
+      for (final record in records) {
+        for (final item in record.items) {
+          if (item.ingredientId == query.ingredientId) {
+            result.add(IngredientRecordInfo(
+              recordId: record.id,
+              recordedAt: record.recordedAt,
+              amount: item.amountDisplay,
+              reaction: item.reaction,
+              memo: item.memo,
+              hasAllergy: item.hasAllergy ?? false,
+            ));
+          }
+        }
       }
-    }
-  }
 
-  // 日付の新しい順にソート
-  result.sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
-  return result;
+      // 日付の新しい順にソート
+      result.sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+      return AsyncValue.data(result);
+    },
+    loading: () => const AsyncValue.loading(),
+    error: (e, st) => AsyncValue.error(e, st),
+  );
 }
