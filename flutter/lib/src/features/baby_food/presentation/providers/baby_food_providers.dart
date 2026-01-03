@@ -17,6 +17,7 @@ import '../../infrastructure/repositories/custom_ingredient_repository_impl.dart
 import '../../infrastructure/sources/baby_food_firestore_data_source.dart';
 import '../../infrastructure/sources/custom_ingredient_firestore_data_source.dart';
 import '../../infrastructure/sources/hidden_ingredients_firestore_data_source.dart';
+import '../models/ingredient_record_info.dart';
 
 part 'baby_food_providers.g.dart';
 
@@ -186,4 +187,70 @@ class DailyBabyFoodRecordsQuery {
   @override
   int get hashCode =>
       Object.hash(householdId, childId, date.year, date.month, date.day);
+}
+
+/// 特定食材の記録をフィルタリングするクエリ
+class IngredientRecordsQuery {
+  const IngredientRecordsQuery({
+    required this.householdId,
+    required this.childId,
+    required this.ingredientId,
+  });
+
+  final String householdId;
+  final String childId;
+  final String ingredientId;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is IngredientRecordsQuery &&
+        other.householdId == householdId &&
+        other.childId == childId &&
+        other.ingredientId == ingredientId;
+  }
+
+  @override
+  int get hashCode => Object.hash(householdId, childId, ingredientId);
+}
+
+/// 特定食材の記録を取得（フィルタリング済み）
+@riverpod
+AsyncValue<List<IngredientRecordInfo>> ingredientRecords(
+  Ref ref,
+  IngredientRecordsQuery query,
+) {
+  final recordsAsync = ref.watch(
+    watchBabyFoodRecordsProvider(
+      householdId: query.householdId,
+      childId: query.childId,
+    ),
+  );
+
+  return recordsAsync.when(
+    data: (records) {
+      final result = <IngredientRecordInfo>[];
+
+      for (final record in records) {
+        for (final item in record.items) {
+          if (item.ingredientId == query.ingredientId) {
+            result.add(IngredientRecordInfo(
+              recordId: record.id,
+              recordedAt: record.recordedAt,
+              amount: item.amountDisplay,
+              reaction: item.reaction,
+              memo: item.memo,
+              hasAllergy: item.hasAllergy ?? false,
+            ));
+          }
+        }
+      }
+
+      // 日付の新しい順にソート
+      result.sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+      return AsyncValue.data(result);
+    },
+    loading: () => const AsyncValue.loading(),
+    error: (e, st) => AsyncValue.error(e, st),
+  );
 }

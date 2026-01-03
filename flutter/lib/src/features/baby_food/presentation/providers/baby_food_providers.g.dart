@@ -1512,3 +1512,100 @@ final class HiddenIngredientsFamily extends $Family
   @override
   String toString() => r'hiddenIngredientsProvider';
 }
+
+/// 特定食材の記録を取得（フィルタリング済み）
+
+@ProviderFor(ingredientRecords)
+const ingredientRecordsProvider = IngredientRecordsFamily._();
+
+/// 特定食材の記録を取得（フィルタリング済み）
+
+final class IngredientRecordsProvider extends $FunctionalProvider<
+        AsyncValue<List<IngredientRecordInfo>>,
+        AsyncValue<List<IngredientRecordInfo>>,
+        AsyncValue<List<IngredientRecordInfo>>>
+    with $Provider<AsyncValue<List<IngredientRecordInfo>>> {
+  /// 特定食材の記録を取得（フィルタリング済み）
+  const IngredientRecordsProvider._(
+      {required IngredientRecordsFamily super.from,
+      required IngredientRecordsQuery super.argument})
+      : super(
+          retry: null,
+          name: r'ingredientRecordsProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$ingredientRecordsHash();
+
+  @override
+  String toString() {
+    return r'ingredientRecordsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<AsyncValue<List<IngredientRecordInfo>>> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  AsyncValue<List<IngredientRecordInfo>> create(Ref ref) {
+    final argument = this.argument as IngredientRecordsQuery;
+    return ingredientRecords(
+      ref,
+      argument,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<List<IngredientRecordInfo>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<AsyncValue<List<IngredientRecordInfo>>>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is IngredientRecordsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$ingredientRecordsHash() => r'e5ba7c955c0ccbb8e0e8df6dafa69f9d496bf51f';
+
+/// 特定食材の記録を取得（フィルタリング済み）
+
+final class IngredientRecordsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<AsyncValue<List<IngredientRecordInfo>>,
+            IngredientRecordsQuery> {
+  const IngredientRecordsFamily._()
+      : super(
+          retry: null,
+          name: r'ingredientRecordsProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// 特定食材の記録を取得（フィルタリング済み）
+
+  IngredientRecordsProvider call(
+    IngredientRecordsQuery query,
+  ) =>
+      IngredientRecordsProvider._(argument: query, from: this);
+
+  @override
+  String toString() => r'ingredientRecordsProvider';
+}
