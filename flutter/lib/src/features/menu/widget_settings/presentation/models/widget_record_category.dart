@@ -7,6 +7,7 @@ enum WidgetRecordCategory {
   breast, // breastRight/breastLeftをまとめる
   formula,
   pump,
+  babyFood, // 離乳食
   pee,
   poop,
   temperature,
@@ -18,6 +19,7 @@ extension WidgetRecordCategoryExtension on WidgetRecordCategory {
         WidgetRecordCategory.breast => '授乳',
         WidgetRecordCategory.formula => 'ミルク',
         WidgetRecordCategory.pump => '搾母乳',
+        WidgetRecordCategory.babyFood => '離乳食',
         WidgetRecordCategory.pee => '尿',
         WidgetRecordCategory.poop => '便',
         WidgetRecordCategory.temperature => '体温',
@@ -34,6 +36,7 @@ extension WidgetRecordCategoryExtension on WidgetRecordCategory {
         WidgetRecordCategory.breast => RecordType.breastLeft,
         WidgetRecordCategory.formula => RecordType.formula,
         WidgetRecordCategory.pump => RecordType.pump,
+        WidgetRecordCategory.babyFood => RecordType.babyFood,
         WidgetRecordCategory.pee => RecordType.pee,
         WidgetRecordCategory.poop => RecordType.poop,
         WidgetRecordCategory.temperature => RecordType.temperature,
@@ -47,11 +50,10 @@ extension WidgetRecordCategoryExtension on WidgetRecordCategory {
           WidgetRecordCategory.breast,
         RecordType.formula => WidgetRecordCategory.formula,
         RecordType.pump => WidgetRecordCategory.pump,
+        RecordType.babyFood => WidgetRecordCategory.babyFood,
         RecordType.pee => WidgetRecordCategory.pee,
         RecordType.poop => WidgetRecordCategory.poop,
         RecordType.temperature => WidgetRecordCategory.temperature,
         RecordType.other => WidgetRecordCategory.other,
-        // 離乳食は別コレクションで管理、ホームウィジェット未対応
-        RecordType.babyFood => WidgetRecordCategory.other,
       };
 }

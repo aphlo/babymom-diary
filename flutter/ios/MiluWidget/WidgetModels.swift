@@ -68,6 +68,8 @@ struct DisplayRecord {
             return "milk"
         case "pump":
             return "sakubonyuu"
+        case "babyFood":
+            return "babyfood"
         case "pee":
             return "nyou"
         case "poop":
@@ -85,14 +87,16 @@ struct DisplayRecord {
             return "授乳"
         case "formula":
             return "ミルク"
+        case "pump":
+            return "搾母乳"
+        case "babyFood":
+            return "離乳食"
         case "pee":
             return "尿"
         case "poop":
             return "便"
         case "temperature":
             return "体温"
-        case "pump":
-            return "搾母乳"
         default:
             return "その他"
         }
