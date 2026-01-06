@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../widget/application/providers/widget_providers.dart';
 import '../../application/usecases/add_baby_food_record.dart';
 import '../../application/usecases/add_custom_ingredient.dart';
 import '../../application/usecases/delete_baby_food_record.dart';
@@ -8,6 +9,7 @@ import '../../application/usecases/update_baby_food_record.dart';
 import '../../application/usecases/update_custom_ingredient.dart';
 import '../../application/usecases/watch_baby_food_records.dart';
 import '../../application/usecases/watch_custom_ingredients.dart';
+import '../../domain/entities/baby_food_item.dart';
 import '../../domain/entities/baby_food_record.dart';
 import '../../domain/entities/custom_ingredient.dart';
 import '../../domain/repositories/baby_food_record_repository.dart';
@@ -112,6 +114,123 @@ WatchCustomIngredients watchCustomIngredientsUseCase(
     Ref ref, String householdId) {
   final repository = ref.watch(customIngredientRepositoryProvider(householdId));
   return WatchCustomIngredients(repository: repository);
+}
+
+// ============================================================================
+// Widget Sync Providers
+// ============================================================================
+
+/// 離乳食記録追加とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+@riverpod
+Future<BabyFoodRecord> Function({
+  required String childId,
+  required DateTime recordedAt,
+  required List<BabyFoodItem> items,
+  String? note,
+}) addBabyFoodRecordWithWidgetSync(Ref ref, String householdId) {
+  final addRecord = ref.watch(addBabyFoodRecordUseCaseProvider(householdId));
+  final widgetSync = ref.watch(widgetDataSyncServiceProvider(householdId));
+
+  return ({
+    required String childId,
+    required DateTime recordedAt,
+    required List<BabyFoodItem> items,
+    String? note,
+  }) async {
+    // Firestoreに保存（これが失敗したらエラー）
+    final record = await addRecord.call(
+      childId: childId,
+      recordedAt: recordedAt,
+      items: items,
+      note: note,
+    );
+
+    // ウィジェットデータを同期（失敗してもエラーとしない）
+    try {
+      await widgetSync.onBabyFoodRecordAdded(
+        childId: childId,
+        record: record,
+      );
+    } catch (_) {
+      // ウィジェット同期失敗はサイレントに処理
+    }
+
+    return record;
+  };
+}
+
+/// 離乳食記録更新とウィジェット同期を行う関数（householdIdごと）
+@riverpod
+Future<BabyFoodRecord> Function({
+  required String childId,
+  required BabyFoodRecord existingRecord,
+  required DateTime recordedAt,
+  required List<BabyFoodItem> items,
+  String? note,
+}) updateBabyFoodRecordWithWidgetSync(Ref ref, String householdId) {
+  final updateRecord =
+      ref.watch(updateBabyFoodRecordUseCaseProvider(householdId));
+  final widgetSync = ref.watch(widgetDataSyncServiceProvider(householdId));
+
+  return ({
+    required String childId,
+    required BabyFoodRecord existingRecord,
+    required DateTime recordedAt,
+    required List<BabyFoodItem> items,
+    String? note,
+  }) async {
+    // Firestoreを更新（これが失敗したらエラー）
+    final record = await updateRecord.call(
+      childId: childId,
+      existingRecord: existingRecord,
+      recordedAt: recordedAt,
+      items: items,
+      note: note,
+    );
+
+    // ウィジェットデータを同期（失敗してもエラーとしない）
+    try {
+      await widgetSync.onBabyFoodRecordAdded(
+        childId: childId,
+        record: record,
+      );
+    } catch (_) {
+      // ウィジェット同期失敗はサイレントに処理
+    }
+
+    return record;
+  };
+}
+
+/// 離乳食記録削除とウィジェット同期を行う関数（householdIdごと）
+@riverpod
+Future<void> Function({
+  required String childId,
+  required String recordId,
+}) deleteBabyFoodRecordWithWidgetSync(Ref ref, String householdId) {
+  final deleteRecord =
+      ref.watch(deleteBabyFoodRecordUseCaseProvider(householdId));
+  final widgetSync = ref.watch(widgetDataSyncServiceProvider(householdId));
+
+  return ({
+    required String childId,
+    required String recordId,
+  }) async {
+    // Firestoreから削除（これが失敗したらエラー）
+    await deleteRecord.call(childId: childId, recordId: recordId);
+
+    // ウィジェットデータを同期（失敗してもエラーとしない）
+    try {
+      await widgetSync.onRecordDeleted(
+        childId: childId,
+        recordId: recordId,
+      );
+    } catch (_) {
+      // ウィジェット同期失敗はサイレントに処理
+    }
+  };
 }
 
 // ============================================================================

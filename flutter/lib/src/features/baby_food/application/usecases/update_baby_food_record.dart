@@ -10,7 +10,7 @@ class UpdateBabyFoodRecord {
 
   final BabyFoodRecordRepository _repository;
 
-  Future<void> call({
+  Future<BabyFoodRecord> call({
     required String childId,
     required BabyFoodRecord existingRecord,
     required DateTime recordedAt,
@@ -29,5 +29,6 @@ class UpdateBabyFoodRecord {
     );
 
     await _repository.updateRecord(childId, updatedRecord);
+    return updatedRecord;
   }
 }

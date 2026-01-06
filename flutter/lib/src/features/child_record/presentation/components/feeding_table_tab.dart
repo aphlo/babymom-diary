@@ -6,7 +6,10 @@ import '../providers/daily_records_provider.dart';
 import '../../../ads/application/services/banner_ad_manager.dart';
 import '../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../../baby_food/domain/entities/baby_food_record.dart';
+import '../../../baby_food/presentation/models/baby_food_draft.dart';
 import '../../../baby_food/presentation/providers/baby_food_providers.dart';
+import '../../../baby_food/presentation/viewmodels/baby_food_sheet_view_model.dart';
+import '../../../baby_food/presentation/widgets/baby_food_sheet.dart';
 import '../../../baby_food/presentation/widgets/baby_food_slot_sheet.dart';
 import '../../../menu/children/application/child_context_provider.dart';
 import '../models/record_draft.dart';
@@ -33,6 +36,7 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
     _stateSub = ref.listenManual<RecordPageState>(
       recordViewModelProvider,
       _handleStateEvent,
+      fireImmediately: true,
     );
   }
 
@@ -47,7 +51,17 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
     if (event == null) {
       return;
     }
+    if (!mounted) return;
     final notifier = ref.read(recordViewModelProvider.notifier);
+
+    // initStateから呼ばれた場合、contextがまだ使えないのでビルド後に処理
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _processUiEvent(event, notifier);
+    });
+  }
+
+  void _processUiEvent(RecordUiEvent event, RecordViewModel notifier) {
     if (!mounted) return;
 
     if (event.message != null) {
@@ -87,6 +101,9 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
     if (event.openEditor != null) {
       _openEditor(event.openEditor!);
     }
+    if (event.openBabyFoodEditor != null) {
+      _openBabyFoodEditor(event.openBabyFoodEditor!);
+    }
     notifier.clearUiEvent();
   }
 
@@ -110,6 +127,41 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
     if (result != null && mounted) {
       await notifier.addOrUpdateRecord(result);
     }
+  }
+
+  Future<void> _openBabyFoodEditor(BabyFoodEditorRequest request) async {
+    final childContext = ref.read(childContextProvider).value;
+    if (childContext == null || !childContext.hasSelectedChild) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('記録を行うには、メニューから子どもを登録してください。')),
+      );
+      return;
+    }
+
+    final householdId = childContext.householdId;
+    final childId = childContext.selectedChildId!;
+    final selectedDate = ref.read(recordViewModelProvider).selectedDate;
+
+    // カスタム食材と非表示食材を取得
+    final customIngredients =
+        ref.read(customIngredientsProvider(householdId)).value ?? [];
+    final hiddenIngredients =
+        ref.read(hiddenIngredientsProvider(householdId)).value ?? <String>{};
+
+    final draft = BabyFoodDraft.newRecord(recordedAt: request.initialDateTime);
+    final args = BabyFoodSheetArgs(
+      householdId: householdId,
+      childId: childId,
+      initialDraft: draft,
+      customIngredients: customIngredients,
+      hiddenIngredients: hiddenIngredients,
+    );
+
+    await showBabyFoodSheet(
+      context: context,
+      args: args,
+      selectedDate: selectedDate,
+    );
   }
 
   @override

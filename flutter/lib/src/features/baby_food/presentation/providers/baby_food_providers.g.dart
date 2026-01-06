@@ -1143,6 +1143,427 @@ final class WatchCustomIngredientsUseCaseFamily extends $Family
   String toString() => r'watchCustomIngredientsUseCaseProvider';
 }
 
+/// 離乳食記録追加とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+
+@ProviderFor(addBabyFoodRecordWithWidgetSync)
+const addBabyFoodRecordWithWidgetSyncProvider =
+    AddBabyFoodRecordWithWidgetSyncFamily._();
+
+/// 離乳食記録追加とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+
+final class AddBabyFoodRecordWithWidgetSyncProvider extends $FunctionalProvider<
+        Future<BabyFoodRecord> Function(
+            {required String childId,
+            required List<BabyFoodItem> items,
+            String? note,
+            required DateTime recordedAt}),
+        Future<BabyFoodRecord> Function(
+            {required String childId,
+            required List<BabyFoodItem> items,
+            String? note,
+            required DateTime recordedAt}),
+        Future<BabyFoodRecord> Function(
+            {required String childId,
+            required List<BabyFoodItem> items,
+            String? note,
+            required DateTime recordedAt})>
+    with
+        $Provider<
+            Future<BabyFoodRecord> Function(
+                {required String childId,
+                required List<BabyFoodItem> items,
+                String? note,
+                required DateTime recordedAt})> {
+  /// 離乳食記録追加とウィジェット同期を行う関数（householdIdごと）
+  ///
+  /// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+  const AddBabyFoodRecordWithWidgetSyncProvider._(
+      {required AddBabyFoodRecordWithWidgetSyncFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'addBabyFoodRecordWithWidgetSyncProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$addBabyFoodRecordWithWidgetSyncHash();
+
+  @override
+  String toString() {
+    return r'addBabyFoodRecordWithWidgetSyncProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<
+          Future<BabyFoodRecord> Function(
+              {required String childId,
+              required List<BabyFoodItem> items,
+              String? note,
+              required DateTime recordedAt})>
+      $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
+
+  @override
+  Future<BabyFoodRecord> Function(
+      {required String childId,
+      required List<BabyFoodItem> items,
+      String? note,
+      required DateTime recordedAt}) create(Ref ref) {
+    final argument = this.argument as String;
+    return addBabyFoodRecordWithWidgetSync(
+      ref,
+      argument,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+      Future<BabyFoodRecord> Function(
+              {required String childId,
+              required List<BabyFoodItem> items,
+              String? note,
+              required DateTime recordedAt})
+          value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<
+          Future<BabyFoodRecord> Function(
+              {required String childId,
+              required List<BabyFoodItem> items,
+              String? note,
+              required DateTime recordedAt})>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is AddBabyFoodRecordWithWidgetSyncProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$addBabyFoodRecordWithWidgetSyncHash() =>
+    r'0aa6b17285a0de29954f250253230c88a77a6b02';
+
+/// 離乳食記録追加とウィジェット同期を行う関数（householdIdごと）
+///
+/// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+
+final class AddBabyFoodRecordWithWidgetSyncFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+            Future<BabyFoodRecord> Function(
+                {required String childId,
+                required List<BabyFoodItem> items,
+                String? note,
+                required DateTime recordedAt}),
+            String> {
+  const AddBabyFoodRecordWithWidgetSyncFamily._()
+      : super(
+          retry: null,
+          name: r'addBabyFoodRecordWithWidgetSyncProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// 離乳食記録追加とウィジェット同期を行う関数（householdIdごと）
+  ///
+  /// Firestore保存は必須、ウィジェット同期は失敗してもエラーとしない。
+
+  AddBabyFoodRecordWithWidgetSyncProvider call(
+    String householdId,
+  ) =>
+      AddBabyFoodRecordWithWidgetSyncProvider._(
+          argument: householdId, from: this);
+
+  @override
+  String toString() => r'addBabyFoodRecordWithWidgetSyncProvider';
+}
+
+/// 離乳食記録更新とウィジェット同期を行う関数（householdIdごと）
+
+@ProviderFor(updateBabyFoodRecordWithWidgetSync)
+const updateBabyFoodRecordWithWidgetSyncProvider =
+    UpdateBabyFoodRecordWithWidgetSyncFamily._();
+
+/// 離乳食記録更新とウィジェット同期を行う関数（householdIdごと）
+
+final class UpdateBabyFoodRecordWithWidgetSyncProvider
+    extends $FunctionalProvider<
+        Future<BabyFoodRecord> Function(
+            {required String childId,
+            required BabyFoodRecord existingRecord,
+            required List<BabyFoodItem> items,
+            String? note,
+            required DateTime recordedAt}),
+        Future<BabyFoodRecord> Function(
+            {required String childId,
+            required BabyFoodRecord existingRecord,
+            required List<BabyFoodItem> items,
+            String? note,
+            required DateTime recordedAt}),
+        Future<BabyFoodRecord> Function(
+            {required String childId,
+            required BabyFoodRecord existingRecord,
+            required List<BabyFoodItem> items,
+            String? note,
+            required DateTime recordedAt})>
+    with
+        $Provider<
+            Future<BabyFoodRecord> Function(
+                {required String childId,
+                required BabyFoodRecord existingRecord,
+                required List<BabyFoodItem> items,
+                String? note,
+                required DateTime recordedAt})> {
+  /// 離乳食記録更新とウィジェット同期を行う関数（householdIdごと）
+  const UpdateBabyFoodRecordWithWidgetSyncProvider._(
+      {required UpdateBabyFoodRecordWithWidgetSyncFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'updateBabyFoodRecordWithWidgetSyncProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() =>
+      _$updateBabyFoodRecordWithWidgetSyncHash();
+
+  @override
+  String toString() {
+    return r'updateBabyFoodRecordWithWidgetSyncProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<
+          Future<BabyFoodRecord> Function(
+              {required String childId,
+              required BabyFoodRecord existingRecord,
+              required List<BabyFoodItem> items,
+              String? note,
+              required DateTime recordedAt})>
+      $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
+
+  @override
+  Future<BabyFoodRecord> Function(
+      {required String childId,
+      required BabyFoodRecord existingRecord,
+      required List<BabyFoodItem> items,
+      String? note,
+      required DateTime recordedAt}) create(Ref ref) {
+    final argument = this.argument as String;
+    return updateBabyFoodRecordWithWidgetSync(
+      ref,
+      argument,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+      Future<BabyFoodRecord> Function(
+              {required String childId,
+              required BabyFoodRecord existingRecord,
+              required List<BabyFoodItem> items,
+              String? note,
+              required DateTime recordedAt})
+          value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<
+          Future<BabyFoodRecord> Function(
+              {required String childId,
+              required BabyFoodRecord existingRecord,
+              required List<BabyFoodItem> items,
+              String? note,
+              required DateTime recordedAt})>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is UpdateBabyFoodRecordWithWidgetSyncProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$updateBabyFoodRecordWithWidgetSyncHash() =>
+    r'fbd38e01487713ec81c08be7450035a8b7d8616d';
+
+/// 離乳食記録更新とウィジェット同期を行う関数（householdIdごと）
+
+final class UpdateBabyFoodRecordWithWidgetSyncFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+            Future<BabyFoodRecord> Function(
+                {required String childId,
+                required BabyFoodRecord existingRecord,
+                required List<BabyFoodItem> items,
+                String? note,
+                required DateTime recordedAt}),
+            String> {
+  const UpdateBabyFoodRecordWithWidgetSyncFamily._()
+      : super(
+          retry: null,
+          name: r'updateBabyFoodRecordWithWidgetSyncProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// 離乳食記録更新とウィジェット同期を行う関数（householdIdごと）
+
+  UpdateBabyFoodRecordWithWidgetSyncProvider call(
+    String householdId,
+  ) =>
+      UpdateBabyFoodRecordWithWidgetSyncProvider._(
+          argument: householdId, from: this);
+
+  @override
+  String toString() => r'updateBabyFoodRecordWithWidgetSyncProvider';
+}
+
+/// 離乳食記録削除とウィジェット同期を行う関数（householdIdごと）
+
+@ProviderFor(deleteBabyFoodRecordWithWidgetSync)
+const deleteBabyFoodRecordWithWidgetSyncProvider =
+    DeleteBabyFoodRecordWithWidgetSyncFamily._();
+
+/// 離乳食記録削除とウィジェット同期を行う関数（householdIdごと）
+
+final class DeleteBabyFoodRecordWithWidgetSyncProvider
+    extends $FunctionalProvider<
+        Future<void> Function(
+            {required String childId, required String recordId}),
+        Future<void> Function(
+            {required String childId, required String recordId}),
+        Future<void> Function(
+            {required String childId, required String recordId})>
+    with
+        $Provider<
+            Future<void> Function(
+                {required String childId, required String recordId})> {
+  /// 離乳食記録削除とウィジェット同期を行う関数（householdIdごと）
+  const DeleteBabyFoodRecordWithWidgetSyncProvider._(
+      {required DeleteBabyFoodRecordWithWidgetSyncFamily super.from,
+      required String super.argument})
+      : super(
+          retry: null,
+          name: r'deleteBabyFoodRecordWithWidgetSyncProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() =>
+      _$deleteBabyFoodRecordWithWidgetSyncHash();
+
+  @override
+  String toString() {
+    return r'deleteBabyFoodRecordWithWidgetSyncProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<
+          Future<void> Function(
+              {required String childId, required String recordId})>
+      $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
+
+  @override
+  Future<void> Function({required String childId, required String recordId})
+      create(Ref ref) {
+    final argument = this.argument as String;
+    return deleteBabyFoodRecordWithWidgetSync(
+      ref,
+      argument,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+      Future<void> Function({required String childId, required String recordId})
+          value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<
+          Future<void> Function(
+              {required String childId, required String recordId})>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is DeleteBabyFoodRecordWithWidgetSyncProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$deleteBabyFoodRecordWithWidgetSyncHash() =>
+    r'c3615a1b83ce87b8b482dae951e64b828b1b3e97';
+
+/// 離乳食記録削除とウィジェット同期を行う関数（householdIdごと）
+
+final class DeleteBabyFoodRecordWithWidgetSyncFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+            Future<void> Function(
+                {required String childId, required String recordId}),
+            String> {
+  const DeleteBabyFoodRecordWithWidgetSyncFamily._()
+      : super(
+          retry: null,
+          name: r'deleteBabyFoodRecordWithWidgetSyncProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  /// 離乳食記録削除とウィジェット同期を行う関数（householdIdごと）
+
+  DeleteBabyFoodRecordWithWidgetSyncProvider call(
+    String householdId,
+  ) =>
+      DeleteBabyFoodRecordWithWidgetSyncProvider._(
+          argument: householdId, from: this);
+
+  @override
+  String toString() => r'deleteBabyFoodRecordWithWidgetSyncProvider';
+}
+
 /// 指定した日の離乳食記録を監視
 
 @ProviderFor(dailyBabyFoodRecords)

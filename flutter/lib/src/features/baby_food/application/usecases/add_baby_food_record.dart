@@ -10,7 +10,7 @@ class AddBabyFoodRecord {
 
   final BabyFoodRecordRepository _repository;
 
-  Future<void> call({
+  Future<BabyFoodRecord> call({
     required String childId,
     required DateTime recordedAt,
     required List<BabyFoodItem> items,
@@ -31,5 +31,6 @@ class AddBabyFoodRecord {
     );
 
     await _repository.addRecord(childId, record);
+    return record;
   }
 }

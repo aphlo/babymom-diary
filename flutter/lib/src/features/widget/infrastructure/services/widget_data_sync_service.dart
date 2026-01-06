@@ -1,5 +1,7 @@
+import '../../../baby_food/domain/entities/baby_food_record.dart';
 import '../../../child_record/domain/entities/record.dart';
 import '../../../child_record/domain/repositories/child_record_repository.dart';
+import '../../../child_record/domain/value/record_type.dart';
 import '../../../menu/children/domain/entities/child_summary.dart';
 import '../../domain/entities/widget_child.dart';
 import '../../domain/entities/widget_data.dart';
@@ -72,6 +74,43 @@ class WidgetDataSyncService {
     existingRecords.removeWhere((r) => r.id == recordId);
 
     await _widgetRepository.updateChildRecords(childId, existingRecords);
+    await _widgetRepository.notifyWidgetUpdate();
+  }
+
+  /// BabyFoodRecord追加/更新時に呼び出し（保存したレコードを直接受け取る）
+  Future<void> onBabyFoodRecordAdded({
+    required String childId,
+    required BabyFoodRecord record,
+  }) async {
+    final widgetRecord = WidgetRecord(
+      id: record.id,
+      type: RecordType.babyFood,
+      at: record.recordedAt,
+      // 離乳食にはamountやexcretionVolumeがないのでnull
+      amount: null,
+      excretionVolume: null,
+    );
+
+    final data = await _widgetRepository.getWidgetData();
+    final existingRecords =
+        List<WidgetRecord>.from(data.recentRecords[childId] ?? []);
+
+    // 同じIDのレコードがあれば更新、なければ追加
+    final existingIndex = existingRecords.indexWhere((r) => r.id == record.id);
+    if (existingIndex >= 0) {
+      existingRecords[existingIndex] = widgetRecord;
+    } else {
+      existingRecords.add(widgetRecord);
+    }
+
+    // 24時間以内かつ未来でない記録のみに絞り込み
+    final validRecords = _filterValidRecords(existingRecords);
+
+    // 日時順でソート（新しい順）、上限件数に制限
+    validRecords.sort((a, b) => b.at.compareTo(a.at));
+    final limitedRecords = validRecords.take(_recentRecordsLimit).toList();
+
+    await _widgetRepository.updateChildRecords(childId, limitedRecords);
     await _widgetRepository.notifyWidgetUpdate();
   }
 
