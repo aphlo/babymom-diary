@@ -1,4 +1,5 @@
 import '../../../baby_food/domain/entities/baby_food_record.dart';
+import '../../../baby_food/domain/repositories/baby_food_record_repository.dart';
 import '../../../child_record/domain/entities/record.dart';
 import '../../../child_record/domain/repositories/child_record_repository.dart';
 import '../../../child_record/domain/value/record_type.dart';
@@ -12,6 +13,7 @@ import '../../domain/repositories/widget_data_repository.dart';
 class WidgetDataSyncService {
   final WidgetDataRepository _widgetRepository;
   final ChildRecordRepository _recordRepository;
+  final BabyFoodRecordRepository _babyFoodRepository;
 
   /// 直近記録の保持件数（各RecordType毎）
   static const int _recentRecordsLimit = 10;
@@ -22,8 +24,10 @@ class WidgetDataSyncService {
   WidgetDataSyncService({
     required WidgetDataRepository widgetRepository,
     required ChildRecordRepository recordRepository,
+    required BabyFoodRecordRepository babyFoodRepository,
   })  : _widgetRepository = widgetRepository,
-        _recordRepository = recordRepository;
+        _recordRepository = recordRepository,
+        _babyFoodRepository = babyFoodRepository;
 
   /// Record追加/更新時に呼び出し（保存したレコードを直接受け取る）
   Future<void> onRecordAdded({
@@ -240,26 +244,35 @@ class WidgetDataSyncService {
 
     for (final child in children) {
       try {
-        final records = <Record>[];
+        final widgetRecords = <WidgetRecord>[];
 
-        // 直近2日間の記録を取得（24時間フィルターがあるため2日分で十分）
+        // 直近2日間の通常記録を取得（24時間フィルターがあるため2日分で十分）
         for (int i = 0; i < 2; i++) {
           final date = now.subtract(Duration(days: i));
           final dayRecords =
               await _recordRepository.getRecordsForDay(child.id, date);
-          records.addAll(dayRecords);
+          widgetRecords.addAll(dayRecords.map((r) => WidgetRecord(
+                id: r.id,
+                type: r.type,
+                at: r.at,
+                amount: r.amount,
+                excretionVolume: r.excretionVolume,
+              )));
         }
 
-        // WidgetRecord形式に変換
-        final widgetRecords = records
-            .map((r) => WidgetRecord(
-                  id: r.id,
-                  type: r.type,
-                  at: r.at,
-                  amount: r.amount,
-                  excretionVolume: r.excretionVolume,
-                ))
-            .toList();
+        // 直近2日間の離乳食記録を取得
+        for (int i = 0; i < 2; i++) {
+          final date = now.subtract(Duration(days: i));
+          final babyFoodRecords =
+              await _babyFoodRepository.getRecordsForDay(child.id, date);
+          widgetRecords.addAll(babyFoodRecords.map((r) => WidgetRecord(
+                id: r.id,
+                type: RecordType.babyFood,
+                at: r.recordedAt,
+                amount: null,
+                excretionVolume: null,
+              )));
+        }
 
         // 24時間以内かつ未来でない記録のみに絞り込み
         final validRecords = _filterValidRecords(widgetRecords);
