@@ -45,71 +45,67 @@ class _OnboardingChildInfoPageState
           ),
         ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(16),
-                child: Text(
-                  'あなたの子どもの情報を登録すると、成長記録や予防接種の予定をスムーズに管理できます。',
-                ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'あなたの子どもの情報を登録すると、成長記録や予防接種の予定をスムーズに管理できます。',
               ),
-              ChildForm(
-                onSubmit: (data) async {
-                  setState(() => _isProcessing = true);
+            ),
+            ChildForm(
+              onSubmit: (data) async {
+                setState(() => _isProcessing = true);
 
-                  final householdId =
-                      await ref.read(currentHouseholdIdProvider.future);
-                  final db = ref.read(firebaseFirestoreProvider);
-                  final ds = ChildFirestoreDataSource(db, householdId);
+                final householdId =
+                    await ref.read(currentHouseholdIdProvider.future);
+                final db = ref.read(firebaseFirestoreProvider);
+                final ds = ChildFirestoreDataSource(db, householdId);
 
-                  try {
-                    final childId = await ds.addChild(
-                      name: data.name,
-                      gender: data.gender,
-                      birthday: data.birthday,
-                      dueDate: data.dueDate,
-                      icon: data.icon,
-                    );
+                try {
+                  final childId = await ds.addChild(
+                    name: data.name,
+                    gender: data.gender,
+                    birthday: data.birthday,
+                    dueDate: data.dueDate,
+                    icon: data.icon,
+                  );
 
-                    await ref
-                        .read(childColorProvider.notifier)
-                        .setColor(childId, data.color);
+                  await ref
+                      .read(childColorProvider.notifier)
+                      .setColor(childId, data.color);
 
-                    await ref
-                        .read(selectedChildControllerProvider.notifier)
-                        .select(childId);
+                  await ref
+                      .read(selectedChildControllerProvider.notifier)
+                      .select(childId);
 
-                    await ref
-                        .read(onboardingStatusProvider.notifier)
-                        .complete();
+                  await ref.read(onboardingStatusProvider.notifier).complete();
 
-                    if (context.mounted) {
-                      context.go('/baby');
-                    }
-                  } on FirebaseException catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('保存に失敗しました: ${e.message}')),
-                      );
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('保存に失敗しました: $e')),
-                      );
-                    }
-                  } finally {
-                    if (mounted) {
-                      setState(() => _isProcessing = false);
-                    }
+                  if (context.mounted) {
+                    context.go('/baby');
                   }
-                },
-              ),
-            ],
-          ),
+                } on FirebaseException catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('保存に失敗しました: ${e.message}')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('保存に失敗しました: $e')),
+                    );
+                  }
+                } finally {
+                  if (mounted) {
+                    setState(() => _isProcessing = false);
+                  }
+                }
+              },
+            ),
+          ],
         ),
       ),
     );

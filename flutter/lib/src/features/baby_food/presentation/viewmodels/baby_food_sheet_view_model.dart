@@ -243,17 +243,17 @@ class BabyFoodSheetViewModel extends _$BabyFoodSheetViewModel {
       final items = draft.toItems();
 
       if (state.isNew) {
-        final addUseCase =
-            ref.read(addBabyFoodRecordUseCaseProvider(_householdId));
-        await addUseCase.call(
+        final addWithSync =
+            ref.read(addBabyFoodRecordWithWidgetSyncProvider(_householdId));
+        await addWithSync(
           childId: _childId,
           recordedAt: recordedAt,
           items: items,
           note: state.note,
         );
       } else {
-        final updateUseCase =
-            ref.read(updateBabyFoodRecordUseCaseProvider(_householdId));
+        final updateWithSync =
+            ref.read(updateBabyFoodRecordWithWidgetSyncProvider(_householdId));
         // 既存レコードを取得して更新
         // Note: 実際の実装では既存レコードをキャッシュしておくか、
         // 別の方法で更新処理を行う
@@ -265,7 +265,7 @@ class BabyFoodSheetViewModel extends _$BabyFoodSheetViewModel {
             existingRecords.where((r) => r.id == state.existingId).firstOrNull;
 
         if (existingRecord != null) {
-          await updateUseCase.call(
+          await updateWithSync(
             childId: _childId,
             existingRecord: existingRecord,
             recordedAt: recordedAt,
@@ -299,9 +299,9 @@ class BabyFoodSheetViewModel extends _$BabyFoodSheetViewModel {
     state = state.copyWith(isProcessing: true, errorMessage: null);
 
     try {
-      final deleteUseCase =
-          ref.read(deleteBabyFoodRecordUseCaseProvider(_householdId));
-      await deleteUseCase.call(childId: _childId, recordId: recordId);
+      final deleteWithSync =
+          ref.read(deleteBabyFoodRecordWithWidgetSyncProvider(_householdId));
+      await deleteWithSync(childId: _childId, recordId: recordId);
       state = state.copyWith(isProcessing: false);
       return true;
     } catch (e) {

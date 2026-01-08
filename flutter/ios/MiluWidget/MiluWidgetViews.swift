@@ -186,6 +186,8 @@ struct MediumWidgetView: View {
             return "milk"
         case "pump":
             return "sakubonyuu"
+        case "babyFood":
+            return "babyfood"
         case "pee":
             return "nyou"
         case "poop":

@@ -125,7 +125,7 @@ final class WidgetDataSyncServiceProvider extends $FunctionalProvider<
 }
 
 String _$widgetDataSyncServiceHash() =>
-    r'4c5e0d97d5042c09113160eb3afd4476847bb91c';
+    r'c9c3633ad6e86a5446a7b51799773407b7f6566d';
 
 /// WidgetDataSyncServiceプロバイダー（householdIdごと）
 

@@ -24,52 +24,50 @@ class _AddChildPageState extends ConsumerState<AddChildPage> {
         leading: BackButton(onPressed: () => context.pop()),
         title: const Text('子どもを追加'),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: ChildForm(
-            onSubmit: (data) async {
-              final householdId =
-                  await ref.read(currentHouseholdIdProvider.future);
-              final db = ref.read(firebaseFirestoreProvider);
-              final ds = ChildFirestoreDataSource(db, householdId);
+      body: SingleChildScrollView(
+        child: ChildForm(
+          onSubmit: (data) async {
+            final householdId =
+                await ref.read(currentHouseholdIdProvider.future);
+            final db = ref.read(firebaseFirestoreProvider);
+            final ds = ChildFirestoreDataSource(db, householdId);
 
-              try {
-                final childId = await ds.addChild(
-                  name: data.name,
-                  gender: data.gender,
-                  birthday: data.birthday,
-                  dueDate: data.dueDate,
-                  icon: data.icon,
-                );
+            try {
+              final childId = await ds.addChild(
+                name: data.name,
+                gender: data.gender,
+                birthday: data.birthday,
+                dueDate: data.dueDate,
+                icon: data.icon,
+              );
 
-                // 色をSharedPreferencesに保存
-                await ref
-                    .read(childColorProvider.notifier)
-                    .setColor(childId, data.color);
+              // 色をSharedPreferencesに保存
+              await ref
+                  .read(childColorProvider.notifier)
+                  .setColor(childId, data.color);
 
-                // 追加した子供を自動的に選択状態にする
-                await ref
-                    .read(selectedChildControllerProvider.notifier)
-                    .select(childId);
+              // 追加した子供を自動的に選択状態にする
+              await ref
+                  .read(selectedChildControllerProvider.notifier)
+                  .select(childId);
 
-                if (context.mounted) {
-                  context.pop();
-                }
-              } on FirebaseException catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('保存に失敗しました: ${e.message}')),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('保存に失敗しました: $e')),
-                  );
-                }
+              if (context.mounted) {
+                context.pop();
               }
-            },
-          ),
+            } on FirebaseException catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('保存に失敗しました: ${e.message}')),
+                );
+              }
+            } catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('保存に失敗しました: $e')),
+                );
+              }
+            }
+          },
         ),
       ),
     );

@@ -54,7 +54,7 @@ extension RecordTypeAssets on RecordType {
         RecordType.breastRight || RecordType.breastLeft => 'jyunyuu',
         RecordType.formula => 'milk',
         RecordType.pump => 'sakubonyuu',
-        RecordType.babyFood => 'rinyushoku',
+        RecordType.babyFood => 'babyfood',
         RecordType.pee => 'nyou',
         RecordType.poop => 'unti',
         RecordType.temperature => 'taion',

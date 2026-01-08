@@ -3,6 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/firebase/household_service.dart';
+import '../../../../core/types/child_icon.dart';
 import '../../../menu/children/application/children_local_provider.dart';
 import '../../../menu/children/application/children_stream_provider.dart';
 import '../../../menu/children/application/selected_child_provider.dart';
@@ -106,10 +107,24 @@ class AppBarChildInfo extends ConsumerWidget {
             borderRadius: BorderRadius.circular(8),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-              child: Text(
-                '$name  $age',
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Image.asset(
+                      d.icon.assetPath,
+                      width: 20,
+                      height: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$name  $age',
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
               ),
             ),
           );
