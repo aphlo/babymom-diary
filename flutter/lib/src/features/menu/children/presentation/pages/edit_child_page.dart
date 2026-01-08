@@ -72,64 +72,61 @@ class _EditChildPageState extends ConsumerState<EditChildPage> {
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : SafeArea(
-              child: SingleChildScrollView(
-                child: ChildForm(
-                  initial: _initial,
-                  onSubmit: (form) async {
-                    final hid =
-                        await ref.read(currentHouseholdIdProvider.future);
-                    final ds = ChildFirestoreDataSource(
-                        ref.read(firebaseFirestoreProvider), hid);
-                    try {
-                      await ds.updateChild(
-                        id: widget.childId,
-                        name: form.name,
-                        gender: form.gender,
-                        birthday: form.birthday,
-                        dueDate: form.dueDate,
-                        icon: form.icon,
-                      );
+          : SingleChildScrollView(
+              child: ChildForm(
+                initial: _initial,
+                onSubmit: (form) async {
+                  final hid = await ref.read(currentHouseholdIdProvider.future);
+                  final ds = ChildFirestoreDataSource(
+                      ref.read(firebaseFirestoreProvider), hid);
+                  try {
+                    await ds.updateChild(
+                      id: widget.childId,
+                      name: form.name,
+                      gender: form.gender,
+                      birthday: form.birthday,
+                      dueDate: form.dueDate,
+                      icon: form.icon,
+                    );
 
-                      // 色をSharedPreferencesに保存
+                    // 色をSharedPreferencesに保存
+                    await ref
+                        .read(childColorProvider.notifier)
+                        .setColor(widget.childId, form.color);
+
+                    final summary = ChildSummary(
+                      id: widget.childId,
+                      name: form.name,
+                      birthday: form.birthday,
+                      dueDate: form.dueDate,
+                      gender: form.gender,
+                      icon: form.icon,
+                    );
+                    await ref
+                        .read(childrenLocalProvider(hid).notifier)
+                        .upsertChild(summary);
+                    final selectedId =
+                        ref.read(selectedChildControllerProvider).value;
+                    if (selectedId == widget.childId) {
                       await ref
-                          .read(childColorProvider.notifier)
-                          .setColor(widget.childId, form.color);
-
-                      final summary = ChildSummary(
-                        id: widget.childId,
-                        name: form.name,
-                        birthday: form.birthday,
-                        dueDate: form.dueDate,
-                        gender: form.gender,
-                        icon: form.icon,
-                      );
-                      await ref
-                          .read(childrenLocalProvider(hid).notifier)
-                          .upsertChild(summary);
-                      final selectedId =
-                          ref.read(selectedChildControllerProvider).value;
-                      if (selectedId == widget.childId) {
-                        await ref
-                            .read(selectedChildSnapshotProvider(hid).notifier)
-                            .save(summary);
-                      }
-
-                      if (!context.mounted) return;
-                      context.pop();
-                    } on FirebaseException catch (e) {
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('保存に失敗しました: ${e.message}')),
-                      );
-                    } catch (e) {
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('保存に失敗しました: $e')),
-                      );
+                          .read(selectedChildSnapshotProvider(hid).notifier)
+                          .save(summary);
                     }
-                  },
-                ),
+
+                    if (!context.mounted) return;
+                    context.pop();
+                  } on FirebaseException catch (e) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('保存に失敗しました: ${e.message}')),
+                    );
+                  } catch (e) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('保存に失敗しました: $e')),
+                    );
+                  }
+                },
               ),
             ),
     );
