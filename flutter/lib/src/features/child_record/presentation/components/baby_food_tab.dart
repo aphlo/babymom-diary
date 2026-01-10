@@ -7,11 +7,26 @@ import '../../../menu/children/application/child_context_provider.dart';
 import 'baby_food/baby_food_ingredient_list.dart';
 
 /// 離乳食タブ - 食材一覧をカテゴリ別に表示
-class BabyFoodTab extends ConsumerWidget {
+///
+/// AutomaticKeepAliveClientMixin を使用して、親タブ（授乳表/成長曲線）への
+/// 切り替え時もウィジェット状態を保持し、カテゴリサブタブの選択状態が
+/// リセットされないようにする。
+class BabyFoodTab extends ConsumerStatefulWidget {
   const BabyFoodTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BabyFoodTab> createState() => _BabyFoodTabState();
+}
+
+class _BabyFoodTabState extends ConsumerState<BabyFoodTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context); // AutomaticKeepAliveClientMixin requires this
+
     final childContext = ref.watch(childContextProvider).value;
     if (childContext == null || childContext.selectedChildId == null) {
       return const Center(child: CircularProgressIndicator());
