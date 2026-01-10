@@ -70,7 +70,7 @@ final class ChildrenStreamProvider extends $FunctionalProvider<
   }
 }
 
-String _$childrenStreamHash() => r'c40003030525520b02615a1afc9475769d5d4352';
+String _$childrenStreamHash() => r'b76e0a41df0f3e61f8409b640433238605a64b43';
 
 /// Household 内の子ども一覧を監視する StreamProvider。
 

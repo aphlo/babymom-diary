@@ -24,11 +24,17 @@
       - 1日分の記録を時間帯マップで保持 (type ごとの records map)
     - `growthRecords/{recordId}`
       - 身長・体重などの計測記録
+    - `babyFoodRecords/{recordId}`
+      - 離乳食記録 (recorded_at, items[], created_at, updated_at)
 - `events/{yyyy-MM-dd}`
   - Fields: `events` マップ (key: event UUID, value: `title`, `memo`, `allDay`, `startAt`, `endAt`, `iconKey`, timestamps)
 - `momDiary/{yyyy-MM-dd}`
   - Fields: `date`, `content`, `updatedAt`
 - `momRecords/{yyyy-MM-dd}`
   - Fields: `temperatureCelsius`, `lochia.*`, `breast.*`, `memo`, `updatedAt`
+- `custom_ingredients/{ingredientId}`
+  - カスタム食材 (name, category_id, created_at)
+- `hidden_ingredients/{documentId}`
+  - 非表示食材 (ingredient_ids[], updated_at)
 - `settings/{...}`
   - 各種設定 (例: vaccine visibility 用に利用)

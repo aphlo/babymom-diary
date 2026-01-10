@@ -3,6 +3,7 @@ enum RecordType {
   breastLeft,
   formula,
   pump,
+  babyFood, // 離乳食（搾母乳の後に配置）
   pee,
   poop,
   temperature,
@@ -15,6 +16,7 @@ extension RecordTypeLabel on RecordType {
         RecordType.breastLeft => '授乳(左)',
         RecordType.formula => 'ミルク',
         RecordType.pump => '搾母乳',
+        RecordType.babyFood => '離乳食',
         RecordType.pee => '尿',
         RecordType.poop => '便',
         RecordType.temperature => '体温',
@@ -28,6 +30,7 @@ extension RecordTypeMeta on RecordType {
         RecordType.breastRight || RecordType.breastLeft => true, // minutes
         RecordType.formula || RecordType.pump => true, // ml
         RecordType.temperature => true, // celsius
+        RecordType.babyFood => false, // 離乳食は別コレクションで管理
         RecordType.pee || RecordType.poop || RecordType.other => false,
       };
 
@@ -38,8 +41,12 @@ extension RecordTypeMeta on RecordType {
         RecordType.breastRight || RecordType.breastLeft => '分',
         RecordType.formula || RecordType.pump => 'ml',
         RecordType.temperature => '℃',
+        RecordType.babyFood => '', // 離乳食は別画面で詳細入力
         RecordType.pee || RecordType.poop || RecordType.other => '数量',
       };
+
+  /// 離乳食は別コレクションで管理するため、childRecordsには保存しない
+  bool get usesSeparateCollection => this == RecordType.babyFood;
 }
 
 extension RecordTypeAssets on RecordType {
@@ -47,6 +54,7 @@ extension RecordTypeAssets on RecordType {
         RecordType.breastRight || RecordType.breastLeft => 'jyunyuu',
         RecordType.formula => 'milk',
         RecordType.pump => 'sakubonyuu',
+        RecordType.babyFood => 'babyfood',
         RecordType.pee => 'nyou',
         RecordType.poop => 'unti',
         RecordType.temperature => 'taion',

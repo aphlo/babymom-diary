@@ -112,13 +112,28 @@ class DeepLinkService {
     router.go('/baby');
 
     // ルーティング完了後にダイアログを開く
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      final notifier = _ref.read(recordViewModelProvider.notifier);
-      notifier.openCreateRecord(
-        type: recordType,
-        initialDateTime: DateTime.now(),
-      );
-    });
+    // FeedingTableTabがマウントされるまで複数フレーム待つ
+    void openRecordAfterDelay() {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          final notifier = _ref.read(recordViewModelProvider.notifier);
+
+          // 離乳食の場合は専用の処理
+          if (recordType == RecordType.babyFood) {
+            notifier.openBabyFoodCreateRecord(
+              initialDateTime: DateTime.now(),
+            );
+          } else {
+            notifier.openCreateRecord(
+              type: recordType,
+              initialDateTime: DateTime.now(),
+            );
+          }
+        });
+      });
+    }
+
+    openRecordAfterDelay();
   }
 
   /// 文字列からRecordTypeを解析
@@ -128,6 +143,7 @@ class DeepLinkService {
       'breastLeft' => RecordType.breastLeft,
       'formula' => RecordType.formula,
       'pump' => RecordType.pump,
+      'babyFood' => RecordType.babyFood,
       'pee' => RecordType.pee,
       'poop' => RecordType.poop,
       'temperature' => RecordType.temperature,

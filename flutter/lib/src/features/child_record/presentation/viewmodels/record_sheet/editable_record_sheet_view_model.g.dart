@@ -61,7 +61,7 @@ final class EditableRecordSheetViewModelProvider extends $NotifierProvider<
 }
 
 String _$editableRecordSheetViewModelHash() =>
-    r'21b0f11201ebaf0498b1f97b063f28a36d85387f';
+    r'04602470b0efc3140e8c863bfef47e9bb419340a';
 
 final class EditableRecordSheetViewModelFamily extends $Family
     with

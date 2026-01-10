@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/preferences/shared_preferences_provider.dart';
+import '../../../baby_food/presentation/providers/baby_food_providers.dart';
 import '../../../child_record/presentation/providers/child_record_providers.dart';
 import '../../../menu/children/application/child_context_provider.dart';
 import '../../domain/entities/widget_settings.dart';
@@ -22,9 +23,11 @@ WidgetDataRepository widgetDataRepository(Ref ref) {
 WidgetDataSyncService widgetDataSyncService(Ref ref, String householdId) {
   final widgetRepo = ref.watch(widgetDataRepositoryProvider);
   final recordRepo = ref.watch(childRecordRepositoryProvider(householdId));
+  final babyFoodRepo = ref.watch(babyFoodRecordRepositoryProvider(householdId));
   return WidgetDataSyncService(
     widgetRepository: widgetRepo,
     recordRepository: recordRepo,
+    babyFoodRepository: babyFoodRepo,
   );
 }
 

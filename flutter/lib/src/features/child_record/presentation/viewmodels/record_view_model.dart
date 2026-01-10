@@ -151,6 +151,16 @@ class RecordViewModel extends _$RecordViewModel {
     );
   }
 
+  /// 離乳食の新規記録画面を開く
+  void openBabyFoodCreateRecord({
+    required DateTime initialDateTime,
+  }) {
+    state = state.copyWith(
+      pendingUiEvent: RecordUiEvent.openBabyFoodEditor(
+          BabyFoodEditorRequest(initialDateTime: initialDateTime)),
+    );
+  }
+
   void openSlotDetails({
     required int hour,
     required RecordType type,

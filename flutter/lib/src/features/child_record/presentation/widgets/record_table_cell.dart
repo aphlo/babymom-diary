@@ -94,6 +94,10 @@ class RecordTableCell extends StatelessWidget {
         case RecordType.other:
           text = '${filtered.length}';
           break;
+        // 離乳食は別コレクションで管理するためここでは処理しない
+        case RecordType.babyFood:
+          text = '';
+          break;
       }
     }
 
@@ -172,6 +176,12 @@ _BadgeColors _badgeColorsForRecordType(RecordType type, ColorScheme scheme) {
     case RecordType.other:
       return const _BadgeColors(
         background: Color(0xFF8f60ac),
+        foreground: Colors.white,
+      );
+    // 離乳食は別コレクションで管理するためここでは処理しない
+    case RecordType.babyFood:
+      return const _BadgeColors(
+        background: Colors.orange,
         foreground: Colors.white,
       );
   }

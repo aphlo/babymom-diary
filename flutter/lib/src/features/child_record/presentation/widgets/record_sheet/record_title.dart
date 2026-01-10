@@ -194,6 +194,9 @@ _TitleDetail _buildTitleDetail(
         );
       }
       return const _TitleDetail(detail: '');
+    // 離乳食は別コレクションで管理するためここでは処理しない
+    case RecordType.babyFood:
+      return const _TitleDetail(detail: '');
   }
 }
 

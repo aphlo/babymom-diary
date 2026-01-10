@@ -17,6 +17,7 @@ enum BannerAdSlot {
   growthChart,
   growthRecordList,
   feedingTable,
+  babyFood,
 }
 
 /// 各スロットの広告状態

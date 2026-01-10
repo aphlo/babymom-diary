@@ -24,12 +24,21 @@ sealed class RecordEditorRequest with _$RecordEditorRequest {
   }) = _RecordEditorRequest;
 }
 
+/// 離乳食エディター表示のリクエスト
+@freezed
+sealed class BabyFoodEditorRequest with _$BabyFoodEditorRequest {
+  const factory BabyFoodEditorRequest({
+    required DateTime initialDateTime,
+  }) = _BabyFoodEditorRequest;
+}
+
 @freezed
 sealed class RecordUiEvent with _$RecordUiEvent {
   const factory RecordUiEvent({
     String? message,
     RecordSlotRequest? openSlot,
     RecordEditorRequest? openEditor,
+    BabyFoodEditorRequest? openBabyFoodEditor,
   }) = _RecordUiEvent;
 
   factory RecordUiEvent.showMessage(String message) =>
@@ -40,6 +49,9 @@ sealed class RecordUiEvent with _$RecordUiEvent {
 
   factory RecordUiEvent.openEditor(RecordEditorRequest request) =>
       RecordUiEvent(openEditor: request);
+
+  factory RecordUiEvent.openBabyFoodEditor(BabyFoodEditorRequest request) =>
+      RecordUiEvent(openBabyFoodEditor: request);
 }
 
 @freezed

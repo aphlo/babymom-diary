@@ -235,6 +235,7 @@ open class MiluWidgetProvider : HomeWidgetProvider() {
             "breast", "breastRight", "breastLeft" -> R.drawable.jyunyuu
             "formula" -> R.drawable.milk
             "pump" -> R.drawable.sakubonyuu
+            "babyFood" -> R.drawable.babyfood
             "pee" -> R.drawable.nyou
             "poop" -> R.drawable.unti
             "temperature" -> R.drawable.taion
@@ -248,6 +249,7 @@ open class MiluWidgetProvider : HomeWidgetProvider() {
             "breast", "breastRight", "breastLeft" -> "授乳"
             "formula" -> "ミルク"
             "pump" -> "搾母乳"
+            "babyFood" -> "離乳食"
             "pee" -> "尿"
             "poop" -> "便"
             "temperature" -> "体温"

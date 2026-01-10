@@ -51,3 +51,15 @@ ChildIcon childIconFromKey(String? key) {
   }
   return ChildIcon.bear;
 }
+
+/// 子供の反応画像パスを取得するための拡張
+extension ChildIconReaction on ChildIcon {
+  /// 良い反応の画像パス
+  String get goodReactionPath => 'assets/icons/animals/${key}_good.png';
+
+  /// 普通の反応の画像パス
+  String get normalReactionPath => 'assets/icons/animals/${key}_normal.png';
+
+  /// 悪い反応の画像パス
+  String get badReactionPath => 'assets/icons/animals/${key}_bad.png';
+}
