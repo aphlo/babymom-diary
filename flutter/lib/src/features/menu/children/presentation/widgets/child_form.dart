@@ -27,13 +27,23 @@ class ChildFormData {
 class ChildForm extends StatefulWidget {
   final ChildFormData? initial;
   final Future<void> Function(ChildFormData data) onSubmit;
-  const ChildForm({super.key, this.initial, required this.onSubmit});
+
+  /// 保存ボタンを表示するかどうか（デフォルト: true）
+  /// falseの場合、外部から[ChildFormState.submit]を呼び出して保存を実行する
+  final bool showSaveButton;
+
+  const ChildForm({
+    super.key,
+    this.initial,
+    required this.onSubmit,
+    this.showSaveButton = true,
+  });
 
   @override
-  State<ChildForm> createState() => _ChildFormState();
+  State<ChildForm> createState() => ChildFormState();
 }
 
-class _ChildFormState extends State<ChildForm> {
+class ChildFormState extends State<ChildForm> {
   static const List<Color> _palette = <Color>[
     AppColors.primary,
     Colors.orangeAccent,
@@ -127,7 +137,9 @@ class _ChildFormState extends State<ChildForm> {
     }
   }
 
-  Future<void> _submit() async {
+  /// フォームをバリデーションし、有効な場合はonSubmitを呼び出す
+  /// 外部から呼び出す場合はGlobalKey<ChildFormState>を使用する
+  Future<void> submit() async {
     if (!_formKey.currentState!.validate()) return;
 
     // バリデーションが通った後なので、_birthdayと_genderは必ずnon-null（dueDateはoptional）
@@ -279,14 +291,16 @@ class _ChildFormState extends State<ChildForm> {
             selectedIcon: _pickedIcon,
             onChanged: (icon) => setState(() => _pickedIcon = icon),
           ),
-          const SizedBox(height: 24),
-          Padding(
-            padding: horizontalPadding,
-            child: SaveButton(
-              onPressed: _submit,
+          if (widget.showSaveButton) ...[
+            const SizedBox(height: 24),
+            Padding(
+              padding: horizontalPadding,
+              child: SaveButton(
+                onPressed: submit,
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
+          ]
         ],
       ),
     );
