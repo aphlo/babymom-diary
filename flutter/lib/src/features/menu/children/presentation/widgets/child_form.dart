@@ -138,7 +138,7 @@ class ChildFormState extends State<ChildForm> {
   }
 
   /// フォームをバリデーションし、有効な場合はonSubmitを呼び出す
-  /// 外部から呼び出す場合はGlobalKey<ChildFormState>を使用する
+  /// 外部から呼び出す場合は`GlobalKey<ChildFormState>`を使用する
   Future<void> submit() async {
     if (!_formKey.currentState!.validate()) return;
 
