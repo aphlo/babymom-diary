@@ -343,7 +343,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
 2.「世帯に参加」の表示名に自分の名前、世帯IDに「$householdId」を入力
 3.参加ボタンをタップ
 
-インストールがまだの方は下記からインストールをお願いいたします
+アプリのインストールがまだの方は下記からインストールをお願いいたします
 
 iOS: https://apps.apple.com/jp/app/%E8%82%B2%E5%85%90%E8%A8%98%E9%8C%B2-%E4%BA%88%E9%98%B2%E6%8E%A5%E7%A8%AE%E7%AE%A1%E7%90%86-milu/id6754955821
 
