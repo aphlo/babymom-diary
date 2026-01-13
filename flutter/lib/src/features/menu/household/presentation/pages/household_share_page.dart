@@ -329,8 +329,26 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
         box != null ? box.localToGlobal(Offset.zero) & box.size : null;
 
     Share.share(
-      'miluへの招待が届きました。\n\n世帯ID: $householdId',
-      subject: 'miluへの招待が届きました。',
+      '''⋅⋅⊱∘──────────∘⊰⋅⋆
+　「milu」への招待が届きました
+⋅⋅⊱∘──────────∘⊰⋅⋆
+
+「milu」をご利用いただき、
+ありがとうこざいます😌
+
+世帯に参加して赤ちゃんやママの情報を共有してみましょう!♡
+
+・世帯への参加方法
+1.メニューから「世帯の共有」をタップ
+2.「世帯に参加」の表示名に自分の名前、世帯IDに「$householdId」を入力
+3.参加ボタンをタップ
+
+アプリのインストールがまだの方は下記からインストールをお願いいたします
+
+iOS: https://apps.apple.com/jp/app/%E8%82%B2%E5%85%90%E8%A8%98%E9%8C%B2-%E4%BA%88%E9%98%B2%E6%8E%A5%E7%A8%AE%E7%AE%A1%E7%90%86-milu/id6754955821
+
+Android: https://play.google.com/store/apps/details?id=com.aphlo.babymomdiary''',
+      subject: '「milu」への招待が届きました',
       sharePositionOrigin: sharePositionOrigin,
     );
   }
