@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>milu - お問い合わせ</title>
+    <meta name="description" content="miluへのお問い合わせはこちらから。バグ報告、機能要望、その他ご質問などお気軽にお寄せください。">
+    <meta name="theme-color" content="#FF8FA3">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <link rel="apple-touch-icon" href="assets/images/favicon.png">
+
+    <!-- OGP -->
+    <meta property="og:title" content="milu - お問い合わせ">
+    <meta property="og:description" content="miluへのお問い合わせはこちらから。バグ報告、機能要望、その他ご質問などお気軽にお寄せください。">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts: Fredoka (headings) + Nunito (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <style>
+        .inquiry-section {
+            padding: 120px 20px 60px;
+            min-height: calc(100vh - 180px);
+            /* Adjust based on header/footer height */
+            background: linear-gradient(135deg, #fff5f7 0%, #fff 100%);
+            display: flex;
+            justify-content: center;
+        }
+
+        .inquiry-container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(232, 112, 134, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .inquiry-title {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #2d3748;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2rem;
+        }
+
+        @media (max-width: 767px) {
+            .inquiry-section {
+                padding: 100px 12px 40px;
+            }
+
+            .inquiry-container {
+                padding: 30px 12px;
+                border-radius: 20px;
+            }
+
+            .inquiry-title {
+                margin-bottom: 24px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <a href="/" class="logo">milu</a>
+        </div>
+    </header>
+
+    <!-- Inquiry Widget Section -->
+    <section class="inquiry-section">
+        <div class="inquiry-container">
+            <h1 class="inquiry-title">お問い合わせ</h1>
+
+            <!-- KoeLoop Widget -->
+            <div id="koeloop-widget-dddb40ea-a331-4cb9-84bb-b81187047a20"></div>
+            <script src="https://koeloop.dev/widget.js"></script>
+            <script>
+                new KoeLoopWidget({
+                    productId: "dddb40ea-a331-4cb9-84bb-b81187047a20",
+                    containerId: "koeloop-widget-dddb40ea-a331-4cb9-84bb-b81187047a20",
+                    theme: "light",
+                    primaryColor: "#E87086",
+                    showVoting: false,
+                    showFeedback: true,
+                    showFAQ: true,
+                    showEmailField: true,
+                    locale: "ja",
+                    apiBase: "https://koeloop.dev"
+                });
+            </script>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">milu</div>
+            <nav class="footer-links">
+                <a
+                    href="https://striped-polonium-ee6.notion.site/milu-2b1de238aa60803697b1f06f3c32d2ec?source=copy_link">プライバシーポリシー</a>
+                <a
+                    href="https://striped-polonium-ee6.notion.site/milu-2b1de238aa6080acb2a3cbe274d05564?source=copy_link">利用規約</a>
+                <a href="inquiry.html">お問い合わせ</a>
+            </nav>
+            <p class="footer-copyright">&copy; <span id="current-year"></span> aphlo All rights reserved.</p>
+            <script>
+                document.getElementById('current-year').textContent = new Date().getFullYear();
+            </script>
+        </div>
+    </footer>
+</body>
+
+</html>
