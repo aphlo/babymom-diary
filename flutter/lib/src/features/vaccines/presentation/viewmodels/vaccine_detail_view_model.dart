@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:babymom_diary/src/core/utils/date_formatter.dart';
 
+import '../../../review_prompt/presentation/viewmodels/review_prompt_view_model.dart';
 import '../../application/usecases/get_vaccine_by_id.dart';
 import '../../application/usecases/watch_vaccination_record.dart';
 import '../../domain/entities/dose_record.dart';
@@ -354,6 +355,11 @@ class VaccineDetailViewModel extends _$VaccineDetailViewModel {
           doseId: doseId,
         );
       }
+
+      // レビュープロンプトのカウント増加
+      await ref
+          .read(reviewPromptViewModelProvider.notifier)
+          .incrementRecordCountOnly();
     } catch (error) {
       state = state.copyWith(
         isLoading: false,
@@ -499,6 +505,11 @@ class VaccineDetailViewModel extends _$VaccineDetailViewModel {
           scheduledDate: scheduledDate,
         );
       }
+
+      // レビュープロンプトのカウント増加
+      await ref
+          .read(reviewPromptViewModelProvider.notifier)
+          .incrementRecordCountOnly();
     } on DuplicateScheduleDateException catch (e) {
       state = state.copyWith(
         isLoading: false,
