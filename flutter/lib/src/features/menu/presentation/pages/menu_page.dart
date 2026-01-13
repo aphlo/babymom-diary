@@ -20,6 +20,8 @@ class MenuPage extends ConsumerWidget {
       'https://striped-polonium-ee6.notion.site/milu-2b1de238aa6080acb2a3cbe274d05564?source=copy_link';
   static const _privacyUrl =
       'https://striped-polonium-ee6.notion.site/milu-2b1de238aa60803697b1f06f3c32d2ec?source=copy_link';
+  static const _inquiryUrl =
+      'https://koeloop.dev/embed/dddb40ea-a331-4cb9-84bb-b81187047a20?theme=light&locale=ja&primaryColor=%23E87086&showVoting=false&showFeedback=true&showFAQ=true&showEmailField=true';
 
   String _formatBirthday(DateTime birthday) {
     return '${birthday.year}年${birthday.month}月${birthday.day}日生';
@@ -179,6 +181,13 @@ class MenuPage extends ConsumerWidget {
               leading: const Icon(Icons.privacy_tip_outlined),
               title: const Text('プライバシーポリシー'),
               onTap: () => _launchExternalUrl(context, _privacyUrl),
+              trailing: const Icon(Icons.open_in_new),
+            ),
+            const Divider(height: 0),
+            ListTile(
+              leading: const Icon(Icons.mail_outline),
+              title: const Text('お問合せ'),
+              onTap: () => _launchExternalUrl(context, _inquiryUrl),
               trailing: const Icon(Icons.open_in_new),
             ),
             const Divider(height: 0),
