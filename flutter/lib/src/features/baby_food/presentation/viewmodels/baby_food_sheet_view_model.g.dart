@@ -60,7 +60,7 @@ final class BabyFoodSheetViewModelProvider
 }
 
 String _$babyFoodSheetViewModelHash() =>
-    r'eb24453ed15b9192ad4e2070dc6fe5c8da0eb01d';
+    r'5184b6b5f412161d45e98f7ab8230234cc6460c4';
 
 final class BabyFoodSheetViewModelFamily extends $Family
     with

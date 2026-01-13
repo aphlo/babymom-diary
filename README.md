@@ -1,4 +1,6 @@
 # babymom-diary
+[![iOS](https://github.com/aphlo/babymom-diary/actions/workflows/deliver-ios.yml/badge.svg)](https://github.com/aphlo/babymom-diary/actions/workflows/deliver-ios.yml)
+[![Android](https://github.com/aphlo/babymom-diary/actions/workflows/deliver-android.yml/badge.svg)](https://github.com/aphlo/babymom-diary/actions/workflows/deliver-android.yml)
 
 赤ちゃんのケア活動を記録するFlutterアプリケーション「milu」のリポジトリ。
 

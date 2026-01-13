@@ -43,6 +43,7 @@ dependencies:
   firebase_remote_config: ^6.1.2
   home_widget: ^0.8.1
   app_links: ^6.3.3
+  in_app_review: ^2.0.10
 
 dev_dependencies:
   flutter_test:

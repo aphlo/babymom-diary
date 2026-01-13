@@ -19,6 +19,7 @@ import 'package:babymom_diary/src/features/menu/children/domain/entities/child_s
 import 'package:babymom_diary/src/core/analytics/analytics_service.dart';
 import 'package:babymom_diary/src/features/widget/application/providers/widget_providers.dart';
 import 'package:babymom_diary/src/core/deeplink/deep_link_service.dart';
+import 'package:babymom_diary/src/features/review_prompt/review_prompt.dart';
 
 Future<void> runBabymomDiaryApp({
   required String appTitle,
@@ -80,6 +81,7 @@ class App extends ConsumerStatefulWidget {
 class _AppState extends ConsumerState<App> {
   String? _previousHouseholdId;
   bool _adPreloadStarted = false;
+  ProviderSubscription<ReviewPromptViewState>? _reviewPromptSub;
 
   @override
   void initState() {
@@ -89,7 +91,44 @@ class _AppState extends ConsumerState<App> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AdMobService.requestATTPermission();
       _initializeDeepLinks();
+      _incrementAppLaunchCount();
+      _setupReviewPromptListener();
     });
+  }
+
+  /// アプリ起動カウントを増加
+  Future<void> _incrementAppLaunchCount() async {
+    try {
+      final incrementLaunchCount =
+          ref.read(incrementLaunchCountUseCaseProvider);
+      await incrementLaunchCount();
+    } catch (_) {
+      // エラーは無視（クリティカルでない処理のため）
+    }
+  }
+
+  /// レビュープロンプトの状態を監視
+  void _setupReviewPromptListener() {
+    _reviewPromptSub = ref.listenManual<ReviewPromptViewState>(
+      reviewPromptViewModelProvider,
+      (previous, next) {
+        if (next.shouldShowDialog && mounted) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ref
+                  .read(reviewPromptViewModelProvider.notifier)
+                  .showDialogIfNeeded(context);
+            }
+          });
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _reviewPromptSub?.close();
+    super.dispose();
   }
 
   /// ディープリンクサービスを初期化

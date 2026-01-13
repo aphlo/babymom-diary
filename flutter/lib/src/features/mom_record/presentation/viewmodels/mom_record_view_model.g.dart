@@ -42,7 +42,7 @@ final class MomRecordViewModelProvider
 }
 
 String _$momRecordViewModelHash() =>
-    r'ce7d705f0b0792191241dfad68fa2c07b718d27c';
+    r'cd1933dea225f55ae38a622e2f47027c0020c33b';
 
 abstract class _$MomRecordViewModel extends $Notifier<MomRecordPageState> {
   MomRecordPageState build();
