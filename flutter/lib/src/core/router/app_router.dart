@@ -33,7 +33,8 @@ import '../../features/baby_food/domain/value_objects/food_category.dart';
 
 part 'app_router.g.dart';
 
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
+/// ルートNavigatorのGlobalKey（レビューダイアログ表示などで使用）
+final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKeyBaby =
     GlobalKey<NavigatorState>(debugLabel: 'shellBaby');
 final _shellNavigatorKeyVaccines =
@@ -50,7 +51,7 @@ GoRouter appRouter(Ref ref) {
   final analyticsService = ref.watch(analyticsServiceProvider);
 
   return GoRouter(
-    navigatorKey: _rootNavigatorKey,
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/baby',
     observers: [analyticsService.observer],
     redirect: (context, state) {
@@ -74,14 +75,14 @@ GoRouter appRouter(Ref ref) {
     },
     routes: [
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/onboarding/greeting',
         name: 'onboarding_greeting',
         pageBuilder: (context, state) =>
             const NoTransitionPage(child: OnboardingGreetingPage()),
       ),
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/onboarding/child-info',
         name: 'onboarding_child_info',
         pageBuilder: (context, state) =>
@@ -164,21 +165,21 @@ GoRouter appRouter(Ref ref) {
       ),
       // ルートレベルのルート（タブ外のページ）
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/children/add',
         name: 'children_add',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: AddChildPage()),
       ),
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/children/manage',
         name: 'children_manage',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: ManageChildrenPage()),
       ),
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/children/edit/:id',
         name: 'children_edit',
         pageBuilder: (context, state) {
@@ -187,42 +188,42 @@ GoRouter appRouter(Ref ref) {
         },
       ),
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/household/share',
         name: 'household_share',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: HouseholdSharePage()),
       ),
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/household/vaccine-visibility-settings',
         name: 'vaccine_visibility_settings',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: VaccineVisibilitySettingsPage()),
       ),
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/growth-chart/settings',
         name: 'growth_chart_settings',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: GrowthChartSettingsPage()),
       ),
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/widget/settings',
         name: 'widget_settings',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: WidgetSettingsPage()),
       ),
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/baby-food/ingredients',
         name: 'ingredient_settings',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: IngredientSettingsPage()),
       ),
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/baby-food/ingredient-detail',
         name: 'ingredient_detail',
         pageBuilder: (context, state) {
@@ -240,7 +241,7 @@ GoRouter appRouter(Ref ref) {
         },
       ),
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/vaccines/detail',
         name: 'vaccine_detail',
         pageBuilder: (context, state) {
@@ -251,7 +252,7 @@ GoRouter appRouter(Ref ref) {
         },
       ),
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/vaccines/reservation',
         name: 'vaccine_reservation',
         pageBuilder: (context, state) {
@@ -272,7 +273,7 @@ GoRouter appRouter(Ref ref) {
         },
       ),
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/vaccines/scheduled-details',
         name: 'vaccine_scheduled_details',
         pageBuilder: (context, state) {
@@ -295,7 +296,7 @@ GoRouter appRouter(Ref ref) {
         },
       ),
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/vaccines/reschedule',
         name: 'vaccine_reschedule',
         pageBuilder: (context, state) {
@@ -318,7 +319,7 @@ GoRouter appRouter(Ref ref) {
         },
       ),
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/calendar/add',
         name: 'calendar_add',
         pageBuilder: (context, state) {
@@ -329,7 +330,7 @@ GoRouter appRouter(Ref ref) {
         },
       ),
       GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         path: '/calendar/edit',
         name: 'calendar_edit',
         pageBuilder: (context, state) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../review_prompt/presentation/viewmodels/review_prompt_view_model.dart';
 import '../../domain/entities/custom_ingredient.dart';
 import '../../domain/value_objects/amount_unit.dart';
 import '../../domain/value_objects/baby_food_reaction.dart';
@@ -274,6 +275,11 @@ class BabyFoodSheetViewModel extends _$BabyFoodSheetViewModel {
           );
         }
       }
+
+      // レビュープロンプトのカウント増加
+      await ref
+          .read(reviewPromptViewModelProvider.notifier)
+          .incrementRecordCountOnly();
 
       state = state.copyWith(isProcessing: false);
       return draft;
