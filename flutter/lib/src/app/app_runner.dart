@@ -109,15 +109,21 @@ class _AppState extends ConsumerState<App> {
 
   /// レビュープロンプトの状態を監視
   void _setupReviewPromptListener() {
+    debugPrint('[ReviewPrompt] Setting up listener');
     _reviewPromptSub = ref.listenManual<ReviewPromptViewState>(
       reviewPromptViewModelProvider,
       (previous, next) {
+        debugPrint(
+            '[ReviewPrompt] Listener triggered: previous=${previous?.shouldShowDialog}, next=${next.shouldShowDialog}');
         if (next.shouldShowDialog && mounted) {
+          debugPrint('[ReviewPrompt] Showing dialog...');
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
+            // MaterialApp内のcontextを使用（rootNavigatorKeyから取得）
+            final navigatorContext = rootNavigatorKey.currentContext;
+            if (mounted && navigatorContext != null) {
               ref
                   .read(reviewPromptViewModelProvider.notifier)
-                  .showDialogIfNeeded(context);
+                  .showDialogIfNeeded(navigatorContext);
             }
           });
         }

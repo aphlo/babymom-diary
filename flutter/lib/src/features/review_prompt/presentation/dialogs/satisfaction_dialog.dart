@@ -10,7 +10,7 @@ import '../../application/review_prompt_providers.dart';
 /// ユーザーの満足度を確認するダイアログ
 ///
 /// 「満足」を選択した場合はIn-App Reviewを表示、
-/// 「不満」を選択した場合はお問い合わせページに遷移
+/// 「不満」を選択した場合はフィードバック確認ダイアログを表示
 class SatisfactionDialog extends ConsumerStatefulWidget {
   const SatisfactionDialog({super.key});
 
@@ -18,7 +18,7 @@ class SatisfactionDialog extends ConsumerStatefulWidget {
   ///
   /// 戻り値:
   /// - true: 満足が選択されIn-App Reviewをリクエストした
-  /// - false: 不満が選択されお問い合わせページに遷移した
+  /// - false: 不満が選択された
   /// - null: ダイアログが閉じられた（キャンセル）
   static Future<bool?> show(BuildContext context) {
     if (Platform.isIOS) {
@@ -41,9 +41,6 @@ class SatisfactionDialog extends ConsumerStatefulWidget {
 }
 
 class _SatisfactionDialogState extends ConsumerState<SatisfactionDialog> {
-  static const String _inquiryUrl =
-      'https://babymom-diary.web.app/inquiry.html';
-
   bool _isProcessing = false;
 
   @override
@@ -74,24 +71,34 @@ class _SatisfactionDialogState extends ConsumerState<SatisfactionDialog> {
   }
 
   Widget _buildMaterialDialog(BuildContext context) {
-    return AlertDialog(
-      title: const Text('miluに満足いただけていますか？'),
-      actionsAlignment: MainAxisAlignment.spaceEvenly,
-      actions: [
-        TextButton(
-          onPressed: _isProcessing ? null : _handleSatisfied,
-          child: _isProcessing
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('満足'),
-        ),
-        TextButton(
-          onPressed: _isProcessing ? null : _handleDissatisfied,
-          child: const Text('不満'),
-        ),
+    return SimpleDialog(
+      title: Text(
+        'miluに満足いただけていますか？',
+        style: Theme.of(context).textTheme.titleMedium,
+        textAlign: TextAlign.center,
+      ),
+      children: [
+        if (_isProcessing)
+          const Padding(
+            padding: EdgeInsets.all(24),
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else ...[
+          SimpleDialogOption(
+            onPressed: _handleSatisfied,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text('満足', textAlign: TextAlign.center),
+            ),
+          ),
+          SimpleDialogOption(
+            onPressed: _handleDissatisfied,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text('不満', textAlign: TextAlign.center),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -124,11 +131,99 @@ class _SatisfactionDialogState extends ConsumerState<SatisfactionDialog> {
   }
 
   Future<void> _handleDissatisfied() async {
-    // お問い合わせページを開く
-    final uri = Uri.parse(_inquiryUrl);
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+    // 現在のダイアログを閉じる
+    Navigator.of(context).pop(false);
 
     if (!mounted) return;
-    Navigator.of(context).pop(false);
+
+    // フィードバック確認ダイアログを表示
+    await FeedbackConfirmDialog.show(context);
+  }
+}
+
+/// フィードバック確認ダイアログ
+///
+/// 不満選択後に表示され、意見送信を促す
+class FeedbackConfirmDialog extends StatelessWidget {
+  const FeedbackConfirmDialog({super.key});
+
+  static const String _koeloopUrl =
+      'https://koeloop.dev/embed/dddb40ea-a331-4cb9-84bb-b81187047a20?theme=light&locale=ja&primaryColor=%23E87086&showVoting=false&showFeedback=true&showFAQ=true&showEmailField=true';
+
+  /// ダイアログを表示
+  static Future<void> show(BuildContext context) {
+    if (Platform.isIOS) {
+      return showCupertinoDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (_) => const FeedbackConfirmDialog(),
+      );
+    } else {
+      return showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (_) => const FeedbackConfirmDialog(),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (Platform.isIOS) {
+      return _buildCupertinoDialog(context);
+    } else {
+      return _buildMaterialDialog(context);
+    }
+  }
+
+  Widget _buildCupertinoDialog(BuildContext context) {
+    return CupertinoAlertDialog(
+      title: const Text('よろしければ、改善のためにご意見をお聞かせください'),
+      actions: [
+        CupertinoDialogAction(
+          onPressed: () => _handleSendFeedback(context),
+          child: const Text('意見を送る'),
+        ),
+        CupertinoDialogAction(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('今はしない'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMaterialDialog(BuildContext context) {
+    return SimpleDialog(
+      title: Text(
+        'よろしければ、改善のためにご意見をお聞かせください',
+        style: Theme.of(context).textTheme.titleMedium,
+        textAlign: TextAlign.center,
+      ),
+      children: [
+        SimpleDialogOption(
+          onPressed: () => _handleSendFeedback(context),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Text('意見を送る', textAlign: TextAlign.center),
+          ),
+        ),
+        SimpleDialogOption(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Text('今はしない', textAlign: TextAlign.center),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleSendFeedback(BuildContext context) async {
+    // ダイアログを先に閉じる
+    Navigator.of(context).pop();
+
+    // メニューのお問い合わせと同じくアプリ内WebViewで開く
+    final uri = Uri.parse(_koeloopUrl);
+    await launchUrl(uri, mode: LaunchMode.inAppWebView);
   }
 }
