@@ -1,4 +1,5 @@
 # babymom-diary
+[![Lint](https://github.com/aphlo/babymom-diary/actions/workflows/ci.yml/badge.svg)](https://github.com/aphlo/babymom-diary/actions/workflows/ci.yml)
 [![iOS](https://github.com/aphlo/babymom-diary/actions/workflows/deliver-ios.yml/badge.svg)](https://github.com/aphlo/babymom-diary/actions/workflows/deliver-ios.yml)
 [![Android](https://github.com/aphlo/babymom-diary/actions/workflows/deliver-android.yml/badge.svg)](https://github.com/aphlo/babymom-diary/actions/workflows/deliver-android.yml)
 
