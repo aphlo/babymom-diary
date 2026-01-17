@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -213,8 +214,42 @@ class MenuPage extends ConsumerWidget {
             ),
           ],
         ),
+        _buildUserIdSection(context, ref),
         const AppVersionFooter(),
       ],
+    );
+  }
+
+  Widget _buildUserIdSection(BuildContext context, WidgetRef ref) {
+    final uid = ref.watch(firebaseAuthProvider).currentUser?.uid;
+    if (uid == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Flexible(
+            child: Text(
+              'ユーザーID: $uid',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                    fontSize: 11,
+                  ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 4),
+          GestureDetector(
+            onTap: () => Clipboard.setData(ClipboardData(text: uid)),
+            child: Icon(
+              Icons.copy,
+              size: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
