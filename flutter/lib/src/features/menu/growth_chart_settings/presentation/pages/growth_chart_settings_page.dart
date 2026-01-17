@@ -24,21 +24,8 @@ class GrowthChartSettingsPage extends ConsumerWidget {
           Expanded(
             child: ListView(
               children: [
-                Container(
-                  color: Colors.white,
-                  child: SwitchListTile(
-                    title: const Text('修正月齢で表示する'),
-                    value: useCorrectedAge,
-                    onChanged: (value) {
-                      ref
-                          .read(growthChartSettingsProvider.notifier)
-                          .setUseCorrectedAge(value);
-                    },
-                  ),
-                ),
-                const SizedBox(height: 24),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -57,6 +44,19 @@ class GrowthChartSettingsPage extends ConsumerWidget {
                             ),
                       ),
                     ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  color: Colors.white,
+                  child: SwitchListTile(
+                    title: const Text('修正月齢で表示する'),
+                    value: useCorrectedAge,
+                    onChanged: (value) {
+                      ref
+                          .read(growthChartSettingsProvider.notifier)
+                          .setUseCorrectedAge(value);
+                    },
                   ),
                 ),
               ],
