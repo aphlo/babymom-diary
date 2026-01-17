@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../ads/application/services/banner_ad_manager.dart';
+import '../../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../../../baby_food/domain/entities/custom_ingredient.dart';
 import '../../../../baby_food/domain/value_objects/food_category.dart';
 import 'category_ingredient_list.dart';
@@ -60,6 +62,7 @@ class TabbedIngredientSettings extends StatelessWidget {
                 }).toList(),
               ),
             ),
+            const BannerAdWidget(slot: BannerAdSlot.ingredientSettings),
           ],
         ),
       ),

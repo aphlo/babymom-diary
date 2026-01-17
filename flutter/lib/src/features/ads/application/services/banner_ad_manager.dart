@@ -18,6 +18,11 @@ enum BannerAdSlot {
   growthRecordList,
   feedingTable,
   babyFood,
+  menu,
+  householdShare,
+  ingredientSettings,
+  growthChartSettings,
+  widgetSettings,
 }
 
 /// 各スロットの広告状態

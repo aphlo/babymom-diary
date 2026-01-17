@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/features/ads/application/services/banner_ad_manager.dart';
+import 'package:babymom_diary/src/features/ads/presentation/widgets/banner_ad_widget.dart';
 import 'package:babymom_diary/src/features/menu/children/application/children_stream_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/domain/entities/child_summary.dart';
 import 'package:babymom_diary/src/features/menu/data_management/application/providers/data_management_providers.dart';
@@ -36,18 +39,26 @@ class MenuPage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.pageBackground,
       appBar: AppBar(title: const Text('メニュー')),
-      body: asyncHid.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, __) => Center(child: Text('読み込みに失敗しました\n$e')),
-        data: (hid) {
-          final childrenAsync = ref.watch(childrenStreamProvider(hid));
-          return childrenAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, __) => Center(child: Text('子どもの読み込みに失敗しました\n$e')),
-            data: (children) =>
-                _buildMenuList(context, ref, hid, children, isOwner),
-          );
-        },
+      body: Column(
+        children: [
+          Expanded(
+            child: asyncHid.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, __) => Center(child: Text('読み込みに失敗しました\n$e')),
+              data: (hid) {
+                final childrenAsync = ref.watch(childrenStreamProvider(hid));
+                return childrenAsync.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, __) => Center(child: Text('子どもの読み込みに失敗しました\n$e')),
+                  data: (children) =>
+                      _buildMenuList(context, ref, hid, children, isOwner),
+                );
+              },
+            ),
+          ),
+          const BannerAdWidget(slot: BannerAdSlot.menu),
+        ],
       ),
     );
   }
@@ -203,8 +214,42 @@ class MenuPage extends ConsumerWidget {
             ),
           ],
         ),
+        _buildUserIdSection(context, ref),
         const AppVersionFooter(),
       ],
+    );
+  }
+
+  Widget _buildUserIdSection(BuildContext context, WidgetRef ref) {
+    final uid = ref.watch(firebaseAuthProvider).currentUser?.uid;
+    if (uid == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Flexible(
+            child: Text(
+              'ユーザーID: $uid',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                    fontSize: 11,
+                  ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 4),
+          GestureDetector(
+            onTap: () => Clipboard.setData(ClipboardData(text: uid)),
+            child: Icon(
+              Icons.copy,
+              size: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

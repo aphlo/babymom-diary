@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../ads/application/services/banner_ad_manager.dart';
+import '../../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../application/growth_chart_settings_provider.dart';
 
 class GrowthChartSettingsPage extends ConsumerWidget {
@@ -17,43 +19,50 @@ class GrowthChartSettingsPage extends ConsumerWidget {
         leading: BackButton(onPressed: () => context.pop()),
         title: const Text('成長曲線の設定'),
       ),
-      body: ListView(
+      body: Column(
         children: [
-          Container(
-            color: Colors.white,
-            child: SwitchListTile(
-              title: const Text('修正月齢で表示する'),
-              value: useCorrectedAge,
-              onChanged: (value) {
-                ref
-                    .read(growthChartSettingsProvider.notifier)
-                    .setUseCorrectedAge(value);
-              },
-            ),
-          ),
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Expanded(
+            child: ListView(
               children: [
-                Text(
-                  '修正月齢の表示について',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '修正月齢の表示について',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '早産のお子さまの成長をより適切に評価するための機能です。\n修正月齢での表示には出産予定日の登録が必要です（設定からいつでも登録できます）。',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey[700],
+                              height: 1.5,
+                            ),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  '早産のお子さまの成長をより適切に評価するための機能です。\n修正月齢での表示には出産予定日の登録が必要です（設定からいつでも登録できます）。',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[700],
-                        height: 1.5,
-                      ),
+                Container(
+                  color: Colors.white,
+                  child: SwitchListTile(
+                    title: const Text('修正月齢で表示する'),
+                    value: useCorrectedAge,
+                    onChanged: (value) {
+                      ref
+                          .read(growthChartSettingsProvider.notifier)
+                          .setUseCorrectedAge(value);
+                    },
+                  ),
                 ),
               ],
             ),
           ),
+          const BannerAdWidget(slot: BannerAdSlot.growthChartSettings),
         ],
       ),
     );
