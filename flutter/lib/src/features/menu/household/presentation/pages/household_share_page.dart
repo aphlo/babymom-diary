@@ -6,6 +6,8 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../../core/firebase/household_service.dart';
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../ads/application/services/banner_ad_manager.dart';
+import '../../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../domain/entities/household_member.dart';
 import '../../domain/errors/invitation_errors.dart';
 import '../providers/invitation_providers.dart';
@@ -43,15 +45,23 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
         title: const Text('世帯の共有'),
       ),
       body: SafeArea(
-        child: householdIdAsync.when(
-          data: (householdId) => membershipTypeAsync.when(
-            data: (membershipType) =>
-                _buildContent(householdId, membershipType),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(child: Text('エラー: $error')),
-          ),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(child: Text('エラー: $error')),
+        child: Column(
+          children: [
+            Expanded(
+              child: householdIdAsync.when(
+                data: (householdId) => membershipTypeAsync.when(
+                  data: (membershipType) =>
+                      _buildContent(householdId, membershipType),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, _) => Center(child: Text('エラー: $error')),
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, _) => Center(child: Text('エラー: $error')),
+              ),
+            ),
+            const BannerAdWidget(slot: BannerAdSlot.householdShare),
+          ],
         ),
       ),
     );
