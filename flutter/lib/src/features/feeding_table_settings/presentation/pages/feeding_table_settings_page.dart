@@ -95,6 +95,7 @@ class FeedingTableSettingsPage extends ConsumerWidget {
                 canToggle: canToggleOff,
                 onToggle: () => viewModel.toggleCategory(category),
                 showDragHandle: true,
+                index: index,
               );
             },
           ),
@@ -148,6 +149,7 @@ class _CategoryTile extends StatelessWidget {
     required this.canToggle,
     required this.onToggle,
     required this.showDragHandle,
+    this.index = 0,
   });
 
   final FeedingTableCategory category;
@@ -155,13 +157,14 @@ class _CategoryTile extends StatelessWidget {
   final bool canToggle;
   final VoidCallback onToggle;
   final bool showDragHandle;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: showDragHandle
           ? ReorderableDragStartListener(
-              index: 0, // Will be overridden by parent
+              index: index,
               child: const Icon(Icons.drag_handle, color: Colors.grey),
             )
           : const SizedBox(width: 24),

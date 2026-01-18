@@ -390,26 +390,13 @@ List<String> get _headers {
    - 設定をwatchして動的に列を生成
    - ヘッダー、セル、合計行を動的に変更
 
-### Phase 4: ウィジェット連動
+### Phase 4: テスト・仕上げ
 
-8. **WidgetData更新**
-   - `disabledRecordTypes` フィールド追加
-   - 設定変更時にウィジェットデータを同期
-
-9. **iOS Widget修正**
-   - `MiluWidgetViews.swift` でdisabled状態のレンダリング
-   - グレーアウト表示、タップ無効化
-
-10. **Android Widget修正**
-    - 同様にdisabled状態のレンダリング
-
-### Phase 5: テスト・仕上げ
-
-11. **テスト追加**
+8. **テスト追加**
     - Repository単体テスト
     - ViewModel単体テスト
 
-12. **バナー広告追加**
+9. **バナー広告追加**
     - `BannerAdSlot.feedingTableSettings` 追加
     - 設定画面にバナー配置
 
@@ -426,9 +413,6 @@ List<String> get _headers {
 | `menu_page.dart` | メニュー項目追加 |
 | `app_router.dart` | ルート追加 |
 | `banner_ad_manager.dart` | 新規スロット追加 |
-| `widget_settings.dart` | disabledRecordTypes対応 |
-| `widget_data_repository_impl.dart` | 同期ロジック追加 |
-| `MiluWidgetViews.swift` | disabled表示対応 |
 
 ### 新規作成ファイル
 
