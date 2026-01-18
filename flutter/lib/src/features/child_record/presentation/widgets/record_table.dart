@@ -37,7 +37,22 @@ class RecordTable extends StatefulWidget {
   final FeedingTableSettings settings;
 
   static const double headerRowHeight = 44.0;
-  static const double bodyRowHeight = 32.0;
+
+  /// 行の最小高さ（スマホでの表示を維持）
+  static const double minBodyRowHeight = 32.0;
+
+  /// 合計行の高さ
+  static const double totalsRowHeight = 32.0;
+
+  /// 利用可能な高さから動的に行の高さを計算
+  /// iPadなど大画面では行が拡張され、スマホでは最小高さを維持
+  static double calculateBodyRowHeight(double availableHeight) {
+    final contentHeight = availableHeight - headerRowHeight - totalsRowHeight;
+    final calculatedHeight = contentHeight / 24;
+    return calculatedHeight > minBodyRowHeight
+        ? calculatedHeight
+        : minBodyRowHeight;
+  }
 
   static const _borderDashPattern = <double>[1.5, 2.5];
 
@@ -107,7 +122,9 @@ class _RecordTableState extends State<RecordTable> {
     final currentHour = now.hour;
     // 現在時刻の2時間前にスクロール（画面内に現在時刻が含まれるように）
     final targetHour = (currentHour - 2).clamp(0, 23);
-    final targetOffset = targetHour * RecordTable.bodyRowHeight;
+    // 最小行高さを使用してスクロール位置を計算
+    // iPadなど大画面では全行が表示されるためスクロール不要、またはmaxScrollExtentでclampされる
+    final targetOffset = targetHour * RecordTable.minBodyRowHeight;
 
     _scrollController.jumpTo(targetOffset.clamp(
       0.0,
@@ -161,7 +178,11 @@ class _RecordTableState extends State<RecordTable> {
   }
 
   /// カテゴリに対応するセルを生成
-  Widget _buildCellForCategory(FeedingTableCategory category, int hour) {
+  Widget _buildCellForCategory(
+    FeedingTableCategory category,
+    int hour,
+    double rowHeight,
+  ) {
     switch (category) {
       case FeedingTableCategory.nursing:
         return RecordTableCell(
@@ -169,7 +190,7 @@ class _RecordTableState extends State<RecordTable> {
           hour: hour,
           types: const [RecordType.breastLeft, RecordType.breastRight],
           onTap: widget.onSlotTap,
-          rowHeight: RecordTable.bodyRowHeight,
+          rowHeight: rowHeight,
         );
       case FeedingTableCategory.formula:
         return RecordTableCell(
@@ -177,7 +198,7 @@ class _RecordTableState extends State<RecordTable> {
           hour: hour,
           types: const [RecordType.formula],
           onTap: widget.onSlotTap,
-          rowHeight: RecordTable.bodyRowHeight,
+          rowHeight: rowHeight,
         );
       case FeedingTableCategory.pump:
         return RecordTableCell(
@@ -185,14 +206,14 @@ class _RecordTableState extends State<RecordTable> {
           hour: hour,
           types: const [RecordType.pump],
           onTap: widget.onSlotTap,
-          rowHeight: RecordTable.bodyRowHeight,
+          rowHeight: rowHeight,
         );
       case FeedingTableCategory.babyFood:
         return _BabyFoodTableCell(
           babyFoodRecords: widget.babyFoodRecords,
           hour: hour,
           onTap: widget.onBabyFoodSlotTap,
-          rowHeight: RecordTable.bodyRowHeight,
+          rowHeight: rowHeight,
         );
       case FeedingTableCategory.pee:
         return RecordTableCell(
@@ -200,7 +221,7 @@ class _RecordTableState extends State<RecordTable> {
           hour: hour,
           types: const [RecordType.pee],
           onTap: widget.onSlotTap,
-          rowHeight: RecordTable.bodyRowHeight,
+          rowHeight: rowHeight,
         );
       case FeedingTableCategory.poop:
         return RecordTableCell(
@@ -208,7 +229,7 @@ class _RecordTableState extends State<RecordTable> {
           hour: hour,
           types: const [RecordType.poop],
           onTap: widget.onSlotTap,
-          rowHeight: RecordTable.bodyRowHeight,
+          rowHeight: rowHeight,
         );
       case FeedingTableCategory.temperature:
         return RecordTableCell(
@@ -216,7 +237,7 @@ class _RecordTableState extends State<RecordTable> {
           hour: hour,
           types: const [RecordType.temperature],
           onTap: widget.onSlotTap,
-          rowHeight: RecordTable.bodyRowHeight,
+          rowHeight: rowHeight,
         );
       case FeedingTableCategory.other:
         return RecordTableCell(
@@ -224,7 +245,7 @@ class _RecordTableState extends State<RecordTable> {
           hour: hour,
           types: const [RecordType.other],
           onTap: widget.onSlotTap,
-          rowHeight: RecordTable.bodyRowHeight,
+          rowHeight: rowHeight,
         );
     }
   }
@@ -233,121 +254,132 @@ class _RecordTableState extends State<RecordTable> {
   Widget build(BuildContext context) {
     final borderSide = BorderSide(color: Colors.grey.shade400);
 
-    final totalsRow = _TotalsRow(
-      borderSide: borderSide,
-      columnWidths: widget.columnWidths,
-      values: widget.settings.visibleCategories
-          .map((c) => _getTotalValue(c))
-          .toList(),
-    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 利用可能な高さから動的に行の高さを計算
+        // iPadなど大画面では行が拡張され、スマホでは最小高さを維持
+        final bodyRowHeight =
+            RecordTable.calculateBodyRowHeight(constraints.maxHeight);
 
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: Table(
-            columnWidths: widget.columnWidths,
-            border: DashedTableBorder(
-              top: borderSide,
-              left: borderSide,
-              right: borderSide,
-              bottom: borderSide,
-              verticalInside: borderSide,
-              dashPattern: RecordTable._borderDashPattern,
-            ),
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            children: [
-              TableRow(
-                decoration: BoxDecoration(color: Colors.grey.shade100),
+        final totalsRow = _TotalsRow(
+          borderSide: borderSide,
+          columnWidths: widget.columnWidths,
+          values: widget.settings.visibleCategories
+              .map((c) => _getTotalValue(c))
+              .toList(),
+          rowHeight: bodyRowHeight,
+        );
+
+        return Column(
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: Table(
+                columnWidths: widget.columnWidths,
+                border: DashedTableBorder(
+                  top: borderSide,
+                  left: borderSide,
+                  right: borderSide,
+                  bottom: borderSide,
+                  verticalInside: borderSide,
+                  dashPattern: RecordTable._borderDashPattern,
+                ),
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                 children: [
-                  for (final header in _headers)
-                    SizedBox(
-                      height: RecordTable.headerRowHeight,
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.center,
-                            child: Text(
-                              header,
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                  TableRow(
+                    decoration: BoxDecoration(color: Colors.grey.shade100),
+                    children: [
+                      for (final header in _headers)
+                        SizedBox(
+                          height: RecordTable.headerRowHeight,
+                          child: Center(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 4),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.center,
+                                child: Text(
+                                  header,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
+                    ],
+                  ),
                 ],
               ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.only(bottom: RecordTable.bodyRowHeight),
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    key: widget.scrollStorageKey,
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Table(
-                        columnWidths: widget.columnWidths,
-                        border: DashedTableBorder(
-                          top: BorderSide.none,
-                          left: borderSide,
-                          right: borderSide,
-                          bottom: BorderSide.none,
-                          horizontalInside: borderSide,
-                          verticalInside: borderSide,
-                          dashPattern: RecordTable._borderDashPattern,
-                        ),
-                        defaultVerticalAlignment:
-                            TableCellVerticalAlignment.middle,
-                        children: [
-                          for (var hour = 0; hour < 24; hour++)
-                            TableRow(
-                              decoration: BoxDecoration(
-                                color: hour.isEven
-                                    ? Colors.white
-                                    : Colors.pink.shade50,
-                              ),
-                              children: [
-                                // 時間列
-                                SizedBox(
-                                  height: RecordTable.bodyRowHeight,
-                                  child: Center(child: Text('$hour')),
-                                ),
-                                // 設定に基づいて動的に列を生成
-                                for (final category
-                                    in widget.settings.visibleCategories)
-                                  _buildCellForCategory(category, hour),
-                              ],
+            ),
+            Expanded(
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: bodyRowHeight),
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        key: widget.scrollStorageKey,
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: Table(
+                            columnWidths: widget.columnWidths,
+                            border: DashedTableBorder(
+                              top: BorderSide.none,
+                              left: borderSide,
+                              right: borderSide,
+                              bottom: BorderSide.none,
+                              horizontalInside: borderSide,
+                              verticalInside: borderSide,
+                              dashPattern: RecordTable._borderDashPattern,
                             ),
-                        ],
+                            defaultVerticalAlignment:
+                                TableCellVerticalAlignment.middle,
+                            children: [
+                              for (var hour = 0; hour < 24; hour++)
+                                TableRow(
+                                  decoration: BoxDecoration(
+                                    color: hour.isEven
+                                        ? Colors.white
+                                        : Colors.pink.shade50,
+                                  ),
+                                  children: [
+                                    // 時間列
+                                    SizedBox(
+                                      height: bodyRowHeight,
+                                      child: Center(child: Text('$hour')),
+                                    ),
+                                    // 設定に基づいて動的に列を生成
+                                    for (final category
+                                        in widget.settings.visibleCategories)
+                                      _buildCellForCategory(
+                                          category, hour, bodyRowHeight),
+                                  ],
+                                ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: totalsRow,
+                  ),
+                ],
               ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: totalsRow,
-              ),
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -357,11 +389,13 @@ class _TotalsRow extends StatelessWidget {
     required this.borderSide,
     required this.values,
     required this.columnWidths,
+    required this.rowHeight,
   });
 
   final BorderSide borderSide;
   final List<_TotalValue> values;
   final Map<int, TableColumnWidth> columnWidths;
+  final double rowHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -384,9 +418,9 @@ class _TotalsRow extends StatelessWidget {
               color: Colors.grey.shade200,
             ),
             children: [
-              const SizedBox(
-                height: RecordTable.bodyRowHeight,
-                child: Center(
+              SizedBox(
+                height: rowHeight,
+                child: const Center(
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.center,
@@ -397,7 +431,8 @@ class _TotalsRow extends StatelessWidget {
                   ),
                 ),
               ),
-              for (final value in values) _TotalValueCell(value: value),
+              for (final value in values)
+                _TotalValueCell(value: value, rowHeight: rowHeight),
             ],
           ),
         ],
@@ -414,14 +449,15 @@ class _TotalValue {
 }
 
 class _TotalValueCell extends StatelessWidget {
-  const _TotalValueCell({required this.value});
+  const _TotalValueCell({required this.value, required this.rowHeight});
 
   final _TotalValue value;
+  final double rowHeight;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: RecordTable.bodyRowHeight,
+      height: rowHeight,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
         child: Stack(
