@@ -112,6 +112,14 @@ class MenuPage extends ConsumerWidget {
             ),
             const Divider(height: 0),
             ListTile(
+              leading: const Icon(Icons.table_chart_outlined),
+              title: const Text('授乳表の設定'),
+              subtitle: const Text('表示する列のカスタマイズ'),
+              onTap: () => context.push('/feeding-table/settings'),
+              trailing: const Icon(Icons.chevron_right),
+            ),
+            const Divider(height: 0),
+            ListTile(
               leading: const Icon(Icons.restaurant_menu),
               title: const Text('離乳食の食材管理'),
               subtitle: const Text('食材の追加・削除'),

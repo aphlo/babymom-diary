@@ -42,7 +42,7 @@ final class WidgetSettingsViewModelProvider
 }
 
 String _$widgetSettingsViewModelHash() =>
-    r'86d56f074581b54dddd7ca915ba8f23a5d5a5458';
+    r'badea97ad558b30dc29eea8d6b4b018696cf9b82';
 
 abstract class _$WidgetSettingsViewModel
     extends $Notifier<WidgetSettingsState> {

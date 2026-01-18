@@ -51,4 +51,4 @@ final class VaccineSettingsRepositoryProvider extends $FunctionalProvider<
 }
 
 String _$vaccineSettingsRepositoryHash() =>
-    r'810cac1edebcc05cfb6ab672a46787516bed30c2';
+    r'00d54c8b9a25331cf63b89e60de52f45a4c60d8c';
