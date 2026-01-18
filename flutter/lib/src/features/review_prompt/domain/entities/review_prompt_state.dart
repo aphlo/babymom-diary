@@ -3,6 +3,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'review_prompt_state.freezed.dart';
 part 'review_prompt_state.g.dart';
 
+/// 不満選択後の抑制期間（日数）
+const int kDissatisfiedSuppressionDays = 30;
+
 /// レビュー促進の状態を表すエンティティ
 @freezed
 sealed class ReviewPromptState with _$ReviewPromptState {
@@ -15,11 +18,14 @@ sealed class ReviewPromptState with _$ReviewPromptState {
     /// アプリ起動回数
     required int appLaunchCount,
 
-    /// レビュー済みフラグ
+    /// レビュー済みフラグ（満足選択時にtrue）
     required bool hasReviewed,
 
     /// 最後にダイアログを表示した日付（ISO8601形式）
     String? lastShownDate,
+
+    /// 不満を選択した日付（ISO8601形式）
+    String? dissatisfiedDate,
   }) = _ReviewPromptState;
 
   factory ReviewPromptState.initial() => const ReviewPromptState(
@@ -27,6 +33,7 @@ sealed class ReviewPromptState with _$ReviewPromptState {
         appLaunchCount: 0,
         hasReviewed: false,
         lastShownDate: null,
+        dissatisfiedDate: null,
       );
 
   factory ReviewPromptState.fromJson(Map<String, dynamic> json) =>
@@ -34,8 +41,11 @@ sealed class ReviewPromptState with _$ReviewPromptState {
 
   /// ダイアログを表示すべきかどうかを判定
   bool shouldShowDialog({required DateTime now}) {
-    // レビュー済みなら表示しない
+    // レビュー済み（満足選択済み）なら表示しない
     if (hasReviewed) return false;
+
+    // 不満選択から30日以内なら表示しない
+    if (_isWithinDissatisfiedSuppressionPeriod(now)) return false;
 
     // 本日すでに表示済みなら表示しない
     if (lastShownDate != null) {
@@ -57,8 +67,11 @@ sealed class ReviewPromptState with _$ReviewPromptState {
   /// 記録カウント増加後にダイアログを表示すべきかを判定
   /// （増加前の状態で呼び出す）
   bool shouldShowAfterRecordIncrement({required DateTime now}) {
-    // レビュー済みなら表示しない
+    // レビュー済み（満足選択済み）なら表示しない
     if (hasReviewed) return false;
+
+    // 不満選択から30日以内なら表示しない
+    if (_isWithinDissatisfiedSuppressionPeriod(now)) return false;
 
     // 本日すでに表示済みなら表示しない
     if (lastShownDate != null) {
@@ -78,6 +91,17 @@ sealed class ReviewPromptState with _$ReviewPromptState {
     final conditionB = appLaunchCount >= 3 && nextRecordCount >= 1;
 
     return conditionA || conditionB;
+  }
+
+  /// 不満選択から抑制期間内かどうかを判定
+  bool _isWithinDissatisfiedSuppressionPeriod(DateTime now) {
+    if (dissatisfiedDate == null) return false;
+
+    final dissatisfied = DateTime.tryParse(dissatisfiedDate!);
+    if (dissatisfied == null) return false;
+
+    final daysSinceDissatisfied = now.difference(dissatisfied).inDays;
+    return daysSinceDissatisfied < kDissatisfiedSuppressionDays;
   }
 
   bool _isSameDay(DateTime a, DateTime b) {

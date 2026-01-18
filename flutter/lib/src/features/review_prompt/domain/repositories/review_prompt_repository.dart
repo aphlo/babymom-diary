@@ -11,8 +11,11 @@ abstract class ReviewPromptRepository {
   /// 起動カウントを増加
   Future<ReviewPromptState> incrementLaunchCount();
 
-  /// レビュー済みとしてマーク
+  /// レビュー済みとしてマーク（満足選択時）
   Future<void> markAsReviewed();
+
+  /// 不満選択日を記録
+  Future<void> markAsDissatisfied(DateTime date);
 
   /// ダイアログ表示日を記録
   Future<void> recordDialogShown(DateTime date);
