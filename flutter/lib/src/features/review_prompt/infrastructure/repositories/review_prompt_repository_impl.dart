@@ -13,6 +13,7 @@ class ReviewPromptRepositoryImpl implements ReviewPromptRepository {
   static const String _keyAppLaunchCount = 'review_prompt/app_launch_count';
   static const String _keyHasReviewed = 'review_prompt/has_reviewed';
   static const String _keyLastShownDate = 'review_prompt/last_shown_date';
+  static const String _keyDissatisfiedDate = 'review_prompt/dissatisfied_date';
 
   @override
   Future<ReviewPromptState> getState() async {
@@ -20,12 +21,14 @@ class ReviewPromptRepositoryImpl implements ReviewPromptRepository {
     final appLaunchCount = _prefs.getInt(_keyAppLaunchCount) ?? 0;
     final hasReviewed = _prefs.getBool(_keyHasReviewed) ?? false;
     final lastShownDate = _prefs.getString(_keyLastShownDate);
+    final dissatisfiedDate = _prefs.getString(_keyDissatisfiedDate);
 
     return ReviewPromptState(
       recordCount: recordCount,
       appLaunchCount: appLaunchCount,
       hasReviewed: hasReviewed,
       lastShownDate: lastShownDate,
+      dissatisfiedDate: dissatisfiedDate,
     );
   }
 
@@ -50,6 +53,12 @@ class ReviewPromptRepositoryImpl implements ReviewPromptRepository {
   @override
   Future<void> markAsReviewed() async {
     await _prefs.setBool(_keyHasReviewed, true);
+  }
+
+  @override
+  Future<void> markAsDissatisfied(DateTime date) async {
+    final dateString = date.toIso8601String().split('T').first;
+    await _prefs.setString(_keyDissatisfiedDate, dateString);
   }
 
   @override

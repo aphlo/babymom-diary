@@ -17,6 +17,9 @@ sealed class WidgetSettingsState with _$WidgetSettingsState {
     /// クイックアクションカテゴリ（最大5つ）
     required List<WidgetRecordCategory> quickActionCategories,
 
+    /// 授乳表設定で非表示になっているカテゴリ
+    @Default([]) List<WidgetRecordCategory> hiddenCategories,
+
     /// 読み込み中かどうか
     @Default(false) bool isLoading,
 
@@ -30,16 +33,19 @@ sealed class WidgetSettingsState with _$WidgetSettingsState {
   /// クイックアクションの最大数
   static const int maxQuickActionCategories = 5;
 
-  /// 直近の記録表示で選択可能なカテゴリ（現在選択中のものを除く）
+  /// 直近の記録表示で選択可能なカテゴリ（現在選択中のものと授乳表で非表示のものを除く）
   List<WidgetRecordCategory> get availableDisplayCategories =>
       WidgetRecordCategory.values
-          .where((c) => !displayCategories.contains(c))
+          .where((c) =>
+              !displayCategories.contains(c) && !hiddenCategories.contains(c))
           .toList();
 
-  /// クイックアクションで選択可能なカテゴリ（現在選択中のものを除く）
+  /// クイックアクションで選択可能なカテゴリ（現在選択中のものと授乳表で非表示のものを除く）
   List<WidgetRecordCategory> get availableQuickActionCategories =>
       WidgetRecordCategory.values
-          .where((c) => !quickActionCategories.contains(c))
+          .where((c) =>
+              !quickActionCategories.contains(c) &&
+              !hiddenCategories.contains(c))
           .toList();
 
   /// 直近の記録表示のデフォルト値

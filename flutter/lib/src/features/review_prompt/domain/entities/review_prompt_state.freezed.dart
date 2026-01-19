@@ -20,11 +20,14 @@ mixin _$ReviewPromptState {
   /// アプリ起動回数
   int get appLaunchCount;
 
-  /// レビュー済みフラグ
+  /// レビュー済みフラグ（満足選択時にtrue）
   bool get hasReviewed;
 
   /// 最後にダイアログを表示した日付（ISO8601形式）
   String? get lastShownDate;
+
+  /// 不満を選択した日付（ISO8601形式）
+  String? get dissatisfiedDate;
 
   /// Create a copy of ReviewPromptState
   /// with the given fields replaced by the non-null parameter values.
@@ -49,17 +52,19 @@ mixin _$ReviewPromptState {
             (identical(other.hasReviewed, hasReviewed) ||
                 other.hasReviewed == hasReviewed) &&
             (identical(other.lastShownDate, lastShownDate) ||
-                other.lastShownDate == lastShownDate));
+                other.lastShownDate == lastShownDate) &&
+            (identical(other.dissatisfiedDate, dissatisfiedDate) ||
+                other.dissatisfiedDate == dissatisfiedDate));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, recordCount, appLaunchCount, hasReviewed, lastShownDate);
+  int get hashCode => Object.hash(runtimeType, recordCount, appLaunchCount,
+      hasReviewed, lastShownDate, dissatisfiedDate);
 
   @override
   String toString() {
-    return 'ReviewPromptState(recordCount: $recordCount, appLaunchCount: $appLaunchCount, hasReviewed: $hasReviewed, lastShownDate: $lastShownDate)';
+    return 'ReviewPromptState(recordCount: $recordCount, appLaunchCount: $appLaunchCount, hasReviewed: $hasReviewed, lastShownDate: $lastShownDate, dissatisfiedDate: $dissatisfiedDate)';
   }
 }
 
@@ -73,7 +78,8 @@ abstract mixin class $ReviewPromptStateCopyWith<$Res> {
       {int recordCount,
       int appLaunchCount,
       bool hasReviewed,
-      String? lastShownDate});
+      String? lastShownDate,
+      String? dissatisfiedDate});
 }
 
 /// @nodoc
@@ -93,6 +99,7 @@ class _$ReviewPromptStateCopyWithImpl<$Res>
     Object? appLaunchCount = null,
     Object? hasReviewed = null,
     Object? lastShownDate = freezed,
+    Object? dissatisfiedDate = freezed,
   }) {
     return _then(_self.copyWith(
       recordCount: null == recordCount
@@ -110,6 +117,10 @@ class _$ReviewPromptStateCopyWithImpl<$Res>
       lastShownDate: freezed == lastShownDate
           ? _self.lastShownDate
           : lastShownDate // ignore: cast_nullable_to_non_nullable
+              as String?,
+      dissatisfiedDate: freezed == dissatisfiedDate
+          ? _self.dissatisfiedDate
+          : dissatisfiedDate // ignore: cast_nullable_to_non_nullable
               as String?,
     ));
   }
@@ -207,7 +218,7 @@ extension ReviewPromptStatePatterns on ReviewPromptState {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(int recordCount, int appLaunchCount, bool hasReviewed,
-            String? lastShownDate)?
+            String? lastShownDate, String? dissatisfiedDate)?
         $default, {
     required TResult orElse(),
   }) {
@@ -215,7 +226,7 @@ extension ReviewPromptStatePatterns on ReviewPromptState {
     switch (_that) {
       case _ReviewPromptState() when $default != null:
         return $default(_that.recordCount, _that.appLaunchCount,
-            _that.hasReviewed, _that.lastShownDate);
+            _that.hasReviewed, _that.lastShownDate, _that.dissatisfiedDate);
       case _:
         return orElse();
     }
@@ -237,14 +248,14 @@ extension ReviewPromptStatePatterns on ReviewPromptState {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(int recordCount, int appLaunchCount, bool hasReviewed,
-            String? lastShownDate)
+            String? lastShownDate, String? dissatisfiedDate)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _ReviewPromptState():
         return $default(_that.recordCount, _that.appLaunchCount,
-            _that.hasReviewed, _that.lastShownDate);
+            _that.hasReviewed, _that.lastShownDate, _that.dissatisfiedDate);
     }
   }
 
@@ -263,14 +274,14 @@ extension ReviewPromptStatePatterns on ReviewPromptState {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(int recordCount, int appLaunchCount, bool hasReviewed,
-            String? lastShownDate)?
+            String? lastShownDate, String? dissatisfiedDate)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _ReviewPromptState() when $default != null:
         return $default(_that.recordCount, _that.appLaunchCount,
-            _that.hasReviewed, _that.lastShownDate);
+            _that.hasReviewed, _that.lastShownDate, _that.dissatisfiedDate);
       case _:
         return null;
     }
@@ -284,7 +295,8 @@ class _ReviewPromptState extends ReviewPromptState {
       {required this.recordCount,
       required this.appLaunchCount,
       required this.hasReviewed,
-      this.lastShownDate})
+      this.lastShownDate,
+      this.dissatisfiedDate})
       : super._();
   factory _ReviewPromptState.fromJson(Map<String, dynamic> json) =>
       _$ReviewPromptStateFromJson(json);
@@ -297,13 +309,17 @@ class _ReviewPromptState extends ReviewPromptState {
   @override
   final int appLaunchCount;
 
-  /// レビュー済みフラグ
+  /// レビュー済みフラグ（満足選択時にtrue）
   @override
   final bool hasReviewed;
 
   /// 最後にダイアログを表示した日付（ISO8601形式）
   @override
   final String? lastShownDate;
+
+  /// 不満を選択した日付（ISO8601形式）
+  @override
+  final String? dissatisfiedDate;
 
   /// Create a copy of ReviewPromptState
   /// with the given fields replaced by the non-null parameter values.
@@ -332,17 +348,19 @@ class _ReviewPromptState extends ReviewPromptState {
             (identical(other.hasReviewed, hasReviewed) ||
                 other.hasReviewed == hasReviewed) &&
             (identical(other.lastShownDate, lastShownDate) ||
-                other.lastShownDate == lastShownDate));
+                other.lastShownDate == lastShownDate) &&
+            (identical(other.dissatisfiedDate, dissatisfiedDate) ||
+                other.dissatisfiedDate == dissatisfiedDate));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, recordCount, appLaunchCount, hasReviewed, lastShownDate);
+  int get hashCode => Object.hash(runtimeType, recordCount, appLaunchCount,
+      hasReviewed, lastShownDate, dissatisfiedDate);
 
   @override
   String toString() {
-    return 'ReviewPromptState(recordCount: $recordCount, appLaunchCount: $appLaunchCount, hasReviewed: $hasReviewed, lastShownDate: $lastShownDate)';
+    return 'ReviewPromptState(recordCount: $recordCount, appLaunchCount: $appLaunchCount, hasReviewed: $hasReviewed, lastShownDate: $lastShownDate, dissatisfiedDate: $dissatisfiedDate)';
   }
 }
 
@@ -358,7 +376,8 @@ abstract mixin class _$ReviewPromptStateCopyWith<$Res>
       {int recordCount,
       int appLaunchCount,
       bool hasReviewed,
-      String? lastShownDate});
+      String? lastShownDate,
+      String? dissatisfiedDate});
 }
 
 /// @nodoc
@@ -378,6 +397,7 @@ class __$ReviewPromptStateCopyWithImpl<$Res>
     Object? appLaunchCount = null,
     Object? hasReviewed = null,
     Object? lastShownDate = freezed,
+    Object? dissatisfiedDate = freezed,
   }) {
     return _then(_ReviewPromptState(
       recordCount: null == recordCount
@@ -395,6 +415,10 @@ class __$ReviewPromptStateCopyWithImpl<$Res>
       lastShownDate: freezed == lastShownDate
           ? _self.lastShownDate
           : lastShownDate // ignore: cast_nullable_to_non_nullable
+              as String?,
+      dissatisfiedDate: freezed == dissatisfiedDate
+          ? _self.dissatisfiedDate
+          : dissatisfiedDate // ignore: cast_nullable_to_non_nullable
               as String?,
     ));
   }

@@ -273,6 +273,50 @@ final class MarkAsReviewedUseCaseProvider
 String _$markAsReviewedUseCaseHash() =>
     r'022d05c53f737675d8f94ab5eb04087518eacccf';
 
+@ProviderFor(markAsDissatisfiedUseCase)
+const markAsDissatisfiedUseCaseProvider = MarkAsDissatisfiedUseCaseProvider._();
+
+final class MarkAsDissatisfiedUseCaseProvider extends $FunctionalProvider<
+    MarkAsDissatisfied,
+    MarkAsDissatisfied,
+    MarkAsDissatisfied> with $Provider<MarkAsDissatisfied> {
+  const MarkAsDissatisfiedUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'markAsDissatisfiedUseCaseProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$markAsDissatisfiedUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<MarkAsDissatisfied> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  MarkAsDissatisfied create(Ref ref) {
+    return markAsDissatisfiedUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MarkAsDissatisfied value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<MarkAsDissatisfied>(value),
+    );
+  }
+}
+
+String _$markAsDissatisfiedUseCaseHash() =>
+    r'453ead2c3af8050d1e3c71245c59cce13f5d1d56';
+
 @ProviderFor(recordDialogShownUseCase)
 const recordDialogShownUseCaseProvider = RecordDialogShownUseCaseProvider._();
 

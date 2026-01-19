@@ -23,6 +23,7 @@ enum BannerAdSlot {
   ingredientSettings,
   growthChartSettings,
   widgetSettings,
+  feedingTableSettings,
 }
 
 /// 各スロットの広告状態
@@ -100,12 +101,29 @@ class BannerAdManager {
     try {
       final config = _ref.read(adConfigProvider);
 
-      final adSize =
+      // Anchored Adaptive Bannerを使用
+      // iPadなど大画面でnullが返される場合はLeaderboardサイズにフォールバック
+      final adaptiveSize =
           await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
         width.truncate(),
       );
 
-      if (adSize == null || _isDisposed) {
+      final AdSize adSize;
+      // iPadなど大画面でnullが返される場合のフォールバック
+      if (adaptiveSize == null) {
+        // 幅に応じて適切なフォールバックサイズを選択
+        if (width >= 728) {
+          adSize = AdSize.leaderboard; // 728x90
+        } else if (width >= 468) {
+          adSize = AdSize.fullBanner; // 468x60
+        } else {
+          adSize = AdSize.banner; // 320x50
+        }
+      } else {
+        adSize = adaptiveSize;
+      }
+
+      if (_isDisposed) {
         slotState.isLoading = false;
         if (!completer.isCompleted) completer.complete();
         return;

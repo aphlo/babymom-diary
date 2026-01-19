@@ -37,6 +37,30 @@ void main() {
         );
         expect(state.shouldShowDialog(now: now), isTrue);
       });
+
+      test('不満選択から30日以内は表示しない', () {
+        // 29日前に不満を選択
+        final dissatisfiedDate = DateTime(2025, 12, 15);
+        final state = ReviewPromptState(
+          recordCount: 5,
+          appLaunchCount: 5,
+          hasReviewed: false,
+          dissatisfiedDate: dissatisfiedDate.toIso8601String().split('T').first,
+        );
+        expect(state.shouldShowDialog(now: now), isFalse);
+      });
+
+      test('不満選択から30日以上経過した場合は表示可能', () {
+        // 31日前に不満を選択
+        final dissatisfiedDate = DateTime(2025, 12, 13);
+        final state = ReviewPromptState(
+          recordCount: 5,
+          appLaunchCount: 5,
+          hasReviewed: false,
+          dissatisfiedDate: dissatisfiedDate.toIso8601String().split('T').first,
+        );
+        expect(state.shouldShowDialog(now: now), isTrue);
+      });
     });
 
     group('条件A: 記録回数がちょうど3回', () {
@@ -143,6 +167,18 @@ void main() {
           appLaunchCount: 5,
           hasReviewed: false,
           lastShownDate: today,
+        );
+        expect(state.shouldShowAfterRecordIncrement(now: now), isFalse);
+      });
+
+      test('不満選択から30日以内は表示しない', () {
+        // 29日前に不満を選択
+        final dissatisfiedDate = DateTime(2025, 12, 15);
+        final state = ReviewPromptState(
+          recordCount: 2,
+          appLaunchCount: 5,
+          hasReviewed: false,
+          dissatisfiedDate: dissatisfiedDate.toIso8601String().split('T').first,
         );
         expect(state.shouldShowAfterRecordIncrement(now: now), isFalse);
       });
