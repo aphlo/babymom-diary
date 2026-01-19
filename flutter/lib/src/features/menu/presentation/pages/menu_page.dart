@@ -19,6 +19,7 @@ import 'package:babymom_diary/src/features/menu/presentation/widgets/menu_sectio
 
 class MenuPage extends ConsumerWidget {
   const MenuPage({super.key});
+  static const _aboutUrl = 'https://babymom-diary.web.app/';
   static const _termsUrl =
       'https://striped-polonium-ee6.notion.site/milu-2b1de238aa6080acb2a3cbe274d05564?source=copy_link';
   static const _privacyUrl =
@@ -189,6 +190,13 @@ class MenuPage extends ConsumerWidget {
         ),
         MenuSection(
           children: [
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: const Text('このアプリについて'),
+              onTap: () => _launchExternalUrl(context, _aboutUrl),
+              trailing: const Icon(Icons.open_in_new),
+            ),
+            const Divider(height: 0),
             ListTile(
               leading: const Icon(Icons.description_outlined),
               title: const Text('利用規約'),
