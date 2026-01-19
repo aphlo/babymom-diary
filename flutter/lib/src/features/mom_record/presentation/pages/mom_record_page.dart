@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:babymom_diary/src/features/mom_record/presentation/components/mom_diary_overview_tab.dart';
 import 'package:babymom_diary/src/features/mom_record/presentation/components/mom_record_overview_tab.dart';
 import 'package:babymom_diary/src/features/mom_record/presentation/viewmodels/mom_record_view_model.dart';
-import 'package:babymom_diary/src/features/mom_record/presentation/widgets/mom_support_fab.dart';
 
 class MomRecordPage extends ConsumerStatefulWidget {
   const MomRecordPage({super.key});
@@ -114,10 +113,6 @@ class _MomRecordPageState extends ConsumerState<MomRecordPage>
           MomRecordOverviewTab(),
           MomDiaryOverviewTab(),
         ],
-      ),
-      floatingActionButton: const Padding(
-        padding: EdgeInsets.only(bottom: 50),
-        child: MomSupportFab(),
       ),
     );
   }
