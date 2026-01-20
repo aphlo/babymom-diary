@@ -188,6 +188,8 @@ class _AppState extends ConsumerState<App> {
       return MaterialApp(
         title: widget.appTitle,
         theme: theme,
+        darkTheme: darkTheme,
+        themeMode: themeMode,
         debugShowCheckedModeBanner: false,
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
         supportedLocales: const [
