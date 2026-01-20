@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/semantic_colors.dart';
 import '../../../../core/firebase/household_service.dart';
 import '../../../../core/widgets/bottom_save_button.dart';
 import '../models/vaccine_info.dart';
@@ -614,7 +615,8 @@ class _RequirementBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final presentation = _RequirementPresentation.fromRequirement(requirement);
+    final presentation =
+        _RequirementPresentation.fromRequirement(requirement, context);
     final textStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w700,
               color: presentation.foregroundColor,
@@ -643,7 +645,7 @@ class _VaccineTypeBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final typeStyles = vaccineTypeStylesFromValueObject(category);
+    final typeStyles = vaccineTypeStyles(category, context: context);
 
     return VaccineTypeBadge(
       label: typeStyles.label,
@@ -673,19 +675,19 @@ class _RequirementPresentation {
   final Color foregroundColor;
 
   static _RequirementPresentation fromRequirement(
-      VaccineRequirement requirement) {
+      VaccineRequirement requirement, BuildContext context) {
     switch (requirement) {
       case VaccineRequirement.mandatory:
-        return const _RequirementPresentation(
+        return _RequirementPresentation(
           label: '定期接種',
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: context.mandatoryBadgeBackground,
+          foregroundColor: context.mandatoryBadgeText,
         );
       case VaccineRequirement.optional:
-        return const _RequirementPresentation(
+        return _RequirementPresentation(
           label: '任意接種',
-          backgroundColor: AppColors.secondary,
-          foregroundColor: Colors.white,
+          backgroundColor: context.optionalBadgeBackground,
+          foregroundColor: context.optionalBadgeText,
         );
     }
   }

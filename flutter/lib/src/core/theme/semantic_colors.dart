@@ -163,4 +163,103 @@ extension SemanticColorsExtension on BuildContext {
   /// 日付セクションテキスト色
   Color get dateSectionText =>
       isDarkMode ? const Color(0xFFFFB4C2) : Colors.pink.shade700;
+
+  // ===================
+  // 予防接種ガイドラインバッジ色
+  // ===================
+
+  /// ガイドラインバッジ背景色（一般的な接種時期の①②③）
+  Color get guidelineBadgeBackground =>
+      isDarkMode ? AppDarkColors.surfaceVariant : Colors.white;
+
+  /// ガイドラインバッジボーダー色
+  Color get guidelineBadgeBorder =>
+      isDarkMode ? const Color(0xFF9E9E9E) : Colors.grey.shade600;
+
+  /// ガイドラインバッジテキスト色
+  Color get guidelineBadgeText =>
+      isDarkMode ? const Color(0xFFBDBDBD) : Colors.grey.shade600;
+
+  /// 矢印線の色
+  Color get guidelineArrowColor =>
+      isDarkMode ? const Color(0xFF9E9E9E) : Colors.grey.shade600;
+
+  // ===================
+  // 予防接種ステータスバッジ色
+  // ===================
+
+  /// 接種予定バッジ背景色
+  Color get scheduledBadgeBackground =>
+      isDarkMode ? AppDarkColors.reserved : AppColors.reserved;
+
+  /// 接種予定バッジボーダー色
+  Color get scheduledBadgeBorder =>
+      isDarkMode ? AppDarkColors.reserved : AppColors.reserved;
+
+  /// 接種予定バッジテキスト色
+  Color get scheduledBadgeText =>
+      isDarkMode ? AppDarkColors.reservedText : Colors.white;
+
+  /// 接種済みバッジ背景色
+  Color get completedBadgeBackground =>
+      isDarkMode ? AppDarkColors.vaccinated : AppColors.vaccinated;
+
+  /// 接種済みバッジボーダー色
+  Color get completedBadgeBorder =>
+      isDarkMode ? AppDarkColors.vaccinated : AppColors.vaccinated;
+
+  /// 接種済みバッジテキスト色
+  Color get completedBadgeText =>
+      isDarkMode ? AppDarkColors.vaccinatedText : Colors.white;
+
+  // ===================
+  // 定期接種・任意接種バッジ色
+  // ===================
+
+  /// 定期接種バッジ背景色
+  Color get mandatoryBadgeBackground =>
+      isDarkMode ? const Color(0xFF8B3A4A) : AppColors.primary;
+
+  /// 定期接種バッジテキスト色
+  Color get mandatoryBadgeText => Colors.white;
+
+  /// 任意接種バッジ背景色
+  Color get optionalBadgeBackground =>
+      isDarkMode ? const Color(0xFF1565C0) : AppColors.secondary;
+
+  /// 任意接種バッジテキスト色
+  Color get optionalBadgeText => Colors.white;
+
+  // ===================
+  // ワクチン種別バッジ色（生/不活化）
+  // ===================
+
+  /// 生ワクチンバッジ背景色
+  Color get liveBadgeBackground => isDarkMode
+      ? AppDarkColors.vaccineLive.withValues(alpha: 0.25)
+      : AppColors.vaccineLive.withValues(alpha: 0.12);
+
+  /// 生ワクチンバッジテキスト色
+  Color get liveBadgeForeground =>
+      isDarkMode ? AppDarkColors.vaccineLive : AppColors.vaccineLive;
+
+  /// 生ワクチンバッジボーダー色
+  Color get liveBadgeBorder => isDarkMode
+      ? AppDarkColors.vaccineLive.withValues(alpha: 0.6)
+      : AppColors.vaccineLive.withValues(alpha: 0.4);
+
+  /// 不活化ワクチンバッジ背景色
+  Color get inactivatedBadgeBackground => isDarkMode
+      ? AppDarkColors.vaccineInactivated.withValues(alpha: 0.25)
+      : AppColors.vaccineInactivated.withValues(alpha: 0.12);
+
+  /// 不活化ワクチンバッジテキスト色
+  Color get inactivatedBadgeForeground => isDarkMode
+      ? AppDarkColors.vaccineInactivated
+      : AppColors.vaccineInactivated;
+
+  /// 不活化ワクチンバッジボーダー色
+  Color get inactivatedBadgeBorder => isDarkMode
+      ? AppDarkColors.vaccineInactivated.withValues(alpha: 0.6)
+      : AppColors.vaccineInactivated.withValues(alpha: 0.4);
 }

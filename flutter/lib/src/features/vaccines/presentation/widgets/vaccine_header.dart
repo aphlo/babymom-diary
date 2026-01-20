@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/semantic_colors.dart';
 import '../models/vaccine_info.dart';
 import '../styles/vaccine_type_styles.dart';
 import '../../domain/value_objects/vaccine_requirement.dart';
@@ -18,8 +18,8 @@ class VaccineHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final requirement =
-        _RequirementPresentation.fromRequirement(vaccine.requirement);
-    final typeStyles = vaccineTypeStyles(vaccine.category);
+        _RequirementPresentation.fromRequirement(vaccine.requirement, context);
+    final typeStyles = vaccineTypeStyles(vaccine.category, context: context);
     final TextStyle nameTextStyle = theme.textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.w700,
           fontSize: 20,
@@ -102,19 +102,19 @@ class _RequirementPresentation {
   final Color foregroundColor;
 
   static _RequirementPresentation fromRequirement(
-      VaccineRequirement requirement) {
+      VaccineRequirement requirement, BuildContext context) {
     switch (requirement) {
       case VaccineRequirement.mandatory:
-        return const _RequirementPresentation(
+        return _RequirementPresentation(
           label: '定期接種',
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: context.mandatoryBadgeBackground,
+          foregroundColor: context.mandatoryBadgeText,
         );
       case VaccineRequirement.optional:
-        return const _RequirementPresentation(
+        return _RequirementPresentation(
           label: '任意接種',
-          backgroundColor: AppColors.secondary,
-          foregroundColor: Colors.white,
+          backgroundColor: context.optionalBadgeBackground,
+          foregroundColor: context.optionalBadgeText,
         );
     }
   }

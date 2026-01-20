@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/core/utils/date_formatter.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_record.dart';
@@ -89,8 +89,8 @@ class _VaccineListCard extends StatelessWidget {
         : (allDoseNumbers.toList()..sort());
 
     final requirement =
-        _RequirementPresentation.fromRequirement(vaccine.requirement);
-    final typeStyles = vaccineTypeStyles(vaccine.category);
+        _RequirementPresentation.fromRequirement(vaccine.requirement, context);
+    final typeStyles = vaccineTypeStyles(vaccine.category, context: context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -128,7 +128,7 @@ class _VaccineListCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Icon(
                     Icons.chevron_right,
-                    color: Colors.grey.shade600,
+                    color: context.subtextColor,
                     size: 20,
                   ),
                 ],
@@ -241,8 +241,9 @@ class _InfluenzaDoseGrid extends StatelessWidget {
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
-                  color:
-                      hasScheduledDate ? Colors.black87 : Colors.grey.shade400,
+                  color: hasScheduledDate
+                      ? context.textPrimary
+                      : context.inactiveTabColor,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -370,8 +371,8 @@ class _StandardDoseList extends StatelessWidget {
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
                   color: effectiveDate != null
-                      ? Colors.black87
-                      : Colors.grey.shade400,
+                      ? context.textPrimary
+                      : context.inactiveTabColor,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -451,19 +452,19 @@ class _RequirementPresentation {
   final Color foregroundColor;
 
   static _RequirementPresentation fromRequirement(
-      VaccineRequirement requirement) {
+      VaccineRequirement requirement, BuildContext context) {
     switch (requirement) {
       case VaccineRequirement.mandatory:
-        return const _RequirementPresentation(
+        return _RequirementPresentation(
           label: '定期接種',
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: context.mandatoryBadgeBackground,
+          foregroundColor: context.mandatoryBadgeText,
         );
       case VaccineRequirement.optional:
-        return const _RequirementPresentation(
+        return _RequirementPresentation(
           label: '任意接種',
-          backgroundColor: AppColors.secondary,
-          foregroundColor: Colors.white,
+          backgroundColor: context.optionalBadgeBackground,
+          foregroundColor: context.optionalBadgeText,
         );
     }
   }

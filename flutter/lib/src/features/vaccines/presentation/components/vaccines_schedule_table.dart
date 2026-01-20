@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccination_period_highlight.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_requirement.dart';
 
@@ -203,7 +204,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
             GridCell(
               width: _firstColumnWidth,
               height: _headerHeight,
-              backgroundColor: Colors.grey.shade100,
+              backgroundColor: context.tableHeaderBackground,
               border: Border(
                 top: borderSide,
                 left: borderSide,
@@ -230,7 +231,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                       return GridCell(
                         width: _periodColumnWidth,
                         height: _headerHeight,
-                        backgroundColor: Colors.grey.shade100,
+                        backgroundColor: context.tableHeaderBackground,
                         border: Border(
                           top: borderSide,
                           right: borderSide,

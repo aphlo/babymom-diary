@@ -21,8 +21,12 @@ class AppDarkColors {
   // Vaccine badge colors (ダーク用に調整)
   static const Color vaccineInactivated = Color(0xFF4AE54E);
   static const Color vaccineLive = Color(0xFFFFAB40);
-  static const Color reserved = Color(0xFFFFEE58);
-  static const Color vaccinated = Color(0xFF69F0AE);
+  // 接種予定：暗めのゴールド
+  static const Color reserved = Color(0xFFB8860B);
+  static const Color reservedText = Color(0xFFFFFFFF);
+  // 接種済み：暗めのグリーン
+  static const Color vaccinated = Color(0xFF2E7D32);
+  static const Color vaccinatedText = Color(0xFFFFFFFF);
 
   // Weekday colors (ダーク用に調整)
   static const Color sunday = Color(0xFFFF8A80);
