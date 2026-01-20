@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import '../../../../core/theme/semantic_colors.dart';
+
 class AppVersionFooter extends StatelessWidget {
   const AppVersionFooter({super.key});
 
@@ -22,7 +24,7 @@ class AppVersionFooter extends StatelessWidget {
           child: Text(
             'バージョン $version',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.black,
+                  color: context.textSecondary,
                 ),
           ),
         );
