@@ -68,7 +68,7 @@ final class AppThemeProvider
   }
 }
 
-String _$appThemeHash() => r'3e2b2594eaf3129600facf03280d1e2803a15670';
+String _$appThemeHash() => r'36ee74221999cb135812b1d1924eb33b011fc0aa';
 
 final class AppThemeFamily extends $Family
     with $FunctionalFamilyOverride<ThemeData, String> {
@@ -88,4 +88,94 @@ final class AppThemeFamily extends $Family
 
   @override
   String toString() => r'appThemeProvider';
+}
+
+/// ダークモード用のテーマProvider
+
+@ProviderFor(appDarkTheme)
+const appDarkThemeProvider = AppDarkThemeFamily._();
+
+/// ダークモード用のテーマProvider
+
+final class AppDarkThemeProvider
+    extends $FunctionalProvider<ThemeData, ThemeData, ThemeData>
+    with $Provider<ThemeData> {
+  /// ダークモード用のテーマProvider
+  const AppDarkThemeProvider._(
+      {required AppDarkThemeFamily super.from, required String super.argument})
+      : super(
+          retry: null,
+          name: r'appDarkThemeProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$appDarkThemeHash();
+
+  @override
+  String toString() {
+    return r'appDarkThemeProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<ThemeData> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ThemeData create(Ref ref) {
+    final argument = this.argument as String;
+    return appDarkTheme(
+      ref,
+      argument,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ThemeData value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ThemeData>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is AppDarkThemeProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$appDarkThemeHash() => r'2fab3cbc60fb4fad13ce9c68ea5feb1f6d736b0a';
+
+/// ダークモード用のテーマProvider
+
+final class AppDarkThemeFamily extends $Family
+    with $FunctionalFamilyOverride<ThemeData, String> {
+  const AppDarkThemeFamily._()
+      : super(
+          retry: null,
+          name: r'appDarkThemeProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: false,
+        );
+
+  /// ダークモード用のテーマProvider
+
+  AppDarkThemeProvider call(
+    String householdId,
+  ) =>
+      AppDarkThemeProvider._(argument: householdId, from: this);
+
+  @override
+  String toString() => r'appDarkThemeProvider';
 }

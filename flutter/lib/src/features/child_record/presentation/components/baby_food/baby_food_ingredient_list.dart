@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import '../../../../../core/types/child_icon.dart';
 import '../../../../ads/application/services/banner_ad_manager.dart';
 import '../../../../ads/presentation/widgets/banner_ad_widget.dart';
@@ -43,9 +44,9 @@ class BabyFoodIngredientList extends StatelessWidget {
                 text: category.label,
               );
             }).toList(),
-            labelColor: Colors.pink,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: Colors.pink,
+            labelColor: context.accentPink,
+            unselectedLabelColor: context.inactiveTabColor,
+            indicatorColor: context.accentPink,
           ),
           // 食材リスト
           Expanded(

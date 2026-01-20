@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/semantic_colors.dart';
 import '../../../../baby_food/presentation/providers/baby_food_providers.dart';
 
 /// プリセット食材のタイル
@@ -19,9 +20,9 @@ class PresetIngredientTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final decoration = BoxDecoration(
-      color: Colors.white,
+      color: context.cardBackground,
       border: Border(
-        bottom: BorderSide(color: Colors.grey.shade200),
+        bottom: BorderSide(color: context.menuSectionBorder),
       ),
     );
 
@@ -33,7 +34,7 @@ class PresetIngredientTile extends ConsumerWidget {
           contentPadding: const EdgeInsets.only(left: 16, right: 8),
           title: Text(
             ingredientName,
-            style: TextStyle(color: Colors.grey.shade500),
+            style: TextStyle(color: context.textSecondary),
           ),
           trailing: TextButton.icon(
             onPressed: () => _unhideIngredient(context, ref),
@@ -51,7 +52,7 @@ class PresetIngredientTile extends ConsumerWidget {
         contentPadding: const EdgeInsets.only(left: 16, right: 8),
         title: Text(ingredientName),
         trailing: IconButton(
-          icon: Icon(Icons.close, color: Colors.grey.shade600),
+          icon: Icon(Icons.close, color: context.textSecondary),
           onPressed: () => _hideIngredient(context, ref),
         ),
       ),

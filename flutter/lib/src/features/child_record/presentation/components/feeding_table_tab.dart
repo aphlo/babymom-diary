@@ -8,6 +8,8 @@ import '../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../../baby_food/domain/entities/baby_food_record.dart';
 import '../../../baby_food/presentation/providers/baby_food_providers.dart';
 import '../../../baby_food/presentation/widgets/baby_food_slot_sheet.dart';
+import '../../../feeding_table_settings/application/providers/feeding_table_settings_providers.dart';
+import '../../../feeding_table_settings/domain/entities/feeding_table_settings.dart';
 import '../../../menu/children/application/child_context_provider.dart';
 import '../models/record_item_model.dart';
 import '../viewmodels/record_state.dart';
@@ -140,6 +142,12 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
         ? ref.watch(hiddenIngredientsProvider(childContext.householdId))
         : null;
 
+    // 授乳表設定を取得
+    final feedingTableSettingsAsync =
+        ref.watch(feedingTableSettingsStreamProvider);
+    final feedingTableSettings =
+        feedingTableSettingsAsync.value ?? const FeedingTableSettings();
+
     void handleSlotTap(int hour, RecordType type) {
       final records = recordsAsync.value ?? const <RecordItemModel>[];
       notifier.openSlotDetails(hour: hour, type: type, allRecords: records);
@@ -194,6 +202,7 @@ class _FeedingTableTabState extends ConsumerState<FeedingTableTab> {
                   selectedDate: selectedDate,
                   babyFoodRecords: babyFoodRecords,
                   onBabyFoodSlotTap: handleBabyFoodSlotTap,
+                  settings: feedingTableSettings,
                 ),
                 if ((recordsAsync.isLoading && !recordsAsync.hasValue) ||
                     (babyFoodRecordsAsync.isLoading &&

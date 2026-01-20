@@ -131,10 +131,13 @@ class _SatisfactionDialogState extends ConsumerState<SatisfactionDialog> {
   }
 
   Future<void> _handleDissatisfied() async {
-    // 現在のダイアログを閉じる
-    Navigator.of(context).pop(false);
+    // 不満選択日を記録（以降1ヶ月間ダイアログを表示しない）
+    final markAsDissatisfied = ref.read(markAsDissatisfiedUseCaseProvider);
+    await markAsDissatisfied(date: DateTime.now());
 
+    // 現在のダイアログを閉じる
     if (!mounted) return;
+    Navigator.of(context).pop(false);
 
     // フィードバック確認ダイアログを表示
     await FeedbackConfirmDialog.show(context);

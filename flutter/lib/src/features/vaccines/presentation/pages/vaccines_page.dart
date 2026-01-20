@@ -1,3 +1,5 @@
+import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccine_settings.dart';
+import 'package:babymom_diary/src/features/vaccines/presentation/viewmodels/vaccine_settings_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,10 +21,8 @@ import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_state.dart';
 import '../models/vaccines_view_data.dart';
 import '../viewmodels/vaccines_view_model.dart';
-import '../widgets/vaccines_legend.dart';
+import '../widgets/list/vaccines_legend.dart';
 import 'vaccine_detail_page.dart';
-
-enum VaccineViewMode { table, list }
 
 class VaccinesPage extends ConsumerStatefulWidget {
   const VaccinesPage({super.key});
@@ -32,12 +32,12 @@ class VaccinesPage extends ConsumerStatefulWidget {
 }
 
 class _VaccinesPageState extends ConsumerState<VaccinesPage> {
-  VaccineViewMode _viewMode = VaccineViewMode.table;
-
   @override
   Widget build(BuildContext context) {
     final AsyncValue<VaccinesViewData> state =
         ref.watch(vaccinesViewModelProvider);
+    final settingsState = ref.watch(vaccineSettingsViewModelProvider);
+    final viewMode = settingsState.settings.viewMode;
     final DateTime? childBirthday = _resolveSelectedChildBirthday(ref);
 
     return Scaffold(
@@ -47,17 +47,18 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage> {
         actions: [
           IconButton(
             icon: Icon(
-              _viewMode == VaccineViewMode.table
+              viewMode == VaccineViewMode.table
                   ? Icons.view_list
                   : Icons.view_timeline_outlined,
             ),
-            tooltip: _viewMode == VaccineViewMode.table ? 'リスト表示' : '表形式表示',
+            tooltip: viewMode == VaccineViewMode.table ? 'リスト表示' : '表形式表示',
             onPressed: () {
-              setState(() {
-                _viewMode = _viewMode == VaccineViewMode.table
-                    ? VaccineViewMode.list
-                    : VaccineViewMode.table;
-              });
+              final newMode = viewMode == VaccineViewMode.table
+                  ? VaccineViewMode.list
+                  : VaccineViewMode.table;
+              ref
+                  .read(vaccineSettingsViewModelProvider.notifier)
+                  .updateViewMode(newMode);
             },
           ),
         ],
@@ -65,7 +66,7 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage> {
       body: state.when(
         data: (data) => _VaccinesContent(
           data: data,
-          viewMode: _viewMode,
+          viewMode: viewMode,
           childBirthday: childBirthday,
           onVaccineTap: (vaccine) {
             Navigator.of(context).push(

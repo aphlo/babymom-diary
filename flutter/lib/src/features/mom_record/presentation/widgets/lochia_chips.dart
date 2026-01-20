@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import '../../domain/value_objects/lochia_status.dart';
 
 class LochiaAmountChips extends StatelessWidget {
@@ -23,7 +24,7 @@ class LochiaAmountChips extends StatelessWidget {
           label: Text(_lochiaAmountLabel(value)),
           selected: selected,
           showCheckmark: false,
-          backgroundColor: Colors.white,
+          backgroundColor: context.menuSectionBackground,
           onSelected: (isSelected) {
             if (selectedAmount == value) {
               // 既に選択されている場合は未選択にする
@@ -71,7 +72,7 @@ class LochiaColorChips extends StatelessWidget {
           label: Text(_lochiaColorLabel(value)),
           selected: selected,
           showCheckmark: false,
-          backgroundColor: Colors.white,
+          backgroundColor: context.menuSectionBackground,
           onSelected: (isSelected) {
             if (selectedColor == value) {
               // 既に選択されている場合は未選択にする

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import '../../domain/entities/custom_ingredient.dart';
 import '../../domain/value_objects/food_category.dart';
 
@@ -93,7 +94,7 @@ class _CategoryTile extends StatelessWidget {
       elevation: 0,
       margin: EdgeInsets.zero,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-      color: isExpanded ? Colors.pink.shade50 : Colors.white,
+      color: isExpanded ? Colors.pink.shade50 : context.menuSectionBackground,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -240,10 +241,10 @@ class _IngredientChip extends StatelessWidget {
       label: Text(ingredientName),
       selected: isSelected,
       onSelected: (_) => onTap(),
-      backgroundColor: Colors.white,
+      backgroundColor: context.menuSectionBackground,
       selectedColor: Colors.pink.shade100,
       checkmarkColor: Colors.pink.shade700,
-      side: BorderSide(color: Colors.grey.shade400),
+      side: BorderSide(color: context.tableBorderColor),
     );
   }
 }

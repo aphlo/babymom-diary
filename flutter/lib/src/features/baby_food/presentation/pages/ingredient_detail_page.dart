@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/semantic_colors.dart';
 import '../../../../core/types/child_icon.dart';
 import '../../../ads/application/services/banner_ad_manager.dart';
 import '../../../ads/presentation/widgets/banner_ad_widget.dart';
@@ -35,7 +35,7 @@ class IngredientDetailPage extends ConsumerWidget {
     final childContext = ref.watch(childContextProvider).value;
     if (childContext == null || childContext.selectedChildId == null) {
       return Scaffold(
-        backgroundColor: AppColors.pageBackground,
+        backgroundColor: context.pageBackground,
         appBar: AppBar(title: Text(ingredientName)),
         body: const Center(child: CircularProgressIndicator()),
       );
@@ -101,14 +101,13 @@ class IngredientDetailPage extends ConsumerWidget {
         ref.watch(hiddenIngredientsProvider(householdId));
 
     return Scaffold(
-      backgroundColor: AppColors.pageBackground,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
         title: Text(state.currentIngredientName),
         actions: [
           if (state.isCustomIngredient)
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert),
-              color: Colors.white,
               onSelected: (value) => _handleMenuAction(
                 context: context,
                 action: value,
@@ -137,8 +136,8 @@ class IngredientDetailPage extends ConsumerWidget {
             customIngredientsAsync: customIngredientsAsync,
             hiddenIngredientsAsync: hiddenIngredientsAsync,
           ),
-          backgroundColor: AppColors.primary,
-          child: const Icon(Icons.add, color: Colors.white),
+          backgroundColor: context.primaryColor,
+          child: Icon(Icons.add, color: context.onPrimaryColor),
         ),
       ),
       body: Column(

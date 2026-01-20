@@ -5,7 +5,9 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../../core/firebase/household_service.dart';
-import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/semantic_colors.dart';
+import '../../../../ads/application/services/banner_ad_manager.dart';
+import '../../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../domain/entities/household_member.dart';
 import '../../domain/errors/invitation_errors.dart';
 import '../providers/invitation_providers.dart';
@@ -37,21 +39,29 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
     final membershipTypeAsync = ref.watch(currentMembershipTypeProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.pageBackground,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
         leading: BackButton(onPressed: () => Navigator.of(context).maybePop()),
         title: const Text('世帯の共有'),
       ),
       body: SafeArea(
-        child: householdIdAsync.when(
-          data: (householdId) => membershipTypeAsync.when(
-            data: (membershipType) =>
-                _buildContent(householdId, membershipType),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(child: Text('エラー: $error')),
-          ),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(child: Text('エラー: $error')),
+        child: Column(
+          children: [
+            Expanded(
+              child: householdIdAsync.when(
+                data: (householdId) => membershipTypeAsync.when(
+                  data: (membershipType) =>
+                      _buildContent(householdId, membershipType),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, _) => Center(child: Text('エラー: $error')),
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, _) => Center(child: Text('エラー: $error')),
+              ),
+            ),
+            const BannerAdWidget(slot: BannerAdSlot.householdShare),
+          ],
         ),
       ),
     );
@@ -72,7 +82,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
       padding: const EdgeInsets.all(16),
       children: [
         Card(
-          color: Colors.white,
+          color: context.cardBackground,
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -80,7 +90,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.group, color: AppColors.primary),
+                    Icon(Icons.group, color: context.primaryColor),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -91,9 +101,9 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                const Text(
+                Text(
                   'あなたは他のユーザーの世帯に参加しています。\n世帯IDの共有は世帯の作成者のみが行えます。',
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(color: context.textSecondary),
                 ),
               ],
             ),
@@ -129,7 +139,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
 
   Widget _buildHouseholdIdSection(String householdId) {
     return Card(
-      color: Colors.white,
+      color: context.cardBackground,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -143,16 +153,20 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
               ],
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               '他のユーザーとこの世帯IDを共有することで、世帯にメンバーを追加できます。',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: context.textSecondary),
             ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: context.pageBackground,
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: context.tableBorderColor,
+                  width: 0.5,
+                ),
               ),
               child: Row(
                 children: [
@@ -180,7 +194,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
                   onPressed: () =>
                       _shareHouseholdId(buttonContext, householdId),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: context.primaryColor,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
@@ -207,7 +221,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Card(
-        color: Colors.white,
+        color: context.cardBackground,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -235,7 +249,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
       child: ListTile(
         contentPadding: const EdgeInsets.only(left: 16, right: 8),
         leading: CircleAvatar(
-          backgroundColor: AppColors.primary,
+          backgroundColor: context.primaryColor,
           child: Text(
             member.displayName.isNotEmpty
                 ? member.displayName[0].toUpperCase()
@@ -257,7 +271,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Card(
-        color: Colors.white,
+        color: context.cardBackground,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -271,9 +285,9 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
                 ],
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 '他のユーザーから受け取った世帯IDを入力して世帯に参加します。',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: context.textSecondary),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -302,7 +316,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
                 child: ElevatedButton(
                   onPressed: _isProcessing ? null : () => _acceptInvitation(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: context.primaryColor,
                     foregroundColor: Colors.white,
                   ),
                   child: const Text('参加'),

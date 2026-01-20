@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import '../../../child_record.dart';
 import '../../models/record_item_model.dart';
 import 'record_title.dart';
@@ -70,7 +71,6 @@ void showRecordSlotSheet({
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.white,
     builder: (ctx) {
       final records = request.records.toList()
         ..sort((a, b) => a.at.compareTo(b.at));
@@ -90,7 +90,7 @@ void showRecordSlotSheet({
                   children: [
                     Image.asset(
                       request.type.iconAssetPath(
-                        isDark: Theme.of(context).brightness == Brightness.dark,
+                        isDark: context.isDarkMode,
                       ),
                       width: 24,
                       height: 24,
@@ -144,7 +144,7 @@ void showRecordSlotSheet({
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
-                                ?.copyWith(color: Colors.black54),
+                                ?.copyWith(color: context.subtextColor),
                           ),
                         ),
                 ),

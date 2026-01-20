@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
 
 class CalendarDayCell extends StatelessWidget {
@@ -47,16 +48,16 @@ class CalendarDayCell extends StatelessWidget {
         Theme.of(context).colorScheme.onSurface;
     Color color;
 
-    // 祝日は赤色
+    // 祝日は赤色（日曜日と同じ色）
     if (isHoliday) {
-      color = Colors.red;
+      color = context.sundayColor;
     } else {
       switch (day.weekday) {
         case DateTime.sunday:
-          color = Colors.red;
+          color = context.sundayColor;
           break;
         case DateTime.saturday:
-          color = Colors.blue;
+          color = context.saturdayColor;
           break;
         default:
           color = base;
@@ -96,10 +97,23 @@ class CalendarDayCell extends StatelessWidget {
               color: Colors.grey,
             );
           } else {
-            child = Image.asset(
+            Widget image = Image.asset(
               event.iconPath,
               fit: BoxFit.contain,
             );
+
+            // ダークモード時は白い背景を追加
+            if (context.isDarkMode) {
+              image = Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: borderRadius,
+                ),
+                child: image,
+              );
+            }
+
+            child = image;
           }
 
           Widget icon = Padding(

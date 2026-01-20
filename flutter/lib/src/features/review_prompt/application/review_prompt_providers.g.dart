@@ -51,7 +51,7 @@ final class ReviewPromptRepositoryProvider extends $FunctionalProvider<
 }
 
 String _$reviewPromptRepositoryHash() =>
-    r'ce7141190de054cd0005ba3b9d408a426c067e1d';
+    r'87dbbe9ac824d08ee5b4f925a32a527de7355693';
 
 @ProviderFor(inAppReviewService)
 const inAppReviewServiceProvider = InAppReviewServiceProvider._();
@@ -95,7 +95,7 @@ final class InAppReviewServiceProvider extends $FunctionalProvider<
 }
 
 String _$inAppReviewServiceHash() =>
-    r'238cedfdbc23cb59fdf1c6c1ddb28ea0e14f4ce7';
+    r'0b5607b176a238d058779506fab4651136bf48bb';
 
 @ProviderFor(checkReviewPromptUseCase)
 const checkReviewPromptUseCaseProvider = CheckReviewPromptUseCaseProvider._();
@@ -139,7 +139,7 @@ final class CheckReviewPromptUseCaseProvider extends $FunctionalProvider<
 }
 
 String _$checkReviewPromptUseCaseHash() =>
-    r'ce433df7f4b0a9eb570299883d4e9983ac58d391';
+    r'bc91c0b41239559c5af6ab4f52c75db17a201346';
 
 @ProviderFor(incrementRecordCountUseCase)
 const incrementRecordCountUseCaseProvider =
@@ -184,7 +184,7 @@ final class IncrementRecordCountUseCaseProvider extends $FunctionalProvider<
 }
 
 String _$incrementRecordCountUseCaseHash() =>
-    r'8bb292a43f77ff4ed5775b5751acdcb777d332a1';
+    r'18f160db8b74792ca6dab873a69ec858e5be7eda';
 
 @ProviderFor(incrementLaunchCountUseCase)
 const incrementLaunchCountUseCaseProvider =
@@ -229,7 +229,7 @@ final class IncrementLaunchCountUseCaseProvider extends $FunctionalProvider<
 }
 
 String _$incrementLaunchCountUseCaseHash() =>
-    r'a27138897c85d36b73e7eca3ce5a91668ba7eac6';
+    r'e86e299b2dabbb9c869bfb420d8cc9d557ab2037';
 
 @ProviderFor(markAsReviewedUseCase)
 const markAsReviewedUseCaseProvider = MarkAsReviewedUseCaseProvider._();
@@ -271,7 +271,51 @@ final class MarkAsReviewedUseCaseProvider
 }
 
 String _$markAsReviewedUseCaseHash() =>
-    r'b8451b06e10233e1b5f8bcf759211c6fad7a62f6';
+    r'022d05c53f737675d8f94ab5eb04087518eacccf';
+
+@ProviderFor(markAsDissatisfiedUseCase)
+const markAsDissatisfiedUseCaseProvider = MarkAsDissatisfiedUseCaseProvider._();
+
+final class MarkAsDissatisfiedUseCaseProvider extends $FunctionalProvider<
+    MarkAsDissatisfied,
+    MarkAsDissatisfied,
+    MarkAsDissatisfied> with $Provider<MarkAsDissatisfied> {
+  const MarkAsDissatisfiedUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'markAsDissatisfiedUseCaseProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$markAsDissatisfiedUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<MarkAsDissatisfied> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  MarkAsDissatisfied create(Ref ref) {
+    return markAsDissatisfiedUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MarkAsDissatisfied value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<MarkAsDissatisfied>(value),
+    );
+  }
+}
+
+String _$markAsDissatisfiedUseCaseHash() =>
+    r'453ead2c3af8050d1e3c71245c59cce13f5d1d56';
 
 @ProviderFor(recordDialogShownUseCase)
 const recordDialogShownUseCaseProvider = RecordDialogShownUseCaseProvider._();
@@ -315,7 +359,7 @@ final class RecordDialogShownUseCaseProvider extends $FunctionalProvider<
 }
 
 String _$recordDialogShownUseCaseHash() =>
-    r'd7686c5e5f912b14e6b0a4b2107c3f8bae576f1e';
+    r'a9138680382021ce8f525bd43a0da5592d510eee';
 
 @ProviderFor(reviewPromptController)
 const reviewPromptControllerProvider = ReviewPromptControllerProvider._();
@@ -359,4 +403,4 @@ final class ReviewPromptControllerProvider extends $FunctionalProvider<
 }
 
 String _$reviewPromptControllerHash() =>
-    r'd5f544cad801da3b20b611d6fa1f8fbc8ea9aa9b';
+    r'1a424d9a6bc9830e4a0d0e99d01ca043224098ec';

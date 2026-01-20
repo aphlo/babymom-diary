@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import '../../../baby_food/domain/entities/baby_food_record.dart';
+import '../../../feeding_table_settings/domain/entities/feeding_table_settings.dart';
 import '../../child_record.dart';
 import '../models/record_item_model.dart';
 import 'dashed_table_border.dart';
@@ -18,6 +20,7 @@ class RecordTable extends StatefulWidget {
     required this.selectedDate,
     this.babyFoodRecords = const [],
     this.onBabyFoodSlotTap,
+    this.settings = const FeedingTableSettings(),
   });
 
   final List<RecordItemModel> records;
@@ -31,22 +34,39 @@ class RecordTable extends StatefulWidget {
   /// 離乳食セルタップ時のコールバック
   final BabyFoodSlotTapCallback? onBabyFoodSlotTap;
 
-  static const double headerRowHeight = 44.0;
-  static const double bodyRowHeight = 32.0;
+  /// 授乳表の設定（表示カテゴリ・順序）
+  final FeedingTableSettings settings;
 
-  static const _columnWidths = <int, TableColumnWidth>{
-    0: FlexColumnWidth(0.7),
-    1: FlexColumnWidth(1.0),
-    2: FlexColumnWidth(1.0),
-    3: FlexColumnWidth(1.0),
-    4: FlexColumnWidth(1.0), // 離乳食
-    5: FlexColumnWidth(1.0),
-    6: FlexColumnWidth(1.0),
-    7: FlexColumnWidth(1.0),
-    8: FlexColumnWidth(1.0),
-  };
+  static const double headerRowHeight = 44.0;
+
+  /// 行の最小高さ（スマホでの表示を維持）
+  static const double minBodyRowHeight = 32.0;
+
+  /// 合計行の高さ
+  static const double totalsRowHeight = 32.0;
+
+  /// 利用可能な高さから動的に行の高さを計算
+  /// iPadなど大画面では行が拡張され、スマホでは最小高さを維持
+  static double calculateBodyRowHeight(double availableHeight) {
+    final contentHeight = availableHeight - headerRowHeight - totalsRowHeight;
+    final calculatedHeight = contentHeight / 24;
+    return calculatedHeight > minBodyRowHeight
+        ? calculatedHeight
+        : minBodyRowHeight;
+  }
 
   static const _borderDashPattern = <double>[1.5, 2.5];
+
+  /// 設定に基づいて動的にカラム幅を生成
+  Map<int, TableColumnWidth> get columnWidths {
+    final widths = <int, TableColumnWidth>{
+      0: const FlexColumnWidth(0.7), // 時間列
+    };
+    for (var i = 0; i < settings.visibleCategories.length; i++) {
+      widths[i + 1] = const FlexColumnWidth(1.0);
+    }
+    return widths;
+  }
 
   @override
   State<RecordTable> createState() => _RecordTableState();
@@ -103,7 +123,9 @@ class _RecordTableState extends State<RecordTable> {
     final currentHour = now.hour;
     // 現在時刻の2時間前にスクロール（画面内に現在時刻が含まれるように）
     final targetHour = (currentHour - 2).clamp(0, 23);
-    final targetOffset = targetHour * RecordTable.bodyRowHeight;
+    // 最小行高さを使用してスクロール位置を計算
+    // iPadなど大画面では全行が表示されるためスクロール不要、またはmaxScrollExtentでclampされる
+    final targetOffset = targetHour * RecordTable.minBodyRowHeight;
 
     _scrollController.jumpTo(targetOffset.clamp(
       0.0,
@@ -115,236 +137,251 @@ class _RecordTableState extends State<RecordTable> {
     _hasScrolled = true;
   }
 
-  static const _headers = <String>[
-    '時間',
-    '授乳',
-    'ミルク',
-    '搾母乳',
-    '離乳食',
-    '尿',
-    '便',
-    '体温',
-    'その他'
-  ];
+  /// 設定に基づいて動的にヘッダーを生成
+  List<String> get _headers {
+    return [
+      '時間',
+      ...widget.settings.visibleCategories.map((c) => c.label),
+    ];
+  }
+
+  /// カテゴリごとの合計値を取得
+  _TotalValue _getTotalValue(FeedingTableCategory category) {
+    switch (category) {
+      case FeedingTableCategory.nursing:
+        final count = widget.records
+                .where((e) => e.type == RecordType.breastRight)
+                .length +
+            widget.records.where((e) => e.type == RecordType.breastLeft).length;
+        return _TotalValue(value: '$count', unit: '回');
+      case FeedingTableCategory.formula:
+        final ml = _sumAmount(widget.records, RecordType.formula);
+        return _TotalValue(value: ml.toStringAsFixed(0), unit: 'ml');
+      case FeedingTableCategory.pump:
+        final ml = _sumAmount(widget.records, RecordType.pump);
+        return _TotalValue(value: ml.toStringAsFixed(0), unit: 'ml');
+      case FeedingTableCategory.babyFood:
+        return _TotalValue(
+            value: '${widget.babyFoodRecords.length}', unit: '回');
+      case FeedingTableCategory.pee:
+        final count =
+            widget.records.where((e) => e.type == RecordType.pee).length;
+        return _TotalValue(value: '$count', unit: '回');
+      case FeedingTableCategory.poop:
+        final count =
+            widget.records.where((e) => e.type == RecordType.poop).length;
+        return _TotalValue(value: '$count', unit: '回');
+      case FeedingTableCategory.temperature:
+        return const _TotalValue(value: '', unit: '');
+      case FeedingTableCategory.other:
+        return const _TotalValue(value: '', unit: '');
+    }
+  }
+
+  /// カテゴリに対応するセルを生成
+  Widget _buildCellForCategory(
+    FeedingTableCategory category,
+    int hour,
+    double rowHeight,
+  ) {
+    switch (category) {
+      case FeedingTableCategory.nursing:
+        return RecordTableCell(
+          records: widget.records,
+          hour: hour,
+          types: const [RecordType.breastLeft, RecordType.breastRight],
+          onTap: widget.onSlotTap,
+          rowHeight: rowHeight,
+        );
+      case FeedingTableCategory.formula:
+        return RecordTableCell(
+          records: widget.records,
+          hour: hour,
+          types: const [RecordType.formula],
+          onTap: widget.onSlotTap,
+          rowHeight: rowHeight,
+        );
+      case FeedingTableCategory.pump:
+        return RecordTableCell(
+          records: widget.records,
+          hour: hour,
+          types: const [RecordType.pump],
+          onTap: widget.onSlotTap,
+          rowHeight: rowHeight,
+        );
+      case FeedingTableCategory.babyFood:
+        return _BabyFoodTableCell(
+          babyFoodRecords: widget.babyFoodRecords,
+          hour: hour,
+          onTap: widget.onBabyFoodSlotTap,
+          rowHeight: rowHeight,
+        );
+      case FeedingTableCategory.pee:
+        return RecordTableCell(
+          records: widget.records,
+          hour: hour,
+          types: const [RecordType.pee],
+          onTap: widget.onSlotTap,
+          rowHeight: rowHeight,
+        );
+      case FeedingTableCategory.poop:
+        return RecordTableCell(
+          records: widget.records,
+          hour: hour,
+          types: const [RecordType.poop],
+          onTap: widget.onSlotTap,
+          rowHeight: rowHeight,
+        );
+      case FeedingTableCategory.temperature:
+        return RecordTableCell(
+          records: widget.records,
+          hour: hour,
+          types: const [RecordType.temperature],
+          onTap: widget.onSlotTap,
+          rowHeight: rowHeight,
+        );
+      case FeedingTableCategory.other:
+        return RecordTableCell(
+          records: widget.records,
+          hour: hour,
+          types: const [RecordType.other],
+          onTap: widget.onSlotTap,
+          rowHeight: rowHeight,
+        );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final borderSide = BorderSide(color: Colors.grey.shade400);
-    final breastRightRecords =
-        widget.records.where((e) => e.type == RecordType.breastRight).toList();
-    final breastLeftRecords =
-        widget.records.where((e) => e.type == RecordType.breastLeft).toList();
-    final totalBreastRightCount = breastRightRecords.length;
-    final totalBreastLeftCount = breastLeftRecords.length;
-    final totalFormulaMl = _sumAmount(widget.records, RecordType.formula);
-    final totalPumpMl = _sumAmount(widget.records, RecordType.pump);
-    final totalPeeCount =
-        widget.records.where((e) => e.type == RecordType.pee).length;
-    final totalPoopCount =
-        widget.records.where((e) => e.type == RecordType.poop).length;
-    final totalBabyFoodCount = widget.babyFoodRecords.length;
+    final borderSide = BorderSide(color: context.tableBorderColor);
 
-    final totalsRow = _TotalsRow(
-      borderSide: borderSide,
-      values: [
-        _TotalValue(
-          value: '${totalBreastLeftCount + totalBreastRightCount}',
-          unit: '回',
-        ),
-        _TotalValue(
-          value: totalFormulaMl.toStringAsFixed(0),
-          unit: 'ml',
-        ),
-        _TotalValue(
-          value: totalPumpMl.toStringAsFixed(0),
-          unit: 'ml',
-        ),
-        _TotalValue(
-          value: '$totalBabyFoodCount',
-          unit: '回',
-        ),
-        _TotalValue(
-          value: '$totalPeeCount',
-          unit: '回',
-        ),
-        _TotalValue(
-          value: '$totalPoopCount',
-          unit: '回',
-        ),
-        const _TotalValue(value: '', unit: ''),
-        const _TotalValue(value: '', unit: ''),
-      ],
-    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 利用可能な高さから動的に行の高さを計算
+        // iPadなど大画面では行が拡張され、スマホでは最小高さを維持
+        final bodyRowHeight =
+            RecordTable.calculateBodyRowHeight(constraints.maxHeight);
 
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: Table(
-            columnWidths: RecordTable._columnWidths,
-            border: DashedTableBorder(
-              top: borderSide,
-              left: borderSide,
-              right: borderSide,
-              bottom: borderSide,
-              verticalInside: borderSide,
-              dashPattern: RecordTable._borderDashPattern,
-            ),
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            children: [
-              TableRow(
-                decoration: BoxDecoration(color: Colors.grey.shade100),
+        final totalsRow = _TotalsRow(
+          borderSide: borderSide,
+          columnWidths: widget.columnWidths,
+          values: widget.settings.visibleCategories
+              .map((c) => _getTotalValue(c))
+              .toList(),
+          rowHeight: bodyRowHeight,
+        );
+
+        return Column(
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: Table(
+                columnWidths: widget.columnWidths,
+                border: DashedTableBorder(
+                  top: borderSide,
+                  left: borderSide,
+                  right: borderSide,
+                  bottom: borderSide,
+                  verticalInside: borderSide,
+                  dashPattern: RecordTable._borderDashPattern,
+                ),
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                 children: [
-                  for (final header in _headers)
-                    SizedBox(
-                      height: RecordTable.headerRowHeight,
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.center,
-                            child: Text(
-                              header,
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                  TableRow(
+                    decoration:
+                        BoxDecoration(color: context.tableHeaderBackground),
+                    children: [
+                      for (final header in _headers)
+                        SizedBox(
+                          height: RecordTable.headerRowHeight,
+                          child: Center(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 4),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.center,
+                                child: Text(
+                                  header,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
+                    ],
+                  ),
                 ],
               ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.only(bottom: RecordTable.bodyRowHeight),
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    key: widget.scrollStorageKey,
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Table(
-                        columnWidths: RecordTable._columnWidths,
-                        border: DashedTableBorder(
-                          top: BorderSide.none,
-                          left: borderSide,
-                          right: borderSide,
-                          bottom: BorderSide.none,
-                          horizontalInside: borderSide,
-                          verticalInside: borderSide,
-                          dashPattern: RecordTable._borderDashPattern,
-                        ),
-                        defaultVerticalAlignment:
-                            TableCellVerticalAlignment.middle,
-                        children: [
-                          for (var hour = 0; hour < 24; hour++)
-                            TableRow(
-                              decoration: BoxDecoration(
-                                color: hour.isEven
-                                    ? Colors.white
-                                    : Colors.pink.shade50,
-                              ),
-                              children: [
-                                // 時間列
-                                SizedBox(
-                                  height: RecordTable.bodyRowHeight,
-                                  child: Center(child: Text('$hour')),
-                                ),
-                                // 授乳
-                                RecordTableCell(
-                                  records: widget.records,
-                                  hour: hour,
-                                  types: const [
-                                    RecordType.breastLeft,
-                                    RecordType.breastRight
-                                  ],
-                                  onTap: widget.onSlotTap,
-                                  rowHeight: RecordTable.bodyRowHeight,
-                                ),
-                                // ミルク
-                                RecordTableCell(
-                                  records: widget.records,
-                                  hour: hour,
-                                  types: const [RecordType.formula],
-                                  onTap: widget.onSlotTap,
-                                  rowHeight: RecordTable.bodyRowHeight,
-                                ),
-                                // 搾母乳
-                                RecordTableCell(
-                                  records: widget.records,
-                                  hour: hour,
-                                  types: const [RecordType.pump],
-                                  onTap: widget.onSlotTap,
-                                  rowHeight: RecordTable.bodyRowHeight,
-                                ),
-                                // 離乳食（別コレクション）
-                                _BabyFoodTableCell(
-                                  babyFoodRecords: widget.babyFoodRecords,
-                                  hour: hour,
-                                  onTap: widget.onBabyFoodSlotTap,
-                                  rowHeight: RecordTable.bodyRowHeight,
-                                ),
-                                // 尿
-                                RecordTableCell(
-                                  records: widget.records,
-                                  hour: hour,
-                                  types: const [RecordType.pee],
-                                  onTap: widget.onSlotTap,
-                                  rowHeight: RecordTable.bodyRowHeight,
-                                ),
-                                // 便
-                                RecordTableCell(
-                                  records: widget.records,
-                                  hour: hour,
-                                  types: const [RecordType.poop],
-                                  onTap: widget.onSlotTap,
-                                  rowHeight: RecordTable.bodyRowHeight,
-                                ),
-                                // 体温
-                                RecordTableCell(
-                                  records: widget.records,
-                                  hour: hour,
-                                  types: const [RecordType.temperature],
-                                  onTap: widget.onSlotTap,
-                                  rowHeight: RecordTable.bodyRowHeight,
-                                ),
-                                // その他
-                                RecordTableCell(
-                                  records: widget.records,
-                                  hour: hour,
-                                  types: const [RecordType.other],
-                                  onTap: widget.onSlotTap,
-                                  rowHeight: RecordTable.bodyRowHeight,
-                                ),
-                              ],
+            ),
+            Expanded(
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: bodyRowHeight),
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        key: widget.scrollStorageKey,
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: Table(
+                            columnWidths: widget.columnWidths,
+                            border: DashedTableBorder(
+                              top: BorderSide.none,
+                              left: borderSide,
+                              right: borderSide,
+                              bottom: BorderSide.none,
+                              horizontalInside: borderSide,
+                              verticalInside: borderSide,
+                              dashPattern: RecordTable._borderDashPattern,
                             ),
-                        ],
+                            defaultVerticalAlignment:
+                                TableCellVerticalAlignment.middle,
+                            children: [
+                              for (var hour = 0; hour < 24; hour++)
+                                TableRow(
+                                  decoration: BoxDecoration(
+                                    color: hour.isEven
+                                        ? context.tableRowEven
+                                        : context.tableRowOdd,
+                                  ),
+                                  children: [
+                                    // 時間列
+                                    SizedBox(
+                                      height: bodyRowHeight,
+                                      child: Center(child: Text('$hour')),
+                                    ),
+                                    // 設定に基づいて動的に列を生成
+                                    for (final category
+                                        in widget.settings.visibleCategories)
+                                      _buildCellForCategory(
+                                          category, hour, bodyRowHeight),
+                                  ],
+                                ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: totalsRow,
+                  ),
+                ],
               ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: totalsRow,
-              ),
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -353,17 +390,21 @@ class _TotalsRow extends StatelessWidget {
   const _TotalsRow({
     required this.borderSide,
     required this.values,
+    required this.columnWidths,
+    required this.rowHeight,
   });
 
   final BorderSide borderSide;
   final List<_TotalValue> values;
+  final Map<int, TableColumnWidth> columnWidths;
+  final double rowHeight;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: Table(
-        columnWidths: RecordTable._columnWidths,
+        columnWidths: columnWidths,
         border: DashedTableBorder(
           top: borderSide,
           left: borderSide,
@@ -376,12 +417,12 @@ class _TotalsRow extends StatelessWidget {
         children: [
           TableRow(
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: context.tableTotalsBackground,
             ),
             children: [
-              const SizedBox(
-                height: RecordTable.bodyRowHeight,
-                child: Center(
+              SizedBox(
+                height: rowHeight,
+                child: const Center(
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.center,
@@ -392,7 +433,8 @@ class _TotalsRow extends StatelessWidget {
                   ),
                 ),
               ),
-              for (final value in values) _TotalValueCell(value: value),
+              for (final value in values)
+                _TotalValueCell(value: value, rowHeight: rowHeight),
             ],
           ),
         ],
@@ -409,14 +451,15 @@ class _TotalValue {
 }
 
 class _TotalValueCell extends StatelessWidget {
-  const _TotalValueCell({required this.value});
+  const _TotalValueCell({required this.value, required this.rowHeight});
 
   final _TotalValue value;
+  final double rowHeight;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: RecordTable.bodyRowHeight,
+      height: rowHeight,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
         child: Stack(
@@ -438,9 +481,9 @@ class _TotalValueCell extends StatelessWidget {
                 right: 0,
                 child: Text(
                   value.unit,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
-                    color: Colors.black54,
+                    color: context.subtextColor,
                   ),
                 ),
               ),

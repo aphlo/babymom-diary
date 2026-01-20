@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apple-Style Contact Form</title>
+  <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f7;
+      --text-primary: #1d1d1f;
+      --text-secondary: #86868b;
+      --accent-blue: #0071e3;
+      --border-color: rgba(0, 0, 0, 0.1);
+      --error-color: #ff3b30;
+      --success-color: #30d158;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: #000000;
+        --bg-secondary: #1d1d1f;
+        --text-primary: #f5f5f7;
+        --text-secondary: #a1a1a6;
+        --accent-blue: #0a84ff;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --error-color: #ff453a;
+        --success-color: #32d74b;
+      }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 3rem 1.5rem;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .contact-section {
+      max-width: 600px;
+      width: 100%;
+      animation: fadeInUp 800ms ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-label {
+      color: var(--accent-blue);
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .section-subtitle {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .contact-form {
+      background: var(--bg-secondary);
+      border-radius: 24px;
+      padding: 3rem;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    @media (max-width: 640px) {
+      .contact-form {
+        padding: 2rem;
+      }
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+    }
+
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      padding: 1rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      font-size: 1rem;
+      color: var(--text-primary);
+      font-family: inherit;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.1);
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .form-input.error,
+    .form-textarea.error {
+      border-color: var(--error-color);
+    }
+
+    .form-input.error:focus,
+    .form-textarea.error:focus {
+      box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.1);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .form-error {
+      margin-top: 0.5rem;
+      color: var(--error-color);
+      font-size: 0.875rem;
+      display: none;
+    }
+
+    .form-error.visible {
+      display: block;
+      animation: shake 500ms ease;
+    }
+
+    @keyframes shake {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-5px);
+      }
+      20%, 40%, 60%, 80% {
+        transform: translateX(5px);
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      border-radius: 980px;
+      font-size: 1rem;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      min-height: 48px;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(10, 132, 255, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--bg-primary);
+    }
+
+    .success-message {
+      text-align: center;
+      padding: 3rem;
+      display: none;
+    }
+
+    .success-message.visible {
+      display: block;
+      animation: fadeInUp 600ms ease-out;
+    }
+
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 1.5rem;
+      border-radius: 50%;
+      background: var(--success-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+    }
+
+    .success-title {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .success-text {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Character counter */
+    .char-counter {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <section class="contact-section">
+    <div class="section-header">
+      <p class="section-label">Get in Touch</p>
+      <h1 class="section-title">Contact Me</h1>
+      <p class="section-subtitle">
+        Have a question or want to work together? I'd love to hear from you.
+      </p>
+    </div>
+
+    <div class="contact-form" id="contactForm">
+      <form id="form">
+        <div class="form-group">
+          <label for="name" class="form-label">Name *</label>
+          <input
+            type="text"
+            id="name"
+            class="form-input"
+            placeholder="Your name"
+            required
+          >
+          <p class="form-error" id="nameError">Please enter your name</p>
+        </div>
+
+        <div class="form-group">
+          <label for="email" class="form-label">Email *</label>
+          <input
+            type="email"
+            id="email"
+            class="form-input"
+            placeholder="you@example.com"
+            required
+          >
+          <p class="form-error" id="emailError">Please enter a valid email address</p>
+        </div>
+
+        <div class="form-group">
+          <label for="subject" class="form-label">Subject *</label>
+          <input
+            type="text"
+            id="subject"
+            class="form-input"
+            placeholder="What is this about?"
+            required
+          >
+          <p class="form-error" id="subjectError">Please enter a subject</p>
+        </div>
+
+        <div class="form-group">
+          <label for="message" class="form-label">Message *</label>
+          <textarea
+            id="message"
+            class="form-textarea"
+            placeholder="Tell me about your project or question..."
+            required
+            maxlength="1000"
+          ></textarea>
+          <p class="char-counter" id="charCounter">0 / 1000</p>
+          <p class="form-error" id="messageError">Please enter a message</p>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="resetBtn">
+            Reset
+          </button>
+          <button type="submit" class="btn btn-primary" id="submitBtn">
+            Send Message
+          </button>
+        </div>
+      </form>
+
+      <div class="success-message" id="successMessage">
+        <div class="success-icon">✓</div>
+        <h2 class="success-title">Message Sent!</h2>
+        <p class="success-text">
+          Thank you for reaching out. I'll get back to you as soon as possible.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const form = document.getElementById('form');
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+    const subjectInput = document.getElementById('subject');
+    const messageInput = document.getElementById('message');
+    const charCounter = document.getElementById('charCounter');
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const successMessage = document.getElementById('successMessage');
+
+    // Character counter
+    messageInput.addEventListener('input', (e) => {
+      const length = e.target.value.length;
+      charCounter.textContent = `${length} / 1000`;
+    });
+
+    // Validation
+    function validateField(input, errorId, validationFn) {
+      const error = document.getElementById(errorId);
+      const isValid = validationFn(input.value);
+
+      if (!isValid) {
+        input.classList.add('error');
+        error.classList.add('visible');
+      } else {
+        input.classList.remove('error');
+        error.classList.remove('visible');
+      }
+
+      return isValid;
+    }
+
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Validate all fields
+      const isNameValid = validateField(nameInput, 'nameError', v => v.trim().length > 0);
+      const isEmailValid = validateField(emailInput, 'emailError', validateEmail);
+      const isSubjectValid = validateField(subjectInput, 'subjectError', v => v.trim().length > 0);
+      const isMessageValid = validateField(messageInput, 'messageError', v => v.trim().length > 0);
+
+      if (!isNameValid || !isEmailValid || !isSubjectValid || !isMessageValid) {
+        return;
+      }
+
+      // Disable submit button
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+
+      // Simulate API call (replace with actual API endpoint)
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Show success message
+      form.style.display = 'none';
+      successMessage.classList.add('visible');
+
+      // Reset form after 3 seconds
+      setTimeout(() => {
+        form.reset();
+        form.style.display = 'block';
+        successMessage.classList.remove('visible');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Message';
+        charCounter.textContent = '0 / 1000';
+      }, 3000);
+    });
+
+    // Reset button
+    resetBtn.addEventListener('click', () => {
+      form.reset();
+      charCounter.textContent = '0 / 1000';
+
+      // Remove error states
+      [nameInput, emailInput, subjectInput, messageInput].forEach(input => {
+        input.classList.remove('error');
+      });
+      ['nameError', 'emailError', 'subjectError', 'messageError'].forEach(id => {
+        document.getElementById(id).classList.remove('visible');
+      });
+    });
+
+    // Real-time validation
+    nameInput.addEventListener('blur', () => {
+      validateField(nameInput, 'nameError', v => v.trim().length > 0);
+    });
+
+    emailInput.addEventListener('blur', () => {
+      validateField(emailInput, 'emailError', validateEmail);
+    });
+
+    subjectInput.addEventListener('blur', () => {
+      validateField(subjectInput, 'subjectError', v => v.trim().length > 0);
+    });
+
+    messageInput.addEventListener('blur', () => {
+      validateField(messageInput, 'messageError', v => v.trim().length > 0);
+    });
+  </script>
+</body>
+</html>

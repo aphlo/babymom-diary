@@ -30,6 +30,7 @@ import '../../features/menu/widget_settings/presentation/pages/widget_settings_p
 import '../../features/menu/ingredient_settings/presentation/pages/ingredient_settings_page.dart';
 import '../../features/baby_food/presentation/pages/ingredient_detail_page.dart';
 import '../../features/baby_food/domain/value_objects/food_category.dart';
+import '../../features/feeding_table_settings/presentation/pages/feeding_table_settings_page.dart';
 
 part 'app_router.g.dart';
 
@@ -214,6 +215,13 @@ GoRouter appRouter(Ref ref) {
         name: 'widget_settings',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: WidgetSettingsPage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '/feeding-table/settings',
+        name: 'feeding_table_settings',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: FeedingTableSettingsPage()),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,

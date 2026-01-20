@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/semantic_colors.dart';
+
 /// セクションヘッダー
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
@@ -13,14 +15,14 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: Colors.pink.shade200,
+      color: context.dateSectionHeaderBackground,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: Colors.white,
+          color: context.dateSectionText,
         ),
       ),
     );

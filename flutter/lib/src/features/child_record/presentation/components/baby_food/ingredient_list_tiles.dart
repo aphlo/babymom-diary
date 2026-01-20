@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import '../../../../../core/types/child_icon.dart';
 import '../../../../baby_food/domain/entities/custom_ingredient.dart';
 import '../../../../baby_food/domain/value_objects/baby_food_reaction.dart';
@@ -45,33 +46,12 @@ class CustomIngredientListTile extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(color: Colors.grey.shade200),
+            bottom: BorderSide(color: context.menuSectionBorder),
           ),
         ),
         child: Row(
           children: [
-            Container(
-              width: 64,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: hasEaten ? Colors.green.shade50 : Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color:
-                      hasEaten ? Colors.green.shade200 : Colors.grey.shade300,
-                ),
-              ),
-              child: Text(
-                hasEaten ? '食べた' : 'まだ',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color:
-                      hasEaten ? Colors.green.shade700 : Colors.grey.shade500,
-                ),
-              ),
-            ),
+            _EatenBadge(hasEaten: hasEaten),
             const SizedBox(width: 16),
             Expanded(
               child: Row(
@@ -87,23 +67,7 @@ class CustomIngredientListTile extends ConsumerWidget {
                   ),
                   if (hasAllergy) ...[
                     const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade50,
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: Colors.red.shade200),
-                      ),
-                      child: Text(
-                        'アレルギー',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.red.shade700,
-                        ),
-                      ),
-                    ),
+                    _AllergyBadge(),
                   ],
                 ],
               ),
@@ -282,33 +246,12 @@ class IngredientListTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(color: Colors.grey.shade200),
+            bottom: BorderSide(color: context.menuSectionBorder),
           ),
         ),
         child: Row(
           children: [
-            Container(
-              width: 64,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: hasEaten ? Colors.green.shade50 : Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color:
-                      hasEaten ? Colors.green.shade200 : Colors.grey.shade300,
-                ),
-              ),
-              child: Text(
-                hasEaten ? '食べた' : 'まだ',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color:
-                      hasEaten ? Colors.green.shade700 : Colors.grey.shade500,
-                ),
-              ),
-            ),
+            _EatenBadge(hasEaten: hasEaten),
             const SizedBox(width: 16),
             Expanded(
               child: Row(
@@ -324,23 +267,7 @@ class IngredientListTile extends StatelessWidget {
                   ),
                   if (hasAllergy) ...[
                     const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade50,
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: Colors.red.shade200),
-                      ),
-                      child: Text(
-                        'アレルギー',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.red.shade700,
-                        ),
-                      ),
-                    ),
+                    _AllergyBadge(),
                   ],
                 ],
               ),
@@ -353,6 +280,74 @@ class IngredientListTile extends StatelessWidget {
                   : null,
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 「食べた」「まだ」バッジ
+class _EatenBadge extends StatelessWidget {
+  const _EatenBadge({required this.hasEaten});
+
+  final bool hasEaten;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color backgroundColor;
+    final Color borderColor;
+    final Color textColor;
+
+    if (hasEaten) {
+      backgroundColor = context.eatenBadgeBackground;
+      borderColor = context.eatenBadgeBorder;
+      textColor = context.eatenBadgeText;
+    } else {
+      backgroundColor = context.notEatenBadgeBackground;
+      borderColor = context.notEatenBadgeBorder;
+      textColor = context.notEatenBadgeText;
+    }
+
+    return Container(
+      width: 64,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Text(
+        hasEaten ? '食べた' : 'まだ',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: textColor,
+        ),
+      ),
+    );
+  }
+}
+
+/// アレルギーバッジ
+class _AllergyBadge extends StatelessWidget {
+  const _AllergyBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: context.allergyBadgeBackground,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: context.allergyBadgeBorder),
+      ),
+      child: Text(
+        'アレルギー',
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: context.allergyBadgeText,
         ),
       ),
     );

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/core/utils/date_formatter.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/vaccination_record.dart';
-import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_requirement.dart';
 
 import '../models/vaccine_info.dart';
 import '../styles/vaccine_type_styles.dart';
 import '../viewmodels/vaccine_detail_state.dart';
-import '../widgets/dose_status_badge.dart';
-import '../widgets/vaccine_type_badge.dart';
+import '../widgets/shared/dose_status_badge.dart';
+import '../widgets/shared/requirement_badge.dart';
+import '../widgets/shared/vaccine_type_badge.dart';
 
 class VaccinesListView extends StatelessWidget {
   const VaccinesListView({
@@ -88,9 +88,7 @@ class _VaccineListCard extends StatelessWidget {
             : List<int>.generate(5, (index) => index + 1))
         : (allDoseNumbers.toList()..sort());
 
-    final requirement =
-        _RequirementPresentation.fromRequirement(vaccine.requirement);
-    final typeStyles = vaccineTypeStyles(vaccine.category);
+    final typeStyles = vaccineTypeStyles(vaccine.category, context: context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -109,7 +107,12 @@ class _VaccineListCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                _RequirementBadge(presentation: requirement),
+                RequirementBadge(
+                  requirement: vaccine.requirement,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  fontSize: 10,
+                ),
                 const SizedBox(width: 4),
                 VaccineTypeBadge(
                   label: typeStyles.label,
@@ -128,7 +131,7 @@ class _VaccineListCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Icon(
                     Icons.chevron_right,
-                    color: Colors.grey.shade600,
+                    color: context.subtextColor,
                     size: 20,
                   ),
                 ],
@@ -241,8 +244,9 @@ class _InfluenzaDoseGrid extends StatelessWidget {
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
-                  color:
-                      hasScheduledDate ? Colors.black87 : Colors.grey.shade400,
+                  color: hasScheduledDate
+                      ? context.textPrimary
+                      : context.inactiveTabColor,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -370,8 +374,8 @@ class _StandardDoseList extends StatelessWidget {
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
                   color: effectiveDate != null
-                      ? Colors.black87
-                      : Colors.grey.shade400,
+                      ? context.textPrimary
+                      : context.inactiveTabColor,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -408,63 +412,5 @@ class _StandardDoseList extends StatelessWidget {
       scheduledDate: doseRecord?.scheduledDate,
       reservationGroupId: doseRecord?.reservationGroupId,
     );
-  }
-}
-
-class _RequirementBadge extends StatelessWidget {
-  const _RequirementBadge({required this.presentation});
-
-  final _RequirementPresentation presentation;
-
-  @override
-  Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: presentation.foregroundColor,
-            ) ??
-        TextStyle(
-          fontWeight: FontWeight.w700,
-          color: presentation.foregroundColor,
-          fontSize: 10,
-        );
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: presentation.backgroundColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(presentation.label, style: textStyle),
-    );
-  }
-}
-
-class _RequirementPresentation {
-  const _RequirementPresentation({
-    required this.label,
-    required this.backgroundColor,
-    required this.foregroundColor,
-  });
-
-  final String label;
-  final Color backgroundColor;
-  final Color foregroundColor;
-
-  static _RequirementPresentation fromRequirement(
-      VaccineRequirement requirement) {
-    switch (requirement) {
-      case VaccineRequirement.mandatory:
-        return const _RequirementPresentation(
-          label: '定期接種',
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-        );
-      case VaccineRequirement.optional:
-        return const _RequirementPresentation(
-          label: '任意接種',
-          backgroundColor: AppColors.secondary,
-          foregroundColor: Colors.white,
-        );
-    }
   }
 }

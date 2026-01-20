@@ -159,7 +159,7 @@ class _TableRow extends StatelessWidget {
     final theme = Theme.of(context);
     final dateStyle = theme.textTheme.bodyMedium;
     final contentStyle = theme.textTheme.bodySmall;
-    final rowColor = getWeekendRowColor(entry.date, theme);
+    final rowColor = getWeekendRowColor(entry.date, context);
 
     return Material(
       color: rowColor,

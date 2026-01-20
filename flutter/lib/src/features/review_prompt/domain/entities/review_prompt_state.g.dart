@@ -12,6 +12,7 @@ _ReviewPromptState _$ReviewPromptStateFromJson(Map<String, dynamic> json) =>
       appLaunchCount: (json['appLaunchCount'] as num).toInt(),
       hasReviewed: json['hasReviewed'] as bool,
       lastShownDate: json['lastShownDate'] as String?,
+      dissatisfiedDate: json['dissatisfiedDate'] as String?,
     );
 
 Map<String, dynamic> _$ReviewPromptStateToJson(_ReviewPromptState instance) =>
@@ -20,4 +21,5 @@ Map<String, dynamic> _$ReviewPromptStateToJson(_ReviewPromptState instance) =>
       'appLaunchCount': instance.appLaunchCount,
       'hasReviewed': instance.hasReviewed,
       'lastShownDate': instance.lastShownDate,
+      'dissatisfiedDate': instance.dissatisfiedDate,
     };

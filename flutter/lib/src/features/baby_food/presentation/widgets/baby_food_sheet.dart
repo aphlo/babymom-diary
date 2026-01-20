@@ -66,7 +66,6 @@ class _BabyFoodSheetState extends ConsumerState<BabyFoodSheet> {
     final stepTitle = state.isIngredientSelectionStep ? '食材を選択' : '食べた量を記録';
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(title),
         leading: IconButton(

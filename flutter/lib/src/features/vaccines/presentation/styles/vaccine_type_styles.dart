@@ -1,4 +1,4 @@
-import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_category.dart';
 import 'package:flutter/material.dart';
 
@@ -16,32 +16,24 @@ class VaccineTypeStyles {
   final Color borderColor;
 }
 
-VaccineTypeStyles vaccineTypeStyles(VaccineCategory category) {
+VaccineTypeStyles vaccineTypeStyles(
+  VaccineCategory category, {
+  required BuildContext context,
+}) {
   switch (category) {
     case VaccineCategory.live:
-      const Color baseColor = AppColors.vaccineLive;
       return VaccineTypeStyles(
         label: '生',
-        backgroundColor: baseColor.withValues(alpha: 0.12),
-        foregroundColor: baseColor,
-        borderColor: baseColor.withValues(alpha: 0.4),
+        backgroundColor: context.liveBadgeBackground,
+        foregroundColor: context.liveBadgeForeground,
+        borderColor: context.liveBadgeBorder,
       );
     case VaccineCategory.inactivated:
-      const Color baseColor = AppColors.vaccineInactivated;
       return VaccineTypeStyles(
         label: '不活化',
-        backgroundColor: baseColor.withValues(alpha: 0.12),
-        foregroundColor: baseColor,
-        borderColor: baseColor.withValues(alpha: 0.4),
+        backgroundColor: context.inactivatedBadgeBackground,
+        foregroundColor: context.inactivatedBadgeForeground,
+        borderColor: context.inactivatedBadgeBorder,
       );
-  }
-}
-
-VaccineTypeStyles vaccineTypeStylesFromValueObject(VaccineCategory category) {
-  switch (category) {
-    case VaccineCategory.live:
-      return vaccineTypeStyles(VaccineCategory.live);
-    case VaccineCategory.inactivated:
-      return vaccineTypeStyles(VaccineCategory.inactivated);
   }
 }
