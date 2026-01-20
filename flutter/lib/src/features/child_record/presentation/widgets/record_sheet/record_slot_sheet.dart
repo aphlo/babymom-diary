@@ -144,7 +144,7 @@ void showRecordSlotSheet({
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
-                                ?.copyWith(color: Colors.black54),
+                                ?.copyWith(color: context.subtextColor),
                           ),
                         ),
                 ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import '../../../../baby_food/domain/value_objects/food_category.dart';
 import '../../../../baby_food/presentation/providers/baby_food_providers.dart';
 
@@ -16,11 +17,14 @@ class AddIngredientButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final accentColor = context.isDarkMode
+        ? const Color(0xFFFF8A9E) // ダークモードでより明るいピンク
+        : Colors.pink;
     return ListTile(
-      leading: const Icon(Icons.add, color: Colors.pink),
-      title: const Text(
+      leading: Icon(Icons.add, color: accentColor),
+      title: Text(
         '食材を追加',
-        style: TextStyle(color: Colors.pink),
+        style: TextStyle(color: accentColor),
       ),
       onTap: () => _showAddIngredientDialog(context, ref),
     );
