@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import '../../../baby_food/domain/entities/baby_food_record.dart';
 import '../../../feeding_table_settings/domain/entities/feeding_table_settings.dart';
 import '../../child_record.dart';
@@ -252,7 +253,7 @@ class _RecordTableState extends State<RecordTable> {
 
   @override
   Widget build(BuildContext context) {
-    final borderSide = BorderSide(color: Colors.grey.shade400);
+    final borderSide = BorderSide(color: context.tableBorderColor);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -287,7 +288,8 @@ class _RecordTableState extends State<RecordTable> {
                 defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                 children: [
                   TableRow(
-                    decoration: BoxDecoration(color: Colors.grey.shade100),
+                    decoration:
+                        BoxDecoration(color: context.tableHeaderBackground),
                     children: [
                       for (final header in _headers)
                         SizedBox(
@@ -346,8 +348,8 @@ class _RecordTableState extends State<RecordTable> {
                                 TableRow(
                                   decoration: BoxDecoration(
                                     color: hour.isEven
-                                        ? Colors.white
-                                        : Colors.pink.shade50,
+                                        ? context.tableRowEven
+                                        : context.tableRowOdd,
                                   ),
                                   children: [
                                     // 時間列
@@ -415,7 +417,7 @@ class _TotalsRow extends StatelessWidget {
         children: [
           TableRow(
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: context.tableTotalsBackground,
             ),
             children: [
               SizedBox(
@@ -479,9 +481,9 @@ class _TotalValueCell extends StatelessWidget {
                 right: 0,
                 child: Text(
                   value.unit,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
-                    color: Colors.black54,
+                    color: context.subtextColor,
                   ),
                 ),
               ),

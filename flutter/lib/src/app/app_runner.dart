@@ -10,6 +10,7 @@ import 'package:babymom_diary/src/core/firebase/household_service.dart'
 import 'package:babymom_diary/src/core/preferences/shared_preferences_provider.dart';
 import 'package:babymom_diary/src/core/router/app_router.dart';
 import 'package:babymom_diary/src/core/theme/app_theme_provider.dart';
+import 'package:babymom_diary/src/core/theme/theme_mode_provider.dart';
 import 'package:babymom_diary/src/features/ads/infrastructure/services/admob_service.dart';
 import 'package:babymom_diary/src/features/ads/application/services/banner_ad_manager.dart';
 import 'package:babymom_diary/src/features/menu/children/application/children_local_provider.dart';
@@ -168,6 +169,8 @@ class _AppState extends ConsumerState<App> {
     final householdId = householdAsync.value ?? widget.initialHouseholdId;
     final router = ref.watch(appRouterProvider);
     final theme = ref.watch(appThemeProvider(householdId));
+    final darkTheme = ref.watch(appDarkThemeProvider(householdId));
+    final themeMode = ref.watch(themeModeProvider);
 
     // ウィジェットデータの自動同期を有効化
     ref.watch(widgetAutoSyncProvider);
@@ -207,6 +210,8 @@ class _AppState extends ConsumerState<App> {
     return MaterialApp.router(
       title: widget.appTitle,
       theme: theme,
+      darkTheme: darkTheme,
+      themeMode: themeMode,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
       localizationsDelegates: GlobalMaterialLocalizations.delegates,

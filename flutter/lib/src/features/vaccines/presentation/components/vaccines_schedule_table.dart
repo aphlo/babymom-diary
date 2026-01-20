@@ -128,6 +128,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
   VaccinePeriodHighlightStyle? _highlightStyleFor(
     VaccineInfo vaccine,
     String periodLabel,
+    BuildContext context,
   ) {
     final VaccinationPeriodHighlight? highlight =
         vaccine.periodHighlights[periodLabel];
@@ -137,6 +138,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
     return vaccinePeriodHighlightStyle(
       highlight: highlight,
       palette: vaccine.highlightPalette,
+      context: context,
     );
   }
 
@@ -315,7 +317,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                           final bool isInfluenza =
                               vaccine.id.startsWith('influenza');
                           final VaccinePeriodHighlightStyle? highlightStyle =
-                              _highlightStyleFor(vaccine, periodLabel);
+                              _highlightStyleFor(vaccine, periodLabel, context);
                           final List<int> rawDoseNumbers =
                               vaccine.doseSchedules[periodLabel] ??
                                   const <int>[];
@@ -419,6 +421,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                                     nextHighlightStyle = _highlightStyleFor(
                                   vaccine,
                                   nextPeriodLabel,
+                                  context,
                                 );
                                 final bool isLast = offset == runLength - 1;
                                 periodCells.add(

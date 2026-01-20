@@ -97,7 +97,6 @@ void showBabyFoodSlotSheet({
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.white,
     builder: (ctx) {
       final records = recordsInHour.toList()
         ..sort((a, b) => a.recordedAt.compareTo(b.recordedAt));

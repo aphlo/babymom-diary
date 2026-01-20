@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccination_period_highlight.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/semantic_colors.dart';
 import '../models/vaccine_info.dart';
 
 class VaccinePeriodHighlightStyle {
@@ -21,28 +22,30 @@ class VaccinePeriodHighlightStyle {
 VaccinePeriodHighlightStyle vaccinePeriodHighlightStyle({
   required VaccinationPeriodHighlight highlight,
   required VaccineHighlightPalette palette,
+  required BuildContext context,
 }) {
   switch (highlight) {
     case VaccinationPeriodHighlight.recommended:
-      return _recommendedStyle(palette);
+      return _recommendedStyle(palette, context);
     case VaccinationPeriodHighlight.available:
-      return _availableStyle(palette);
+      return _availableStyle(palette, context);
     case VaccinationPeriodHighlight.academyRecommendation:
-      return _academyRecommendationStyle();
+      return _academyRecommendationStyle(context);
   }
 }
 
 VaccinePeriodHighlightStyle _recommendedStyle(
   VaccineHighlightPalette palette,
+  BuildContext context,
 ) {
   final Color base = _paletteBaseColor(palette);
-  const _BadgeColors badgeColors = _BadgeColors(
-    fill: Colors.white,
-    text: _badgeNeutralColor,
-    border: _badgeNeutralColor,
+  final badgeColors = _BadgeColors(
+    fill: context.badgeBackground,
+    text: context.badgeNeutralColor,
+    border: context.badgeNeutralColor,
   );
   return VaccinePeriodHighlightStyle(
-    cellColor: _mix(base, Colors.white, 0.35),
+    cellColor: _mix(base, context.highlightMixBase, 0.35),
     badgeFillColor: badgeColors.fill,
     badgeTextColor: badgeColors.text,
     badgeBorderColor: badgeColors.border,
@@ -51,29 +54,30 @@ VaccinePeriodHighlightStyle _recommendedStyle(
 
 VaccinePeriodHighlightStyle _availableStyle(
   VaccineHighlightPalette palette,
+  BuildContext context,
 ) {
   final Color base = _paletteBaseColor(palette);
-  const _BadgeColors badgeColors = _BadgeColors(
-    fill: Colors.white,
-    text: _badgeNeutralColor,
-    border: _badgeNeutralColor,
+  final badgeColors = _BadgeColors(
+    fill: context.badgeBackground,
+    text: context.badgeNeutralColor,
+    border: context.badgeNeutralColor,
   );
   return VaccinePeriodHighlightStyle(
-    cellColor: _mix(base, Colors.white, 0.82),
+    cellColor: _mix(base, context.highlightMixBase, 0.82),
     badgeFillColor: badgeColors.fill,
     badgeTextColor: badgeColors.text,
     badgeBorderColor: badgeColors.border,
   );
 }
 
-VaccinePeriodHighlightStyle _academyRecommendationStyle() {
+VaccinePeriodHighlightStyle _academyRecommendationStyle(BuildContext context) {
   const double blendRatio = 0.5;
   final Color base = _mix(AppColors.primary, AppColors.secondary, blendRatio);
   return VaccinePeriodHighlightStyle(
-    cellColor: _mix(base, Colors.white, 0.4),
-    badgeFillColor: Colors.white,
-    badgeTextColor: _badgeNeutralColor,
-    badgeBorderColor: _badgeNeutralColor,
+    cellColor: _mix(base, context.highlightMixBase, 0.4),
+    badgeFillColor: context.badgeBackground,
+    badgeTextColor: context.badgeNeutralColor,
+    badgeBorderColor: context.badgeNeutralColor,
   );
 }
 
@@ -89,8 +93,6 @@ Color _paletteBaseColor(VaccineHighlightPalette palette) {
 Color _mix(Color a, Color b, double t) {
   return Color.lerp(a, b, t) ?? a;
 }
-
-const Color _badgeNeutralColor = Color(0xFF757575);
 
 class _BadgeColors {
   const _BadgeColors({

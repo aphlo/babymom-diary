@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
-import 'package:babymom_diary/src/core/theme/app_colors.dart';
 import 'package:babymom_diary/src/features/ads/application/services/banner_ad_manager.dart';
 import 'package:babymom_diary/src/features/ads/presentation/widgets/banner_ad_widget.dart';
 import 'package:babymom_diary/src/features/menu/children/application/children_stream_provider.dart';
@@ -16,6 +15,8 @@ import 'package:babymom_diary/src/features/menu/presentation/widgets/app_version
 import 'package:babymom_diary/src/features/menu/presentation/widgets/child_list_tile.dart';
 import 'package:babymom_diary/src/features/menu/presentation/widgets/children_empty_state.dart';
 import 'package:babymom_diary/src/features/menu/presentation/widgets/menu_section.dart';
+import 'package:babymom_diary/src/core/theme/theme_mode_provider.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 
 class MenuPage extends ConsumerWidget {
   const MenuPage({super.key});
@@ -38,7 +39,7 @@ class MenuPage extends ConsumerWidget {
     // nullの場合は安全側に倒してfalseとする（ローディング中は非オーナー扱い）
     final isOwner = membershipType == 'owner';
     return Scaffold(
-      backgroundColor: AppColors.pageBackground,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(title: const Text('メニュー')),
       body: Column(
         children: [
@@ -156,6 +157,11 @@ class MenuPage extends ConsumerWidget {
         ),
 
         const SizedBox(height: 24),
+
+        // 外観セクション
+        _buildAppearanceSection(context, ref),
+
+        const SizedBox(height: 24),
         // データ削除メニューはオーナーのみ表示
         if (isOwner) ...[
           MenuSection(
@@ -174,8 +180,8 @@ class MenuPage extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
         ],
-        const Padding(
-          padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
@@ -183,7 +189,7 @@ class MenuPage extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: Colors.black54,
+                color: context.subtextColor,
               ),
             ),
           ),
@@ -232,6 +238,73 @@ class MenuPage extends ConsumerWidget {
         ),
         _buildUserIdSection(context, ref),
         const AppVersionFooter(),
+      ],
+    );
+  }
+
+  Widget _buildAppearanceSection(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Text(
+            '外観',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: context.subtextColor,
+            ),
+          ),
+        ),
+        MenuSection(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  const Icon(Icons.dark_mode_outlined),
+                  const SizedBox(width: 16),
+                  const Expanded(
+                    child: Text(
+                      'テーマ',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  SegmentedButton<ThemeMode>(
+                    segments: const [
+                      ButtonSegment<ThemeMode>(
+                        value: ThemeMode.system,
+                        label: Text('自動'),
+                      ),
+                      ButtonSegment<ThemeMode>(
+                        value: ThemeMode.light,
+                        label: Text('ライト'),
+                      ),
+                      ButtonSegment<ThemeMode>(
+                        value: ThemeMode.dark,
+                        label: Text('ダーク'),
+                      ),
+                    ],
+                    selected: {themeMode},
+                    onSelectionChanged: (Set<ThemeMode> selected) {
+                      ref
+                          .read(themeModeProvider.notifier)
+                          .setThemeMode(selected.first);
+                    },
+                    showSelectedIcon: false,
+                    style: ButtonStyle(
+                      visualDensity: VisualDensity.compact,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }

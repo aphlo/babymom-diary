@@ -27,26 +27,31 @@ class VaccinesLegend extends StatelessWidget {
         vaccinePeriodHighlightStyle(
       highlight: VaccinationPeriodHighlight.recommended,
       palette: VaccineHighlightPalette.primary,
+      context: context,
     );
     final VaccinePeriodHighlightStyle recommendedSecondaryStyle =
         vaccinePeriodHighlightStyle(
       highlight: VaccinationPeriodHighlight.recommended,
       palette: VaccineHighlightPalette.secondary,
+      context: context,
     );
     final VaccinePeriodHighlightStyle availablePrimaryStyle =
         vaccinePeriodHighlightStyle(
       highlight: VaccinationPeriodHighlight.available,
       palette: VaccineHighlightPalette.primary,
+      context: context,
     );
     final VaccinePeriodHighlightStyle availableSecondaryStyle =
         vaccinePeriodHighlightStyle(
       highlight: VaccinationPeriodHighlight.available,
       palette: VaccineHighlightPalette.secondary,
+      context: context,
     );
     final VaccinePeriodHighlightStyle academyRecommendationStyle =
         vaccinePeriodHighlightStyle(
       highlight: VaccinationPeriodHighlight.academyRecommendation,
       palette: VaccineHighlightPalette.primary,
+      context: context,
     );
 
     return Container(
