@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccination_period_highlight.dart';
 
@@ -273,7 +274,7 @@ class _StatusLegend extends StatelessWidget {
       children: <Widget>[
         DoseNumberBadge(
           number: 1,
-          backgroundColor: Colors.white,
+          backgroundColor: context.menuSectionBackground,
           borderColor: baseBorderColor,
           status: status,
           textColor:

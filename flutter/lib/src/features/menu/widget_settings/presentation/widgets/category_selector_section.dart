@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/app_dark_colors.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import '../models/widget_record_category.dart';
 
 /// カテゴリ選択セクション
@@ -82,13 +84,15 @@ class _CategoryList extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey[100],
+          color: context.isDarkMode
+              ? AppDarkColors.surfaceVariant
+              : Colors.grey[100],
           borderRadius: BorderRadius.circular(8),
         ),
         child: Center(
           child: Text(
             '項目が選択されていません',
-            style: TextStyle(color: Colors.grey[500]),
+            style: TextStyle(color: context.subtextColor),
           ),
         ),
       );
@@ -97,9 +101,9 @@ class _CategoryList extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.menuSectionBackground,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: context.menuSectionBorder),
       ),
       child: ReorderableListView.builder(
         shrinkWrap: true,
@@ -144,7 +148,7 @@ class _CategoryTile extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         border: showTopBorder
-            ? Border(top: BorderSide(color: Colors.grey[200]!))
+            ? Border(top: BorderSide(color: context.menuSectionBorder))
             : null,
       ),
       child: ListTile(
@@ -188,7 +192,6 @@ class _CategoryTile extends StatelessWidget {
   Future<void> _showReplaceDialog(BuildContext context) async {
     final selected = await showModalBottomSheet<WidgetRecordCategory>(
       context: context,
-      backgroundColor: Colors.white,
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,

@@ -12,7 +12,6 @@ Future<TimeOfDay?> showMiluInfiniteTimePicker(
 }) {
   return showModalBottomSheet<TimeOfDay>(
     context: context,
-    backgroundColor: Colors.white,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),

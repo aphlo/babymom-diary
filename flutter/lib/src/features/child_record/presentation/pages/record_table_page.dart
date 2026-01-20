@@ -103,7 +103,6 @@ class _RecordTablePageState extends ConsumerState<RecordTablePage>
       context: context,
       barrierDismissible: true,
       builder: (_) => Dialog(
-        backgroundColor: Colors.white,
         insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),

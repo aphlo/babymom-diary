@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import '../../domain/value_objects/breast_condition.dart';
 
 class BreastConditionChips extends StatelessWidget {
@@ -23,7 +24,7 @@ class BreastConditionChips extends StatelessWidget {
           label: Text(_intensityLabel(value)),
           selected: isSelected,
           showCheckmark: false,
-          backgroundColor: Colors.white,
+          backgroundColor: context.menuSectionBackground,
           onSelected: (selected) {
             if (isSelected) {
               // 既に選択されている場合は未選択にする

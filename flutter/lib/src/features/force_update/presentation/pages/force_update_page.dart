@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:babymom_diary/src/core/theme/app_dark_colors.dart';
 import '../../domain/entities/update_requirement.dart';
 
 /// 強制アップデートが必要な場合に表示する画面。
@@ -16,10 +17,11 @@ class ForceUpdatePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? AppDarkColors.surface : Colors.white,
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -42,14 +44,16 @@ class ForceUpdatePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 40),
                 // タイトル
-                const Text(
+                Text(
                   '新しいバージョンが\n利用可能です',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: _fontFamily,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF333333),
+                    color: isDark
+                        ? AppDarkColors.onSurface
+                        : const Color(0xFF333333),
                     height: 1.4,
                   ),
                 ),
@@ -61,7 +65,9 @@ class ForceUpdatePage extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: _fontFamily,
                     fontSize: 15,
-                    color: Colors.grey.shade600,
+                    color: isDark
+                        ? AppDarkColors.onSurfaceVariant
+                        : Colors.grey.shade600,
                     height: 1.6,
                   ),
                 ),

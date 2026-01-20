@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 class AppDarkColors {
   const AppDarkColors._();
 
-  // Primary (明るめに調整してダーク背景で映えるように)
-  static const Color primary = Color(0xFFFFB4C2);
+  // Primary
+  static const Color primary = Color(0xFFE87086);
   static const Color onPrimary = Color(0xFF5D1126);
 
   // Surface / Background
