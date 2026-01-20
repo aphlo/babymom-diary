@@ -36,26 +36,17 @@ class BabyFoodIngredientList extends StatelessWidget {
       child: Column(
         children: [
           // カテゴリサブタブ
-          Builder(
-            builder: (context) {
-              final isDark = context.isDarkMode;
-              final activeColor = isDark
-                  ? const Color(0xFFFF8A9E) // ダークモードでより明るいピンク
-                  : Colors.pink;
-              final inactiveColor = isDark ? Colors.grey.shade400 : Colors.grey;
-              return TabBar(
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
-                tabs: FoodCategory.values.map((category) {
-                  return Tab(
-                    text: category.label,
-                  );
-                }).toList(),
-                labelColor: activeColor,
-                unselectedLabelColor: inactiveColor,
-                indicatorColor: activeColor,
+          TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            tabs: FoodCategory.values.map((category) {
+              return Tab(
+                text: category.label,
               );
-            },
+            }).toList(),
+            labelColor: context.accentPink,
+            unselectedLabelColor: context.inactiveTabColor,
+            indicatorColor: context.accentPink,
           ),
           // 食材リスト
           Expanded(

@@ -17,14 +17,11 @@ class AddIngredientButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final accentColor = context.isDarkMode
-        ? const Color(0xFFFF8A9E) // ダークモードでより明るいピンク
-        : Colors.pink;
     return ListTile(
-      leading: Icon(Icons.add, color: accentColor),
+      leading: Icon(Icons.add, color: context.accentPink),
       title: Text(
         '食材を追加',
-        style: TextStyle(color: accentColor),
+        style: TextStyle(color: context.accentPink),
       ),
       onTap: () => _showAddIngredientDialog(context, ref),
     );

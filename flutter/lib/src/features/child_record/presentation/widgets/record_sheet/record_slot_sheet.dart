@@ -90,7 +90,7 @@ void showRecordSlotSheet({
                   children: [
                     Image.asset(
                       request.type.iconAssetPath(
-                        isDark: Theme.of(context).brightness == Brightness.dark,
+                        isDark: context.isDarkMode,
                       ),
                       width: 24,
                       height: 24,

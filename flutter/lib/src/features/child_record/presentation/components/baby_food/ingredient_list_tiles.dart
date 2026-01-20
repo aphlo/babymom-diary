@@ -294,21 +294,18 @@ class _EatenBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = context.isDarkMode;
-
-    // ダークモード用の濃い色
     final Color backgroundColor;
     final Color borderColor;
     final Color textColor;
 
     if (hasEaten) {
-      backgroundColor = isDark ? const Color(0xFF1B5E20) : Colors.green.shade50;
-      borderColor = isDark ? const Color(0xFF4CAF50) : Colors.green.shade200;
-      textColor = isDark ? const Color(0xFF81C784) : Colors.green.shade700;
+      backgroundColor = context.eatenBadgeBackground;
+      borderColor = context.eatenBadgeBorder;
+      textColor = context.eatenBadgeText;
     } else {
-      backgroundColor = isDark ? const Color(0xFF424242) : Colors.grey.shade100;
-      borderColor = isDark ? const Color(0xFF757575) : Colors.grey.shade300;
-      textColor = isDark ? const Color(0xFFBDBDBD) : Colors.grey.shade500;
+      backgroundColor = context.notEatenBadgeBackground;
+      borderColor = context.notEatenBadgeBorder;
+      textColor = context.notEatenBadgeText;
     }
 
     return Container(
@@ -338,23 +335,19 @@ class _AllergyBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = context.isDarkMode;
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF7F1D1D) : Colors.red.shade50,
+        color: context.allergyBadgeBackground,
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(
-          color: isDark ? const Color(0xFFEF5350) : Colors.red.shade200,
-        ),
+        border: Border.all(color: context.allergyBadgeBorder),
       ),
       child: Text(
         'アレルギー',
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w600,
-          color: isDark ? const Color(0xFFEF9A9A) : Colors.red.shade700,
+          color: context.allergyBadgeText,
         ),
       ),
     );

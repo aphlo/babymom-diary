@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:babymom_diary/src/core/theme/app_dark_colors.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import '../../domain/entities/update_requirement.dart';
 
 /// 強制アップデートが必要な場合に表示する画面。
@@ -17,11 +17,10 @@ class ForceUpdatePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: isDark ? AppDarkColors.surface : Colors.white,
+        backgroundColor: context.surfaceBackground,
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -51,9 +50,7 @@ class ForceUpdatePage extends StatelessWidget {
                     fontFamily: _fontFamily,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: isDark
-                        ? AppDarkColors.onSurface
-                        : const Color(0xFF333333),
+                    color: context.textPrimary,
                     height: 1.4,
                   ),
                 ),
@@ -65,9 +62,7 @@ class ForceUpdatePage extends StatelessWidget {
                   style: TextStyle(
                     fontFamily: _fontFamily,
                     fontSize: 15,
-                    color: isDark
-                        ? AppDarkColors.onSurfaceVariant
-                        : Colors.grey.shade600,
+                    color: context.textSecondary,
                     height: 1.6,
                   ),
                 ),

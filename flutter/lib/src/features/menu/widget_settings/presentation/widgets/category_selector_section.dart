@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:babymom_diary/src/core/theme/app_dark_colors.dart';
 import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import '../models/widget_record_category.dart';
 
@@ -84,9 +83,7 @@ class _CategoryList extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: context.isDarkMode
-              ? AppDarkColors.surfaceVariant
-              : Colors.grey[100],
+          color: context.subtleSurfaceBackground,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Center(
@@ -161,7 +158,7 @@ class _CategoryTile extends StatelessWidget {
           children: [
             Image.asset(
               category.iconAssetPath(
-                isDark: Theme.of(context).brightness == Brightness.dark,
+                isDark: context.isDarkMode,
               ),
               width: 20,
               height: 20,
@@ -211,7 +208,7 @@ class _CategoryTile extends StatelessWidget {
               (cat) => ListTile(
                 leading: Image.asset(
                   cat.iconAssetPath(
-                    isDark: Theme.of(context).brightness == Brightness.dark,
+                    isDark: context.isDarkMode,
                   ),
                   width: 24,
                   height: 24,
