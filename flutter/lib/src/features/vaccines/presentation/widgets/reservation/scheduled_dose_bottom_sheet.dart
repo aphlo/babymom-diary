@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 
 import '../../models/vaccine_info.dart';
 import '../../viewmodels/vaccine_detail_state.dart';
@@ -27,9 +27,9 @@ class ScheduledDoseBottomSheet extends StatelessWidget {
     final String doseLabel = '$doseNumber回目';
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: context.cardBackground,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SafeArea(
         child: Padding(
@@ -43,7 +43,7 @@ class ScheduledDoseBottomSheet extends StatelessWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: context.tableBorderColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -62,14 +62,14 @@ class ScheduledDoseBottomSheet extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.event_available,
-                    color: AppColors.reserved,
+                    color: context.reservedContainerAccent,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '予約済み',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.reserved,
+                      color: context.reservedContainerAccent,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -82,7 +82,7 @@ class ScheduledDoseBottomSheet extends StatelessWidget {
                 label: const Text('接種済みにする'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.green,
+                  backgroundColor: context.completedButtonBackground,
                   foregroundColor: Colors.white,
                 ),
               ),
