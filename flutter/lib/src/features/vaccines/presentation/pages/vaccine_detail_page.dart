@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
-import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 
 import '../../../menu/children/application/selected_child_provider.dart';
 import '../../domain/entities/dose_record.dart';
@@ -11,10 +11,12 @@ import '../controllers/vaccine_detail_interactions.dart';
 import '../models/vaccine_detail_callbacks.dart';
 import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_view_model.dart';
-import '../widgets/influenza_dose_reservation_board.dart';
-import '../widgets/scheduled_dose_bottom_sheet.dart';
-import '../widgets/vaccine_header.dart';
-import '../widgets/vaccine_dose_reservation_board.dart';
+import '../widgets/reservation/influenza_dose_reservation_board.dart';
+import '../widgets/reservation/scheduled_dose_bottom_sheet.dart';
+import '../widgets/reservation/vaccine_dose_reservation_board.dart';
+import '../widgets/shared/async_state_views.dart';
+import '../widgets/shared/vaccine_header.dart';
+import '../widgets/shared/vaccine_notes_section.dart';
 
 class VaccineDetailPage extends ConsumerWidget {
   const VaccineDetailPage({
@@ -36,14 +38,14 @@ class VaccineDetailPage extends ConsumerWidget {
         ref.watch(selectedChildControllerProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.pageBackground,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(title: Text(vaccine.name)),
       body: householdAsync.when(
         data: (householdId) {
           return selectedChildAsync.when(
             data: (childId) {
               if (childId == null) {
-                return const _NoChildSelectedView();
+                return const NoChildSelectedView();
               }
 
               final params = VaccineDetailParams(
@@ -69,7 +71,6 @@ class VaccineDetailPage extends ConsumerWidget {
               return _VaccineDetailContent(
                 vaccine: vaccine,
                 state: detailState,
-                childBirthday: childBirthday,
                 onReservationTap: _navigateToReservation,
                 onScheduledDoseTap:
                     (context, vaccine, doseNumber, statusInfo) =>
@@ -84,12 +85,12 @@ class VaccineDetailPage extends ConsumerWidget {
             },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stackTrace) =>
-                const _AsyncErrorView(message: '子ども情報の取得に失敗しました'),
+                const AsyncErrorView(message: '子ども情報の取得に失敗しました'),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>
-            const _AsyncErrorView(message: 'ホーム情報の取得に失敗しました'),
+            const AsyncErrorView(message: 'ホーム情報の取得に失敗しました'),
       ),
     );
   }
@@ -166,14 +167,12 @@ class _VaccineDetailContent extends StatelessWidget {
   const _VaccineDetailContent({
     required this.vaccine,
     required this.state,
-    required this.childBirthday,
     required this.onReservationTap,
     required this.onScheduledDoseTap,
   });
 
   final VaccineInfo vaccine;
   final VaccineDetailState state;
-  final DateTime? childBirthday;
   final VaccineReservationTap? onReservationTap;
   final ScheduledDoseTap? onScheduledDoseTap;
 
@@ -182,208 +181,80 @@ class _VaccineDetailContent extends StatelessWidget {
     final theme = Theme.of(context);
     final bool isInfluenza = vaccine.id.startsWith('influenza');
 
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x14000000),
-                        offset: Offset(0, 8),
-                        blurRadius: 20,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      VaccineHeader(vaccine: vaccine),
-                      if (state.isLoading) ...[
-                        const SizedBox(height: 16),
-                        const LinearProgressIndicator(minHeight: 3),
-                      ],
-                      const SizedBox(height: 24),
-                      if (state.error != null) ...[
-                        Container(
-                          width: double.infinity,
-                          margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            state.error!,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: Colors.red.shade700,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                      if (state.doseNumbers.isEmpty)
-                        Text(
-                          '接種回数の情報が見つかりませんでした',
-                          style: theme.textTheme.bodyMedium,
-                        )
-                      else if (isInfluenza)
-                        InfluenzaDoseReservationBoard(
-                          doseNumbers: state.doseNumbers,
-                          doseStatuses: state.doseStatuses,
-                          activeDoseNumber: state.activeDoseNumber,
-                          pendingDoseNumber: state.pendingDoseNumber,
-                          vaccine: vaccine,
-                          onReservationTap: onReservationTap,
-                          onScheduledDoseTap: onScheduledDoseTap,
-                        )
-                      else
-                        VaccineDoseReservationBoard(
-                          doseNumbers: state.doseNumbers,
-                          doseStatuses: state.doseStatuses,
-                          activeDoseNumber: state.activeDoseNumber,
-                          pendingDoseNumber: state.pendingDoseNumber,
-                          recommendationText: state.recommendation?.message,
-                          vaccine: vaccine,
-                          onReservationTap: onReservationTap,
-                          onScheduledDoseTap: onScheduledDoseTap,
-                        ),
-                      if (vaccine.notes.isNotEmpty) ...[
-                        const SizedBox(height: 24),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.info_outline,
-                                    color: Colors.blue.shade700,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      '接種時の注意点',
-                                      style:
-                                          theme.textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.blue.shade700,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              _VaccineNotesList(notes: vaccine.notes),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: context.cardBackground,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: context.cardShadow,
+              offset: const Offset(0, 8),
+              blurRadius: 20,
             ),
-          ),
+          ],
         ),
-      ],
-    );
-  }
-}
-
-class _VaccineNotesList extends StatelessWidget {
-  const _VaccineNotesList({required this.notes});
-
-  final List<VaccineGuidelineNote> notes;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: notes.asMap().entries.map((entry) {
-        final note = entry.value;
-        final TextStyle? textStyle = textTheme.bodySmall?.copyWith(
-          fontWeight: FontWeight.w400,
-          color: Colors.black,
-        );
-
-        return Padding(
-          padding: EdgeInsets.only(top: entry.key == 0 ? 0 : 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.circle,
-                size: 6,
-                color: Colors.black,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            VaccineHeader(vaccine: vaccine),
+            if (state.isLoading) ...[
+              const SizedBox(height: 16),
+              const LinearProgressIndicator(minHeight: 3),
+            ],
+            const SizedBox(height: 24),
+            if (state.error != null) ...[
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: context.errorContainerBackground,
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: Text(
-                  note.message,
-                  style: textStyle,
+                  state.error!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: context.errorText,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
-          ),
-        );
-      }).toList(growable: false),
-    );
-  }
-}
-
-class _NoChildSelectedView extends StatelessWidget {
-  const _NoChildSelectedView();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(
-          '子どもを選択すると接種予定を確認できます',
-          style: theme.textTheme.bodyMedium,
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-}
-
-class _AsyncErrorView extends StatelessWidget {
-  const _AsyncErrorView({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(
-          message,
-          style: theme.textTheme.bodyMedium?.copyWith(color: Colors.red),
-          textAlign: TextAlign.center,
+            if (state.doseNumbers.isEmpty)
+              Text(
+                '接種回数の情報が見つかりませんでした',
+                style: theme.textTheme.bodyMedium,
+              )
+            else if (isInfluenza)
+              InfluenzaDoseReservationBoard(
+                doseNumbers: state.doseNumbers,
+                doseStatuses: state.doseStatuses,
+                activeDoseNumber: state.activeDoseNumber,
+                pendingDoseNumber: state.pendingDoseNumber,
+                vaccine: vaccine,
+                onReservationTap: onReservationTap,
+                onScheduledDoseTap: onScheduledDoseTap,
+              )
+            else
+              VaccineDoseReservationBoard(
+                doseNumbers: state.doseNumbers,
+                doseStatuses: state.doseStatuses,
+                activeDoseNumber: state.activeDoseNumber,
+                pendingDoseNumber: state.pendingDoseNumber,
+                recommendationText: state.recommendation?.message,
+                vaccine: vaccine,
+                onReservationTap: onReservationTap,
+                onScheduledDoseTap: onScheduledDoseTap,
+              ),
+            if (vaccine.notes.isNotEmpty) ...[
+              const SizedBox(height: 24),
+              VaccineNotesSection(notes: vaccine.notes),
+            ],
+          ],
         ),
       ),
     );

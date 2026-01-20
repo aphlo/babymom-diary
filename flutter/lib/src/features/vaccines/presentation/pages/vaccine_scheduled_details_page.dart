@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/theme/semantic_colors.dart';
 import '../../../../core/firebase/household_service.dart';
 import '../../../menu/children/application/selected_child_provider.dart';
 import '../../application/vaccine_catalog_providers.dart';
 import '../../domain/entities/dose_record.dart';
+import '../../domain/errors/vaccination_persistence_exception.dart';
 import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_view_model.dart';
-import '../widgets/vaccine_header.dart';
-import '../widgets/concurrent_vaccines_card.dart';
-import '../widgets/concurrent_vaccines_confirmation_dialog.dart';
-import '../widgets/concurrent_vaccines_delete_dialog.dart';
-import '../widgets/concurrent_vaccines_revert_dialog.dart';
-import '../widgets/vaccine_error_dialog.dart';
-import '../../domain/errors/vaccination_persistence_exception.dart';
+import '../widgets/concurrent_vaccines/concurrent_vaccines_card.dart';
+import '../widgets/concurrent_vaccines/concurrent_vaccines_confirmation_dialog.dart';
+import '../widgets/concurrent_vaccines/concurrent_vaccines_delete_dialog.dart';
+import '../widgets/concurrent_vaccines/concurrent_vaccines_revert_dialog.dart';
+import '../widgets/reservation/scheduled_date_card.dart';
+import '../widgets/shared/vaccine_error_dialog.dart';
+import '../widgets/shared/vaccine_info_card.dart';
 
 class VaccineScheduledDetailsPage extends ConsumerWidget {
   const VaccineScheduledDetailsPage({
@@ -56,7 +56,7 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
         ref.watch(selectedChildControllerProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.pageBackground,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
         title: Text('${vaccine.name} $doseLabel'),
         actions: [
@@ -99,7 +99,7 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // ワクチン情報カード
-                    _VaccineInfoCard(
+                    VaccineInfoCard(
                       vaccine: vaccine,
                       doseNumber: doseNumber,
                       influenzaSeasonLabel: influenzaSeasonLabel,
@@ -108,7 +108,7 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
                     const SizedBox(height: 24),
 
                     // 予約日時カード
-                    _ScheduledDateCard(scheduledDate: currentScheduledDate),
+                    ScheduledDateCard(scheduledDate: currentScheduledDate),
                     const SizedBox(height: 24),
 
                     // 同時接種ワクチンカード
@@ -159,7 +159,7 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
                     label: const Text('未接種に戻す'),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      backgroundColor: Colors.orange,
+                      backgroundColor: context.revertButtonBackground,
                       foregroundColor: Colors.white,
                     ),
                   ),
@@ -174,7 +174,7 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
                     label: const Text('接種済みにする'),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      backgroundColor: Colors.green,
+                      backgroundColor: context.completedButtonBackground,
                       foregroundColor: Colors.white,
                     ),
                   ),
@@ -479,176 +479,5 @@ class VaccineScheduledDetailsPage extends ConsumerWidget {
         );
       }
     }
-  }
-}
-
-class _VaccineInfoCard extends StatelessWidget {
-  const _VaccineInfoCard({
-    required this.vaccine,
-    required this.doseNumber,
-    this.influenzaSeasonLabel,
-    this.influenzaDoseOrder,
-  });
-
-  final VaccineInfo vaccine;
-  final int doseNumber;
-  final String? influenzaSeasonLabel;
-  final int? influenzaDoseOrder;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            offset: Offset(0, 8),
-            blurRadius: 20,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          VaccineHeader(vaccine: vaccine),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.secondary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.vaccines,
-                  color: AppColors.secondary,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  _buildDoseLabel(),
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: AppColors.secondary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _buildDoseLabel() {
-    if (!vaccine.id.startsWith('influenza')) {
-      return '$doseNumber回目の接種';
-    }
-    final bool hasSeason = influenzaSeasonLabel != null &&
-        influenzaSeasonLabel!.isNotEmpty &&
-        influenzaSeasonLabel != '未設定';
-    final String orderPart = ((influenzaDoseOrder ?? doseNumber)).toString();
-    final String orderLabel = '$orderPart回目';
-    if (hasSeason) {
-      return '${influenzaSeasonLabel!}$orderLabelの接種';
-    }
-    return '$orderLabelの接種';
-  }
-}
-
-class _ScheduledDateCard extends StatelessWidget {
-  const _ScheduledDateCard({required this.scheduledDate});
-
-  final DateTime? scheduledDate;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            offset: Offset(0, 8),
-            blurRadius: 20,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.event_available,
-                color: AppColors.reserved,
-                size: 24,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                '日付',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (scheduledDate != null) ...[
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.reserved.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    color: AppColors.reserved,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          DateFormatter.yyyyMMddE(scheduledDate!),
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.reserved,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ] else ...[
-            Text(
-              '予約日時が設定されていません',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade600,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
   }
 }

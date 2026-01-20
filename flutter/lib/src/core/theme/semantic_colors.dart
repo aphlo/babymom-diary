@@ -262,4 +262,89 @@ extension SemanticColorsExtension on BuildContext {
   Color get inactivatedBadgeBorder => isDarkMode
       ? AppDarkColors.vaccineInactivated.withValues(alpha: 0.6)
       : AppColors.vaccineInactivated.withValues(alpha: 0.4);
+
+  // ===================
+  // ワクチン詳細ページ色
+  // ===================
+
+  /// カード背景色（詳細ページの白いカード）
+  Color get cardBackground =>
+      isDarkMode ? AppDarkColors.surfaceVariant : Colors.white;
+
+  /// カード影色
+  Color get cardShadow => isDarkMode ? Colors.black26 : const Color(0x14000000);
+
+  /// 情報ボックス背景色（青い注意点セクション）
+  Color get infoBoxBackground =>
+      isDarkMode ? const Color(0xFF1A3A5C) : Colors.blue.shade50;
+
+  /// 情報ボックスアイコン/タイトル色
+  Color get infoBoxAccent =>
+      isDarkMode ? const Color(0xFF64B5F6) : Colors.blue.shade700;
+
+  /// 情報ボックステキスト色
+  Color get infoBoxText => isDarkMode ? AppDarkColors.onSurface : Colors.black;
+
+  /// 推奨時期バブル背景色（オレンジの接種時期のめやす）
+  Color get recommendationBubbleBackground =>
+      isDarkMode ? const Color(0xFF4A3520) : Colors.orange.shade50;
+
+  /// 推奨時期バブルテキスト色
+  Color get recommendationBubbleText =>
+      isDarkMode ? const Color(0xFFFFCC80) : Colors.black87;
+
+  /// 日付ラベル色（有効な日付）
+  Color get doseDateLabel =>
+      isDarkMode ? AppDarkColors.onSurface : Colors.black87;
+
+  /// 日付プレースホルダー色（未定の日付）
+  Color get doseDatePlaceholder =>
+      isDarkMode ? Colors.grey.shade500 : Colors.grey;
+
+  /// 未定バッジの基本色
+  Color get doseUndecidedColor =>
+      isDarkMode ? Colors.grey.shade400 : Colors.grey;
+
+  /// 接種済みバッジの基本色
+  Color get doseCompletedColor =>
+      isDarkMode ? const Color(0xFF81C784) : Colors.green;
+
+  /// エラーコンテナ背景色
+  Color get errorContainerBackground => isDarkMode
+      ? Colors.red.shade900.withValues(alpha: 0.3)
+      : Colors.red.withValues(alpha: 0.08);
+
+  /// エラーテキスト色
+  Color get errorText =>
+      isDarkMode ? const Color(0xFFEF9A9A) : Colors.red.shade700;
+
+  // ===================
+  // ワクチン予約ページ色
+  // ===================
+
+  /// セカンダリカラーコンテナ背景色（回数表示など）
+  Color get secondaryContainerBackground => isDarkMode
+      ? AppColors.secondary.withValues(alpha: 0.2)
+      : AppColors.secondary.withValues(alpha: 0.1);
+
+  /// セカンダリカラーアイコン/テキスト色
+  Color get secondaryContainerAccent =>
+      isDarkMode ? const Color(0xFF90CAF9) : AppColors.secondary;
+
+  /// 予約済みコンテナ背景色（予約日時表示など）
+  Color get reservedContainerBackground => isDarkMode
+      ? AppDarkColors.reserved.withValues(alpha: 0.2)
+      : AppColors.reserved.withValues(alpha: 0.1);
+
+  /// 予約済みコンテナアイコン/テキスト色
+  Color get reservedContainerAccent =>
+      isDarkMode ? const Color(0xFFFFD54F) : AppColors.reserved;
+
+  /// 未接種ボタン背景色（オレンジ）
+  Color get revertButtonBackground =>
+      isDarkMode ? const Color(0xFFE65100) : Colors.orange;
+
+  /// 接種済みボタン背景色（グリーン）
+  Color get completedButtonBackground =>
+      isDarkMode ? const Color(0xFF2E7D32) : Colors.green;
 }

@@ -4,8 +4,8 @@ import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccination_period_highlight.dart';
 
-import '../models/vaccine_info.dart';
-import '../styles/vaccine_schedule_highlight_styles.dart';
+import '../../models/vaccine_info.dart';
+import '../../styles/vaccine_schedule_highlight_styles.dart';
 import 'vaccine_table_cells.dart';
 
 const double _legendLabelMaxWidth = 140;

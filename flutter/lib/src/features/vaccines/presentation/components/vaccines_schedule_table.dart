@@ -8,7 +8,7 @@ import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine
 import '../models/vaccine_info.dart';
 import '../styles/vaccine_schedule_highlight_styles.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/services/vaccination_period_calculator.dart';
-import '../widgets/vaccine_table_cells.dart';
+import '../widgets/list/vaccine_table_cells.dart';
 
 class VaccinesScheduleTable extends StatefulWidget {
   const VaccinesScheduleTable({

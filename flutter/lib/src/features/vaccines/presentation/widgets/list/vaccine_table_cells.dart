@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
 
-import '../models/vaccine_info.dart';
-import '../styles/vaccine_schedule_highlight_styles.dart';
-import '../styles/vaccine_type_styles.dart';
-import 'vaccine_type_badge.dart';
+import '../../models/vaccine_info.dart';
+import '../../styles/vaccine_schedule_highlight_styles.dart';
+import '../../styles/vaccine_type_styles.dart';
+import '../shared/vaccine_type_badge.dart';
 
 const double _doseBadgeDiameter = 24;
 const double _doseBadgeDiameterSmall = 20;

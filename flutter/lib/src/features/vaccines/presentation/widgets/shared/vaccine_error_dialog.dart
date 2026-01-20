@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_colors.dart';
 
 /// ワクチン関連のエラーを表示するダイアログ
 class VaccineErrorDialog extends StatelessWidget {

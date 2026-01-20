@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 
-import '../models/vaccine_info.dart';
-import '../viewmodels/vaccine_detail_state.dart';
+import '../../models/vaccine_info.dart';
+import '../../viewmodels/vaccine_detail_state.dart';
 
 class ScheduledDoseBottomSheet extends StatelessWidget {
   const ScheduledDoseBottomSheet({

@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 
-import '../viewmodels/concurrent_vaccines_view_model.dart';
+import '../../viewmodels/concurrent_vaccines_view_model.dart';
 
-Future<bool?> showConcurrentVaccinesConfirmationDialog({
+Future<bool?> showConcurrentVaccinesRescheduleDialog({
   required BuildContext context,
   required String householdId,
   required String childId,
@@ -15,7 +15,7 @@ Future<bool?> showConcurrentVaccinesConfirmationDialog({
 }) {
   return showDialog<bool>(
     context: context,
-    builder: (_) => _ConcurrentVaccinesConfirmationDialog(
+    builder: (_) => _ConcurrentVaccinesRescheduleDialog(
       householdId: householdId,
       childId: childId,
       reservationGroupId: reservationGroupId,
@@ -25,8 +25,8 @@ Future<bool?> showConcurrentVaccinesConfirmationDialog({
   );
 }
 
-class _ConcurrentVaccinesConfirmationDialog extends ConsumerWidget {
-  const _ConcurrentVaccinesConfirmationDialog({
+class _ConcurrentVaccinesRescheduleDialog extends ConsumerWidget {
+  const _ConcurrentVaccinesRescheduleDialog({
     required this.householdId,
     required this.childId,
     required this.reservationGroupId,
@@ -153,7 +153,7 @@ class _ConcurrentVaccinesConfirmationDialog extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              '同時に予約したワクチンがあります。まとめて接種済みにしますか？',
+              '同時に予約したワクチンがあります。まとめて日付変更しますか？',
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 height: 1.4,
@@ -174,7 +174,7 @@ class _ConcurrentVaccinesConfirmationDialog extends ConsumerWidget {
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 4),
                 child: Text(
-                  '全て接種済みにする',
+                  '全て日付変更する',
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -193,7 +193,7 @@ class _ConcurrentVaccinesConfirmationDialog extends ConsumerWidget {
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 4),
                 child: Text(
-                  'これだけ接種済みにする',
+                  'これだけ日付変更する',
                   textAlign: TextAlign.center,
                 ),
               ),

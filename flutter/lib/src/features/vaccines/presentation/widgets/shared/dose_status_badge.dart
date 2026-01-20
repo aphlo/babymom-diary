@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 
-import '../../domain/entities/dose_record.dart';
-import '../viewmodels/vaccine_detail_state.dart';
+import '../../../domain/entities/dose_record.dart';
+import '../../viewmodels/vaccine_detail_state.dart';
 
 class DoseBadgePresentation {
   const DoseBadgePresentation({
@@ -18,6 +19,7 @@ class DoseBadgePresentation {
   final IconData icon;
   final DoseStatus? status;
 
+  /// コンテキストに依存しない色を返す（ダークモード非対応）
   static DoseBadgePresentation fromStatus(DoseStatusInfo? info) {
     switch (info?.status) {
       case DoseStatus.completed:
@@ -43,6 +45,18 @@ class DoseBadgePresentation {
         );
     }
   }
+
+  /// コンテキストに応じた色を返す（ダークモード対応）
+  Color getBaseColor(BuildContext context) {
+    switch (status) {
+      case DoseStatus.completed:
+        return context.doseCompletedColor;
+      case DoseStatus.scheduled:
+        return context.scheduledBadgeBackground;
+      default:
+        return context.doseUndecidedColor;
+    }
+  }
 }
 
 class DoseStatusBadge extends StatelessWidget {
@@ -60,7 +74,7 @@ class DoseStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final Color baseColor = presentation.baseColor;
+    final Color baseColor = presentation.getBaseColor(context);
     final bool highlightWithPrimary = presentation.status == null && isActive;
     final Color activeColor =
         highlightWithPrimary ? theme.colorScheme.primary : baseColor;

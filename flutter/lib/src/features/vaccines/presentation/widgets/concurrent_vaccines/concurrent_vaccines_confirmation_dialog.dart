@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 
-import '../viewmodels/concurrent_vaccines_view_model.dart';
+import '../../viewmodels/concurrent_vaccines_view_model.dart';
 
-Future<bool?> showConcurrentVaccinesRevertDialog({
+Future<bool?> showConcurrentVaccinesConfirmationDialog({
   required BuildContext context,
   required String householdId,
   required String childId,
@@ -15,7 +15,7 @@ Future<bool?> showConcurrentVaccinesRevertDialog({
 }) {
   return showDialog<bool>(
     context: context,
-    builder: (_) => _ConcurrentVaccinesRevertDialog(
+    builder: (_) => _ConcurrentVaccinesConfirmationDialog(
       householdId: householdId,
       childId: childId,
       reservationGroupId: reservationGroupId,
@@ -25,8 +25,8 @@ Future<bool?> showConcurrentVaccinesRevertDialog({
   );
 }
 
-class _ConcurrentVaccinesRevertDialog extends ConsumerWidget {
-  const _ConcurrentVaccinesRevertDialog({
+class _ConcurrentVaccinesConfirmationDialog extends ConsumerWidget {
+  const _ConcurrentVaccinesConfirmationDialog({
     required this.householdId,
     required this.childId,
     required this.reservationGroupId,
@@ -153,7 +153,7 @@ class _ConcurrentVaccinesRevertDialog extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              '同時に予約したワクチンがあります。まとめて未接種に戻しますか？',
+              '同時に予約したワクチンがあります。まとめて接種済みにしますか？',
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 height: 1.4,
@@ -174,14 +174,14 @@ class _ConcurrentVaccinesRevertDialog extends ConsumerWidget {
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 4),
                 child: Text(
-                  '全て未接種に戻す',
+                  '全て接種済みにする',
                   textAlign: TextAlign.center,
                 ),
               ),
               onPressed: () => Navigator.of(context).pop(true),
               style: TextButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
-                backgroundColor: Colors.orange,
+                backgroundColor: theme.colorScheme.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -193,17 +193,17 @@ class _ConcurrentVaccinesRevertDialog extends ConsumerWidget {
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 4),
                 child: Text(
-                  'これだけ未接種に戻す',
+                  'これだけ接種済みにする',
                   textAlign: TextAlign.center,
                 ),
               ),
               onPressed: () => Navigator.of(context).pop(false),
               style: TextButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
-                foregroundColor: Colors.orange,
+                foregroundColor: theme.colorScheme.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  side: const BorderSide(color: Colors.orange),
+                  side: BorderSide(color: theme.colorScheme.primary),
                 ),
               ),
             ),
