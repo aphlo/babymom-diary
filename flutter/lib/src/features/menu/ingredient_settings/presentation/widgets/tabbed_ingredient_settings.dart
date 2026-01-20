@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/semantic_colors.dart';
 import '../../../../ads/application/services/banner_ad_manager.dart';
 import '../../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../../../baby_food/domain/entities/custom_ingredient.dart';
@@ -25,7 +25,7 @@ class TabbedIngredientSettings extends StatelessWidget {
     return DefaultTabController(
       length: FoodCategory.values.length,
       child: Scaffold(
-        backgroundColor: AppColors.pageBackground,
+        backgroundColor: context.pageBackground,
         appBar: AppBar(
           leading:
               BackButton(onPressed: () => Navigator.of(context).maybePop()),
@@ -33,18 +33,18 @@ class TabbedIngredientSettings extends StatelessWidget {
         ),
         body: Column(
           children: [
-            // カテゴリタブ（白背景）
+            // カテゴリタブ
             Container(
-              color: Colors.white,
+              color: context.cardBackground,
               child: TabBar(
                 isScrollable: true,
                 tabAlignment: TabAlignment.start,
                 tabs: FoodCategory.values.map((category) {
                   return Tab(text: category.label);
                 }).toList(),
-                labelColor: Colors.pink,
-                unselectedLabelColor: Colors.grey,
-                indicatorColor: Colors.pink,
+                labelColor: context.accentPink,
+                unselectedLabelColor: context.textSecondary,
+                indicatorColor: context.accentPink,
               ),
             ),
             // 食材リスト

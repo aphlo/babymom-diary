@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../core/theme/semantic_colors.dart';
 import '../../../../ads/application/services/banner_ad_manager.dart';
 import '../../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../application/growth_chart_settings_provider.dart';
@@ -14,7 +15,7 @@ class GrowthChartSettingsPage extends ConsumerWidget {
     final useCorrectedAge = ref.watch(growthChartSettingsProvider);
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
         title: const Text('成長曲線の設定'),
@@ -39,7 +40,7 @@ class GrowthChartSettingsPage extends ConsumerWidget {
                       Text(
                         '早産のお子さまの成長をより適切に評価するための機能です。\n修正月齢での表示には出産予定日の登録が必要です（設定からいつでも登録できます）。',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey[700],
+                              color: context.textSecondary,
                               height: 1.5,
                             ),
                       ),
@@ -48,7 +49,7 @@ class GrowthChartSettingsPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Container(
-                  color: Colors.white,
+                  color: context.cardBackground,
                   child: SwitchListTile(
                     title: const Text('修正月齢で表示する'),
                     value: useCorrectedAge,

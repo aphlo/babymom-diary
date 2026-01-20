@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/semantic_colors.dart';
 import '../../../../ads/application/services/banner_ad_manager.dart';
 import '../../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../viewmodels/widget_settings_view_model.dart';
@@ -16,7 +16,7 @@ class WidgetSettingsPage extends ConsumerWidget {
     final viewModel = ref.read(widgetSettingsViewModelProvider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.pageBackground,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
         title: const Text('ウィジェット設定'),
       ),
