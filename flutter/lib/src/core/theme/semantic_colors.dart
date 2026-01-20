@@ -147,4 +147,20 @@ extension SemanticColorsExtension on BuildContext {
   /// アレルギーバッジテキスト色
   Color get allergyBadgeText =>
       isDarkMode ? const Color(0xFFEF9A9A) : Colors.red.shade700;
+
+  // ===================
+  // 日付セクション色（離乳食詳細など）
+  // ===================
+
+  /// 日付セクションヘッダー背景色
+  Color get dateSectionHeaderBackground =>
+      isDarkMode ? const Color(0xFF3D2A3A) : Colors.pink.shade50;
+
+  /// 日付セクションボーダー色
+  Color get dateSectionBorder =>
+      isDarkMode ? const Color(0xFFE87086) : Colors.pink.shade200;
+
+  /// 日付セクションテキスト色
+  Color get dateSectionText =>
+      isDarkMode ? const Color(0xFFFFB4C2) : Colors.pink.shade700;
 }

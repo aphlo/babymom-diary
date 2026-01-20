@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/theme/semantic_colors.dart';
 import '../../../../core/types/child_icon.dart';
 import '../models/ingredient_record_info.dart';
 import 'ingredient_record_tile.dart';
@@ -92,12 +93,12 @@ class _AllergyWarningCard extends StatelessWidget {
 class _EmptyRecordsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 32),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 32),
       child: Center(
         child: Text(
           '記録がありません',
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: context.subtextColor),
         ),
       ),
     );
@@ -116,12 +117,12 @@ class _RecordListHeader extends StatelessWidget {
       padding: const EdgeInsets.only(left: 4, bottom: 8),
       child: Row(
         children: [
-          const Text(
+          Text(
             '記録一覧',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.black54,
+              color: context.subtextColor,
             ),
           ),
           const Spacer(),
@@ -129,7 +130,7 @@ class _RecordListHeader extends StatelessWidget {
             '$recordCount回食べました',
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey.shade600,
+              color: context.textSecondary,
             ),
           ),
         ],
@@ -150,19 +151,19 @@ class _DateSectionHeader extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.pink.shade50,
+        color: context.dateSectionHeaderBackground,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(12),
           topRight: Radius.circular(12),
         ),
-        border: Border.all(color: Colors.pink.shade200),
+        border: Border.all(color: context.dateSectionBorder),
       ),
       child: Text(
         date,
         style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: Colors.pink.shade700,
+          color: context.dateSectionText,
         ),
       ),
     );
@@ -183,17 +184,18 @@ class _DateSectionContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final borderColor = context.dateSectionBorder;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.menuSectionBackground,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(12),
           bottomRight: Radius.circular(12),
         ),
         border: Border(
-          left: BorderSide(color: Colors.pink.shade200),
-          right: BorderSide(color: Colors.pink.shade200),
-          bottom: BorderSide(color: Colors.pink.shade200),
+          left: BorderSide(color: borderColor),
+          right: BorderSide(color: borderColor),
+          bottom: BorderSide(color: borderColor),
         ),
       ),
       child: Column(
