@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/core/utils/date_formatter.dart';
 
-import '../../domain/entities/dose_record.dart';
-import '../models/vaccine_detail_callbacks.dart';
-import '../models/vaccine_info.dart';
-import '../viewmodels/vaccine_detail_state.dart';
-import 'dose_status_badge.dart';
+import '../../../domain/entities/dose_record.dart';
+import '../../models/vaccine_detail_callbacks.dart';
+import '../../models/vaccine_info.dart';
+import '../../viewmodels/vaccine_detail_state.dart';
+import '../shared/dose_status_badge.dart';
 
 class InfluenzaDoseReservationBoard extends StatelessWidget {
   const InfluenzaDoseReservationBoard({
@@ -135,7 +136,7 @@ class _InfluenzaDoseCell extends StatelessWidget {
           '$doseNumber回目',
           style: theme.textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w600,
-            color: Colors.grey.shade700,
+            color: context.textSecondary,
           ),
         ),
         const SizedBox(height: 8),
@@ -178,7 +179,9 @@ class _InfluenzaDoseCell extends StatelessWidget {
                 dateYearLabel,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w500,
-                  color: hasScheduledDate ? Colors.black87 : Colors.grey,
+                  color: hasScheduledDate
+                      ? context.doseDateLabel
+                      : context.doseDatePlaceholder,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -187,7 +190,9 @@ class _InfluenzaDoseCell extends StatelessWidget {
                 dateDateLabel,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: hasScheduledDate ? Colors.black87 : Colors.grey,
+                  color: hasScheduledDate
+                      ? context.doseDateLabel
+                      : context.doseDatePlaceholder,
                 ),
                 textAlign: TextAlign.center,
               ),

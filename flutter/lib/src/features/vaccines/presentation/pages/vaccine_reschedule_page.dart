@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/semantic_colors.dart';
 import '../../../../core/firebase/household_service.dart';
 import '../../../menu/children/application/selected_child_provider.dart';
 import '../../application/vaccine_catalog_providers.dart';
 import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_view_model.dart';
-import '../widgets/vaccine_header.dart';
-import '../widgets/concurrent_vaccines_card.dart';
-import '../widgets/concurrent_vaccines_reschedule_dialog.dart';
-import '../widgets/vaccine_error_dialog.dart';
+import '../widgets/concurrent_vaccines/concurrent_vaccines_card.dart';
+import '../widgets/concurrent_vaccines/concurrent_vaccines_reschedule_dialog.dart';
+import '../widgets/reservation/date_selection_card.dart';
+import '../widgets/shared/vaccine_error_dialog.dart';
+import '../widgets/shared/vaccine_info_card.dart';
 import '../../domain/errors/vaccination_persistence_exception.dart';
 
 class VaccineReschedulePage extends ConsumerStatefulWidget {
@@ -43,7 +44,6 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
   @override
   void initState() {
     super.initState();
-    // 既存の予約日時をプリセット
     _selectedDate = widget.statusInfo.scheduledDate;
   }
 
@@ -52,7 +52,7 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
     final bool canSubmit = _selectedDate != null && !_isLoading;
 
     return Scaffold(
-      backgroundColor: AppColors.pageBackground,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
         title: const Text('日付を変更'),
       ),
@@ -63,14 +63,15 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _VaccineInfoCard(
+                  VaccineInfoCard(
                     vaccine: widget.vaccine,
                     doseNumber: widget.doseNumber,
                     influenzaSeasonLabel: widget.influenzaSeasonLabel,
                     influenzaDoseOrder: widget.influenzaDoseOrder,
                   ),
                   const SizedBox(height: 24),
-                  _DateSelectionCard(
+                  DateSelectionCard(
+                    title: '新しい日付',
                     selectedDate: _selectedDate,
                     onDateSelected: (date) {
                       setState(() {
@@ -134,12 +135,10 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
       return;
     }
 
-    // 同時接種ワクチンがある場合の確認ダイアログ
     final groupId = widget.statusInfo.reservationGroupId;
     bool applyToGroup = true;
 
     if (groupId != null) {
-      // doseIdを取得するためにVaccinationRecordを取得
       final repository = ref.read(vaccinationRecordRepositoryProvider);
       final record = await repository.getVaccinationRecord(
         householdId: householdId,
@@ -229,175 +228,5 @@ class _VaccineReschedulePageState extends ConsumerState<VaccineReschedulePage> {
         });
       }
     }
-  }
-}
-
-class _VaccineInfoCard extends StatelessWidget {
-  const _VaccineInfoCard({
-    required this.vaccine,
-    required this.doseNumber,
-    this.influenzaSeasonLabel,
-    this.influenzaDoseOrder,
-  });
-
-  final VaccineInfo vaccine;
-  final int doseNumber;
-  final String? influenzaSeasonLabel;
-  final int? influenzaDoseOrder;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            offset: Offset(0, 8),
-            blurRadius: 20,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          VaccineHeader(vaccine: vaccine),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.secondary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.vaccines,
-                  color: AppColors.secondary,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  _buildDoseLabel(),
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: AppColors.secondary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _buildDoseLabel() {
-    if (!vaccine.id.startsWith('influenza')) {
-      return '$doseNumber回目の接種';
-    }
-    final bool hasSeason = influenzaSeasonLabel != null &&
-        influenzaSeasonLabel!.isNotEmpty &&
-        influenzaSeasonLabel != '未設定';
-    final String orderPart = ((influenzaDoseOrder ?? doseNumber)).toString();
-    final String orderLabel = '$orderPart回目';
-    if (hasSeason) {
-      return '${influenzaSeasonLabel!}$orderLabelの接種';
-    }
-    return '$orderLabelの接種';
-  }
-}
-
-class _DateSelectionCard extends StatelessWidget {
-  const _DateSelectionCard({
-    required this.selectedDate,
-    required this.onDateSelected,
-  });
-
-  final DateTime? selectedDate;
-  final ValueChanged<DateTime> onDateSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            offset: Offset(0, 8),
-            blurRadius: 20,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '新しい日付',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 16),
-          OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              alignment: Alignment.centerLeft,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            onPressed: () => _selectDate(context),
-            child: Row(
-              children: [
-                Icon(Icons.event, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    selectedDate != null
-                        ? '${selectedDate!.year}年${selectedDate!.month}月${selectedDate!.day}日'
-                        : '日付を選択してください',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: selectedDate != null
-                          ? theme.colorScheme.onSurface
-                          : Colors.grey.shade600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final now = DateTime.now();
-    final initialDate = selectedDate ?? now;
-
-    DatePicker.showDatePicker(
-      context,
-      showTitleActions: true,
-      minTime: now.subtract(const Duration(days: 365 * 20)),
-      maxTime: now.add(const Duration(days: 365 * 100)),
-      onConfirm: (date) {
-        onDateSelected(date);
-      },
-      currentTime: initialDate,
-      locale: LocaleType.jp,
-    );
   }
 }

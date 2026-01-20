@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/firebase/household_service.dart';
-import '../../../menu/children/application/selected_child_provider.dart';
-import '../../application/vaccine_catalog_providers.dart';
-import '../models/vaccine_info.dart';
-import '../viewmodels/concurrent_vaccines_view_model.dart';
+import '../../../../../core/theme/semantic_colors.dart';
+import '../../../../../core/firebase/household_service.dart';
+import '../../../../menu/children/application/selected_child_provider.dart';
+import '../../../application/vaccine_catalog_providers.dart';
+import '../../models/vaccine_info.dart';
+import '../../viewmodels/concurrent_vaccines_view_model.dart';
 
 /// doseIdを取得するためのパラメータ
 @immutable
@@ -85,7 +85,7 @@ class ConcurrentVaccinesCard extends ConsumerWidget {
         reservationGroupId!.isEmpty ||
         householdId == null ||
         childId == null) {
-      return _buildCard(theme, _buildEmptyContent(theme));
+      return _buildCard(context, theme, _buildEmptyContent(context, theme));
     }
 
     // doseIdを取得
@@ -99,6 +99,7 @@ class ConcurrentVaccinesCard extends ConsumerWidget {
 
     return doseIdAsync.when(
       loading: () => _buildCard(
+        context,
         theme,
         const Center(
           child: Padding(
@@ -107,10 +108,11 @@ class ConcurrentVaccinesCard extends ConsumerWidget {
           ),
         ),
       ),
-      error: (_, __) => _buildCard(theme, _buildEmptyContent(theme)),
+      error: (_, __) =>
+          _buildCard(context, theme, _buildEmptyContent(context, theme)),
       data: (doseId) {
         if (doseId == null) {
-          return _buildCard(theme, _buildEmptyContent(theme));
+          return _buildCard(context, theme, _buildEmptyContent(context, theme));
         }
 
         // ConcurrentVaccinesViewModelを使用して同時接種ワクチンを取得
@@ -137,31 +139,31 @@ class ConcurrentVaccinesCard extends ConsumerWidget {
           content = Text(
             state.error!,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.red,
+              color: context.errorText,
             ),
           );
         } else if (state.members.isEmpty) {
-          content = _buildEmptyContent(theme);
+          content = _buildEmptyContent(context, theme);
         } else {
-          content = _buildMembersList(theme, state.members);
+          content = _buildMembersList(context, theme, state.members);
         }
 
-        return _buildCard(theme, content);
+        return _buildCard(context, theme, content);
       },
     );
   }
 
-  Widget _buildCard(ThemeData theme, Widget content) {
+  Widget _buildCard(BuildContext context, ThemeData theme, Widget content) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBackground,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x14000000),
-            offset: Offset(0, 8),
+            color: context.cardShadow,
+            offset: const Offset(0, 8),
             blurRadius: 20,
           ),
         ],
@@ -173,7 +175,7 @@ class ConcurrentVaccinesCard extends ConsumerWidget {
             children: [
               Icon(
                 Icons.vaccines,
-                color: AppColors.primary,
+                color: context.primaryColor,
                 size: 24,
               ),
               const SizedBox(width: 12),
@@ -192,19 +194,25 @@ class ConcurrentVaccinesCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyContent(ThemeData theme) {
+  Widget _buildEmptyContent(BuildContext context, ThemeData theme) {
     return Text(
       '同時接種するワクチンはありません',
       style: theme.textTheme.bodyMedium?.copyWith(
-        color: Colors.grey.shade600,
+        color: context.textSecondary,
       ),
     );
   }
 
   Widget _buildMembersList(
+    BuildContext context,
     ThemeData theme,
     List<ConcurrentVaccineMember> members,
   ) {
+    final primaryColor = context.primaryColor;
+    final itemBackground = context.isDarkMode
+        ? primaryColor.withValues(alpha: 0.15)
+        : primaryColor.withValues(alpha: 0.05);
+
     return Column(
       children: [
         for (var i = 0; i < members.length; i++)
@@ -215,14 +223,14 @@ class ConcurrentVaccinesCard extends ConsumerWidget {
             ),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.05),
+              color: itemBackground,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.vaccines,
-                  color: AppColors.primary,
+                  color: primaryColor,
                   size: 20,
                 ),
                 const SizedBox(width: 12),
@@ -237,7 +245,7 @@ class ConcurrentVaccinesCard extends ConsumerWidget {
                 Text(
                   '${members[i].doseNumber}回目',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.grey.shade700,
+                    color: context.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

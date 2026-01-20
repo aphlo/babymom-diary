@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/semantic_colors.dart';
 import '../../../../baby_food/domain/value_objects/food_category.dart';
 import '../../../../baby_food/presentation/providers/baby_food_providers.dart';
 
@@ -19,16 +20,16 @@ class AddIngredientButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBackground,
         border: Border(
-          bottom: BorderSide(color: Colors.grey.shade200),
+          bottom: BorderSide(color: context.menuSectionBorder),
         ),
       ),
       child: ListTile(
-        leading: const Icon(Icons.add, color: Colors.pink),
-        title: const Text(
+        leading: Icon(Icons.add, color: context.accentPink),
+        title: Text(
           '食材を追加',
-          style: TextStyle(color: Colors.pink),
+          style: TextStyle(color: context.accentPink),
         ),
         onTap: () => _showAddIngredientDialog(context, ref),
       ),

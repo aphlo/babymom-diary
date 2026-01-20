@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
+
 /// テーブルのヘッダーセル
 class TableHeaderCell extends StatelessWidget {
   const TableHeaderCell({
@@ -86,13 +88,13 @@ class TableHeader extends StatelessWidget {
 }
 
 /// 週末の背景色を取得するヘルパー関数
-Color getWeekendRowColor(DateTime date, ThemeData theme) {
+Color getWeekendRowColor(DateTime date, BuildContext context) {
   final weekday = date.weekday;
   if (weekday == DateTime.saturday) {
-    return const Color(0xFFE3F2FD);
+    return context.saturdayRowBackground;
   } else if (weekday == DateTime.sunday) {
-    return const Color(0xFFFFEBEE);
+    return context.sundayRowBackground;
   } else {
-    return theme.colorScheme.surface;
+    return Theme.of(context).colorScheme.surface;
   }
 }

@@ -5,7 +5,7 @@ import '../../application/vaccine_catalog_providers.dart';
 import '../../domain/entities/dose_record.dart';
 import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_view_model.dart';
-import '../widgets/concurrent_vaccines_confirmation_dialog.dart';
+import '../widgets/concurrent_vaccines/concurrent_vaccines_confirmation_dialog.dart';
 
 class VaccineDetailInteractions {
   const VaccineDetailInteractions({

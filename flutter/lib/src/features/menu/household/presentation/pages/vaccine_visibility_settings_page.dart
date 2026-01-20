@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/semantic_colors.dart';
 import '../../../../../core/firebase/household_service.dart';
 import '../viewmodels/vaccine_visibility_settings_view_model.dart';
 
@@ -65,7 +65,7 @@ class _VaccineVisibilitySettingsPageState
     });
 
     return Scaffold(
-      backgroundColor: AppColors.pageBackground,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
         title: const Text('ワクチンの表示・非表示'),
       ),
@@ -82,7 +82,7 @@ class _VaccineVisibilitySettingsPageState
                     child: Text(
                       '不要なワクチンを非表示にできます。ボタンをオフにして保存ボタンを押してください',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey.shade700,
+                            color: context.textSecondary,
                           ),
                     ),
                   );
@@ -96,7 +96,7 @@ class _VaccineVisibilitySettingsPageState
                 return Card(
                   margin:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  color: Colors.white,
+                  color: context.cardBackground,
                   child: SwitchListTile(
                     title: Text(
                       vaccine.name,
@@ -104,7 +104,7 @@ class _VaccineVisibilitySettingsPageState
                     ),
                     value: isVisible,
                     onChanged: (_) => viewModel.toggleVisibility(vaccine.id),
-                    activeTrackColor: AppColors.primary,
+                    activeTrackColor: context.primaryColor,
                   ),
                 );
               },
@@ -120,7 +120,7 @@ class _VaccineVisibilitySettingsPageState
               onPressed: state.isSaving ? null : () => _saveSettings(context),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                backgroundColor: AppColors.primary,
+                backgroundColor: context.primaryColor,
                 foregroundColor: Colors.white,
               ),
               child: state.isSaving

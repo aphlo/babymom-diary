@@ -21,7 +21,7 @@ import '../models/vaccine_info.dart';
 import '../viewmodels/vaccine_detail_state.dart';
 import '../models/vaccines_view_data.dart';
 import '../viewmodels/vaccines_view_model.dart';
-import '../widgets/vaccines_legend.dart';
+import '../widgets/list/vaccines_legend.dart';
 import 'vaccine_detail_page.dart';
 
 class VaccinesPage extends ConsumerStatefulWidget {

@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 
-import '../viewmodels/concurrent_vaccines_view_model.dart';
+import '../../viewmodels/concurrent_vaccines_view_model.dart';
 
-Future<bool?> showConcurrentVaccinesRescheduleDialog({
+Future<bool?> showConcurrentVaccinesRevertDialog({
   required BuildContext context,
   required String householdId,
   required String childId,
@@ -15,7 +15,7 @@ Future<bool?> showConcurrentVaccinesRescheduleDialog({
 }) {
   return showDialog<bool>(
     context: context,
-    builder: (_) => _ConcurrentVaccinesRescheduleDialog(
+    builder: (_) => _ConcurrentVaccinesRevertDialog(
       householdId: householdId,
       childId: childId,
       reservationGroupId: reservationGroupId,
@@ -25,8 +25,8 @@ Future<bool?> showConcurrentVaccinesRescheduleDialog({
   );
 }
 
-class _ConcurrentVaccinesRescheduleDialog extends ConsumerWidget {
-  const _ConcurrentVaccinesRescheduleDialog({
+class _ConcurrentVaccinesRevertDialog extends ConsumerWidget {
+  const _ConcurrentVaccinesRevertDialog({
     required this.householdId,
     required this.childId,
     required this.reservationGroupId,
@@ -153,7 +153,7 @@ class _ConcurrentVaccinesRescheduleDialog extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              '同時に予約したワクチンがあります。まとめて日付変更しますか？',
+              '同時に予約したワクチンがあります。まとめて未接種に戻しますか？',
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 height: 1.4,
@@ -174,14 +174,14 @@ class _ConcurrentVaccinesRescheduleDialog extends ConsumerWidget {
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 4),
                 child: Text(
-                  '全て日付変更する',
+                  '全て未接種に戻す',
                   textAlign: TextAlign.center,
                 ),
               ),
               onPressed: () => Navigator.of(context).pop(true),
               style: TextButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
-                backgroundColor: theme.colorScheme.primary,
+                backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -193,17 +193,17 @@ class _ConcurrentVaccinesRescheduleDialog extends ConsumerWidget {
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 4),
                 child: Text(
-                  'これだけ日付変更する',
+                  'これだけ未接種に戻す',
                   textAlign: TextAlign.center,
                 ),
               ),
               onPressed: () => Navigator.of(context).pop(false),
               style: TextButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
-                foregroundColor: theme.colorScheme.primary,
+                foregroundColor: Colors.orange,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: theme.colorScheme.primary),
+                  side: const BorderSide(color: Colors.orange),
                 ),
               ),
             ),

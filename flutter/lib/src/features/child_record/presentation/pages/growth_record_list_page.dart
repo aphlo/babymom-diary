@@ -2,14 +2,14 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/core/utils/date_formatter.dart';
 import '../../../ads/application/services/banner_ad_manager.dart';
 import '../../../ads/presentation/widgets/banner_ad_widget.dart';
-import '../../child_record.dart';
 import '../models/growth_measurement_point.dart';
 import '../viewmodels/growth_chart/growth_chart_view_model.dart';
 import '../widgets/growth_measurement_sheet.dart';
+import '../widgets/growth_record_list_tile.dart';
 
 class GrowthRecordListPage extends ConsumerWidget {
   const GrowthRecordListPage({super.key});
@@ -17,38 +17,45 @@ class GrowthRecordListPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final tabLabelColor =
+        context.isDarkMode ? context.primaryColor : Colors.white;
+    final tabUnselectedColor = context.isDarkMode
+        ? context.primaryColor.withValues(alpha: 0.6)
+        : Colors.white70;
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-            title: const Text('身長と体重の記録'),
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(32),
-              child: SizedBox(
-                height: 32,
-                child: TabBar(
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.white70,
-                  indicatorColor: Colors.white,
-                  labelStyle: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  unselectedLabelStyle: theme.textTheme.bodyMedium,
-                  tabs: const [
-                    Tab(text: '身長'),
-                    Tab(text: '体重'),
-                  ],
+          title: const Text('身長と体重の記録'),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(32),
+            child: SizedBox(
+              height: 32,
+              child: TabBar(
+                labelColor: tabLabelColor,
+                unselectedLabelColor: tabUnselectedColor,
+                indicatorColor: tabLabelColor,
+                labelStyle: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
+                unselectedLabelStyle: theme.textTheme.bodyMedium,
+                tabs: const [
+                  Tab(text: '身長'),
+                  Tab(text: '体重'),
+                ],
               ),
-            )),
-        backgroundColor: AppColors.pageBackground,
+            ),
+          ),
+        ),
+        backgroundColor: context.pageBackground,
         body: Column(
           children: [
             Expanded(
               child: TabBarView(
                 children: [
-                  _RecordListView(type: RecordType.height),
-                  _RecordListView(type: RecordType.weight),
+                  _RecordListView(isHeightRecord: true),
+                  _RecordListView(isHeightRecord: false),
                 ],
               ),
             ),
@@ -60,86 +67,10 @@ class GrowthRecordListPage extends ConsumerWidget {
   }
 }
 
-enum RecordType { height, weight }
-
 class _RecordListView extends ConsumerWidget {
-  const _RecordListView({required this.type});
+  const _RecordListView({required this.isHeightRecord});
 
-  final RecordType type;
-
-  String _formatHeight(double? value) {
-    if (value == null) {
-      return '-';
-    }
-    return '${value.toStringAsFixed(1)} cm';
-  }
-
-  String _formatWeight(GrowthMeasurementPoint record) {
-    if (!record.hasWeight) {
-      return '-';
-    }
-    final unit = record.resolvedWeightUnit;
-    final value = record.weightDisplayValue;
-    if (value == null) {
-      return '-';
-    }
-    final fractionDigits =
-        unit == WeightUnit.kilograms ? 2 : (value % 1 == 0 ? 0 : 2);
-    final text = _formatNumber(value, fractionDigits);
-    return '$text ${unit.label}';
-  }
-
-  String _formatNumber(double value, int fractionDigits) {
-    var text = value.toStringAsFixed(fractionDigits);
-    if (fractionDigits > 0) {
-      text = text.replaceFirst(RegExp('\\.?0+\$'), '');
-    }
-    return text;
-  }
-
-  String? _formatElapsedSinceBirth(DateTime? birthday, DateTime recordedAt) {
-    if (birthday == null) {
-      return null;
-    }
-    final birthDate = DateUtils.dateOnly(birthday);
-    final recordDate = DateUtils.dateOnly(recordedAt);
-
-    if (recordDate.isBefore(birthDate)) {
-      return null;
-    }
-
-    int years = recordDate.year - birthDate.year;
-    int months = recordDate.month - birthDate.month;
-    int days = recordDate.day - birthDate.day;
-
-    if (days < 0) {
-      final previousMonth = DateTime(recordDate.year, recordDate.month, 0);
-      days += previousMonth.day;
-      months -= 1;
-    }
-
-    if (months < 0) {
-      years -= 1;
-      months += 12;
-    }
-
-    final totalMonths = years * 12 + months;
-    final buffer = StringBuffer();
-
-    if (totalMonths > 0) {
-      buffer.write('$totalMonthsヶ月');
-    }
-
-    if (days > 0) {
-      buffer.write('$days日');
-    }
-
-    if (buffer.isEmpty) {
-      buffer.write('0日');
-    }
-
-    return '生後${buffer.toString()}目';
-  }
+  final bool isHeightRecord;
 
   Future<bool?> _showDeleteConfirmDialog(BuildContext context) {
     return showDialog<bool>(
@@ -171,7 +102,7 @@ class _RecordListView extends ConsumerWidget {
 
     return chartData.when(
       data: (data) {
-        final records = (type == RecordType.height)
+        final records = isHeightRecord
             ? data.allMeasurements.where((m) => m.hasHeight).toList()
             : data.allMeasurements.where((m) => m.hasWeight).toList();
 
@@ -200,136 +131,16 @@ class _RecordListView extends ConsumerWidget {
             final item = items[index];
 
             if (item is String) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Text(
-                      item,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
-                  const Divider(height: 1),
-                ],
-              );
+              return GrowthRecordMonthHeader(month: item);
             }
 
-            final record = item;
-            final formattedDate = DateFormatter.ddE(record.recordedAt);
-            final value = (type == RecordType.height)
-                ? _formatHeight(record.height)
-                : _formatWeight(record);
-            final ageText =
-                _formatElapsedSinceBirth(childBirthday, record.recordedAt);
-            final theme = Theme.of(context);
-            final valueTextStyle = theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              fontSize: (theme.textTheme.titleMedium?.fontSize ??
-                      theme.textTheme.bodyLarge?.fontSize ??
-                      16) +
-                  2,
-              color: AppColors.primary,
-            );
-
-            return Container(
-              color: Colors.white,
-              child: Column(
-                children: [
-                  ListTile(
-                    contentPadding: const EdgeInsets.only(
-                      left: 16,
-                      right: 8,
-                    ),
-                    title: Text(
-                      formattedDate,
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                    subtitle: ageText == null
-                        ? null
-                        : Text(
-                            ageText,
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 12,
-                            ),
-                          ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          value,
-                          style: valueTextStyle,
-                        ),
-                        const SizedBox(width: 16),
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          constraints: const BoxConstraints(
-                            minWidth: 28,
-                            minHeight: 28,
-                          ),
-                          visualDensity: VisualDensity.compact,
-                          splashRadius: 18,
-                          onPressed: () {
-                            if (type == RecordType.height) {
-                              showHeightRecordSheet(
-                                context: context,
-                                initialDate: record.recordedAt,
-                                minimumDate: childBirthday,
-                                maximumDate: DateTime.now(),
-                                record: record,
-                              );
-                            } else {
-                              showWeightRecordSheet(
-                                context: context,
-                                initialDate: record.recordedAt,
-                                minimumDate: childBirthday,
-                                maximumDate: DateTime.now(),
-                                record: record,
-                              );
-                            }
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          constraints: const BoxConstraints(
-                            minWidth: 28,
-                            minHeight: 28,
-                          ),
-                          visualDensity: VisualDensity.compact,
-                          splashRadius: 18,
-                          onPressed: () async {
-                            final confirmed =
-                                await _showDeleteConfirmDialog(context);
-                            if (confirmed == true) {
-                              final notifier = ref
-                                  .read(growthChartViewModelProvider.notifier);
-                              try {
-                                await notifier.deleteGrowthRecord(record.id);
-                              } catch (error) {
-                                if (!context.mounted) {
-                                  return;
-                                }
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('削除に失敗しました: $error'),
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 1),
-                ],
-              ),
+            final record = item as GrowthMeasurementPoint;
+            return GrowthRecordListTile(
+              record: record,
+              isHeightRecord: isHeightRecord,
+              childBirthday: childBirthday,
+              onEdit: () => _onEdit(context, record, childBirthday),
+              onDelete: () => _onDelete(context, ref, record),
             );
           },
         );
@@ -337,5 +148,52 @@ class _RecordListView extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(child: Text('エラー: $error')),
     );
+  }
+
+  void _onEdit(
+    BuildContext context,
+    GrowthMeasurementPoint record,
+    DateTime? childBirthday,
+  ) {
+    if (isHeightRecord) {
+      showHeightRecordSheet(
+        context: context,
+        initialDate: record.recordedAt,
+        minimumDate: childBirthday,
+        maximumDate: DateTime.now(),
+        record: record,
+      );
+    } else {
+      showWeightRecordSheet(
+        context: context,
+        initialDate: record.recordedAt,
+        minimumDate: childBirthday,
+        maximumDate: DateTime.now(),
+        record: record,
+      );
+    }
+  }
+
+  Future<void> _onDelete(
+    BuildContext context,
+    WidgetRef ref,
+    GrowthMeasurementPoint record,
+  ) async {
+    final confirmed = await _showDeleteConfirmDialog(context);
+    if (confirmed == true) {
+      final notifier = ref.read(growthChartViewModelProvider.notifier);
+      try {
+        await notifier.deleteGrowthRecord(record.id);
+      } catch (error) {
+        if (!context.mounted) {
+          return;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('削除に失敗しました: $error'),
+          ),
+        );
+      }
+    }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/theme/semantic_colors.dart';
 import '../../../../baby_food/domain/entities/custom_ingredient.dart';
 import '../../../../baby_food/presentation/providers/baby_food_providers.dart';
 
@@ -20,9 +21,9 @@ class CustomIngredientTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final decoration = BoxDecoration(
-      color: Colors.white,
+      color: context.cardBackground,
       border: Border(
-        bottom: BorderSide(color: Colors.grey.shade200),
+        bottom: BorderSide(color: context.menuSectionBorder),
       ),
     );
 
@@ -34,7 +35,7 @@ class CustomIngredientTile extends ConsumerWidget {
           contentPadding: const EdgeInsets.only(left: 16, right: 8),
           title: Text(
             ingredient.name,
-            style: TextStyle(color: Colors.grey.shade500),
+            style: TextStyle(color: context.textSecondary),
           ),
           trailing: TextButton.icon(
             onPressed: () => _unhideIngredient(context, ref),
@@ -60,14 +61,14 @@ class CustomIngredientTile extends ConsumerWidget {
               constraints: iconButtonConstraints,
               padding: EdgeInsets.zero,
               visualDensity: VisualDensity.compact,
-              icon: const Icon(Icons.edit, color: Colors.red, size: 20),
+              icon: Icon(Icons.edit, color: context.accentPink, size: 20),
               onPressed: () => _showEditDialog(context, ref),
             ),
             IconButton(
               constraints: iconButtonConstraints,
               padding: EdgeInsets.zero,
               visualDensity: VisualDensity.compact,
-              icon: Icon(Icons.close, color: Colors.grey.shade600),
+              icon: Icon(Icons.close, color: context.textSecondary),
               onPressed: () => _hideIngredient(context, ref),
             ),
           ],

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccination_period_highlight.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccine_requirement.dart';
 
 import '../models/vaccine_info.dart';
 import '../styles/vaccine_schedule_highlight_styles.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/services/vaccination_period_calculator.dart';
-import '../widgets/vaccine_table_cells.dart';
+import '../widgets/list/vaccine_table_cells.dart';
 
 class VaccinesScheduleTable extends StatefulWidget {
   const VaccinesScheduleTable({
@@ -128,6 +129,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
   VaccinePeriodHighlightStyle? _highlightStyleFor(
     VaccineInfo vaccine,
     String periodLabel,
+    BuildContext context,
   ) {
     final VaccinationPeriodHighlight? highlight =
         vaccine.periodHighlights[periodLabel];
@@ -137,6 +139,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
     return vaccinePeriodHighlightStyle(
       highlight: highlight,
       palette: vaccine.highlightPalette,
+      context: context,
     );
   }
 
@@ -201,7 +204,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
             GridCell(
               width: _firstColumnWidth,
               height: _headerHeight,
-              backgroundColor: Colors.grey.shade100,
+              backgroundColor: context.tableHeaderBackground,
               border: Border(
                 top: borderSide,
                 left: borderSide,
@@ -228,7 +231,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                       return GridCell(
                         width: _periodColumnWidth,
                         height: _headerHeight,
-                        backgroundColor: Colors.grey.shade100,
+                        backgroundColor: context.tableHeaderBackground,
                         border: Border(
                           top: borderSide,
                           right: borderSide,
@@ -315,7 +318,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                           final bool isInfluenza =
                               vaccine.id.startsWith('influenza');
                           final VaccinePeriodHighlightStyle? highlightStyle =
-                              _highlightStyleFor(vaccine, periodLabel);
+                              _highlightStyleFor(vaccine, periodLabel, context);
                           final List<int> rawDoseNumbers =
                               vaccine.doseSchedules[periodLabel] ??
                                   const <int>[];
@@ -419,6 +422,7 @@ class _VaccinesScheduleTableState extends State<VaccinesScheduleTable> {
                                     nextHighlightStyle = _highlightStyleFor(
                                   vaccine,
                                   nextPeriodLabel,
+                                  context,
                                 );
                                 final bool isLast = offset == runLength - 1;
                                 periodCells.add(

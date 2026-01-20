@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/value_objects/vaccination_period_highlight.dart';
 
-import '../models/vaccine_info.dart';
-import '../styles/vaccine_schedule_highlight_styles.dart';
+import '../../models/vaccine_info.dart';
+import '../../styles/vaccine_schedule_highlight_styles.dart';
 import 'vaccine_table_cells.dart';
 
 const double _legendLabelMaxWidth = 140;
@@ -27,26 +28,31 @@ class VaccinesLegend extends StatelessWidget {
         vaccinePeriodHighlightStyle(
       highlight: VaccinationPeriodHighlight.recommended,
       palette: VaccineHighlightPalette.primary,
+      context: context,
     );
     final VaccinePeriodHighlightStyle recommendedSecondaryStyle =
         vaccinePeriodHighlightStyle(
       highlight: VaccinationPeriodHighlight.recommended,
       palette: VaccineHighlightPalette.secondary,
+      context: context,
     );
     final VaccinePeriodHighlightStyle availablePrimaryStyle =
         vaccinePeriodHighlightStyle(
       highlight: VaccinationPeriodHighlight.available,
       palette: VaccineHighlightPalette.primary,
+      context: context,
     );
     final VaccinePeriodHighlightStyle availableSecondaryStyle =
         vaccinePeriodHighlightStyle(
       highlight: VaccinationPeriodHighlight.available,
       palette: VaccineHighlightPalette.secondary,
+      context: context,
     );
     final VaccinePeriodHighlightStyle academyRecommendationStyle =
         vaccinePeriodHighlightStyle(
       highlight: VaccinationPeriodHighlight.academyRecommendation,
       palette: VaccineHighlightPalette.primary,
+      context: context,
     );
 
     return Container(
@@ -268,7 +274,7 @@ class _StatusLegend extends StatelessWidget {
       children: <Widget>[
         DoseNumberBadge(
           number: 1,
-          backgroundColor: Colors.white,
+          backgroundColor: context.menuSectionBackground,
           borderColor: baseBorderColor,
           status: status,
           textColor:

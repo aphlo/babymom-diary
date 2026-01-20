@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/theme/semantic_colors.dart';
 import '../../../../core/types/child_icon.dart';
 import '../models/ingredient_record_info.dart';
 import 'reaction_display.dart';
@@ -51,7 +52,7 @@ class IngredientRecordTile extends StatelessWidget {
                         '量: ${record.amount}',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.grey.shade700,
+                          color: context.textSecondary,
                         ),
                       ),
                     ],
@@ -74,7 +75,7 @@ class IngredientRecordTile extends StatelessWidget {
                         'メモ: ${record.memo}',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.grey.shade700,
+                          color: context.textSecondary,
                         ),
                       ),
                     ],

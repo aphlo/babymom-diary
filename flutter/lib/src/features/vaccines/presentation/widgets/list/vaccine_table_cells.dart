@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/features/vaccines/domain/entities/dose_record.dart';
 
-import '../models/vaccine_info.dart';
-import '../styles/vaccine_schedule_highlight_styles.dart';
-import '../styles/vaccine_type_styles.dart';
-import 'vaccine_type_badge.dart';
+import '../../models/vaccine_info.dart';
+import '../../styles/vaccine_schedule_highlight_styles.dart';
+import '../../styles/vaccine_type_styles.dart';
+import '../shared/vaccine_type_badge.dart';
 
 const double _doseBadgeDiameter = 24;
 const double _doseBadgeDiameterSmall = 20;
@@ -144,7 +144,8 @@ class VaccineNameCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
-    final VaccineTypeStyles styles = vaccineTypeStyles(vaccine.category);
+    final VaccineTypeStyles styles =
+        vaccineTypeStyles(vaccine.category, context: context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -200,7 +201,7 @@ class DoseScheduleCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color arrowColor = Colors.grey.shade600;
+    final Color arrowColor = context.guidelineArrowColor;
     final Color? badgeFillColor = highlightStyle?.badgeFillColor;
     final Color? badgeTextColor = highlightStyle?.badgeTextColor;
     final Color? badgeBorderColor = highlightStyle?.badgeBorderColor;
@@ -366,24 +367,24 @@ class DoseNumberBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color fallbackColor = Colors.grey.shade600;
+    final Color fallbackColor = context.guidelineBadgeBorder;
     Color resolvedTextColor = textColor ?? fallbackColor;
     Color resolvedBorderColor = borderColor ?? fallbackColor;
     Color? resolvedBackgroundColor = backgroundColor;
 
     // ガイドライン表示の場合は、statusに関係なく固定の色を使用
     if (isGuidelineOnly) {
-      resolvedBackgroundColor = Colors.white;
-      resolvedTextColor = Colors.grey.shade600;
-      resolvedBorderColor = Colors.grey.shade600;
+      resolvedBackgroundColor = context.guidelineBadgeBackground;
+      resolvedTextColor = context.guidelineBadgeText;
+      resolvedBorderColor = context.guidelineBadgeBorder;
     } else if (status == DoseStatus.scheduled) {
-      resolvedBackgroundColor = AppColors.reserved;
-      resolvedBorderColor = AppColors.reserved;
-      resolvedTextColor = Colors.white;
+      resolvedBackgroundColor = context.scheduledBadgeBackground;
+      resolvedBorderColor = context.scheduledBadgeBorder;
+      resolvedTextColor = context.scheduledBadgeText;
     } else if (status == DoseStatus.completed) {
-      resolvedBackgroundColor = AppColors.vaccinated;
-      resolvedBorderColor = AppColors.vaccinated;
-      resolvedTextColor = Colors.white;
+      resolvedBackgroundColor = context.completedBadgeBackground;
+      resolvedBorderColor = context.completedBadgeBorder;
+      resolvedTextColor = context.completedBadgeText;
     }
 
     final TextStyle textStyle =

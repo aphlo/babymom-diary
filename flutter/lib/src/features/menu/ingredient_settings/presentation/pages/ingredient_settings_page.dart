@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:babymom_diary/src/core/firebase/household_service.dart';
-import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/features/baby_food/presentation/providers/baby_food_providers.dart';
 
 import '../widgets/tabbed_ingredient_settings.dart';
@@ -24,7 +24,7 @@ class IngredientSettingsPage extends ConsumerWidget {
 
   Widget _buildLoadingScaffold(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.pageBackground,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
         leading: BackButton(onPressed: () => Navigator.of(context).maybePop()),
         title: const Text('離乳食の食材管理'),
@@ -35,7 +35,7 @@ class IngredientSettingsPage extends ConsumerWidget {
 
   Widget _buildErrorScaffold(BuildContext context, Object error) {
     return Scaffold(
-      backgroundColor: AppColors.pageBackground,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
         leading: BackButton(onPressed: () => Navigator.of(context).maybePop()),
         title: const Text('離乳食の食材管理'),
@@ -74,7 +74,7 @@ class _IngredientSettingsBody extends ConsumerWidget {
 
   Widget _buildLoadingScaffold(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.pageBackground,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
         leading: BackButton(onPressed: () => Navigator.of(context).maybePop()),
         title: const Text('離乳食の食材管理'),
@@ -85,7 +85,7 @@ class _IngredientSettingsBody extends ConsumerWidget {
 
   Widget _buildErrorScaffold(BuildContext context, Object error) {
     return Scaffold(
-      backgroundColor: AppColors.pageBackground,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
         leading: BackButton(onPressed: () => Navigator.of(context).maybePop()),
         title: const Text('離乳食の食材管理'),

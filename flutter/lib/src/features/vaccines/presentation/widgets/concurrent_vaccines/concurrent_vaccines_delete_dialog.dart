@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
 
-import '../viewmodels/concurrent_vaccines_view_model.dart';
+import '../../viewmodels/concurrent_vaccines_view_model.dart';
 
 Future<bool?> showConcurrentVaccinesDeleteDialog({
   required BuildContext context,

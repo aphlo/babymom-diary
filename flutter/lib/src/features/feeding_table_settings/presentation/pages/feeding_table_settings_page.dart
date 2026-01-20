@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/features/ads/application/services/banner_ad_manager.dart';
 import 'package:babymom_diary/src/features/ads/presentation/widgets/banner_ad_widget.dart';
 import 'package:babymom_diary/src/features/feeding_table_settings/domain/entities/feeding_table_settings.dart';
@@ -17,7 +17,7 @@ class FeedingTableSettingsPage extends ConsumerWidget {
     final viewModel = ref.read(feedingTableSettingsViewModelProvider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.pageBackground,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
         title: const Text('授乳表の設定'),
       ),
@@ -29,12 +29,12 @@ class FeedingTableSettingsPage extends ConsumerWidget {
                   child: ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.only(bottom: 16),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
                         child: Text(
                           '表示する項目を選択してください\nドラッグして順序を変更できます\n※ 最低1つの項目を表示する必要があります',
                           style: TextStyle(
-                            color: Colors.grey,
+                            color: context.textSecondary,
                             fontSize: 14,
                           ),
                         ),
@@ -59,7 +59,7 @@ class FeedingTableSettingsPage extends ConsumerWidget {
     FeedingTableSettingsViewModel viewModel,
   ) {
     return Card(
-      color: Colors.white,
+      color: context.cardBackground,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -81,7 +81,7 @@ class FeedingTableSettingsPage extends ConsumerWidget {
             proxyDecorator: (child, index, animation) {
               return Material(
                 elevation: 4,
-                color: Colors.white,
+                color: context.cardBackground,
                 child: child,
               );
             },
@@ -110,18 +110,18 @@ class FeedingTableSettingsPage extends ConsumerWidget {
     FeedingTableSettingsViewModel viewModel,
   ) {
     return Card(
-      color: Colors.white,
+      color: context.cardBackground,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text(
               '非表示の項目',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
-                color: Colors.grey,
+                color: context.textSecondary,
               ),
             ),
           ),
@@ -165,19 +165,19 @@ class _CategoryTile extends StatelessWidget {
       leading: showDragHandle
           ? ReorderableDragStartListener(
               index: index,
-              child: const Icon(Icons.drag_handle, color: Colors.grey),
+              child: Icon(Icons.drag_handle, color: context.textSecondary),
             )
           : const SizedBox(width: 24),
       title: Text(
         category.label,
         style: TextStyle(
-          color: isVisible ? Colors.black : Colors.grey,
+          color: isVisible ? context.textPrimary : context.textSecondary,
         ),
       ),
       trailing: Switch(
         value: isVisible,
         onChanged: canToggle ? (_) => onToggle() : null,
-        activeTrackColor: AppColors.primary,
+        activeTrackColor: context.primaryColor,
       ),
     );
   }

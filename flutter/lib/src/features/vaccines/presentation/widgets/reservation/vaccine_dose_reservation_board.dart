@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/core/utils/date_formatter.dart';
 
-import '../../domain/entities/dose_record.dart';
-import '../models/vaccine_detail_callbacks.dart';
-import '../models/vaccine_info.dart';
-import '../viewmodels/vaccine_detail_state.dart';
-import 'dose_status_badge.dart';
+import '../../../domain/entities/dose_record.dart';
+import '../../models/vaccine_detail_callbacks.dart';
+import '../../models/vaccine_info.dart';
+import '../../viewmodels/vaccine_detail_state.dart';
+import '../shared/dose_status_badge.dart';
 
 class VaccineDoseReservationBoard extends StatelessWidget {
   const VaccineDoseReservationBoard({
@@ -140,8 +141,8 @@ class VaccineDoseReservationBoard extends StatelessWidget {
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       fontWeight: FontWeight.w500,
                                       color: effectiveDate != null
-                                          ? Colors.black87
-                                          : Colors.grey,
+                                          ? context.doseDateLabel
+                                          : context.doseDatePlaceholder,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -151,8 +152,8 @@ class VaccineDoseReservationBoard extends StatelessWidget {
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       fontWeight: FontWeight.w700,
                                       color: effectiveDate != null
-                                          ? Colors.black87
-                                          : Colors.grey,
+                                          ? context.doseDateLabel
+                                          : context.doseDatePlaceholder,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -192,7 +193,8 @@ class DoseRecommendationBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final Color backgroundColor = Colors.orange.shade50;
+    final Color backgroundColor = context.recommendationBubbleBackground;
+    final Color textColor = context.recommendationBubbleText;
 
     return SizedBox(
       width: double.infinity,
@@ -206,17 +208,19 @@ class DoseRecommendationBubble extends StatelessWidget {
             decoration: BoxDecoration(
               color: backgroundColor,
               borderRadius: BorderRadius.circular(16),
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
-                  color: Color(0x14000000),
-                  offset: Offset(0, 8),
+                  color: context.cardShadow,
+                  offset: const Offset(0, 8),
                   blurRadius: 16,
                 ),
               ],
             ),
             child: Text(
               text,
-              style: theme.textTheme.bodyMedium,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: textColor,
+              ),
             ),
           ),
           Align(
