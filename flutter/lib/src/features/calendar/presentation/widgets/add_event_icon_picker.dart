@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 
 class AddEventIconPicker extends StatelessWidget {
   const AddEventIconPicker({
@@ -57,6 +57,33 @@ class _IconChoice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget? iconContent;
+    if (path.isEmpty) {
+      iconContent = Text(
+        noIconLabel,
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.bodySmall,
+      );
+    } else {
+      Widget image = Image.asset(
+        path,
+        fit: BoxFit.contain,
+      );
+
+      // ダークモード時は白い背景を追加
+      if (context.isDarkMode) {
+        image = Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: image,
+        );
+      }
+
+      iconContent = image;
+    }
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -65,22 +92,13 @@ class _IconChoice extends StatelessWidget {
         decoration: BoxDecoration(
           border: selected
               ? Border.all(
-                  color: AppColors.primary,
+                  color: context.primaryColor,
                   width: 2,
                 )
               : null,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: path.isEmpty
-            ? Text(
-                noIconLabel,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall,
-              )
-            : Image.asset(
-                path,
-                fit: BoxFit.contain,
-              ),
+        child: iconContent,
       ),
     );
   }

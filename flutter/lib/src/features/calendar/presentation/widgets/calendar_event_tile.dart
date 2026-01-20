@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/features/calendar/domain/entities/calendar_event.dart';
 
 class CalendarEventTile extends StatelessWidget {
@@ -57,14 +58,29 @@ class CalendarEventTile extends StatelessWidget {
 
     Widget? icon;
     if (event.iconPath.isNotEmpty) {
-      icon = ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.asset(
-          event.iconPath,
+      Widget image = Image.asset(
+        event.iconPath,
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+      );
+
+      // ダークモード時は白い背景を追加
+      if (context.isDarkMode) {
+        image = Container(
           width: 40,
           height: 40,
-          fit: BoxFit.cover,
-        ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: image,
+        );
+      }
+
+      icon = ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: image,
       );
     } else {
       icon = Container(

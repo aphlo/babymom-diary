@@ -97,10 +97,23 @@ class CalendarDayCell extends StatelessWidget {
               color: Colors.grey,
             );
           } else {
-            child = Image.asset(
+            Widget image = Image.asset(
               event.iconPath,
               fit: BoxFit.contain,
             );
+
+            // ダークモード時は白い背景を追加
+            if (context.isDarkMode) {
+              image = Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: borderRadius,
+                ),
+                child: image,
+              );
+            }
+
+            child = image;
           }
 
           Widget icon = Padding(
