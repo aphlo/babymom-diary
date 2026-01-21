@@ -44,6 +44,8 @@ dependencies:
   home_widget: ^0.8.1
   app_links: ^6.3.3
   in_app_review: ^2.0.10
+  purchases_flutter: ^9.10.7
+  purchases_ui_flutter: ^9.10.7
 
 dev_dependencies:
   flutter_test:

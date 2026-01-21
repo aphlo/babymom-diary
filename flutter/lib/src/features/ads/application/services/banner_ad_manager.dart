@@ -1,7 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import 'package:babymom_diary/src/features/subscription/domain/entities/subscription_status.dart';
+import 'package:babymom_diary/src/features/subscription/infrastructure/services/revenue_cat_service.dart';
 
 import '../providers/ad_providers.dart';
 
@@ -68,6 +72,20 @@ class BannerAdManager {
   /// [width] 広告を表示する領域の幅（ピクセル）
   Future<void> preloadAll(double width) async {
     if (_isDisposed) return;
+
+    // サブスク加入済みならプリロードをスキップ
+    try {
+      final revenueCatService = RevenueCatService();
+      final status = await revenueCatService.getSubscriptionStatus();
+      if (status.shouldHideAds) {
+        debugPrint('[BannerAdManager] Skipping preload - subscription active');
+        return;
+      }
+    } catch (e) {
+      // エラー時は通常通りプリロードを続行
+      debugPrint('[BannerAdManager] Subscription check failed: $e');
+    }
+
     _screenWidth = width;
 
     // 全スロットを並行してプリロード

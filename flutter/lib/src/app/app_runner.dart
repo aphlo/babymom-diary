@@ -21,12 +21,22 @@ import 'package:babymom_diary/src/core/analytics/analytics_service.dart';
 import 'package:babymom_diary/src/features/widget/application/providers/widget_providers.dart';
 import 'package:babymom_diary/src/core/deeplink/deep_link_service.dart';
 import 'package:babymom_diary/src/features/review_prompt/review_prompt.dart';
+import 'package:babymom_diary/src/features/subscription/infrastructure/services/revenue_cat_service.dart';
 
 Future<void> runBabymomDiaryApp({
   required String appTitle,
+  String revenueCatApiKey = const String.fromEnvironment('REVENUECAT_API_KEY'),
   bool enableAnalytics = false,
 }) async {
   await FirebaseAuth.instance.signInAnonymously();
+
+  // RevenueCat初期化
+  final uid = FirebaseAuth.instance.currentUser?.uid;
+  final revenueCatService = RevenueCatService();
+  await revenueCatService.configure(
+    apiKey: revenueCatApiKey,
+    appUserId: uid,
+  );
 
   final prefs = await SharedPreferences.getInstance();
   final householdService = fbcore.HouseholdService(

@@ -12,13 +12,33 @@ def with_args(base_command)
   "#{base_command} #{extra_args}"
 end
 
+# Load environment variables from .env.local file
+def load_env_file(file_path)
+  return unless File.exist?(file_path)
+
+  File.readlines(file_path).each do |line|
+    line = line.strip
+    next if line.empty? || line.start_with?("#")
+
+    key, value = line.split("=", 2)
+    ENV[key] = value if key && value
+  end
+end
+
+# Load .env.local for local development
+load_env_file(".env.local")
+
+def revenuecat_api_key
+  ENV["REVENUECAT_API_KEY"].to_s
+end
+
 TASKS = {
   run_prod: {
     command: "fvm flutter run --flavor prod -t lib/main_prod.dart --dart-define=FLAVOR=prod",
     description: "Run app with prod flavor (set ARGS for extra flutter flags)",
   },
   run_local: {
-    command: "fvm flutter run --flavor stg -t lib/main_stg.dart --dart-define=FLAVOR=stg",
+    command: -> { "fvm flutter run --flavor stg -t lib/main_stg.dart --dart-define=FLAVOR=stg --dart-define=REVENUECAT_API_KEY=#{revenuecat_api_key}" },
     description: "Run app with stg flavor (set ARGS for extra flutter flags)",
   },
   format: {
@@ -66,7 +86,9 @@ TASKS = {
 TASKS.each do |name, config|
   desc config.fetch(:description)
   task name do
-    run_command(with_args(config.fetch(:command)))
+    command = config.fetch(:command)
+    command = command.call if command.respond_to?(:call)
+    run_command(with_args(command))
   end
 end
 

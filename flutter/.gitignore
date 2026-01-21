@@ -48,6 +48,9 @@ lib/src/features/ads/infrastructure/services/admob_service.dart
 fastlane/.env.local
 fastlane/.env.prod
 
+# Local environment files (SECRETS - DO NOT COMMIT)
+.env.local
+
 # iOS/XCode related
 **/ios/**/*.mode1v3
 **/ios/**/*.mode2v3

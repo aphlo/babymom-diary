@@ -31,6 +31,7 @@ import '../../features/menu/ingredient_settings/presentation/pages/ingredient_se
 import '../../features/baby_food/presentation/pages/ingredient_detail_page.dart';
 import '../../features/baby_food/domain/value_objects/food_category.dart';
 import '../../features/feeding_table_settings/presentation/pages/feeding_table_settings_page.dart';
+import '../../features/subscription/presentation/pages/subscription_page.dart';
 
 part 'app_router.g.dart';
 
@@ -347,6 +348,13 @@ GoRouter appRouter(Ref ref) {
             child: AddCalendarEventPage(existingEvent: existingEvent),
           );
         },
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '/subscription',
+        name: 'subscription',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: SubscriptionPage()),
       ),
     ],
   );

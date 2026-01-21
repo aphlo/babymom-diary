@@ -47,5 +47,12 @@ Future<void> main() async {
   // AdMob SDK初期化（ATT許可は後で最初の画面から呼ぶ）
   await AdMobService.initializeMobileAds();
 
-  await runBabymomDiaryApp(appTitle: 'milu', enableAnalytics: true);
+  // RevenueCat API Key (本番環境)
+  // CI/CD で --dart-define=REVENUECAT_API_KEY=appl_xxx 経由で渡す
+  const revenueCatApiKey = String.fromEnvironment('REVENUECAT_API_KEY');
+  await runBabymomDiaryApp(
+    appTitle: 'milu',
+    enableAnalytics: true,
+    revenueCatApiKey: revenueCatApiKey,
+  );
 }
