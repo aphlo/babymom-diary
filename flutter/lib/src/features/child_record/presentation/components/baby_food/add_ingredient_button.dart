@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import '../../../../baby_food/domain/value_objects/food_category.dart';
 import '../../../../baby_food/presentation/providers/baby_food_providers.dart';
+import '../../../../menu/children/application/child_context_provider.dart';
 
 class AddIngredientButton extends ConsumerWidget {
   const AddIngredientButton({
@@ -23,7 +24,36 @@ class AddIngredientButton extends ConsumerWidget {
         '食材を追加',
         style: TextStyle(color: context.accentPink),
       ),
-      onTap: () => _showAddIngredientDialog(context, ref),
+      onTap: () {
+        final childContext = ref.read(childContextProvider).value;
+        if (childContext == null || !childContext.hasSelectedChild) {
+          _showChildRequiredDialog(context);
+          return;
+        }
+        _showAddIngredientDialog(context, ref);
+      },
+    );
+  }
+
+  void _showChildRequiredDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          '子どもを登録してください',
+          style: TextStyle(fontSize: 16),
+        ),
+        content: const Text(
+          '記録を行うには、メニューから子どもを登録してください。',
+          style: TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 

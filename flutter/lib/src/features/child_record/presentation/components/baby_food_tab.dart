@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/types/child_icon.dart';
+import '../../../baby_food/domain/entities/baby_food_record.dart';
 import '../../../baby_food/presentation/providers/baby_food_providers.dart';
 import '../../../menu/children/application/child_context_provider.dart';
 import 'baby_food/baby_food_ingredient_list.dart';
@@ -28,19 +29,24 @@ class _BabyFoodTabState extends ConsumerState<BabyFoodTab>
     super.build(context); // AutomaticKeepAliveClientMixin requires this
 
     final childContext = ref.watch(childContextProvider).value;
-    if (childContext == null || childContext.selectedChildId == null) {
+    // householdIdが取得できるまではローディング表示
+    if (childContext == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
     final householdId = childContext.householdId;
-    final childId = childContext.selectedChildId!;
+    final selectedChildId = childContext.selectedChildId;
+    final hasValidChild = selectedChildId != null && selectedChildId.isNotEmpty;
 
-    final recordsAsync = ref.watch(
-      watchBabyFoodRecordsProvider(
-        householdId: householdId,
-        childId: childId,
-      ),
-    );
+    // 子供が選択されていない場合は空のデータを使用
+    final recordsAsync = hasValidChild
+        ? ref.watch(
+            watchBabyFoodRecordsProvider(
+              householdId: householdId,
+              childId: selectedChildId,
+            ),
+          )
+        : const AsyncValue<List<BabyFoodRecord>>.data(<BabyFoodRecord>[]);
     final customIngredientsAsync =
         ref.watch(customIngredientsProvider(householdId));
     final hiddenIngredientsAsync =

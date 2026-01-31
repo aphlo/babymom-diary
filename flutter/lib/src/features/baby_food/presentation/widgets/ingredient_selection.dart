@@ -94,7 +94,9 @@ class _CategoryTile extends StatelessWidget {
       elevation: 0,
       margin: EdgeInsets.zero,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-      color: isExpanded ? Colors.pink.shade50 : context.menuSectionBackground,
+      color: isExpanded
+          ? context.dateSectionHeaderBackground
+          : context.menuSectionBackground,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -104,9 +106,10 @@ class _CategoryTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   category.label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
+                    color: context.textPrimary,
                   ),
                 ),
               ),
@@ -115,13 +118,13 @@ class _CategoryTile extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.pink,
+                    color: context.accentPink,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     '$selectedCount',
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: context.onPrimaryColor,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
@@ -131,7 +134,7 @@ class _CategoryTile extends StatelessWidget {
               ],
               Icon(
                 isExpanded ? Icons.expand_less : Icons.expand_more,
-                color: Colors.grey,
+                color: context.inactiveTabColor,
               ),
             ],
           ),
@@ -174,8 +177,8 @@ class _IngredientList extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        border: Border.all(color: Colors.grey.shade200),
+        color: context.subtleSurfaceBackground,
+        border: Border.all(color: context.menuSectionBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,12 +241,15 @@ class _IngredientChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FilterChip(
-      label: Text(ingredientName),
+      label: Text(
+        ingredientName,
+        style: TextStyle(color: context.textPrimary),
+      ),
       selected: isSelected,
       onSelected: (_) => onTap(),
       backgroundColor: context.menuSectionBackground,
-      selectedColor: Colors.pink.shade100,
-      checkmarkColor: Colors.pink.shade700,
+      selectedColor: context.dateSectionHeaderBackground,
+      checkmarkColor: context.dateSectionText,
       side: BorderSide(color: context.tableBorderColor),
     );
   }

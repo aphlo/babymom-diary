@@ -1,4 +1,5 @@
 import 'package:babymom_diary/src/core/theme/app_colors.dart';
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import 'package:babymom_diary/src/core/widgets/bottom_save_button.dart';
 import 'package:flutter/material.dart';
 
@@ -262,7 +263,9 @@ class ChildFormState extends State<ChildForm> {
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: _pickedColor.toARGB32() == c.toARGB32()
-                              ? Colors.black
+                              ? (context.isDarkMode
+                                  ? Colors.white
+                                  : Colors.black)
                               : Colors.transparent,
                           width: 2,
                         ),
