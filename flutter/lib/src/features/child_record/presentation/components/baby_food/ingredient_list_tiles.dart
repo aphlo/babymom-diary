@@ -8,6 +8,7 @@ import '../../../../baby_food/domain/entities/custom_ingredient.dart';
 import '../../../../baby_food/domain/value_objects/baby_food_reaction.dart';
 import '../../../../baby_food/domain/value_objects/food_category.dart';
 import '../../../../baby_food/presentation/providers/baby_food_providers.dart';
+import '../../../../menu/children/application/child_context_provider.dart';
 import 'reaction_icon.dart';
 
 class CustomIngredientListTile extends ConsumerWidget {
@@ -33,14 +34,21 @@ class CustomIngredientListTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return InkWell(
-      onTap: () => context.push(
-        '/baby-food/ingredient-detail',
-        extra: {
-          'ingredientId': ingredient.id,
-          'ingredientName': ingredient.name,
-          'category': category,
-        },
-      ),
+      onTap: () {
+        final childContext = ref.read(childContextProvider).value;
+        if (childContext == null || !childContext.hasSelectedChild) {
+          _showChildRequiredDialog(context);
+          return;
+        }
+        context.push(
+          '/baby-food/ingredient-detail',
+          extra: {
+            'ingredientId': ingredient.id,
+            'ingredientName': ingredient.name,
+            'category': category,
+          },
+        );
+      },
       child: Container(
         constraints: const BoxConstraints(minHeight: 72),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -210,7 +218,7 @@ class CustomIngredientListTile extends ConsumerWidget {
   }
 }
 
-class IngredientListTile extends StatelessWidget {
+class IngredientListTile extends ConsumerWidget {
   const IngredientListTile({
     super.key,
     required this.ingredientId,
@@ -231,16 +239,23 @@ class IngredientListTile extends StatelessWidget {
   final ChildIcon childIcon;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return InkWell(
-      onTap: () => context.push(
-        '/baby-food/ingredient-detail',
-        extra: {
-          'ingredientId': ingredientId,
-          'ingredientName': ingredientName,
-          'category': category,
-        },
-      ),
+      onTap: () {
+        final childContext = ref.read(childContextProvider).value;
+        if (childContext == null || !childContext.hasSelectedChild) {
+          _showChildRequiredDialog(context);
+          return;
+        }
+        context.push(
+          '/baby-food/ingredient-detail',
+          extra: {
+            'ingredientId': ingredientId,
+            'ingredientName': ingredientName,
+            'category': category,
+          },
+        );
+      },
       child: Container(
         constraints: const BoxConstraints(minHeight: 72),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -352,4 +367,27 @@ class _AllergyBadge extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 子供未登録時のダイアログを表示
+void _showChildRequiredDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text(
+        '子どもを登録してください',
+        style: TextStyle(fontSize: 16),
+      ),
+      content: const Text(
+        '記録を行うには、メニューから子どもを登録してください。',
+        style: TextStyle(fontSize: 14),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('OK'),
+        ),
+      ],
+    ),
+  );
 }

@@ -70,6 +70,10 @@ extension SemanticColorsExtension on BuildContext {
   Color get subtleSurfaceBackground =>
       isDarkMode ? AppDarkColors.surfaceVariant : Colors.grey.shade100;
 
+  // ステップインジケーター背景色（離乳食記録画面など）
+  Color get stepIndicatorBackground =>
+      isDarkMode ? const Color(0xFF2D2D2D) : const Color(0xFFFFF0F3);
+
   // 合計行の背景
   Color get tableTotalsBackground =>
       isDarkMode ? AppDarkColors.surfaceVariant : Colors.grey.shade200;

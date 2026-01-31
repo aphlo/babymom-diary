@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import '../../../../core/types/child_icon.dart';
 import '../../domain/value_objects/amount_unit.dart';
 import '../../domain/value_objects/baby_food_reaction.dart';
@@ -79,41 +80,42 @@ class _AmountInputCardState extends State<AmountInputCard> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.pink.shade200),
+        border: Border.all(color: context.dateSectionBorder),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 1行目: 食材名
-          _buildNameRow(),
+          _buildNameRow(context),
           const SizedBox(height: 12),
           // 2行目: 量ラベル + 単位・量入力
-          _buildAmountRow(),
+          _buildAmountRow(context),
           const Divider(height: 16),
           // 3行目: 反応ラベル + 反応アイコン + アレルギーチェック
-          _buildReactionAndAllergyRow(),
+          _buildReactionAndAllergyRow(context),
           const Divider(height: 16),
           // 4行目: メモ（複数行入力可能）
-          _buildMemoRow(),
+          _buildMemoRow(context),
         ],
       ),
     );
   }
 
   /// 1行目: 食材名
-  Widget _buildNameRow() {
+  Widget _buildNameRow(BuildContext context) {
     return Text(
       widget.item.ingredientName,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
+        color: context.textPrimary,
       ),
     );
   }
 
   /// 2行目: 量ラベル + 単位・量入力
-  Widget _buildAmountRow() {
+  Widget _buildAmountRow(BuildContext context) {
     final currentUnit = widget.item.unit;
 
     return Row(
@@ -125,7 +127,7 @@ class _AmountInputCardState extends State<AmountInputCard> {
             '量',
             style: TextStyle(
               fontSize: 13,
-              color: Colors.grey.shade600,
+              color: context.textSecondary,
             ),
           ),
         ),
@@ -138,7 +140,7 @@ class _AmountInputCardState extends State<AmountInputCard> {
               height: 36,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade400),
+                border: Border.all(color: context.tableBorderColor),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Row(
@@ -149,15 +151,15 @@ class _AmountInputCardState extends State<AmountInputCard> {
                       style: TextStyle(
                         fontSize: 13,
                         color: currentUnit != null
-                            ? Colors.black87
-                            : Colors.grey.shade400,
+                            ? context.textPrimary
+                            : context.inactiveTabColor,
                       ),
                     ),
                   ),
                   Icon(
                     Icons.arrow_drop_down,
                     size: 20,
-                    color: Colors.grey.shade600,
+                    color: context.textSecondary,
                   ),
                 ],
               ),
@@ -176,10 +178,11 @@ class _AmountInputCardState extends State<AmountInputCard> {
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
               ],
-              style: const TextStyle(fontSize: 13),
+              style: TextStyle(fontSize: 13, color: context.textPrimary),
               decoration: InputDecoration(
                 hintText: '数値',
-                hintStyle: TextStyle(fontSize: 12, color: Colors.grey.shade400),
+                hintStyle:
+                    TextStyle(fontSize: 12, color: context.inactiveTabColor),
                 border: const OutlineInputBorder(),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -197,7 +200,7 @@ class _AmountInputCardState extends State<AmountInputCard> {
   }
 
   /// 3行目: 反応ラベル + 反応選択 + アレルギーチェック
-  Widget _buildReactionAndAllergyRow() {
+  Widget _buildReactionAndAllergyRow(BuildContext context) {
     // 反応ボタンの高さ（画像56 + 間隔4 + ラベル約16）
     const reactionButtonHeight = 76.0;
 
@@ -213,7 +216,7 @@ class _AmountInputCardState extends State<AmountInputCard> {
               '反応',
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.grey.shade600,
+                color: context.textSecondary,
               ),
             ),
           ),
@@ -257,7 +260,7 @@ class _AmountInputCardState extends State<AmountInputCard> {
                 'アレルギー',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey.shade600,
+                  color: context.textSecondary,
                 ),
               ),
               Checkbox(
@@ -283,10 +286,11 @@ class _AmountInputCardState extends State<AmountInputCard> {
 
     showModalBottomSheet(
       context: context,
+      backgroundColor: context.surfaceBackground,
       builder: (ctx) {
         return Container(
           height: 280,
-          color: Colors.white,
+          color: ctx.surfaceBackground,
           child: Column(
             children: [
               // ヘッダー
@@ -294,7 +298,7 @@ class _AmountInputCardState extends State<AmountInputCard> {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
                   border: Border(
-                    bottom: BorderSide(color: Colors.grey.shade300),
+                    bottom: BorderSide(color: ctx.menuSectionBorder),
                   ),
                 ),
                 child: Row(
@@ -308,11 +312,12 @@ class _AmountInputCardState extends State<AmountInputCard> {
                         ),
                       ),
                     ),
-                    const Text(
+                    Text(
                       '単位を選択',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
+                        color: ctx.textPrimary,
                       ),
                     ),
                     Expanded(
@@ -345,7 +350,10 @@ class _AmountInputCardState extends State<AmountInputCard> {
                     return Center(
                       child: Text(
                         unit.label,
-                        style: const TextStyle(fontSize: 18),
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: ctx.textPrimary,
+                        ),
                       ),
                     );
                   }).toList(),
@@ -359,7 +367,7 @@ class _AmountInputCardState extends State<AmountInputCard> {
   }
 
   /// 4行目: メモラベル + メモ入力（複数行）
-  Widget _buildMemoRow() {
+  Widget _buildMemoRow(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -372,7 +380,7 @@ class _AmountInputCardState extends State<AmountInputCard> {
               'メモ',
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.grey.shade600,
+                color: context.textSecondary,
               ),
             ),
           ),
@@ -386,10 +394,11 @@ class _AmountInputCardState extends State<AmountInputCard> {
             maxLines: null,
             minLines: 1,
             keyboardType: TextInputType.multiline,
-            style: const TextStyle(fontSize: 14),
+            style: TextStyle(fontSize: 14, color: context.textPrimary),
             decoration: InputDecoration(
               hintText: 'メモを入力',
-              hintStyle: TextStyle(fontSize: 12, color: Colors.grey.shade400),
+              hintStyle:
+                  TextStyle(fontSize: 12, color: context.inactiveTabColor),
               border: const OutlineInputBorder(),
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
