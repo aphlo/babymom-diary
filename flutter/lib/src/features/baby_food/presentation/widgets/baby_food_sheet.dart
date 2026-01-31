@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 import '../../../../core/types/child_icon.dart';
 import '../../../menu/children/application/child_context_provider.dart';
 import '../../../menu/children/application/selected_child_provider.dart';
@@ -198,15 +199,15 @@ class _SelectedItemsSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Colors.pink.shade50,
+      color: context.dateSectionHeaderBackground,
       child: Row(
         children: [
-          const Icon(Icons.check_circle, color: Colors.pink, size: 20),
+          Icon(Icons.check_circle, color: context.accentPink, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               '選択中: $summary',
-              style: const TextStyle(fontSize: 14),
+              style: TextStyle(fontSize: 14, color: context.textPrimary),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

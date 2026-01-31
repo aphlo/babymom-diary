@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
+
 /// ステップインジケーター
 class StepIndicator extends StatelessWidget {
   const StepIndicator({
@@ -18,14 +20,15 @@ class StepIndicator extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: Colors.grey.shade100,
+      color: context.stepIndicatorBackground,
       child: Row(
         children: [
           Text(
             stepTitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w500,
               fontSize: 16,
+              color: context.textPrimary,
             ),
           ),
           const Spacer(),
@@ -38,14 +41,14 @@ class StepIndicator extends StatelessWidget {
                   Icon(
                     Icons.help_outline,
                     size: 16,
-                    color: Colors.grey.shade600,
+                    color: context.textSecondary,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     '記録したい食材がない場合は',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey.shade600,
+                      color: context.textSecondary,
                       decoration: TextDecoration.underline,
                     ),
                   ),
@@ -57,7 +60,7 @@ class StepIndicator extends StatelessWidget {
               '量や反応の入力は任意です',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey.shade600,
+                color: context.textSecondary,
               ),
             ),
         ],
