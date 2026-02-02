@@ -102,28 +102,37 @@ miluアプリにプッシュ通知機能を実装し、以下の2種類の通知
 
 ### 4.1 Firestore スキーマ追加
 
-#### users/{uid} への追加フィールド
+#### users/{uid}/fcm_tokens/{deviceId} サブコレクション（新規）
+
+FCMトークンはサブコレクションとして管理する。
+
+```
+users/{uid}
+├── activeHouseholdId: string
+├── membershipType: 'owner' | 'member'
+├── createdAt: Timestamp
+├── updatedAt: Timestamp
+└── fcm_tokens/{deviceId}  ← サブコレクション
+      ├── token: string           // FCMトークン
+      ├── platform: 'ios' | 'android'
+      ├── createdAt: Timestamp
+      └── updatedAt: Timestamp
+```
 
 ```typescript
-interface User {
-  // 既存フィールド
-  activeHouseholdId: string;
-  membershipType: 'owner' | 'member';
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-
-  // 追加フィールド
-  fcmTokens: FcmTokenInfo[];  // 複数デバイス対応
-}
-
-interface FcmTokenInfo {
+// パス: users/{uid}/fcm_tokens/{deviceId}
+interface FcmToken {
   token: string;           // FCMトークン
-  deviceId: string;        // デバイス識別子
   platform: 'ios' | 'android';
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
 ```
+
+**サブコレクションのメリット:**
+- 個別トークンの追加/削除/更新がシンプル
+- トークン数が多くても効率的にクエリ可能
+- Security Rulesが書きやすい
 
 #### notification_settings/{uid} コレクション（新規）
 
