@@ -6,8 +6,8 @@ import {
 
 describe("sendDailyEncouragement", () => {
   describe("ENCOURAGEMENT_MESSAGES", () => {
-    it("should have at least 5 messages", () => {
-      expect(ENCOURAGEMENT_MESSAGES.length).toBeGreaterThanOrEqual(5);
+    it("should have at least 100 messages", () => {
+      expect(ENCOURAGEMENT_MESSAGES.length).toBeGreaterThanOrEqual(100);
     });
 
     it("should have non-empty messages", () => {

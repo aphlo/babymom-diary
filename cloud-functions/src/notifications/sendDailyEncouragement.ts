@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin";
 import { onMessagePublished } from "firebase-functions/v2/pubsub";
+import { ENCOURAGEMENT_MESSAGES } from "./encouragementMessages";
 
 interface FcmTokenDoc {
   token: string;
@@ -12,21 +13,8 @@ interface NotificationSettingsDoc {
   };
 }
 
-/**
- * 励ましメッセージのリスト
- */
-export const ENCOURAGEMENT_MESSAGES = [
-  "今日も一日、お疲れさまです。無理せず、自分のペースで育児を楽しんでくださいね。",
-  "赤ちゃんの笑顔は最高の宝物。あなたの愛情がしっかり届いていますよ。",
-  "完璧を目指さなくて大丈夫。あなたは十分頑張っています。",
-  "育児は大変だけど、一人じゃない。いつでも頼ってくださいね。",
-  "今日も赤ちゃんと過ごせる時間を大切に。かけがえのない毎日です。",
-  "疲れた時は休んでいいんです。あなたの健康も大切です。",
-  "小さな成長も見逃さないで。赤ちゃんは毎日少しずつ成長しています。",
-  "あなたの優しさが、赤ちゃんの心を育てています。",
-  "今日という日は二度と来ない特別な日。赤ちゃんとの時間を楽しんで。",
-  "困った時は周りに頼って。助けを求めることも立派な育児です。",
-];
+// Re-export for tests
+export { ENCOURAGEMENT_MESSAGES };
 
 /**
  * 毎日の励まし通知を送信する Cloud Function
