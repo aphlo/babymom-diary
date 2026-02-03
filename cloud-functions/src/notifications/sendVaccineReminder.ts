@@ -27,6 +27,12 @@ interface HouseholdReservation {
   isTomorrow: boolean;
 }
 
+interface UserTokensWithPreference {
+  tokens: string[];
+  notifyToday: boolean;
+  notifyTomorrow: boolean;
+}
+
 /**
  * 予防接種リマインダー通知を送信する Cloud Function
  * Cloud Scheduler -> Pub/Sub -> この関数 の流れで実行
@@ -39,56 +45,59 @@ export const sendVaccineReminder = onMessagePublished(
     retry: true,
   },
   async () => {
-    const db = admin.firestore();
-    const messaging = admin.messaging();
-
-    // 1. JST基準で当日・翌日の日付を計算
-    const { today, tomorrow } = getJSTDates();
-    console.log(
-      `Checking reservations for today: ${today.toISOString()}, tomorrow: ${tomorrow.toISOString()}`
-    );
-
-    // 2. 当日・翌日の予約を持つreservation_groupsを取得
-    const reservations = await getUpcomingReservations(db, today, tomorrow);
-    console.log(`Found ${reservations.length} upcoming reservations`);
-
-    if (reservations.length === 0) {
-      console.log("No upcoming reservations found");
-      return;
-    }
-
-    // 3. 世帯ごとにグループ化
-    const householdReservations = groupByHousehold(reservations);
-    console.log(`Grouped into ${householdReservations.size} households`);
-
-    // 4. 各世帯のメンバーに通知送信
-    let totalSent = 0;
-    let totalFailed = 0;
-
-    for (const [householdId, reservationInfo] of householdReservations) {
-      try {
-        const result = await sendNotificationToHousehold(
-          db,
-          messaging,
-          householdId,
-          reservationInfo
-        );
-        totalSent += result.sent;
-        totalFailed += result.failed;
-      } catch (error) {
-        console.error(`Error sending notification to household ${householdId}:`, error);
-        totalFailed++;
-      }
-    }
-
-    console.log(`Notification summary: sent=${totalSent}, failed=${totalFailed}`);
+    await sendVaccineReminderHandler(admin.firestore(), admin.messaging());
   }
 );
 
 /**
+ * テスト可能なハンドラー関数
+ */
+export async function sendVaccineReminderHandler(
+  db: admin.firestore.Firestore,
+  messaging: admin.messaging.Messaging
+): Promise<{ totalSent: number; totalFailed: number }> {
+  // 1. JST基準で当日・翌日の日付を計算
+  const { today, tomorrow } = getJSTDates();
+  console.log(
+    `Checking reservations for today: ${today.toISOString()}, tomorrow: ${tomorrow.toISOString()}`
+  );
+
+  // 2. 当日・翌日の予約を持つreservation_groupsを取得
+  const reservations = await getUpcomingReservations(db, today, tomorrow);
+  console.log(`Found ${reservations.length} upcoming reservations`);
+
+  if (reservations.length === 0) {
+    console.log("No upcoming reservations found");
+    return { totalSent: 0, totalFailed: 0 };
+  }
+
+  // 3. 世帯ごとにグループ化
+  const householdReservations = groupByHousehold(reservations);
+  console.log(`Grouped into ${householdReservations.size} households`);
+
+  // 4. 各世帯のメンバーに通知送信
+  let totalSent = 0;
+  let totalFailed = 0;
+
+  for (const [householdId, reservationInfo] of householdReservations) {
+    try {
+      const result = await sendNotificationToHousehold(db, messaging, householdId, reservationInfo);
+      totalSent += result.sent;
+      totalFailed += result.failed;
+    } catch (error) {
+      console.error("Error sending notification to household:", error);
+      totalFailed++;
+    }
+  }
+
+  console.log(`Notification summary: sent=${totalSent}, failed=${totalFailed}`);
+  return { totalSent, totalFailed };
+}
+
+/**
  * JST基準で当日と翌日の日付を取得（時刻は0:00:00にリセット）
  */
-function getJSTDates(): { today: Date; tomorrow: Date } {
+export function getJSTDates(): { today: Date; tomorrow: Date } {
   // JST = UTC + 9時間
   const now = new Date();
   const jstOffset = 9 * 60 * 60 * 1000;
@@ -135,7 +144,7 @@ async function getUpcomingReservations(
     const householdIdIndex = pathParts.indexOf("households") + 1;
 
     if (householdIdIndex <= 0 || householdIdIndex >= pathParts.length) {
-      console.warn(`Invalid path structure: ${doc.ref.path}`);
+      console.warn("Invalid reservation group path structure");
       continue;
     }
 
@@ -160,7 +169,7 @@ async function getUpcomingReservations(
 /**
  * 2つの日付が同じ日かどうかを判定（UTC基準）
  */
-function isSameDay(date1: Date, date2: Date): boolean {
+export function isSameDay(date1: Date, date2: Date): boolean {
   return (
     date1.getUTCFullYear() === date2.getUTCFullYear() &&
     date1.getUTCMonth() === date2.getUTCMonth() &&
@@ -171,7 +180,7 @@ function isSameDay(date1: Date, date2: Date): boolean {
 /**
  * 予約を世帯IDでグループ化
  */
-function groupByHousehold(
+export function groupByHousehold(
   reservations: HouseholdReservation[]
 ): Map<string, { isToday: boolean; isTomorrow: boolean }> {
   const grouped = new Map<string, { isToday: boolean; isTomorrow: boolean }>();
@@ -207,27 +216,42 @@ async function sendNotificationToHousehold(
   // 1. 世帯のメンバーUID一覧を取得
   const memberUids = await getHouseholdMemberUids(db, householdId);
   if (memberUids.length === 0) {
-    console.log(`No members found for household ${householdId}`);
     return { sent: 0, failed: 0 };
   }
 
-  // 2. 各メンバーのFCMトークンを取得（通知設定が有効なユーザーのみ）
-  const tokens: string[] = [];
+  // 2. 各メンバーのFCMトークンと通知設定を取得
+  // ユーザーごとにdaysBefore設定が異なる可能性があるため、個別に処理
+  let totalSent = 0;
+  let totalFailed = 0;
+
   for (const uid of memberUids) {
-    const userTokens = await getUserFcmTokensIfEnabled(db, uid);
-    tokens.push(...userTokens);
+    const userResult = await getUserTokensWithPreference(db, uid, reservationInfo);
+
+    if (userResult.tokens.length === 0) {
+      continue;
+    }
+
+    // ユーザーの設定に基づいて通知対象日を決定
+    const userReservationInfo = {
+      isToday: reservationInfo.isToday && userResult.notifyToday,
+      isTomorrow: reservationInfo.isTomorrow && userResult.notifyTomorrow,
+    };
+
+    // 通知対象日がない場合はスキップ
+    if (!userReservationInfo.isToday && !userReservationInfo.isTomorrow) {
+      continue;
+    }
+
+    // 通知メッセージを構築
+    const message = buildNotificationMessage(userReservationInfo);
+
+    // 送信
+    const result = await sendMulticastNotification(messaging, userResult.tokens, message, db);
+    totalSent += result.sent;
+    totalFailed += result.failed;
   }
 
-  if (tokens.length === 0) {
-    console.log(`No enabled FCM tokens for household ${householdId}`);
-    return { sent: 0, failed: 0 };
-  }
-
-  // 3. 通知メッセージを構築
-  const message = buildNotificationMessage(reservationInfo);
-
-  // 4. マルチキャスト送信
-  return await sendMulticastNotification(messaging, tokens, message, db);
+  return { sent: totalSent, failed: totalFailed };
 }
 
 /**
@@ -243,36 +267,61 @@ async function getHouseholdMemberUids(
 }
 
 /**
- * ユーザーのFCMトークンを取得（通知設定が有効な場合のみ）
+ * ユーザーのFCMトークンと通知設定を取得
+ * daysBefore設定に基づいて通知対象日を判定
  */
-async function getUserFcmTokensIfEnabled(
+async function getUserTokensWithPreference(
   db: admin.firestore.Firestore,
-  uid: string
-): Promise<string[]> {
+  uid: string,
+  reservationInfo: { isToday: boolean; isTomorrow: boolean }
+): Promise<UserTokensWithPreference> {
   // 通知設定を確認
   const settingsRef = db.doc(`users/${uid}/notification_settings/settings`);
   const settingsSnapshot = await settingsRef.get();
 
+  // デフォルト値: 当日(0)と前日(1)の両方に通知
+  let notifyToday = true;
+  let notifyTomorrow = true;
+
   if (settingsSnapshot.exists) {
     const settings = settingsSnapshot.data() as NotificationSettingsDoc;
+
     // vaccineReminder.enabled が false の場合はトークンを返さない
     if (settings.vaccineReminder?.enabled === false) {
-      return [];
+      return { tokens: [], notifyToday: false, notifyTomorrow: false };
     }
+
+    // daysBefore設定を確認
+    const daysBefore = settings.vaccineReminder?.daysBefore;
+    if (daysBefore && Array.isArray(daysBefore)) {
+      // 0: 当日通知, 1: 前日通知
+      notifyToday = daysBefore.includes(0);
+      notifyTomorrow = daysBefore.includes(1);
+    }
+  }
+
+  // 予約と設定の両方に該当する場合のみトークンを返す
+  const shouldNotify =
+    (reservationInfo.isToday && notifyToday) || (reservationInfo.isTomorrow && notifyTomorrow);
+
+  if (!shouldNotify) {
+    return { tokens: [], notifyToday, notifyTomorrow };
   }
 
   // FCMトークンを取得
   const tokensSnapshot = await db.collection(`users/${uid}/fcm_tokens`).get();
 
-  return tokensSnapshot.docs
+  const tokens = tokensSnapshot.docs
     .map((doc) => (doc.data() as FcmTokenDoc).token)
     .filter((token) => token != null && token !== "");
+
+  return { tokens, notifyToday, notifyTomorrow };
 }
 
 /**
  * 通知メッセージを構築
  */
-function buildNotificationMessage(reservationInfo: {
+export function buildNotificationMessage(reservationInfo: {
   isToday: boolean;
   isTomorrow: boolean;
 }): { title: string; body: string } {
@@ -368,7 +417,7 @@ async function cleanupInvalidTokens(
 
         for (const doc of snapshot.docs) {
           await doc.ref.delete();
-          console.log(`Deleted invalid FCM token: ${doc.ref.path}`);
+          console.log("Deleted invalid FCM token");
         }
       }
     }
