@@ -55,7 +55,7 @@ class NotificationSettingsFirestoreDataSource {
     final doc = await docRef.get();
 
     if (!doc.exists) {
-      final defaultSettings = NotificationSettings.defaultSettings(uid);
+      final defaultSettings = NotificationSettings.defaultSettings();
       final dto = NotificationSettingsDto.fromEntity(defaultSettings);
       final data = dto.toJson();
       data['createdAt'] = FieldValue.serverTimestamp();

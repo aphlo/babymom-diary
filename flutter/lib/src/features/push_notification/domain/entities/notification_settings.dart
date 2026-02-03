@@ -7,17 +7,15 @@ sealed class NotificationSettings with _$NotificationSettings {
   const NotificationSettings._();
 
   const factory NotificationSettings({
-    required String uid,
     required VaccineReminderSettings vaccineReminder,
     required DailyEncouragementSettings dailyEncouragement,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) = _NotificationSettings;
 
-  factory NotificationSettings.defaultSettings(String uid) {
+  factory NotificationSettings.defaultSettings() {
     final now = DateTime.now();
     return NotificationSettings(
-      uid: uid,
       vaccineReminder: const VaccineReminderSettings(
         enabled: true,
         daysBefore: [0, 1],

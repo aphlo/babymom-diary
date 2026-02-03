@@ -14,7 +14,6 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$NotificationSettings {
-  String get uid;
   VaccineReminderSettings get vaccineReminder;
   DailyEncouragementSettings get dailyEncouragement;
   DateTime get createdAt;
@@ -33,7 +32,6 @@ mixin _$NotificationSettings {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is NotificationSettings &&
-            (identical(other.uid, uid) || other.uid == uid) &&
             (identical(other.vaccineReminder, vaccineReminder) ||
                 other.vaccineReminder == vaccineReminder) &&
             (identical(other.dailyEncouragement, dailyEncouragement) ||
@@ -45,12 +43,12 @@ mixin _$NotificationSettings {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, uid, vaccineReminder,
-      dailyEncouragement, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      runtimeType, vaccineReminder, dailyEncouragement, createdAt, updatedAt);
 
   @override
   String toString() {
-    return 'NotificationSettings(uid: $uid, vaccineReminder: $vaccineReminder, dailyEncouragement: $dailyEncouragement, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'NotificationSettings(vaccineReminder: $vaccineReminder, dailyEncouragement: $dailyEncouragement, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
 
@@ -61,8 +59,7 @@ abstract mixin class $NotificationSettingsCopyWith<$Res> {
       _$NotificationSettingsCopyWithImpl;
   @useResult
   $Res call(
-      {String uid,
-      VaccineReminderSettings vaccineReminder,
+      {VaccineReminderSettings vaccineReminder,
       DailyEncouragementSettings dailyEncouragement,
       DateTime createdAt,
       DateTime updatedAt});
@@ -84,17 +81,12 @@ class _$NotificationSettingsCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? uid = null,
     Object? vaccineReminder = null,
     Object? dailyEncouragement = null,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
     return _then(_self.copyWith(
-      uid: null == uid
-          ? _self.uid
-          : uid // ignore: cast_nullable_to_non_nullable
-              as String,
       vaccineReminder: null == vaccineReminder
           ? _self.vaccineReminder
           : vaccineReminder // ignore: cast_nullable_to_non_nullable
@@ -229,7 +221,6 @@ extension NotificationSettingsPatterns on NotificationSettings {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            String uid,
             VaccineReminderSettings vaccineReminder,
             DailyEncouragementSettings dailyEncouragement,
             DateTime createdAt,
@@ -240,8 +231,8 @@ extension NotificationSettingsPatterns on NotificationSettings {
     final _that = this;
     switch (_that) {
       case _NotificationSettings() when $default != null:
-        return $default(_that.uid, _that.vaccineReminder,
-            _that.dailyEncouragement, _that.createdAt, _that.updatedAt);
+        return $default(_that.vaccineReminder, _that.dailyEncouragement,
+            _that.createdAt, _that.updatedAt);
       case _:
         return orElse();
     }
@@ -263,7 +254,6 @@ extension NotificationSettingsPatterns on NotificationSettings {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            String uid,
             VaccineReminderSettings vaccineReminder,
             DailyEncouragementSettings dailyEncouragement,
             DateTime createdAt,
@@ -273,8 +263,8 @@ extension NotificationSettingsPatterns on NotificationSettings {
     final _that = this;
     switch (_that) {
       case _NotificationSettings():
-        return $default(_that.uid, _that.vaccineReminder,
-            _that.dailyEncouragement, _that.createdAt, _that.updatedAt);
+        return $default(_that.vaccineReminder, _that.dailyEncouragement,
+            _that.createdAt, _that.updatedAt);
     }
   }
 
@@ -293,7 +283,6 @@ extension NotificationSettingsPatterns on NotificationSettings {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            String uid,
             VaccineReminderSettings vaccineReminder,
             DailyEncouragementSettings dailyEncouragement,
             DateTime createdAt,
@@ -303,8 +292,8 @@ extension NotificationSettingsPatterns on NotificationSettings {
     final _that = this;
     switch (_that) {
       case _NotificationSettings() when $default != null:
-        return $default(_that.uid, _that.vaccineReminder,
-            _that.dailyEncouragement, _that.createdAt, _that.updatedAt);
+        return $default(_that.vaccineReminder, _that.dailyEncouragement,
+            _that.createdAt, _that.updatedAt);
       case _:
         return null;
     }
@@ -315,15 +304,12 @@ extension NotificationSettingsPatterns on NotificationSettings {
 
 class _NotificationSettings extends NotificationSettings {
   const _NotificationSettings(
-      {required this.uid,
-      required this.vaccineReminder,
+      {required this.vaccineReminder,
       required this.dailyEncouragement,
       required this.createdAt,
       required this.updatedAt})
       : super._();
 
-  @override
-  final String uid;
   @override
   final VaccineReminderSettings vaccineReminder;
   @override
@@ -347,7 +333,6 @@ class _NotificationSettings extends NotificationSettings {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _NotificationSettings &&
-            (identical(other.uid, uid) || other.uid == uid) &&
             (identical(other.vaccineReminder, vaccineReminder) ||
                 other.vaccineReminder == vaccineReminder) &&
             (identical(other.dailyEncouragement, dailyEncouragement) ||
@@ -359,12 +344,12 @@ class _NotificationSettings extends NotificationSettings {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, uid, vaccineReminder,
-      dailyEncouragement, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      runtimeType, vaccineReminder, dailyEncouragement, createdAt, updatedAt);
 
   @override
   String toString() {
-    return 'NotificationSettings(uid: $uid, vaccineReminder: $vaccineReminder, dailyEncouragement: $dailyEncouragement, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'NotificationSettings(vaccineReminder: $vaccineReminder, dailyEncouragement: $dailyEncouragement, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
 
@@ -377,8 +362,7 @@ abstract mixin class _$NotificationSettingsCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String uid,
-      VaccineReminderSettings vaccineReminder,
+      {VaccineReminderSettings vaccineReminder,
       DailyEncouragementSettings dailyEncouragement,
       DateTime createdAt,
       DateTime updatedAt});
@@ -402,17 +386,12 @@ class __$NotificationSettingsCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? uid = null,
     Object? vaccineReminder = null,
     Object? dailyEncouragement = null,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
     return _then(_NotificationSettings(
-      uid: null == uid
-          ? _self.uid
-          : uid // ignore: cast_nullable_to_non_nullable
-              as String,
       vaccineReminder: null == vaccineReminder
           ? _self.vaccineReminder
           : vaccineReminder // ignore: cast_nullable_to_non_nullable

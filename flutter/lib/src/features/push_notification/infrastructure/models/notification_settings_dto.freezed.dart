@@ -14,7 +14,6 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$NotificationSettingsDto {
-  String get uid;
   VaccineReminderSettingsDto get vaccineReminder;
   DailyEncouragementSettingsDto get dailyEncouragement;
   @TimestampConverter()
@@ -38,7 +37,6 @@ mixin _$NotificationSettingsDto {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is NotificationSettingsDto &&
-            (identical(other.uid, uid) || other.uid == uid) &&
             (identical(other.vaccineReminder, vaccineReminder) ||
                 other.vaccineReminder == vaccineReminder) &&
             (identical(other.dailyEncouragement, dailyEncouragement) ||
@@ -51,12 +49,12 @@ mixin _$NotificationSettingsDto {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, uid, vaccineReminder,
-      dailyEncouragement, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      runtimeType, vaccineReminder, dailyEncouragement, createdAt, updatedAt);
 
   @override
   String toString() {
-    return 'NotificationSettingsDto(uid: $uid, vaccineReminder: $vaccineReminder, dailyEncouragement: $dailyEncouragement, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'NotificationSettingsDto(vaccineReminder: $vaccineReminder, dailyEncouragement: $dailyEncouragement, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
 
@@ -67,8 +65,7 @@ abstract mixin class $NotificationSettingsDtoCopyWith<$Res> {
       _$NotificationSettingsDtoCopyWithImpl;
   @useResult
   $Res call(
-      {String uid,
-      VaccineReminderSettingsDto vaccineReminder,
+      {VaccineReminderSettingsDto vaccineReminder,
       DailyEncouragementSettingsDto dailyEncouragement,
       @TimestampConverter() DateTime createdAt,
       @TimestampConverter() DateTime updatedAt});
@@ -90,17 +87,12 @@ class _$NotificationSettingsDtoCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? uid = null,
     Object? vaccineReminder = null,
     Object? dailyEncouragement = null,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
     return _then(_self.copyWith(
-      uid: null == uid
-          ? _self.uid
-          : uid // ignore: cast_nullable_to_non_nullable
-              as String,
       vaccineReminder: null == vaccineReminder
           ? _self.vaccineReminder
           : vaccineReminder // ignore: cast_nullable_to_non_nullable
@@ -235,7 +227,6 @@ extension NotificationSettingsDtoPatterns on NotificationSettingsDto {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            String uid,
             VaccineReminderSettingsDto vaccineReminder,
             DailyEncouragementSettingsDto dailyEncouragement,
             @TimestampConverter() DateTime createdAt,
@@ -246,8 +237,8 @@ extension NotificationSettingsDtoPatterns on NotificationSettingsDto {
     final _that = this;
     switch (_that) {
       case _NotificationSettingsDto() when $default != null:
-        return $default(_that.uid, _that.vaccineReminder,
-            _that.dailyEncouragement, _that.createdAt, _that.updatedAt);
+        return $default(_that.vaccineReminder, _that.dailyEncouragement,
+            _that.createdAt, _that.updatedAt);
       case _:
         return orElse();
     }
@@ -269,7 +260,6 @@ extension NotificationSettingsDtoPatterns on NotificationSettingsDto {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            String uid,
             VaccineReminderSettingsDto vaccineReminder,
             DailyEncouragementSettingsDto dailyEncouragement,
             @TimestampConverter() DateTime createdAt,
@@ -279,8 +269,8 @@ extension NotificationSettingsDtoPatterns on NotificationSettingsDto {
     final _that = this;
     switch (_that) {
       case _NotificationSettingsDto():
-        return $default(_that.uid, _that.vaccineReminder,
-            _that.dailyEncouragement, _that.createdAt, _that.updatedAt);
+        return $default(_that.vaccineReminder, _that.dailyEncouragement,
+            _that.createdAt, _that.updatedAt);
     }
   }
 
@@ -299,7 +289,6 @@ extension NotificationSettingsDtoPatterns on NotificationSettingsDto {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            String uid,
             VaccineReminderSettingsDto vaccineReminder,
             DailyEncouragementSettingsDto dailyEncouragement,
             @TimestampConverter() DateTime createdAt,
@@ -309,8 +298,8 @@ extension NotificationSettingsDtoPatterns on NotificationSettingsDto {
     final _that = this;
     switch (_that) {
       case _NotificationSettingsDto() when $default != null:
-        return $default(_that.uid, _that.vaccineReminder,
-            _that.dailyEncouragement, _that.createdAt, _that.updatedAt);
+        return $default(_that.vaccineReminder, _that.dailyEncouragement,
+            _that.createdAt, _that.updatedAt);
       case _:
         return null;
     }
@@ -321,8 +310,7 @@ extension NotificationSettingsDtoPatterns on NotificationSettingsDto {
 @JsonSerializable()
 class _NotificationSettingsDto extends NotificationSettingsDto {
   const _NotificationSettingsDto(
-      {required this.uid,
-      required this.vaccineReminder,
+      {required this.vaccineReminder,
       required this.dailyEncouragement,
       @TimestampConverter() required this.createdAt,
       @TimestampConverter() required this.updatedAt})
@@ -330,8 +318,6 @@ class _NotificationSettingsDto extends NotificationSettingsDto {
   factory _NotificationSettingsDto.fromJson(Map<String, dynamic> json) =>
       _$NotificationSettingsDtoFromJson(json);
 
-  @override
-  final String uid;
   @override
   final VaccineReminderSettingsDto vaccineReminder;
   @override
@@ -364,7 +350,6 @@ class _NotificationSettingsDto extends NotificationSettingsDto {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _NotificationSettingsDto &&
-            (identical(other.uid, uid) || other.uid == uid) &&
             (identical(other.vaccineReminder, vaccineReminder) ||
                 other.vaccineReminder == vaccineReminder) &&
             (identical(other.dailyEncouragement, dailyEncouragement) ||
@@ -377,12 +362,12 @@ class _NotificationSettingsDto extends NotificationSettingsDto {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, uid, vaccineReminder,
-      dailyEncouragement, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      runtimeType, vaccineReminder, dailyEncouragement, createdAt, updatedAt);
 
   @override
   String toString() {
-    return 'NotificationSettingsDto(uid: $uid, vaccineReminder: $vaccineReminder, dailyEncouragement: $dailyEncouragement, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'NotificationSettingsDto(vaccineReminder: $vaccineReminder, dailyEncouragement: $dailyEncouragement, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
 
@@ -395,8 +380,7 @@ abstract mixin class _$NotificationSettingsDtoCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String uid,
-      VaccineReminderSettingsDto vaccineReminder,
+      {VaccineReminderSettingsDto vaccineReminder,
       DailyEncouragementSettingsDto dailyEncouragement,
       @TimestampConverter() DateTime createdAt,
       @TimestampConverter() DateTime updatedAt});
@@ -420,17 +404,12 @@ class __$NotificationSettingsDtoCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? uid = null,
     Object? vaccineReminder = null,
     Object? dailyEncouragement = null,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
     return _then(_NotificationSettingsDto(
-      uid: null == uid
-          ? _self.uid
-          : uid // ignore: cast_nullable_to_non_nullable
-              as String,
       vaccineReminder: null == vaccineReminder
           ? _self.vaccineReminder
           : vaccineReminder // ignore: cast_nullable_to_non_nullable

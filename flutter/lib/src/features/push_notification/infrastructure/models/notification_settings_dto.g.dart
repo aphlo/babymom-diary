@@ -9,7 +9,6 @@ part of 'notification_settings_dto.dart';
 _NotificationSettingsDto _$NotificationSettingsDtoFromJson(
         Map<String, dynamic> json) =>
     _NotificationSettingsDto(
-      uid: json['uid'] as String,
       vaccineReminder: VaccineReminderSettingsDto.fromJson(
           json['vaccineReminder'] as Map<String, dynamic>),
       dailyEncouragement: DailyEncouragementSettingsDto.fromJson(
@@ -23,7 +22,6 @@ _NotificationSettingsDto _$NotificationSettingsDtoFromJson(
 Map<String, dynamic> _$NotificationSettingsDtoToJson(
         _NotificationSettingsDto instance) =>
     <String, dynamic>{
-      'uid': instance.uid,
       'vaccineReminder': instance.vaccineReminder,
       'dailyEncouragement': instance.dailyEncouragement,
       'createdAt': const TimestampConverter().toJson(instance.createdAt),

@@ -11,7 +11,6 @@ sealed class NotificationSettingsDto with _$NotificationSettingsDto {
   const NotificationSettingsDto._();
 
   const factory NotificationSettingsDto({
-    required String uid,
     required VaccineReminderSettingsDto vaccineReminder,
     required DailyEncouragementSettingsDto dailyEncouragement,
     @TimestampConverter() required DateTime createdAt,
@@ -23,7 +22,6 @@ sealed class NotificationSettingsDto with _$NotificationSettingsDto {
 
   factory NotificationSettingsDto.fromEntity(NotificationSettings entity) {
     return NotificationSettingsDto(
-      uid: entity.uid,
       vaccineReminder:
           VaccineReminderSettingsDto.fromEntity(entity.vaccineReminder),
       dailyEncouragement:
@@ -35,7 +33,6 @@ sealed class NotificationSettingsDto with _$NotificationSettingsDto {
 
   NotificationSettings toEntity() {
     return NotificationSettings(
-      uid: uid,
       vaccineReminder: vaccineReminder.toEntity(),
       dailyEncouragement: dailyEncouragement.toEntity(),
       createdAt: createdAt,
