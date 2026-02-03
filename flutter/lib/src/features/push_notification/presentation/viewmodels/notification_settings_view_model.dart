@@ -131,7 +131,7 @@ class NotificationSettingsViewModel extends _$NotificationSettingsViewModel {
       final useCase =
           UpdateNotificationSettings(ref.read(notificationRepositoryProvider));
       await useCase.call(uid: uid, settings: settings);
-    } catch (e) {
+    } catch (_) {
       state = state.copyWith(error: '設定の保存に失敗しました');
     }
   }

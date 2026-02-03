@@ -36,8 +36,11 @@ class NotificationSettingsFirestoreDataSource {
     required NotificationSettings settings,
   }) async {
     final dto = NotificationSettingsDto.fromEntity(settings);
-    final data = dto.toJson();
-    data['updatedAt'] = FieldValue.serverTimestamp();
+    final data = <String, dynamic>{
+      'vaccineReminder': dto.vaccineReminder.toJson(),
+      'dailyEncouragement': dto.dailyEncouragement.toJson(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
 
     final docRef = _settingsRef(uid);
     final doc = await docRef.get();
@@ -57,9 +60,12 @@ class NotificationSettingsFirestoreDataSource {
     if (!doc.exists) {
       final defaultSettings = NotificationSettings.defaultSettings();
       final dto = NotificationSettingsDto.fromEntity(defaultSettings);
-      final data = dto.toJson();
-      data['createdAt'] = FieldValue.serverTimestamp();
-      data['updatedAt'] = FieldValue.serverTimestamp();
+      final data = <String, dynamic>{
+        'vaccineReminder': dto.vaccineReminder.toJson(),
+        'dailyEncouragement': dto.dailyEncouragement.toJson(),
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
       await docRef.set(data);
     }
   }
