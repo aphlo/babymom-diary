@@ -2,6 +2,7 @@ import * as admin from "firebase-admin";
 import { acceptInvitation } from "./invitations/acceptInvitation";
 import { removeMember } from "./members/removeMember";
 import { registerFcmToken } from "./notifications/registerFcmToken";
+import { sendDailyEncouragement } from "./notifications/sendDailyEncouragement";
 import { sendVaccineReminder } from "./notifications/sendVaccineReminder";
 import { unregisterFcmToken } from "./notifications/unregisterFcmToken";
 
@@ -13,6 +14,7 @@ export {
   acceptInvitation,
   removeMember,
   registerFcmToken,
-  unregisterFcmToken,
+  sendDailyEncouragement,
   sendVaccineReminder,
+  unregisterFcmToken,
 };
