@@ -167,13 +167,18 @@ async function getUpcomingReservations(
 }
 
 /**
- * 2つの日付が同じ日かどうかを判定（UTC基準）
+ * 2つの日付が同じ日かどうかを判定（JST基準）
  */
 export function isSameDay(date1: Date, date2: Date): boolean {
+  // JST = UTC + 9時間
+  const jstOffset = 9 * 60 * 60 * 1000;
+  const jst1 = new Date(date1.getTime() + jstOffset);
+  const jst2 = new Date(date2.getTime() + jstOffset);
+
   return (
-    date1.getUTCFullYear() === date2.getUTCFullYear() &&
-    date1.getUTCMonth() === date2.getUTCMonth() &&
-    date1.getUTCDate() === date2.getUTCDate()
+    jst1.getUTCFullYear() === jst2.getUTCFullYear() &&
+    jst1.getUTCMonth() === jst2.getUTCMonth() &&
+    jst1.getUTCDate() === jst2.getUTCDate()
   );
 }
 

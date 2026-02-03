@@ -22,31 +22,53 @@ describe("sendVaccineReminder", () => {
     });
   });
 
-  describe("isSameDay", () => {
-    it("should return true for same day", () => {
-      const date1 = new Date("2024-01-15T10:00:00Z");
-      const date2 = new Date("2024-01-15T23:59:59Z");
+  describe("isSameDay (JST-based comparison)", () => {
+    it("should return true for same JST day", () => {
+      // Both are JST Jan 15 (different times)
+      const date1 = new Date("2024-01-15T01:00:00Z"); // JST 10:00
+      const date2 = new Date("2024-01-15T14:00:00Z"); // JST 23:00
 
       expect(isSameDay(date1, date2)).toBe(true);
     });
 
-    it("should return false for different days", () => {
-      const date1 = new Date("2024-01-15T10:00:00Z");
-      const date2 = new Date("2024-01-16T10:00:00Z");
+    it("should return true for same JST day across UTC date boundary", () => {
+      // UTC Jan 14 15:00 = JST Jan 15 00:00
+      // UTC Jan 15 01:00 = JST Jan 15 10:00
+      // Both are JST Jan 15, but UTC dates differ (14 vs 15)
+      const date1 = new Date("2024-01-14T15:00:00Z"); // JST Jan 15 00:00
+      const date2 = new Date("2024-01-15T01:00:00Z"); // JST Jan 15 10:00
+
+      expect(isSameDay(date1, date2)).toBe(true);
+    });
+
+    it("should return false for different JST days", () => {
+      // JST Jan 15 vs JST Jan 16
+      const date1 = new Date("2024-01-15T01:00:00Z"); // JST Jan 15 10:00
+      const date2 = new Date("2024-01-16T01:00:00Z"); // JST Jan 16 10:00
+
+      expect(isSameDay(date1, date2)).toBe(false);
+    });
+
+    it("should return false for different JST days at UTC date boundary", () => {
+      // UTC Jan 15 14:00 = JST Jan 15 23:00
+      // UTC Jan 15 15:00 = JST Jan 16 00:00
+      // Same UTC date (15), but different JST dates (15 vs 16)
+      const date1 = new Date("2024-01-15T14:00:00Z"); // JST Jan 15 23:00
+      const date2 = new Date("2024-01-15T15:00:00Z"); // JST Jan 16 00:00
 
       expect(isSameDay(date1, date2)).toBe(false);
     });
 
     it("should return false for different months", () => {
-      const date1 = new Date("2024-01-15T10:00:00Z");
-      const date2 = new Date("2024-02-15T10:00:00Z");
+      const date1 = new Date("2024-01-15T01:00:00Z");
+      const date2 = new Date("2024-02-15T01:00:00Z");
 
       expect(isSameDay(date1, date2)).toBe(false);
     });
 
     it("should return false for different years", () => {
-      const date1 = new Date("2024-01-15T10:00:00Z");
-      const date2 = new Date("2025-01-15T10:00:00Z");
+      const date1 = new Date("2024-01-15T01:00:00Z");
+      const date2 = new Date("2025-01-15T01:00:00Z");
 
       expect(isSameDay(date1, date2)).toBe(false);
     });
