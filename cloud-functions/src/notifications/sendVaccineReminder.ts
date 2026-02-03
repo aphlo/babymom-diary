@@ -281,11 +281,11 @@ function buildNotificationMessage(reservationInfo: {
   let body: string;
   if (reservationInfo.isToday && reservationInfo.isTomorrow) {
     // 当日と翌日両方に予約がある場合
-    body = "本日と明日、予防接種の予約があります。ご確認ください。";
+    body = "本日と明日、予防接種の予約があります。";
   } else if (reservationInfo.isToday) {
-    body = "本日、予防接種の予約があります。お忘れなく！";
+    body = "本日、予防接種の予約があります。";
   } else {
-    body = "明日、予防接種の予約があります。準備をお願いします。";
+    body = "明日、予防接種の予約があります。";
   }
 
   return { title, body };

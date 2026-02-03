@@ -2,8 +2,8 @@ import * as admin from "firebase-admin";
 import { acceptInvitation } from "./invitations/acceptInvitation";
 import { removeMember } from "./members/removeMember";
 import { registerFcmToken } from "./notifications/registerFcmToken";
-import { unregisterFcmToken } from "./notifications/unregisterFcmToken";
 import { sendVaccineReminder } from "./notifications/sendVaccineReminder";
+import { unregisterFcmToken } from "./notifications/unregisterFcmToken";
 
 // Initialize Firebase Admin SDK
 admin.initializeApp();
