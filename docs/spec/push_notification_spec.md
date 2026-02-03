@@ -134,13 +134,23 @@ interface FcmToken {
 - トークン数が多くても効率的にクエリ可能
 - Security Rulesが書きやすい
 
-#### notification_settings/{uid} コレクション（新規）
+#### users/{uid}/notification_settings/settings ドキュメント（新規）
+
+通知設定もusersのサブコレクションとして管理する。
+
+```
+users/{uid}
+├── fcm_tokens/{deviceId}
+└── notification_settings/settings  ← 単一ドキュメント
+      ├── vaccineReminder: { enabled, daysBefore }
+      ├── dailyEncouragement: { enabled }
+      ├── createdAt: Timestamp
+      └── updatedAt: Timestamp
+```
 
 ```typescript
-// パス: notification_settings/{uid}
+// パス: users/{uid}/notification_settings/settings
 interface NotificationSettings {
-  uid: string;
-
   // 予防接種リマインダー設定
   vaccineReminder: {
     enabled: boolean;        // 有効/無効
@@ -152,10 +162,10 @@ interface NotificationSettings {
     enabled: boolean;        // 有効/無効
   };
 
-  // 共通設定
-  quietHoursEnabled: boolean;  // おやすみモード（将来拡張用）
-  quietHoursStart: string;     // "22:00"
-  quietHoursEnd: string;       // "07:00"
+  // 共通設定（将来拡張用）
+  quietHoursEnabled?: boolean;  // おやすみモード
+  quietHoursStart?: string;     // "22:00"
+  quietHoursEnd?: string;       // "07:00"
 
   createdAt: Timestamp;
   updatedAt: Timestamp;

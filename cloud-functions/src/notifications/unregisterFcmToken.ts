@@ -13,16 +13,10 @@ interface UnregisterFcmTokenResult {
 export const unregisterFcmToken = functions
   .region("asia-northeast1")
   .https.onCall(
-    async (
-      data: UnregisterFcmTokenData,
-      context
-    ): Promise<UnregisterFcmTokenResult> => {
+    async (data: UnregisterFcmTokenData, context): Promise<UnregisterFcmTokenResult> => {
       // 1. Authentication check
       if (!context.auth) {
-        throw new functions.https.HttpsError(
-          "unauthenticated",
-          "認証が必要です"
-        );
+        throw new functions.https.HttpsError("unauthenticated", "認証が必要です");
       }
 
       const userId = context.auth.uid;
@@ -30,10 +24,7 @@ export const unregisterFcmToken = functions
 
       // 2. Input validation
       if (!deviceId) {
-        throw new functions.https.HttpsError(
-          "invalid-argument",
-          "デバイスIDが必要です"
-        );
+        throw new functions.https.HttpsError("invalid-argument", "デバイスIDが必要です");
       }
 
       const db = admin.firestore();
