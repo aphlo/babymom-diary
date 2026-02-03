@@ -28,6 +28,27 @@ resource "google_project_service" "artifactregistry" {
   disable_on_destroy = false
 }
 
+resource "google_project_service" "pubsub" {
+  count              = var.enable_cloud_functions ? 1 : 0
+  project            = var.project_id
+  service            = "pubsub.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_project_service" "cloudscheduler" {
+  count              = var.enable_cloud_functions ? 1 : 0
+  project            = var.project_id
+  service            = "cloudscheduler.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_project_service" "eventarc" {
+  count              = var.enable_cloud_functions ? 1 : 0
+  project            = var.project_id
+  service            = "eventarc.googleapis.com"
+  disable_on_destroy = false
+}
+
 resource "google_project_service" "firebaseappcheck" {
   count              = var.enable_firebase_appcheck ? 1 : 0
   project            = var.project_id
