@@ -20,9 +20,6 @@ sealed class VaccineVisibilitySettingsState
 
     /// 全てのワクチン情報（id, name）
     @Default([]) List<VaccineDisplayInfo> vaccines,
-
-    /// 保存中かどうか
-    @Default(false) bool isSaving,
   }) = _VaccineVisibilitySettingsState;
 
   /// エラーをクリアした新しい状態を返す

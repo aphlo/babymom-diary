@@ -25,6 +25,7 @@ enum BannerAdSlot {
   widgetSettings,
   feedingTableSettings,
   notificationSettings,
+  vaccineVisibilitySettings,
 }
 
 /// 各スロットの広告状態
