@@ -21,6 +21,7 @@ import 'package:babymom_diary/src/core/analytics/analytics_service.dart';
 import 'package:babymom_diary/src/features/widget/application/providers/widget_providers.dart';
 import 'package:babymom_diary/src/core/deeplink/deep_link_service.dart';
 import 'package:babymom_diary/src/features/review_prompt/review_prompt.dart';
+import 'package:babymom_diary/src/features/push_notification/infrastructure/services/push_notification_service.dart';
 
 Future<void> runBabymomDiaryApp({
   required String appTitle,
@@ -92,6 +93,7 @@ class _AppState extends ConsumerState<App> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AdMobService.requestATTPermission();
       _initializeDeepLinks();
+      _initializePushNotifications();
       _incrementAppLaunchCount();
       _setupReviewPromptListener();
     });
@@ -144,22 +146,34 @@ class _AppState extends ConsumerState<App> {
     await deepLinkService.initialize();
   }
 
+  /// プッシュ通知サービスを初期化
+  Future<void> _initializePushNotifications() async {
+    try {
+      final pushNotificationService = ref.read(pushNotificationServiceProvider);
+      await pushNotificationService.initialize();
+      pushNotificationService.setupForegroundHandler();
+    } catch (e) {
+      // プッシュ通知の初期化エラーは無視（クリティカルでない処理のため）
+      debugPrint('Failed to initialize push notifications: $e');
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _preloadBannerAds();
   }
 
-  /// 全画面分のバナー広告をプリロードする
+  /// 初期タブ（ベビーの記録）のバナー広告をプリロードする
   void _preloadBannerAds() {
     if (_adPreloadStarted) return;
     _adPreloadStarted = true;
 
-    // 全スロットのバナー広告をプリロード（ATT許可と並行して実行）
+    // 初期タブのバナー広告のみプリロード（他タブはタブ切り替え時にロード）
     final screenWidth = MediaQuery.of(context).size.width;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final manager = ref.read(bannerAdManagerProvider);
-      manager.preloadAll(screenWidth);
+      manager.preloadInitialTab(screenWidth);
     });
   }
 

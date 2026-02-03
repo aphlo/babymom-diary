@@ -48,6 +48,12 @@ jobs:
       - name: Check formatting and lint
         run: pnpm check
 
+      - name: Build
+        run: pnpm build
+
+      - name: Test
+        run: pnpm test
+
   flutter:
     name: Flutter Check
     runs-on: ubuntu-latest

@@ -11,19 +11,79 @@ part 'banner_ad_manager.g.dart';
 ///
 /// 各画面で使用する広告を識別するために使用
 enum BannerAdSlot {
-  vaccines,
-  momRecordOverview,
-  momDiaryOverview,
-  growthChart,
-  growthRecordList,
+  // ベビーの記録タブ
   feedingTable,
   babyFood,
+  growthChart,
+  growthRecordList,
+
+  // 予防接種タブ
+  vaccines,
+
+  // ママの記録タブ
+  momRecordOverview,
+  momDiaryOverview,
+
+  // メニュータブ
   menu,
+
+  // 設定画面（遅延ロード）
   householdShare,
   ingredientSettings,
   growthChartSettings,
   widgetSettings,
   feedingTableSettings,
+  notificationSettings,
+  vaccineVisibilitySettings,
+}
+
+/// ボトムナビゲーションのタブ
+enum BottomNavTab {
+  baby,
+  vaccines,
+  mom,
+  calendar,
+  menu,
+}
+
+/// タブごとの広告スロットマッピング
+extension BannerAdSlotExtension on BannerAdSlot {
+  /// このスロットが属するタブ（設定画面はnull）
+  BottomNavTab? get tab {
+    switch (this) {
+      case BannerAdSlot.feedingTable:
+      case BannerAdSlot.babyFood:
+      case BannerAdSlot.growthChart:
+      case BannerAdSlot.growthRecordList:
+        return BottomNavTab.baby;
+      case BannerAdSlot.vaccines:
+        return BottomNavTab.vaccines;
+      case BannerAdSlot.momRecordOverview:
+      case BannerAdSlot.momDiaryOverview:
+        return BottomNavTab.mom;
+      case BannerAdSlot.menu:
+        return BottomNavTab.menu;
+      // 設定画面は遅延ロード
+      case BannerAdSlot.householdShare:
+      case BannerAdSlot.ingredientSettings:
+      case BannerAdSlot.growthChartSettings:
+      case BannerAdSlot.widgetSettings:
+      case BannerAdSlot.feedingTableSettings:
+      case BannerAdSlot.notificationSettings:
+      case BannerAdSlot.vaccineVisibilitySettings:
+        return null;
+    }
+  }
+
+  /// 設定画面かどうか
+  bool get isSettingsScreen => tab == null;
+}
+
+/// タブに属するスロット一覧を取得
+extension BottomNavTabExtension on BottomNavTab {
+  List<BannerAdSlot> get slots {
+    return BannerAdSlot.values.where((slot) => slot.tab == this).toList();
+  }
 }
 
 /// 各スロットの広告状態
@@ -42,11 +102,12 @@ class _SlotState {
 
 /// バナー広告のプリロードとキャッシュを管理するサービス
 ///
-/// アプリ起動時に各画面用の広告をプリロードし、
-/// 画面表示時にはキャッシュから即座に広告を提供する
+/// タブ切り替え時にそのタブの広告をプリロードし、
+/// 設定画面は画面遷移時に遅延ロードする
 class BannerAdManager {
   final Ref _ref;
   final Map<BannerAdSlot, _SlotState> _slots = {};
+  final Set<BottomNavTab> _preloadedTabs = {};
   bool _isDisposed = false;
   double? _screenWidth;
 
@@ -63,17 +124,27 @@ class BannerAdManager {
   /// 指定スロットの広告サイズ
   AdSize? getAdSize(BannerAdSlot slot) => _slots[slot]?.adSize;
 
-  /// 全スロットの広告をプリロードする
+  /// 指定タブの広告をプリロードする
   ///
-  /// [width] 広告を表示する領域の幅（ピクセル）
-  Future<void> preloadAll(double width) async {
+  /// 既にプリロード済みのタブは再ロードしない
+  Future<void> preloadTab(BottomNavTab tab, double width) async {
     if (_isDisposed) return;
     _screenWidth = width;
 
-    // 全スロットを並行してプリロード
+    // 既にプリロード済みならスキップ
+    if (_preloadedTabs.contains(tab)) return;
+    _preloadedTabs.add(tab);
+
+    // タブに属するスロットを並行してプリロード
+    final slots = tab.slots;
     await Future.wait(
-      BannerAdSlot.values.map((slot) => preload(slot, width)),
+      slots.map((slot) => preload(slot, width)),
     );
+  }
+
+  /// 初期タブ（ベビーの記録）の広告をプリロードする
+  Future<void> preloadInitialTab(double width) async {
+    await preloadTab(BottomNavTab.baby, width);
   }
 
   /// 指定スロットの広告をプリロードする
@@ -153,7 +224,7 @@ class BannerAdManager {
   /// 指定スロットのプリロード完了を待機する
   ///
   /// プリロードがまだ開始されていない場合もCompleterを作成して待機する。
-  /// これにより、BannerAdWidgetがpreloadAllより先に呼ばれても正しく待機できる。
+  /// これにより、BannerAdWidgetがpreloadより先に呼ばれても正しく待機できる。
   Future<void> waitForPreload(BannerAdSlot slot) async {
     final slotState = _slots[slot];
     if (slotState == null) return;
