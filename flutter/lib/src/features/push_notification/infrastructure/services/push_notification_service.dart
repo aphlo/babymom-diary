@@ -49,7 +49,10 @@ class PushNotificationService {
       provisional: false,
     );
 
-    // 5. フォアグラウンド通知設定
+    // 5. 許可後に再度トークン登録を試みる（iOSでは許可前にトークン取得できない場合がある）
+    await _registerToken();
+
+    // 6. フォアグラウンド通知設定
     await _messaging.setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
@@ -111,7 +114,7 @@ class PushNotificationService {
 
     try {
       token = await _messaging.getToken();
-      debugPrint('[PushNotification] FCM token: ${token?.substring(0, 20)}...');
+      debugPrint('[PushNotification] FCM token received');
     } catch (e) {
       debugPrint('[PushNotification] Failed to get FCM token: $e');
       return;
