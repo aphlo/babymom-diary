@@ -24,6 +24,7 @@ enum BannerAdSlot {
   growthChartSettings,
   widgetSettings,
   feedingTableSettings,
+  notificationSettings,
 }
 
 /// 各スロットの広告状態
