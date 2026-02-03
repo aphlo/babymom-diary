@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../analytics/analytics_service.dart';
+import '../../features/ads/application/services/banner_ad_manager.dart';
 import '../../features/child_record/presentation/pages/record_table_page.dart';
 import '../../features/menu/growth_chart_settings/presentation/pages/growth_chart_settings_page.dart';
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
@@ -361,14 +363,45 @@ GoRouter appRouter(Ref ref) {
 }
 
 // StatefulNavigationShellを使用したスキャフォールドウィジェット
-class _ScaffoldWithNavBar extends StatelessWidget {
+class _ScaffoldWithNavBar extends ConsumerStatefulWidget {
   const _ScaffoldWithNavBar({required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
+  @override
+  ConsumerState<_ScaffoldWithNavBar> createState() =>
+      _ScaffoldWithNavBarState();
+}
+
+class _ScaffoldWithNavBarState extends ConsumerState<_ScaffoldWithNavBar> {
+  int? _lastPreloadedTabIndex;
+
+  /// タブインデックスをBottomNavTabに変換
+  BottomNavTab _indexToTab(int index) {
+    return switch (index) {
+      0 => BottomNavTab.baby,
+      1 => BottomNavTab.vaccines,
+      2 => BottomNavTab.mom,
+      3 => BottomNavTab.calendar,
+      4 => BottomNavTab.menu,
+      _ => BottomNavTab.baby,
+    };
+  }
+
+  /// タブ切り替え時にそのタブの広告をプリロード
+  void _preloadAdsForTab(int tabIndex) {
+    if (_lastPreloadedTabIndex == tabIndex) return;
+    _lastPreloadedTabIndex = tabIndex;
+
+    final tab = _indexToTab(tabIndex);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final manager = ref.read(bannerAdManagerProvider);
+    manager.preloadTab(tab, screenWidth);
+  }
+
   void _onDestinationSelected(int index) {
     // 同じタブを再度タップした場合、ルートページに戻る
-    if (index == navigationShell.currentIndex) {
+    if (index == widget.navigationShell.currentIndex) {
       // 現在のブランチのナビゲーターキーを取得してポップ
       final navigatorKeys = [
         _shellNavigatorKeyBaby,
@@ -385,16 +418,18 @@ class _ScaffoldWithNavBar extends StatelessWidget {
       }
     } else {
       // 別のタブに切り替え
-      navigationShell.goBranch(index);
+      widget.navigationShell.goBranch(index);
+      // 切り替え先タブの広告をプリロード
+      _preloadAdsForTab(index);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: navigationShell,
+      body: widget.navigationShell,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
+        selectedIndex: widget.navigationShell.currentIndex,
         onDestinationSelected: _onDestinationSelected,
         destinations: const [
           NavigationDestination(
