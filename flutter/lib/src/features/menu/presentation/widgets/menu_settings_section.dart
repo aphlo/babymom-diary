@@ -58,6 +58,14 @@ class MenuSettingsSection extends StatelessWidget {
           onTap: () => context.push('/widget/settings'),
           trailing: const Icon(Icons.chevron_right),
         ),
+        const Divider(height: 0),
+        ListTile(
+          leading: const Icon(Icons.notifications_outlined),
+          title: const Text('通知設定'),
+          subtitle: const Text('プッシュ通知の設定'),
+          onTap: () => context.push('/notification/settings'),
+          trailing: const Icon(Icons.chevron_right),
+        ),
       ],
     );
   }

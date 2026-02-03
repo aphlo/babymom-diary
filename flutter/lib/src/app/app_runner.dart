@@ -164,16 +164,16 @@ class _AppState extends ConsumerState<App> {
     _preloadBannerAds();
   }
 
-  /// 全画面分のバナー広告をプリロードする
+  /// 初期タブ（ベビーの記録）のバナー広告をプリロードする
   void _preloadBannerAds() {
     if (_adPreloadStarted) return;
     _adPreloadStarted = true;
 
-    // 全スロットのバナー広告をプリロード（ATT許可と並行して実行）
+    // 初期タブのバナー広告のみプリロード（他タブはタブ切り替え時にロード）
     final screenWidth = MediaQuery.of(context).size.width;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final manager = ref.read(bannerAdManagerProvider);
-      manager.preloadAll(screenWidth);
+      manager.preloadInitialTab(screenWidth);
     });
   }
 

@@ -26,9 +26,6 @@ mixin _$VaccineVisibilitySettingsState {
   /// 全てのワクチン情報（id, name）
   List<VaccineDisplayInfo> get vaccines;
 
-  /// 保存中かどうか
-  bool get isSaving;
-
   /// Create a copy of VaccineVisibilitySettingsState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,9 +45,7 @@ mixin _$VaccineVisibilitySettingsState {
             (identical(other.error, error) || other.error == error) &&
             const DeepCollectionEquality()
                 .equals(other.visibilitySettings, visibilitySettings) &&
-            const DeepCollectionEquality().equals(other.vaccines, vaccines) &&
-            (identical(other.isSaving, isSaving) ||
-                other.isSaving == isSaving));
+            const DeepCollectionEquality().equals(other.vaccines, vaccines));
   }
 
   @override
@@ -59,12 +54,11 @@ mixin _$VaccineVisibilitySettingsState {
       isLoading,
       error,
       const DeepCollectionEquality().hash(visibilitySettings),
-      const DeepCollectionEquality().hash(vaccines),
-      isSaving);
+      const DeepCollectionEquality().hash(vaccines));
 
   @override
   String toString() {
-    return 'VaccineVisibilitySettingsState(isLoading: $isLoading, error: $error, visibilitySettings: $visibilitySettings, vaccines: $vaccines, isSaving: $isSaving)';
+    return 'VaccineVisibilitySettingsState(isLoading: $isLoading, error: $error, visibilitySettings: $visibilitySettings, vaccines: $vaccines)';
   }
 }
 
@@ -79,8 +73,7 @@ abstract mixin class $VaccineVisibilitySettingsStateCopyWith<$Res> {
       {bool isLoading,
       String? error,
       Map<String, bool> visibilitySettings,
-      List<VaccineDisplayInfo> vaccines,
-      bool isSaving});
+      List<VaccineDisplayInfo> vaccines});
 }
 
 /// @nodoc
@@ -100,7 +93,6 @@ class _$VaccineVisibilitySettingsStateCopyWithImpl<$Res>
     Object? error = freezed,
     Object? visibilitySettings = null,
     Object? vaccines = null,
-    Object? isSaving = null,
   }) {
     return _then(_self.copyWith(
       isLoading: null == isLoading
@@ -119,10 +111,6 @@ class _$VaccineVisibilitySettingsStateCopyWithImpl<$Res>
           ? _self.vaccines
           : vaccines // ignore: cast_nullable_to_non_nullable
               as List<VaccineDisplayInfo>,
-      isSaving: null == isSaving
-          ? _self.isSaving
-          : isSaving // ignore: cast_nullable_to_non_nullable
-              as bool,
     ));
   }
 }
@@ -223,8 +211,7 @@ extension VaccineVisibilitySettingsStatePatterns
             bool isLoading,
             String? error,
             Map<String, bool> visibilitySettings,
-            List<VaccineDisplayInfo> vaccines,
-            bool isSaving)?
+            List<VaccineDisplayInfo> vaccines)?
         $default, {
     required TResult orElse(),
   }) {
@@ -232,7 +219,7 @@ extension VaccineVisibilitySettingsStatePatterns
     switch (_that) {
       case _VaccineVisibilitySettingsState() when $default != null:
         return $default(_that.isLoading, _that.error, _that.visibilitySettings,
-            _that.vaccines, _that.isSaving);
+            _that.vaccines);
       case _:
         return orElse();
     }
@@ -257,15 +244,14 @@ extension VaccineVisibilitySettingsStatePatterns
             bool isLoading,
             String? error,
             Map<String, bool> visibilitySettings,
-            List<VaccineDisplayInfo> vaccines,
-            bool isSaving)
+            List<VaccineDisplayInfo> vaccines)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _VaccineVisibilitySettingsState():
         return $default(_that.isLoading, _that.error, _that.visibilitySettings,
-            _that.vaccines, _that.isSaving);
+            _that.vaccines);
     }
   }
 
@@ -287,15 +273,14 @@ extension VaccineVisibilitySettingsStatePatterns
             bool isLoading,
             String? error,
             Map<String, bool> visibilitySettings,
-            List<VaccineDisplayInfo> vaccines,
-            bool isSaving)?
+            List<VaccineDisplayInfo> vaccines)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _VaccineVisibilitySettingsState() when $default != null:
         return $default(_that.isLoading, _that.error, _that.visibilitySettings,
-            _that.vaccines, _that.isSaving);
+            _that.vaccines);
       case _:
         return null;
     }
@@ -309,8 +294,7 @@ class _VaccineVisibilitySettingsState extends VaccineVisibilitySettingsState {
       {this.isLoading = false,
       this.error,
       final Map<String, bool> visibilitySettings = const {},
-      final List<VaccineDisplayInfo> vaccines = const [],
-      this.isSaving = false})
+      final List<VaccineDisplayInfo> vaccines = const []})
       : _visibilitySettings = visibilitySettings,
         _vaccines = vaccines,
         super._();
@@ -349,11 +333,6 @@ class _VaccineVisibilitySettingsState extends VaccineVisibilitySettingsState {
     return EqualUnmodifiableListView(_vaccines);
   }
 
-  /// 保存中かどうか
-  @override
-  @JsonKey()
-  final bool isSaving;
-
   /// Create a copy of VaccineVisibilitySettingsState
   /// with the given fields replaced by the non-null parameter values.
   @override
@@ -373,9 +352,7 @@ class _VaccineVisibilitySettingsState extends VaccineVisibilitySettingsState {
             (identical(other.error, error) || other.error == error) &&
             const DeepCollectionEquality()
                 .equals(other._visibilitySettings, _visibilitySettings) &&
-            const DeepCollectionEquality().equals(other._vaccines, _vaccines) &&
-            (identical(other.isSaving, isSaving) ||
-                other.isSaving == isSaving));
+            const DeepCollectionEquality().equals(other._vaccines, _vaccines));
   }
 
   @override
@@ -384,12 +361,11 @@ class _VaccineVisibilitySettingsState extends VaccineVisibilitySettingsState {
       isLoading,
       error,
       const DeepCollectionEquality().hash(_visibilitySettings),
-      const DeepCollectionEquality().hash(_vaccines),
-      isSaving);
+      const DeepCollectionEquality().hash(_vaccines));
 
   @override
   String toString() {
-    return 'VaccineVisibilitySettingsState(isLoading: $isLoading, error: $error, visibilitySettings: $visibilitySettings, vaccines: $vaccines, isSaving: $isSaving)';
+    return 'VaccineVisibilitySettingsState(isLoading: $isLoading, error: $error, visibilitySettings: $visibilitySettings, vaccines: $vaccines)';
   }
 }
 
@@ -406,8 +382,7 @@ abstract mixin class _$VaccineVisibilitySettingsStateCopyWith<$Res>
       {bool isLoading,
       String? error,
       Map<String, bool> visibilitySettings,
-      List<VaccineDisplayInfo> vaccines,
-      bool isSaving});
+      List<VaccineDisplayInfo> vaccines});
 }
 
 /// @nodoc
@@ -427,7 +402,6 @@ class __$VaccineVisibilitySettingsStateCopyWithImpl<$Res>
     Object? error = freezed,
     Object? visibilitySettings = null,
     Object? vaccines = null,
-    Object? isSaving = null,
   }) {
     return _then(_VaccineVisibilitySettingsState(
       isLoading: null == isLoading
@@ -446,10 +420,6 @@ class __$VaccineVisibilitySettingsStateCopyWithImpl<$Res>
           ? _self._vaccines
           : vaccines // ignore: cast_nullable_to_non_nullable
               as List<VaccineDisplayInfo>,
-      isSaving: null == isSaving
-          ? _self.isSaving
-          : isSaving // ignore: cast_nullable_to_non_nullable
-              as bool,
     ));
   }
 }

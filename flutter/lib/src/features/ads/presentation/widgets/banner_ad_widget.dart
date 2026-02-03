@@ -8,6 +8,7 @@ import '../../application/services/banner_ad_manager.dart';
 ///
 /// 画面幅に応じた最適なサイズのバナー広告を表示する。
 /// BannerAdManagerによりプリロードされた広告があれば即座に表示する。
+/// 設定画面などプリロードされていないスロットは遅延ロードする。
 ///
 /// [slot] パラメータで各画面用の広告スロットを指定する。
 class BannerAdWidget extends ConsumerStatefulWidget {
@@ -40,10 +41,17 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
     _isLoaded = true;
 
     final manager = ref.read(bannerAdManagerProvider);
+    final screenWidth = MediaQuery.of(context).size.width;
 
-    // キャッシュがなければプリロード完了を待機
+    // キャッシュがない場合
     if (!manager.hasAd(widget.slot)) {
-      await manager.waitForPreload(widget.slot);
+      // 設定画面の場合は即座にプリロードを開始
+      if (widget.slot.isSettingsScreen) {
+        await manager.preload(widget.slot, screenWidth);
+      } else {
+        // タブ画面の場合はプリロード完了を待機
+        await manager.waitForPreload(widget.slot);
+      }
     }
 
     // キャッシュから取得

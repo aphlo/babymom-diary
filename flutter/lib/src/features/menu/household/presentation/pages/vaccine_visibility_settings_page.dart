@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../../core/theme/semantic_colors.dart';
 import '../../../../../core/firebase/household_service.dart';
+import '../../../../ads/application/services/banner_ad_manager.dart';
+import '../../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../viewmodels/vaccine_visibility_settings_view_model.dart';
 
 /// ワクチン表示設定画面
@@ -53,11 +54,11 @@ class _VaccineVisibilitySettingsPageState
 
     // エラー表示
     ref.listen(vaccineVisibilitySettingsViewModelProvider, (previous, next) {
-      if (next.error != null) {
+      if (next.error != null && previous?.error != next.error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.error!),
-            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
           ),
         );
         viewModel.clearError();
@@ -71,101 +72,57 @@ class _VaccineVisibilitySettingsPageState
       ),
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: state.vaccines.length + 1,
-              itemBuilder: (context, index) {
-                // 最初のアイテムは説明文
-                if (index == 0) {
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      '不要なワクチンを非表示にできます。ボタンをオフにして保存ボタンを押してください',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: context.textSecondary,
+          : Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: state.vaccines.length + 1,
+                    itemBuilder: (context, index) {
+                      // 最初のアイテムは説明文
+                      if (index == 0) {
+                        return Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(
+                            '不要なワクチンを非表示にできます。',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: context.textSecondary,
+                                ),
                           ),
-                    ),
-                  );
-                }
+                        );
+                      }
 
-                // インデックスを調整してワクチンリストにアクセス
-                final vaccineIndex = index - 1;
-                final vaccine = state.vaccines[vaccineIndex];
-                final isVisible = state.visibilitySettings[vaccine.id] ?? true;
+                      // インデックスを調整してワクチンリストにアクセス
+                      final vaccineIndex = index - 1;
+                      final vaccine = state.vaccines[vaccineIndex];
+                      final isVisible =
+                          state.visibilitySettings[vaccine.id] ?? true;
 
-                return Card(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  color: context.cardBackground,
-                  child: SwitchListTile(
-                    title: Text(
-                      vaccine.name,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    value: isVisible,
-                    onChanged: (_) => viewModel.toggleVisibility(vaccine.id),
-                    activeTrackColor: context.primaryColor,
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 4),
+                        color: context.cardBackground,
+                        child: SwitchListTile(
+                          title: Text(
+                            vaccine.name,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          value: isVisible,
+                          onChanged: (_) =>
+                              viewModel.toggleVisibility(vaccine.id),
+                          activeTrackColor: context.primaryColor,
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+                const BannerAdWidget(
+                    slot: BannerAdSlot.vaccineVisibilitySettings),
+              ],
             ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton(
-              onPressed: state.isSaving ? null : () => _saveSettings(context),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                backgroundColor: context.primaryColor,
-                foregroundColor: Colors.white,
-              ),
-              child: state.isSaving
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : const Text('保存'),
-            ),
-          ),
-        ),
-      ),
     );
-  }
-
-  Future<void> _saveSettings(BuildContext context) async {
-    final householdIdAsync = ref.read(currentHouseholdIdProvider);
-    final householdId = householdIdAsync.value;
-
-    if (householdId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('世帯情報が取得できません'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final viewModel =
-        ref.read(vaccineVisibilitySettingsViewModelProvider.notifier);
-    final success = await viewModel.saveSettings(householdId: householdId);
-
-    if (success && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('設定を保存しました'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      context.pop();
-    }
   }
 }

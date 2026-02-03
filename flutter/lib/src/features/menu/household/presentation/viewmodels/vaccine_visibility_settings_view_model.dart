@@ -15,6 +15,8 @@ part 'vaccine_visibility_settings_view_model.g.dart';
 @riverpod
 class VaccineVisibilitySettingsViewModel
     extends _$VaccineVisibilitySettingsViewModel {
+  String? _householdId;
+
   @override
   VaccineVisibilitySettingsState build() {
     return const VaccineVisibilitySettingsState();
@@ -24,6 +26,7 @@ class VaccineVisibilitySettingsViewModel
   Future<void> initialize({
     required String householdId,
   }) async {
+    _householdId = householdId;
     state = state.clearError().copyWith(isLoading: true);
 
     try {
@@ -62,69 +65,80 @@ class VaccineVisibilitySettingsViewModel
     }
   }
 
-  /// ワクチンの表示・非表示を切り替え
-  void toggleVisibility(String vaccineId) {
+  /// ワクチンの表示・非表示を切り替え（即時保存）
+  Future<void> toggleVisibility(String vaccineId) async {
+    final householdId = _householdId;
+    if (householdId == null) return;
+
     final currentVisibility = state.visibilitySettings[vaccineId] ?? true;
     final newVisibility = !currentVisibility;
 
     final updatedSettings = Map<String, bool>.from(state.visibilitySettings);
     updatedSettings[vaccineId] = newVisibility;
 
+    // 即座にUIを更新
     state = state.copyWith(visibilitySettings: updatedSettings);
+
+    // バックグラウンドで保存
+    await _saveSettings(householdId, updatedSettings, vaccineId, newVisibility);
   }
 
-  /// 設定を保存
-  Future<bool> saveSettings({
-    required String householdId,
-  }) async {
-    state = state.clearError().copyWith(isSaving: true);
-
+  /// 設定を保存（内部メソッド）
+  Future<void> _saveSettings(
+    String householdId,
+    Map<String, bool> visibilitySettings,
+    String changedVaccineId,
+    bool isVisible,
+  ) async {
     try {
       final repository = ref.read(vaccineVisibilitySettingsRepositoryProvider);
+
+      final updateVaccineVisibilitySettings =
+          UpdateVaccineVisibilitySettings(repository: repository);
+
+      // 設定を更新
+      final settings = VaccineVisibilitySettings(
+        householdId: householdId,
+        visibilityMap: visibilitySettings,
+      );
+
+      await updateVaccineVisibilitySettings(settings: settings);
+
+      // OFFに設定された場合のみreservation_groupsから削除
+      if (!isVisible) {
+        await _removeFromReservationGroups(householdId, changedVaccineId);
+      }
+    } catch (error) {
+      state = state.copyWith(
+        error: '設定の保存に失敗しました',
+      );
+    }
+  }
+
+  /// reservation_groupsから削除
+  Future<void> _removeFromReservationGroups(
+    String householdId,
+    String vaccineId,
+  ) async {
+    try {
       final firestore = ref.read(firebaseFirestoreProvider);
       final vaccinationRecordRepository =
           ref.read(vaccinationRecordRepositoryProvider);
 
-      final updateVaccineVisibilitySettings =
-          UpdateVaccineVisibilitySettings(repository: repository);
       final removeVaccineFromReservationGroups =
           RemoveVaccineFromReservationGroups(
         firestore: firestore,
         vaccinationRecordRepository: vaccinationRecordRepository,
       );
 
-      // 設定を更新
-      final settings = VaccineVisibilitySettings(
+      await removeVaccineFromReservationGroups(
         householdId: householdId,
-        visibilityMap: state.visibilitySettings,
+        vaccineId: vaccineId,
       );
-
-      await updateVaccineVisibilitySettings(settings: settings);
-
-      // OFFに設定されたワクチンをreservation_groupsから削除
-      final hiddenVaccineIds = settings.hiddenVaccineIds;
-      for (final vaccineId in hiddenVaccineIds) {
-        try {
-          await removeVaccineFromReservationGroups(
-            householdId: householdId,
-            vaccineId: vaccineId,
-          );
-        } catch (e) {
-          // エラーが発生してもログに記録して続行
-          // ignore: avoid_print
-          print(
-              'Failed to remove vaccine $vaccineId from reservation groups: $e');
-        }
-      }
-
-      state = state.copyWith(isSaving: false);
-      return true;
-    } catch (error) {
-      state = state.copyWith(
-        isSaving: false,
-        error: '設定の保存に失敗しました: $error',
-      );
-      return false;
+    } catch (e) {
+      // エラーが発生してもログに記録して続行
+      // ignore: avoid_print
+      print('Failed to remove vaccine $vaccineId from reservation groups: $e');
     }
   }
 
