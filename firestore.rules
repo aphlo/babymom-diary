@@ -61,6 +61,16 @@ service cloud.firestore {
 
     match /users/{uid} {
       allow read, write: if authed() && request.auth.uid == uid;
+
+      // FCMトークン：本人のみ読み書き可能
+      match /fcm_tokens/{deviceId} {
+        allow read, write: if authed() && request.auth.uid == uid;
+      }
+
+      // 通知設定：本人のみ読み書き可能
+      match /notification_settings/{docId} {
+        allow read, write: if authed() && request.auth.uid == uid;
+      }
     }
 
     // カレンダーイベントを collectionGroup クエリで取得できるようにする
