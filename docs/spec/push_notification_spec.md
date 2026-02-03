@@ -1,13 +1,15 @@
 # プッシュ通知機能 設計書
 
+> **実装状況**: ✅ 完了（2026-02-03）
+
 ## 1. 概要
 
 miluアプリにプッシュ通知機能を実装し、以下の2種類の通知を配信する。
 
-| 通知種別 | 配信時刻 | 目的 |
-|---------|---------|------|
-| 予防接種リマインダー | 毎日 10:00 | 予約日の前日・当日に接種を忘れないよう通知 |
-| 応援メッセージ | 毎日 20:00 | 育児家庭を励ますランダムメッセージ |
+| 通知種別 | 配信時刻 | 目的 | 実装状況 |
+|---------|---------|------|----------|
+| 予防接種リマインダー | 毎日 10:00 | 予約日の前日・当日に接種を忘れないよう通知 | ✅ 完了 |
+| 毎日のエール | 毎日 20:00 | 育児家庭を励ますランダムメッセージ | ✅ 完了 |
 
 ---
 
@@ -22,27 +24,43 @@ miluアプリにプッシュ通知機能を実装し、以下の2種類の通知
 
 **通知内容：**
 - タイトル: 「予防接種のお知らせ」
-- 本文（当日）: 「本日、予防接種の予約があります。お忘れなく！」
-- 本文（前日）: 「明日、予防接種の予約があります。準備をお願いします。」
+- 本文（当日）: 「本日、予防接種の予約があります。」
+- 本文（前日）: 「明日、予防接種の予約があります。」
+- 本文（当日+前日）: 「本日と明日、予防接種の予約があります。」
 - 複数予約がある場合もワクチン名は明言しない（要件通り）
 
 **対象ユーザー：**
 - 該当する子供が所属する世帯の全メンバー（FCMトークン登録済み）
 
-### 2.2 応援メッセージ通知
+### 2.2 毎日のエール通知
 
 **配信条件：**
 - 毎日 20:00 JST に配信
-- 通知設定で有効にしている全ユーザーに送信
+- 通知設定で `dailyEncouragement.enabled = true` の全ユーザーに送信
 
 **通知内容：**
-- タイトル: 「miluからのメッセージ」
-- 本文: 100種類以上の励ましメッセージからランダム選択
+- タイトル: 「今日のひとこと」
+- 本文: 110種類の励ましメッセージからランダム選択
+
+**メッセージカテゴリ（各10種類）：**
+1. 感謝・労いのメッセージ
+2. 成長を喜ぶメッセージ
+3. 自己肯定のメッセージ
+4. 休息を促すメッセージ
+5. 愛情に関するメッセージ
+6. 日常を大切にするメッセージ
+7. 育児の知恵・ヒント
+8. 応援・エールのメッセージ
+9. 共感のメッセージ
+10. 未来への希望
+11. その他
 
 **メッセージ例：**
-- 「今日も一日、育児おつかれさまでした」
-- 「あなたの頑張りを、お子さんはちゃんと見ていますよ」
-- 「完璧じゃなくていい。十分がんばっています」
+- 「今日も一日、お疲れさまです。無理せず、自分のペースで育児を楽しんでくださいね。」
+- 「赤ちゃんの笑顔は最高の宝物。あなたの愛情がしっかり届いていますよ。」
+- 「完璧を目指さなくて大丈夫。あなたは十分頑張っています。」
+- 「疲れた時は休んでいいんです。あなたの健康も大切です。」
+- 「miluはいつでもあなたの味方です。」
 
 ---
 
@@ -89,12 +107,27 @@ miluアプリにプッシュ通知機能を実装し、以下の2種類の通知
 
 ### 3.2 Cloud Functions 構成
 
-| 関数名 | 種別 | トリガー | 説明 |
-|--------|------|----------|------|
-| `sendVaccineReminder` | Scheduled | 毎日 10:00 JST | 予防接種リマインダー送信 |
-| `sendDailyEncouragement` | Scheduled | 毎日 20:00 JST | 応援メッセージ送信 |
-| `registerFcmToken` | HTTPS Callable | アプリから呼出 | FCMトークン登録・更新 |
-| `unregisterFcmToken` | HTTPS Callable | アプリから呼出 | FCMトークン削除（ログアウト時） |
+| 関数名 | 種別 | トリガー | 説明 | ファイル |
+|--------|------|----------|------|----------|
+| `sendVaccineReminder` | Pub/Sub | 毎日 10:00 JST | 予防接種リマインダー送信 | `sendVaccineReminder.ts` |
+| `sendDailyEncouragement` | Pub/Sub | 毎日 20:00 JST | 毎日のエール送信 | `sendDailyEncouragement.ts` |
+| `registerFcmToken` | HTTPS Callable | アプリから呼出 | FCMトークン登録・更新 | `registerFcmToken.ts` |
+| `unregisterFcmToken` | HTTPS Callable | アプリから呼出 | FCMトークン削除 | `unregisterFcmToken.ts` |
+
+### 3.3 Terraform リソース
+
+**ファイル:** `terraform/modules/cloud-functions/push_notification.tf`
+
+| リソース | 説明 |
+|---------|------|
+| `google_pubsub_topic.send_vaccine_reminder` | ワクチンリマインダー用Pub/Subトピック |
+| `google_pubsub_topic.send_daily_encouragement` | 毎日のエール用Pub/Subトピック |
+| `google_cloud_scheduler_job.send_vaccine_reminder` | 毎日10:00 JSTに実行 |
+| `google_cloud_scheduler_job.send_daily_encouragement` | 毎日20:00 JSTに実行 |
+| `google_cloudfunctions2_function.send_vaccine_reminder` | ワクチンリマインダーCloud Function |
+| `google_cloudfunctions2_function.send_daily_encouragement` | 毎日のエールCloud Function |
+| `google_cloudfunctions2_function.register_fcm_token` | FCMトークン登録Cloud Function |
+| `google_cloudfunctions2_function.unregister_fcm_token` | FCMトークン削除Cloud Function |
 
 ---
 
@@ -510,39 +543,37 @@ export const encouragementMessages: string[] = [
 
 ## 6. Flutter 実装設計
 
-### 6.1 ディレクトリ構成
+### 6.1 ディレクトリ構成（実装済み）
 
 ```
-flutter/lib/src/features/notifications/
+flutter/lib/src/features/push_notification/
 ├── domain/
 │   ├── entities/
-│   │   └── notification_settings.dart
-│   ├── repositories/
-│   │   └── notification_repository.dart
-│   └── value_objects/
-│       └── notification_type.dart
+│   │   ├── notification_settings.dart      # 通知設定エンティティ
+│   │   └── fcm_token_info.dart             # FCMトークン情報
+│   └── repositories/
+│       └── notification_repository.dart    # リポジトリインターフェース
 ├── application/
-│   ├── usecases/
-│   │   ├── register_fcm_token.dart
-│   │   ├── unregister_fcm_token.dart
-│   │   └── update_notification_settings.dart
-│   └── services/
-│       └── notification_service.dart
+│   └── usecases/
+│       ├── register_fcm_token.dart         # FCMトークン登録
+│       ├── unregister_fcm_token.dart       # FCMトークン削除
+│       └── update_notification_settings.dart # 通知設定更新
 ├── infrastructure/
 │   ├── repositories/
-│   │   └── notification_repository_impl.dart
+│   │   └── notification_repository_impl.dart # リポジトリ実装
 │   ├── sources/
-│   │   ├── notification_settings_firestore_source.dart
+│   │   ├── notification_settings_firestore_data_source.dart
 │   │   └── fcm_data_source.dart
-│   └── models/
-│       └── notification_settings_dto.dart
+│   ├── models/
+│   │   └── notification_settings_dto.dart  # DTO
+│   └── services/
+│       └── push_notification_service.dart  # FCM初期化サービス
 └── presentation/
     ├── pages/
-    │   └── notification_settings_page.dart
-    ├── viewmodels/
-    │   └── notification_settings_viewmodel.dart
-    └── widgets/
-        └── notification_toggle_tile.dart
+    │   └── notification_settings_page.dart # 設定画面
+    └── viewmodels/
+        ├── notification_settings_state.dart     # 状態定義
+        └── notification_settings_view_model.dart # ViewModel
 ```
 
 ### 6.2 依存パッケージ追加
@@ -667,45 +698,52 @@ void main() async {
 }
 ```
 
-### 6.5 通知設定UI
+### 6.5 通知設定UI（実装済み）
 
-```dart
-// presentation/pages/notification_settings_page.dart
-class NotificationSettingsPage extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settingsAsync = ref.watch(notificationSettingsProvider);
+**アクセス方法:** メニュー → 通知設定（`/notification/settings`）
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('通知設定')),
-      body: settingsAsync.when(
-        data: (settings) => ListView(
-          children: [
-            SwitchListTile(
-              title: const Text('予防接種リマインダー'),
-              subtitle: const Text('予約日の前日と当日にお知らせします'),
-              value: settings.vaccineReminder.enabled,
-              onChanged: (value) => ref
-                  .read(notificationSettingsViewModelProvider.notifier)
-                  .updateVaccineReminder(enabled: value),
-            ),
-            SwitchListTile(
-              title: const Text('毎日のメッセージ'),
-              subtitle: const Text('毎晩20時に応援メッセージをお届けします'),
-              value: settings.dailyEncouragement.enabled,
-              onChanged: (value) => ref
-                  .read(notificationSettingsViewModelProvider.notifier)
-                  .updateDailyEncouragement(enabled: value),
-            ),
-          ],
-        ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, s) => Center(child: Text('エラー: $e')),
-      ),
-    );
-  }
-}
+**画面構成:**
+
 ```
+┌─────────────────────────────────────┐
+│ ← 通知設定                          │
+├─────────────────────────────────────┤
+│                                     │
+│ 予防接種のリマインダー              │
+│ 予約日が近づくと通知でお知らせ...   │
+│ ┌─────────────────────────────────┐ │
+│ │ ☑ リマインダーを受け取る       │ │
+│ │   予約日の前日・当日に通知      │ │
+│ ├─────────────────────────────────┤ │
+│ │ ☑ 当日に通知                   │ │
+│ │   予約当日の朝に通知            │ │
+│ ├─────────────────────────────────┤ │
+│ │ ☑ 前日に通知                   │ │
+│ │   予約前日の朝に通知            │ │
+│ └─────────────────────────────────┘ │
+│                                     │
+│ 毎日のエール                        │
+│ 毎日夜に励ましのメッセージ...       │
+│ ┌─────────────────────────────────┐ │
+│ │ ☑ エールを受け取る             │ │
+│ │   毎日20時頃に通知              │ │
+│ └─────────────────────────────────┘ │
+│                                     │
+│          [ 保存 ]                   │
+│                                     │
+│ ┌─────────────────────────────────┐ │
+│ │          広告バナー             │ │
+│ └─────────────────────────────────┘ │
+└─────────────────────────────────────┘
+```
+
+**機能:**
+- ワクチンリマインダーのON/OFF
+- 当日通知のON/OFF（daysBefore: 0）
+- 前日通知のON/OFF（daysBefore: 1）
+- 毎日のエールのON/OFF
+- 保存ボタンでFirestoreに反映
+- ローディング/エラー状態の表示
 
 ---
 
@@ -816,30 +854,34 @@ Cloud Functions サービスアカウントに追加：
 
 ## 10. 実装フェーズ
 
-### Phase 1: 基盤整備（優先度: 高）
-1. Flutter: firebase_messaging パッケージ追加
-2. Flutter: FCMトークン取得・登録実装
-3. Cloud Functions: registerFcmToken 実装
-4. Firestore: notification_settings スキーマ追加
+### Phase 1: 基盤整備（優先度: 高）✅ 完了
+1. ✅ Flutter: firebase_messaging パッケージ追加
+2. ✅ Flutter: FCMトークン取得・登録実装
+3. ✅ Cloud Functions: registerFcmToken 実装
+4. ✅ Firestore: notification_settings スキーマ追加
+5. ✅ Cloud Functions: unregisterFcmToken 実装
 
-### Phase 2: 予防接種リマインダー（優先度: 高）
-1. Cloud Functions: sendVaccineReminder 実装
-2. Terraform: Cloud Scheduler 設定
-3. Flutter: 通知受信ハンドラー実装
+### Phase 2: 予防接種リマインダー（優先度: 高）✅ 完了
+1. ✅ Cloud Functions: sendVaccineReminder 実装
+2. ✅ Terraform: Cloud Scheduler 設定（10:00 JST）
+3. ✅ Flutter: 通知受信ハンドラー実装
+4. ✅ daysBefore設定によるフィルタリング実装
+5. ✅ JST基準の日付比較実装
 
-### Phase 3: 応援メッセージ（優先度: 中）
-1. Cloud Functions: sendDailyEncouragement 実装
-2. 応援メッセージ100個作成
-3. Terraform: Cloud Scheduler 設定
+### Phase 3: 毎日のエール（優先度: 中）✅ 完了
+1. ✅ Cloud Functions: sendDailyEncouragement 実装
+2. ✅ 励ましメッセージ110種類作成（encouragementMessages.ts）
+3. ✅ Terraform: Cloud Scheduler 設定（20:00 JST）
 
-### Phase 4: 設定UI（優先度: 中）
-1. Flutter: 通知設定画面実装
-2. Flutter: 設定変更UseCase実装
+### Phase 4: 設定UI（優先度: 中）✅ 完了
+1. ✅ Flutter: 通知設定画面実装（NotificationSettingsPage）
+2. ✅ Flutter: 設定変更UseCase実装（UpdateNotificationSettings）
+3. ✅ メニューへの導線追加
 
 ### Phase 5: 品質向上（優先度: 低）
-1. エラーハンドリング強化
-2. 分析・ログ改善
-3. パフォーマンス最適化
+1. ✅ エラーハンドリング（無効トークン自動削除）
+2. ✅ ログからPII（householdId）を除外
+3. 🔲 分析・メトリクス追加（未実装）
 
 ---
 
