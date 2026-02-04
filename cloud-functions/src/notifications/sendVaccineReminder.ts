@@ -393,7 +393,6 @@ async function sendMulticastNotification(
               title: message.title,
               body: message.body,
             },
-            badge: 1,
             sound: "default",
           },
         },
