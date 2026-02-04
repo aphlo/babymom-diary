@@ -3,36 +3,10 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# Scheduled Functions - Pub/Sub Topics and Cloud Scheduler
+# Scheduled Functions - HTTP triggered Cloud Functions with Cloud Scheduler
 # ------------------------------------------------------------------------------
 
-# Pub/Sub Topic for sendVaccineReminder
-resource "google_pubsub_topic" "send_vaccine_reminder" {
-  name   = "send-vaccine-reminder"
-  labels = var.labels
-}
-
-# Cloud Scheduler Job: vaccine reminder at 10:00 JST daily
-resource "google_cloud_scheduler_job" "send_vaccine_reminder" {
-  name        = "send-vaccine-reminder"
-  description = "Daily vaccine reminder notification at 10:00 JST"
-  schedule    = "0 10 * * *"
-  time_zone   = "Asia/Tokyo"
-  region      = var.region
-
-  pubsub_target {
-    topic_name = google_pubsub_topic.send_vaccine_reminder.id
-    data       = base64encode("{}")
-  }
-
-  retry_config {
-    retry_count          = 3
-    min_backoff_duration = "5s"
-    max_backoff_duration = "300s"
-  }
-}
-
-# Cloud Function: sendVaccineReminder (Pub/Sub triggered)
+# Cloud Function: sendVaccineReminder (HTTP triggered)
 resource "google_cloudfunctions2_function" "send_vaccine_reminder" {
   name        = "send-vaccine-reminder"
   location    = var.region
@@ -58,14 +32,46 @@ resource "google_cloudfunctions2_function" "send_vaccine_reminder" {
     environment_variables = var.environment_variables
   }
 
-  event_trigger {
-    trigger_region = var.region
-    event_type     = "google.cloud.pubsub.topic.v1.messagePublished"
-    pubsub_topic   = google_pubsub_topic.send_vaccine_reminder.id
-    retry_policy   = "RETRY_POLICY_RETRY"
+  labels = var.labels
+}
+
+# Service account for Cloud Scheduler to invoke Cloud Functions
+resource "google_service_account" "scheduler_invoker" {
+  account_id   = "scheduler-invoker"
+  display_name = "Cloud Scheduler Invoker"
+  description  = "Service account for Cloud Scheduler to invoke Cloud Functions"
+}
+
+# Grant invoker role to scheduler service account for vaccine reminder
+resource "google_cloud_run_service_iam_member" "send_vaccine_reminder_invoker" {
+  location = var.region
+  service  = google_cloudfunctions2_function.send_vaccine_reminder.name
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:${google_service_account.scheduler_invoker.email}"
+}
+
+# Cloud Scheduler Job: vaccine reminder at 10:00 JST daily
+resource "google_cloud_scheduler_job" "send_vaccine_reminder" {
+  name        = "send-vaccine-reminder"
+  description = "Daily vaccine reminder notification at 10:00 JST"
+  schedule    = "0 10 * * *"
+  time_zone   = "Asia/Tokyo"
+  region      = var.region
+
+  http_target {
+    uri         = google_cloudfunctions2_function.send_vaccine_reminder.url
+    http_method = "POST"
+
+    oidc_token {
+      service_account_email = google_service_account.scheduler_invoker.email
+    }
   }
 
-  labels = var.labels
+  retry_config {
+    retry_count          = 3
+    min_backoff_duration = "5s"
+    max_backoff_duration = "300s"
+  }
 }
 
 # ------------------------------------------------------------------------------
@@ -148,33 +154,7 @@ resource "google_cloud_run_service_iam_member" "unregister_fcm_token_invoker" {
 # Daily Encouragement Notification
 # ------------------------------------------------------------------------------
 
-# Pub/Sub Topic for sendDailyEncouragement
-resource "google_pubsub_topic" "send_daily_encouragement" {
-  name   = "send-daily-encouragement"
-  labels = var.labels
-}
-
-# Cloud Scheduler Job: daily encouragement at 20:00 JST daily
-resource "google_cloud_scheduler_job" "send_daily_encouragement" {
-  name        = "send-daily-encouragement"
-  description = "Daily encouragement notification at 20:00 JST"
-  schedule    = "0 20 * * *"
-  time_zone   = "Asia/Tokyo"
-  region      = var.region
-
-  pubsub_target {
-    topic_name = google_pubsub_topic.send_daily_encouragement.id
-    data       = base64encode("{}")
-  }
-
-  retry_config {
-    retry_count          = 3
-    min_backoff_duration = "5s"
-    max_backoff_duration = "300s"
-  }
-}
-
-# Cloud Function: sendDailyEncouragement (Pub/Sub triggered)
+# Cloud Function: sendDailyEncouragement (HTTP triggered)
 resource "google_cloudfunctions2_function" "send_daily_encouragement" {
   name        = "send-daily-encouragement"
   location    = var.region
@@ -200,12 +180,37 @@ resource "google_cloudfunctions2_function" "send_daily_encouragement" {
     environment_variables = var.environment_variables
   }
 
-  event_trigger {
-    trigger_region = var.region
-    event_type     = "google.cloud.pubsub.topic.v1.messagePublished"
-    pubsub_topic   = google_pubsub_topic.send_daily_encouragement.id
-    retry_policy   = "RETRY_POLICY_RETRY"
+  labels = var.labels
+}
+
+# Grant invoker role to scheduler service account for daily encouragement
+resource "google_cloud_run_service_iam_member" "send_daily_encouragement_invoker" {
+  location = var.region
+  service  = google_cloudfunctions2_function.send_daily_encouragement.name
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:${google_service_account.scheduler_invoker.email}"
+}
+
+# Cloud Scheduler Job: daily encouragement at 20:00 JST daily
+resource "google_cloud_scheduler_job" "send_daily_encouragement" {
+  name        = "send-daily-encouragement"
+  description = "Daily encouragement notification at 20:00 JST"
+  schedule    = "0 20 * * *"
+  time_zone   = "Asia/Tokyo"
+  region      = var.region
+
+  http_target {
+    uri         = google_cloudfunctions2_function.send_daily_encouragement.url
+    http_method = "POST"
+
+    oidc_token {
+      service_account_email = google_service_account.scheduler_invoker.email
+    }
   }
 
-  labels = var.labels
+  retry_config {
+    retry_count          = 3
+    min_backoff_duration = "5s"
+    max_backoff_duration = "300s"
+  }
 }

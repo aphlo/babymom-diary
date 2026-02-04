@@ -1,5 +1,5 @@
 import * as admin from "firebase-admin";
-import { onMessagePublished } from "firebase-functions/v2/pubsub";
+import { onRequest } from "firebase-functions/v2/https";
 import { ENCOURAGEMENT_MESSAGES } from "./encouragementMessages";
 
 interface FcmTokenDoc {
@@ -18,17 +18,29 @@ export { ENCOURAGEMENT_MESSAGES };
 
 /**
  * 毎日の励まし通知を送信する Cloud Function
- * Cloud Scheduler -> Pub/Sub -> この関数 の流れで実行
+ * Cloud Scheduler -> HTTP -> この関数 の流れで実行
  * 毎日 20:00 JST に実行
  */
-export const sendDailyEncouragement = onMessagePublished(
+export const sendDailyEncouragement = onRequest(
   {
-    topic: "send-daily-encouragement",
     region: "asia-northeast1",
-    retry: true,
+    timeoutSeconds: 300,
+    memory: "512MiB",
   },
-  async () => {
-    await sendDailyEncouragementHandler(admin.firestore(), admin.messaging());
+  async (req, res) => {
+    try {
+      const result = await sendDailyEncouragementHandler(admin.firestore(), admin.messaging());
+      res.status(200).json({
+        success: true,
+        ...result,
+      });
+    } catch (error) {
+      console.error("sendDailyEncouragement failed:", error);
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
   }
 );
 

@@ -1,5 +1,5 @@
 import * as admin from "firebase-admin";
-import { onMessagePublished } from "firebase-functions/v2/pubsub";
+import { onRequest } from "firebase-functions/v2/https";
 
 interface ReservationGroupDoc {
   childId: string;
@@ -35,17 +35,29 @@ interface UserTokensWithPreference {
 
 /**
  * 予防接種リマインダー通知を送信する Cloud Function
- * Cloud Scheduler -> Pub/Sub -> この関数 の流れで実行
+ * Cloud Scheduler -> HTTP -> この関数 の流れで実行
  * 毎日 10:00 JST に実行
  */
-export const sendVaccineReminder = onMessagePublished(
+export const sendVaccineReminder = onRequest(
   {
-    topic: "send-vaccine-reminder",
     region: "asia-northeast1",
-    retry: true,
+    timeoutSeconds: 300,
+    memory: "512MiB",
   },
-  async () => {
-    await sendVaccineReminderHandler(admin.firestore(), admin.messaging());
+  async (req, res) => {
+    try {
+      const result = await sendVaccineReminderHandler(admin.firestore(), admin.messaging());
+      res.status(200).json({
+        success: true,
+        ...result,
+      });
+    } catch (error) {
+      console.error("sendVaccineReminder failed:", error);
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
   }
 );
 
