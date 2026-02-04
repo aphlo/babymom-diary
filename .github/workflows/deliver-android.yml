@@ -1,9 +1,6 @@
 name: deliver-android
 
 on:
-  push:
-    tags:
-      - v*
   workflow_dispatch:
 
 permissions:
