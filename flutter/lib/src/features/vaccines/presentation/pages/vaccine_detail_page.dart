@@ -131,7 +131,7 @@ class VaccineDetailPage extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
+      builder: (BuildContext _) {
         return ScheduledDoseBottomSheet(
           vaccine: vaccine,
           doseNumber: doseNumber,
