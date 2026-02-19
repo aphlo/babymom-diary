@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../analytics/analytics_service.dart';
 import '../../features/ads/application/services/banner_ad_manager.dart';
+import '../../features/subscription/application/providers/subscription_providers.dart';
 import '../../features/child_record/presentation/pages/record_table_page.dart';
 import '../../features/menu/growth_chart_settings/presentation/pages/growth_chart_settings_page.dart';
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
@@ -392,6 +393,10 @@ class _ScaffoldWithNavBarState extends ConsumerState<_ScaffoldWithNavBar> {
   void _preloadAdsForTab(int tabIndex) {
     if (_lastPreloadedTabIndex == tabIndex) return;
     _lastPreloadedTabIndex = tabIndex;
+
+    // プレミアムユーザーはプリロードしない
+    final premium = ref.read(isPremiumProvider);
+    if (premium) return;
 
     final tab = _indexToTab(tabIndex);
     final screenWidth = MediaQuery.of(context).size.width;
