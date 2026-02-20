@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
+import '../../../ads/application/services/banner_ad_manager.dart';
+import '../../../ads/presentation/widgets/banner_ad_widget.dart';
 import '../../../feeding_table_settings/application/providers/feeding_table_settings_providers.dart';
 import '../../../feeding_table_settings/domain/entities/feeding_table_settings.dart';
 import '../../../menu/children/application/child_context_provider.dart';
@@ -179,6 +181,7 @@ class _WeeklySummaryPageState extends ConsumerState<WeeklySummaryPage>
               ),
             ),
           ),
+          const BannerAdWidget(slot: BannerAdSlot.weeklySummary),
         ],
       ),
     );

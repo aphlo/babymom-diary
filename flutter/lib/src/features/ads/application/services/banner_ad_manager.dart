@@ -27,6 +27,9 @@ enum BannerAdSlot {
   // メニュータブ
   menu,
 
+  // モーダル画面（遅延ロード）
+  weeklySummary,
+
   // 設定画面（遅延ロード）
   householdShare,
   ingredientSettings,
@@ -63,7 +66,8 @@ extension BannerAdSlotExtension on BannerAdSlot {
         return BottomNavTab.mom;
       case BannerAdSlot.menu:
         return BottomNavTab.menu;
-      // 設定画面は遅延ロード
+      // モーダル・設定画面は遅延ロード
+      case BannerAdSlot.weeklySummary:
       case BannerAdSlot.householdShare:
       case BannerAdSlot.ingredientSettings:
       case BannerAdSlot.growthChartSettings:
