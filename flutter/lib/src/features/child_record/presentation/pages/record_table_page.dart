@@ -15,6 +15,7 @@ import '../viewmodels/record_view_model.dart';
 import '../widgets/app_bar_child_info.dart';
 import '../widgets/app_bar_date_switcher.dart';
 import '../widgets/record_sheet/editable_record_sheet.dart';
+import 'weekly_summary_page.dart';
 
 class RecordTablePage extends ConsumerStatefulWidget {
   const RecordTablePage({super.key});
@@ -192,11 +193,35 @@ class _RecordTablePageState extends ConsumerState<RecordTablePage>
         toolbarHeight: 64,
         titleSpacing: 0,
         title: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const AppBarChildInfo(),
-            const SizedBox(height: 3),
+            Row(
+              children: [
+                const SizedBox(width: 40),
+                const Expanded(
+                  child: Center(child: AppBarChildInfo()),
+                ),
+                SizedBox(
+                  width: 40,
+                  height: 28,
+                  child: IconButton(
+                    icon: const Icon(Icons.bar_chart,
+                        size: 24, color: Colors.white),
+                    tooltip: '週間サマリー',
+                    onPressed: () =>
+                        openWeeklySummaryPage(context: context, ref: ref),
+                    padding: EdgeInsets.zero,
+                    constraints:
+                        const BoxConstraints.tightFor(width: 40, height: 28),
+                    highlightColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    splashRadius: 0.01,
+                  ),
+                ),
+              ],
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,

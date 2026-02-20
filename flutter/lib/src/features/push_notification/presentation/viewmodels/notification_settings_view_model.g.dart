@@ -43,7 +43,7 @@ final class NotificationSettingsViewModelProvider extends $NotifierProvider<
 }
 
 String _$notificationSettingsViewModelHash() =>
-    r'bbd756990ab66f1d9927f231dc2862ca28db6f66';
+    r'50fd8b413e5b7f57ed0c7740c4a19aa6e57c4aee';
 
 abstract class _$NotificationSettingsViewModel
     extends $Notifier<NotificationSettingsState> {
