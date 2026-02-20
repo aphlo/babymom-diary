@@ -68,9 +68,13 @@ class _WeeklySummaryPageState extends ConsumerState<WeeklySummaryPage>
 
   void _ensureTabController(int tabCount) {
     if (_tabCount == tabCount) return;
-    final oldIndex = _tabController?.index ?? 0;
     _tabController?.dispose();
     _tabCount = tabCount;
+    if (tabCount == 0) {
+      _tabController = null;
+      return;
+    }
+    final oldIndex = _tabController?.index ?? 0;
     _tabController = TabController(
       length: tabCount,
       vsync: this,

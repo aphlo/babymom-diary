@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../baby_food/infrastructure/sources/baby_food_firestore_data_source.dart';
 import '../../../feeding_table_settings/domain/entities/feeding_table_settings.dart';
 import '../../child_record.dart';
 import '../../infrastructure/sources/record_firestore_data_source.dart';
@@ -17,8 +16,6 @@ Future<WeeklySummaryData> weeklySummary(
 ) async {
   final db = FirebaseFirestore.instance;
   final recordSource = RecordFirestoreDataSource(db, query.householdId);
-  final babyFoodSource =
-      BabyFoodFirestoreDataSource(householdId: query.householdId);
 
   final weekStart = DateTime(
     query.weekStart.year,
@@ -29,25 +26,15 @@ Future<WeeklySummaryData> weeklySummary(
   // 日曜〜土曜の7日分の日付リストを生成
   final dates = List.generate(7, (i) => weekStart.add(Duration(days: i)));
 
-  // 7日分のレコードと離乳食レコードを並列取得
-  final recordFutures =
-      dates.map((d) => recordSource.getForDay(query.childId, d));
-  final babyFoodFutures =
-      dates.map((d) => babyFoodSource.getForDay(query.childId, d));
-
-  final results = await Future.wait([
-    Future.wait(recordFutures.toList()),
-    Future.wait(babyFoodFutures.toList()),
-  ]);
-
-  final recordsByDay = results[0] as List<List<Record>>;
-  final babyFoodByDay = results[1];
+  // 7日分のレコードを並列取得
+  final recordsByDay = await Future.wait(
+    dates.map((d) => recordSource.getForDay(query.childId, d)).toList(),
+  );
 
   // 日ごとに集計
   final days = <DaySummary>[];
   for (var i = 0; i < 7; i++) {
     final records = recordsByDay[i];
-    final babyFoodRecords = babyFoodByDay[i] as List;
     final values = <FeedingTableCategory, CategoryDayValue>{};
 
     // 授乳
@@ -72,10 +59,6 @@ Future<WeeklySummaryData> weeklySummary(
         pumpRecords.fold<double>(0, (acc, r) => acc + (r.amount ?? 0));
     values[FeedingTableCategory.pump] =
         CategoryDayValue(count: pumpRecords.length, totalAmount: pumpAmount);
-
-    // 離乳食
-    values[FeedingTableCategory.babyFood] =
-        CategoryDayValue(count: babyFoodRecords.length, totalAmount: 0);
 
     // 尿
     final peeCount = records.where((r) => r.type == RecordType.pee).length;
