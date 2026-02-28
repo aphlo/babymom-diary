@@ -12,6 +12,7 @@ import 'package:babymom_diary/src/features/menu/presentation/widgets/menu_appear
 import 'package:babymom_diary/src/features/menu/presentation/widgets/menu_app_info_section.dart';
 import 'package:babymom_diary/src/features/menu/presentation/widgets/menu_children_section.dart';
 import 'package:babymom_diary/src/features/menu/presentation/widgets/menu_delete_data_section.dart';
+import 'package:babymom_diary/src/features/menu/presentation/widgets/menu_premium_section.dart';
 import 'package:babymom_diary/src/features/menu/presentation/widgets/menu_settings_section.dart';
 import 'package:babymom_diary/src/features/menu/presentation/widgets/menu_user_id_section.dart';
 
@@ -69,6 +70,8 @@ class _MenuListView extends StatelessWidget {
     return ListView(
       children: [
         MenuChildrenSection(children: children),
+        const SizedBox(height: 24),
+        const MenuPremiumSection(),
         const SizedBox(height: 24),
         const MenuSettingsSection(),
         const SizedBox(height: 24),

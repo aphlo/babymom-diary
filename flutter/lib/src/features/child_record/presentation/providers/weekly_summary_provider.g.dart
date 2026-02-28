@@ -70,7 +70,7 @@ final class WeeklySummaryProvider extends $FunctionalProvider<
   }
 }
 
-String _$weeklySummaryHash() => r'31cf99e4801a829474c1e351b08d4686a73d9e91';
+String _$weeklySummaryHash() => r'61b1ddf2df2351e86aa6bf1fc6e1630a3aba7c89';
 
 /// 週間サマリーデータを取得・集計するFutureProvider
 

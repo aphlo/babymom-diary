@@ -20,11 +20,8 @@ class SubscriptionStatus {
   /// 現在有効なプラン（フリーの場合はnull）
   final SubscriptionPlan? activePlan;
 
-  /// サブスクリプションの有効期限（買い切りの場合はnull）
+  /// サブスクリプションの有効期限
   final DateTime? expiresAt;
-
-  /// 買い切りプランかどうか
-  bool get isLifetime => activePlan == SubscriptionPlan.lifetime;
 
   @override
   bool operator ==(Object other) =>

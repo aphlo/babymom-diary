@@ -4,7 +4,7 @@
 
 ### 1.1 目的
 
-milu アプリにプレミアムプラン（月額・年額・買い切り）を RevenueCat で導入し、課金ユーザーに広告削除と UI カスタマイズ機能を提供する。
+milu アプリにプレミアムプラン（月額・年額）を RevenueCat で導入し、課金ユーザーに広告削除と UI カスタマイズ機能を提供する。
 
 ### 1.2 プレミアム特典
 
@@ -21,7 +21,6 @@ milu アプリにプレミアムプラン（月額・年額・買い切り）を
 |----------|------|------|
 | `milu_premium_monthly` | 自動更新サブスクリプション（月額） | 毎月自動更新 |
 | `milu_premium_yearly` | 自動更新サブスクリプション（年額） | 毎年自動更新 |
-| `milu_premium_lifetime` | 非消耗型（買い切り） | 一度の支払いで永続利用 |
 
 ### 1.4 価格案
 
@@ -29,7 +28,6 @@ milu アプリにプレミアムプラン（月額・年額・買い切り）を
 |--------|------|------|
 | 月額 | ¥480 | 基準価格 |
 | 年額 | ¥3,800 | 月額比 約34%お得 |
-| 買い切り | ¥9,800 | 約20ヶ月分 |
 
 > 価格は App Store Connect / Google Play Console で設定時に最終決定する。
 
@@ -37,8 +35,8 @@ milu アプリにプレミアムプラン（月額・年額・買い切り）を
 
 | 項目 | 決定 |
 |------|------|
-| 課金基盤 | RevenueCat (`purchases_flutter` + `purchases_ui_flutter`) |
-| ペイウォールUI | RevenueCat Paywalls（ダッシュボードで作成） |
+| 課金基盤 | RevenueCat (`purchases_flutter`) |
+| ペイウォールUI | カスタム実装（PaywallPage） |
 | サブスク状態管理 | RevenueCat SDK のみ（Firestore 同期なし） |
 | 並び替え設定の保存先 | SharedPreferences（端末ローカル） |
 | アーキテクチャ | 既存の DDD + MVVM + Riverpod パターンに従う |
@@ -55,8 +53,8 @@ milu アプリにプレミアムプラン（月額・年額・買い切り）を
 flutter/lib/src/features/subscription/
   domain/
     entities/
-      subscription_plan.dart         # enum: monthly, yearly, lifetime
-      subscription_status.dart       # isPremium, activePlan, expiresAt, isLifetime
+      subscription_plan.dart         # enum: monthly, yearly
+      subscription_status.dart       # isPremium, activePlan, expiresAt
     value_objects/
       entitlement.dart               # static const premium = 'premium'
     repositories/
@@ -110,63 +108,65 @@ isPremiumProvider を watch:
 
 ## 3. 未実装（Phase 3〜5）
 
-### Phase 3: ペイウォール UI（RevenueCat Paywalls）
+### Phase 3: ペイウォール UI（カスタム実装）
 
-RevenueCat の Paywalls 機能を使い、ダッシュボード上でペイウォール画面をデザインする。アプリ側は `purchases_ui_flutter` パッケージを使って表示する。
+カスタム実装のペイウォール画面を作成。milu の primaryColor (`#E87086`) とアイコン (`milu_bear.png`) を使用したデザイン。
 
-#### 3.1 必要な作業
+#### 3.1 実装済みファイル一覧
 
-**パッケージ追加:**
-```yaml
-# pubspec.yaml
-dependencies:
-  purchases_ui_flutter: ^9.0.0  # RevenueCat Paywalls UI
+**新規ファイル:**
+
+```
+flutter/lib/src/features/subscription/presentation/
+  pages/
+    paywall_page.dart                    # メインページ（loading/error/content状態管理）
+  viewmodels/
+    paywall_state.dart                   # freezed state + PaywallUiEvent
+    paywall_view_model.dart              # ViewModel (Riverpod codegen)
+  widgets/
+    paywall_header.dart                  # アイコン + タイトル + サブタイトル
+    paywall_review_carousel.dart         # レビューカルーセル + ドットインジケーター
+    paywall_plan_card.dart               # プラン選択カード（1枚分）
+    paywall_plan_selector.dart           # 2枚のカードを横並び（月額・年額）
+    paywall_footer.dart                  # 購入を復元 + 利用規約 + プライバシー
+
+flutter/lib/src/features/menu/presentation/widgets/
+  menu_premium_section.dart              # メニューのプレミアムセクション
 ```
 
-**ペイウォール表示（アプリ側）:**
-
-```dart
-import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
-
-// 画面遷移で表示する場合
-Future<void> showPaywall(BuildContext context) async {
-  final paywallResult = await RevenueCatUI.presentPaywallIfNeeded('premium');
-  // paywallResult で購入結果を判定可能
-}
-
-// Widget として埋め込む場合
-PaywallView(
-  onDismiss: () => Navigator.of(context).pop(),
-)
-```
-
-**メニューページへの導線追加 (`menu_page.dart`):**
-
-`_MenuListView` の children に、プレミアムセクションを追加する。`isPremiumProvider` の値に応じて「プレミアムに加入する」または「プレミアム（加入中）」を表示。
-
-```dart
-// menu_page.dart の _MenuListView.build() 内
-MenuPremiumSection(),  // 新規ウィジェット
-const SizedBox(height: 24),
-MenuChildrenSection(children: children),
-// ...
-```
-
-**リストア導線:**
-
-メニューの「プレミアムに加入する」セクション内、または設定セクションに「購入を復元」ボタンを配置。
-
-```dart
-await ref.read(subscriptionRepositoryProvider).restorePurchases();
-```
-
-#### 3.2 変更ファイル一覧
+**変更ファイル:**
 
 | ファイル | 変更内容 |
 |---------|---------|
-| `pubspec.yaml` | `purchases_ui_flutter` 追加 |
-| `menu_page.dart` | プレミアムセクション追加 |
-| 新規: `menu_premium_section.dart` | プレミアム導線ウィジェット |
+| `app_router.dart` | `/paywall` ルート追加（fullscreenDialog モーダル遷移） |
+| `menu_page.dart` | `MenuPremiumSection` を `MenuChildrenSection` の下に追加 |
+
+#### 3.2 ペイウォール画面構成
+
+```
+Scaffold(backgroundColor: surfaceBackground)
+  └── SafeArea
+      └── Column
+          ├── Align(topRight) → IconButton(close) → context.pop()
+          └── Expanded
+              └── SingleChildScrollView
+                  ├── PaywallHeader（milu_bear + "milu プレミアム"）
+                  ├── PaywallReviewCarousel（レビュー3枚スワイプ）
+                  ├── PaywallPlanSelector（月額・年額の2カード）
+                  ├── FilledButton("続ける") — 56px高、角丸16、primaryColor
+                  └── PaywallFooter（復元・利用規約・プライバシー）
+```
+
+#### 3.3 エラーハンドリング
+
+| シナリオ | 処理 |
+|---------|------|
+| Offerings取得失敗 | エラー画面 + 「再読み込み」ボタン |
+| Package未発見 | カード無効化（タップ不可） |
+| ユーザーキャンセル | 静かに無視（SnackBarなし） |
+| 購入失敗 | SnackBar「購入に失敗しました」 |
+| リストア該当なし | SnackBar「復元可能な購入が見つかりませんでした」 |
+| 購入成功 | ページを閉じる（isPremiumProvider自動更新） |
 
 ---
 
@@ -325,36 +325,20 @@ static const prod = RevenueCatConfig(
 |------------|-------|
 | `milu_premium_monthly` | Apple / Google |
 | `milu_premium_yearly` | Apple / Google |
-| `milu_premium_lifetime` | Apple / Google |
 
 10. 各 Product を Entitlement `premium` に紐付け
 
 ### 4.6 Offering 作成
 
 11. **Project Settings** → **Offerings**
-    - デフォルトオファリング（`default`）に3つのパッケージを追加:
+    - デフォルトオファリング（`default`）に2つのパッケージを追加:
 
 | Package | Product |
 |---------|---------|
 | `$rc_monthly` | `milu_premium_monthly` |
 | `$rc_annual` | `milu_premium_yearly` |
-| `$rc_lifetime` | `milu_premium_lifetime` |
 
-### 4.7 Paywall 作成
-
-12. **Project Settings** → **Paywalls** → **+ New Paywall**
-    - テンプレートを選択（RevenueCat が提供する複数のテンプレートから選ぶ）
-    - Offering: `default` を紐付け
-    - 日本語のコピーを設定:
-      - タイトル例: `milu プレミアム`
-      - サブタイトル例: `広告なし & カスタマイズ機能`
-      - 特典リスト:
-        - 全ての広告を削除
-        - タブの並び替え
-      - CTA: `プレミアムに加入する`
-      - リストアリンク: `購入を復元`
-    - 各プランの表示を確認・調整
-13. Paywall を Offering に割り当て（Current Paywall として設定）
+> **Note:** ペイウォールUIはアプリ側でカスタム実装済み（Phase 3）。RevenueCat Paywalls は使用しない。
 
 ### 4.8 ストア認証情報の接続
 
@@ -397,37 +381,25 @@ static const prod = RevenueCatConfig(
 **年額プラン:**
 11. 同様に作成。Product ID: `milu_premium_yearly`, 期間: **1年**, 価格: ¥3,800
 
-### 5.3 非消耗型 App 内課金作成（買い切り）
+### 5.3 App Store Connect API Key 作成（RevenueCat 連携用）
 
-12. サイドバー → **App 内課金** → **＋**
-13. 種類: **非消耗型**
-14. 参照名: `milu Premium Lifetime`, Product ID: `milu_premium_lifetime`
-15. 価格: ¥9,800
-16. ローカライゼーション（日本語）:
-    - 表示名: `milu プレミアム（買い切り）`
-    - 説明: `一度の購入で全てのプレミアム機能が永続的に使えます`
-17. 審査情報 → スクリーンショット添付
-18. ステータスを **送信準備完了** にする
-
-### 5.4 App Store Connect API Key 作成（RevenueCat 連携用）
-
-19. [App Store Connect](https://appstoreconnect.apple.com/) → **ユーザーとアクセス** → **統合** → **App Store Connect API**
-20. **キー** タブ → **＋** → キー名: `RevenueCat`, アクセス: **Admin** または **Finance**
-21. `.p8` ファイルをダウンロード（一度しかダウンロードできないので注意）
-22. **Issuer ID** と **Key ID** を記録
-23. RevenueCat ダッシュボードの Apple 接続設定にこの3つを入力
+12. [App Store Connect](https://appstoreconnect.apple.com/) → **ユーザーとアクセス** → **統合** → **App Store Connect API**
+13. **キー** タブ → **＋** → キー名: `RevenueCat`, アクセス: **Admin** または **Finance**
+14. `.p8` ファイルをダウンロード（一度しかダウンロードできないので注意）
+15. **Issuer ID** と **Key ID** を記録
+16. RevenueCat ダッシュボードの Apple 接続設定にこの3つを入力
 
 > **代替方法:** App用共有シークレットを使う場合
 > - アプリ → App 内課金 → 右上 **App 用共有シークレット** → 生成
 > - RevenueCat の Apple 設定に入力
 
-### 5.5 Sandbox テスター作成
+### 5.4 Sandbox テスター作成
 
-24. **ユーザーとアクセス** → **Sandbox** → **テスター** → **＋**
-25. テスト用のメールアドレスと情報を入力
-26. テスト端末の **設定** → **App Store** → **Sandboxアカウント** にこのアカウントでログイン
+17. **ユーザーとアクセス** → **Sandbox** → **テスター** → **＋**
+18. テスト用のメールアドレスと情報を入力
+19. テスト端末の **設定** → **App Store** → **Sandboxアカウント** にこのアカウントでログイン
 
-### 5.6 審査提出時の注意
+### 5.5 審査提出時の注意
 
 - App 内課金は、アプリのバイナリと一緒に審査に提出する必要がある
 - アプリの新バージョン提出時に、App 内課金の項目が「送信準備完了」になっていることを確認
@@ -455,40 +427,31 @@ static const prod = RevenueCatConfig(
 10. 同様に作成。Product ID: `milu_premium_yearly`, 期間: **1年**, 価格: ¥3,800
 11. **有効化**
 
-### 6.2 アプリ内アイテム作成（買い切り）
+### 6.2 サービスアカウント設定（RevenueCat 連携用）
 
-12. サイドバー → **収益化** → **商品** → **アプリ内アイテム**
-13. **商品を作成** → Product ID: `milu_premium_lifetime`
-14. 名前: `milu プレミアム（買い切り）`
-15. 説明: `一度の購入で全てのプレミアム機能が永続的に使えます`
-16. 価格: ¥9,800
-17. ステータスを **有効** にする
-
-### 6.3 サービスアカウント設定（RevenueCat 連携用）
-
-18. [Google Cloud Console](https://console.cloud.google.com/) にアクセス
-19. milu のプロジェクトを選択（Google Play と紐付いているプロジェクト）
-20. **IAM と管理** → **サービスアカウント** → **サービスアカウントを作成**
+12. [Google Cloud Console](https://console.cloud.google.com/) にアクセス
+13. milu のプロジェクトを選択（Google Play と紐付いているプロジェクト）
+14. **IAM と管理** → **サービスアカウント** → **サービスアカウントを作成**
     - 名前: `revenuecat-service-account`
     - ロール: なし（Google Play Console 側で権限付与）
-21. 作成したサービスアカウントの **キー** → **鍵を追加** → **JSON** → ダウンロード
-22. Google Play Console → **設定** → **APIアクセス** → **サービスアカウントをリンク**
+15. 作成したサービスアカウントの **キー** → **鍵を追加** → **JSON** → ダウンロード
+16. Google Play Console → **設定** → **APIアクセス** → **サービスアカウントをリンク**
     - 上記で作成したサービスアカウントのメールアドレスを入力
-23. リンクしたサービスアカウントに **権限を付与**:
+17. リンクしたサービスアカウントに **権限を付与**:
     - **財務データの表示、注文の管理** にチェック
-24. RevenueCat ダッシュボードの Google Play 設定に JSON キーファイルをアップロード
+18. RevenueCat ダッシュボードの Google Play 設定に JSON キーファイルをアップロード
 
-### 6.4 ライセンステスト設定
+### 6.3 ライセンステスト設定
 
-25. Google Play Console → **設定** → **ライセンステスト**
-26. テスト用 Google アカウントのメールアドレスを追加
-27. ライセンスレスポンス: `RESPOND_NORMALLY`
+19. Google Play Console → **設定** → **ライセンステスト**
+20. テスト用 Google アカウントのメールアドレスを追加
+21. ライセンスレスポンス: `RESPOND_NORMALLY`
 
-### 6.5 内部テスト（任意）
+### 6.4 内部テスト（任意）
 
-28. **テスト** → **内部テスト** → テスタートラックを作成
-29. テスターのメールリストを追加
-30. APK/AAB をアップロード（課金機能を含むビルド）
+22. **テスト** → **内部テスト** → テスタートラックを作成
+23. テスターのメールリストを追加
+24. APK/AAB をアップロード（課金機能を含むビルド）
 
 > **注意:** Google Play の課金テストは、アプリが一度内部テスト以上のトラックにアップロードされている必要がある。ローカルビルドのみではテスト不可。
 
@@ -527,7 +490,7 @@ static const prod = RevenueCatConfig(
 ### 8.2 ペイウォールの検証（Phase 3 実装後）
 
 1. メニュー → プレミアムセクションからペイウォールが表示されることを確認
-2. 各プラン（月額・年額・買い切り）の価格が正しく表示されることを確認
+2. 各プラン（月額・年額）の価格が正しく表示されることを確認
 3. 購入フローが正常に完了することを確認
 4. 「購入を復元」が正常に動作することを確認
 
@@ -559,14 +522,13 @@ cd flutter && fvm flutter test
 |-------|------|------|
 | **Phase 1** | RevenueCat 基盤（subscription feature, SDK初期化, isPremiumProvider） | **完了** |
 | **Phase 2** | 広告削除（BannerAdWidget + プリロードガード） | **完了** |
-| **Phase 3** | ペイウォール UI（`purchases_ui_flutter`, メニュー導線, リストア） | 未実装 |
+| **Phase 3** | ペイウォール UI（カスタム実装, メニュー導線, リストア） | **完了** |
 | **Phase 4** | 並び替え機能（navigation_order feature, ボトムナビ/タブ並び替え, 設定ページ） | 未実装 |
 | **Phase 5** | ストア連携・テスト（セクション4〜6の手順実施, Sandbox テスト） | 未実装 |
 
 ### Phase 3 の前提条件
 
-- RevenueCat ダッシュボードでの Paywall 作成（セクション4.7）が先に必要
-- `purchases_ui_flutter` パッケージの追加
+- 完了済み（カスタムUIで実装）
 
 ### Phase 5 の前提条件
 
@@ -582,4 +544,4 @@ cd flutter && fvm flutter test
 - RevenueCat の Public API Key はクライアントサイドで使用するキーであり、シークレットではない。リポジトリに含めて問題ない
 - App Store Connect API Key (.p8) やサービスアカウント JSON キーはシークレット。RevenueCat ダッシュボードにのみアップロードし、リポジトリには含めない
 - サブスクリプション状態は RevenueCat SDK が管理。Firestore への同期は行わないため、サーバー側での課金状態チェックは不可。将来必要になった場合は RevenueCat Webhooks + Cloud Functions で対応
-- 買い切りプラン (`lifetime`) は `expiresAt` が null になる。`isLifetime` プロパティで判定可能
+- すべてのプランは自動更新サブスクリプション（月額・年額）のみ。買い切りプランは提供しない

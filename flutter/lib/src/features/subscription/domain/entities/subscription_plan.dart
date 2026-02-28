@@ -5,7 +5,4 @@ enum SubscriptionPlan {
 
   /// 年額プラン
   yearly,
-
-  /// 買い切りプラン
-  lifetime,
 }

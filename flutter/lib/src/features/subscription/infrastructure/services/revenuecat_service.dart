@@ -87,7 +87,6 @@ class RevenueCatService {
   SubscriptionPlan? _mapProductIdentifier(String productId) {
     if (productId.contains('monthly')) return SubscriptionPlan.monthly;
     if (productId.contains('yearly')) return SubscriptionPlan.yearly;
-    if (productId.contains('lifetime')) return SubscriptionPlan.lifetime;
     return null;
   }
 
