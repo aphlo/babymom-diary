@@ -43,8 +43,7 @@ sealed class PaywallState with _$PaywallState {
       SubscriptionPlan.yearly => PackageType.annual,
     };
     try {
-      return availablePackages
-          .firstWhere((p) => p.packageType == packageType);
+      return availablePackages.firstWhere((p) => p.packageType == packageType);
     } catch (_) {
       return null;
     }

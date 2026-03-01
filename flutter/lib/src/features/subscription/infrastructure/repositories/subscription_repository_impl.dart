@@ -15,6 +15,5 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   Future<SubscriptionStatus> getStatus() => _service.getStatus();
 
   @override
-  Future<SubscriptionStatus> restorePurchases() =>
-      _service.restorePurchases();
+  Future<SubscriptionStatus> restorePurchases() => _service.restorePurchases();
 }

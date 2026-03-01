@@ -35,9 +35,8 @@ class PaywallPlanCard extends StatelessWidget {
               : context.menuSectionBackground,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected
-                ? context.primaryColor
-                : context.menuSectionBorder,
+            color:
+                isSelected ? context.primaryColor : context.menuSectionBorder,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -67,9 +66,8 @@ class PaywallPlanCard extends StatelessWidget {
               Icon(
                 _iconForPlan(plan),
                 size: 28,
-                color: isSelected
-                    ? context.primaryColor
-                    : context.textSecondary,
+                color:
+                    isSelected ? context.primaryColor : context.textSecondary,
               ),
               const SizedBox(height: 8),
               Text(
@@ -86,9 +84,8 @@ class PaywallPlanCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: isSelected
-                      ? context.primaryColor
-                      : context.textPrimary,
+                  color:
+                      isSelected ? context.primaryColor : context.textPrimary,
                 ),
               ),
               Text(
