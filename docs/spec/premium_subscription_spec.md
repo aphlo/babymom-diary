@@ -26,8 +26,8 @@ milu アプリにプレミアムプラン（月額・年額）を RevenueCat で
 
 | プラン | 価格 | 備考 |
 |--------|------|------|
-| 月額 | ¥480 | 基準価格 |
-| 年額 | ¥3,800 | 月額比 約34%お得 |
+| 月額 | ¥200 | 基準価格 |
+| 年額 | ¥2,000 | 月額比 約17%お得 |
 
 > 価格は App Store Connect / Google Play Console で設定時に最終決定する。
 
@@ -371,7 +371,7 @@ static const prod = RevenueCatConfig(
 **月額プラン:**
 5. **＋** → 参照名: `milu Premium Monthly`, Product ID: `milu_premium_monthly`
 6. サブスクリプション期間: **1ヶ月**
-7. **サブスクリプション価格** → 価格を設定（例: ¥480）
+7. **サブスクリプション価格** → 価格を設定（例: ¥200）
 8. **ローカライゼーション** → 日本語:
    - 表示名: `milu プレミアム（月額）`
    - 説明: `広告削除、タブの並び替えなどプレミアム機能が使えます`
@@ -379,7 +379,7 @@ static const prod = RevenueCatConfig(
 10. ステータスを **送信準備完了** にする
 
 **年額プラン:**
-11. 同様に作成。Product ID: `milu_premium_yearly`, 期間: **1年**, 価格: ¥3,800
+11. 同様に作成。Product ID: `milu_premium_yearly`, 期間: **1年**, 価格: ¥2,000
 
 ### 5.3 App Store Connect API Key 作成（RevenueCat 連携用）
 
@@ -420,11 +420,11 @@ static const prod = RevenueCatConfig(
 5. 名前: `milu プレミアム（月額）`
 6. 説明: `広告削除、タブの並び替えなどプレミアム機能が使えます`
 7. **基本プランを追加** → 請求対象期間: **1ヶ月**
-8. **価格を設定** → 日本: ¥480
+8. **価格を設定** → 日本: ¥200
 9. **有効化**
 
 **年額プラン:**
-10. 同様に作成。Product ID: `milu_premium_yearly`, 期間: **1年**, 価格: ¥3,800
+10. 同様に作成。Product ID: `milu_premium_yearly`, 期間: **1年**, 価格: ¥2,000
 11. **有効化**
 
 ### 6.2 サービスアカウント設定（RevenueCat 連携用）
