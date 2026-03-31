@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../analytics/analytics_service.dart';
 import '../../features/ads/application/services/banner_ad_manager.dart';
+import '../../features/subscription/application/providers/subscription_providers.dart';
 import '../../features/child_record/presentation/pages/record_table_page.dart';
 import '../../features/menu/growth_chart_settings/presentation/pages/growth_chart_settings_page.dart';
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
@@ -34,6 +35,7 @@ import '../../features/baby_food/presentation/pages/ingredient_detail_page.dart'
 import '../../features/baby_food/domain/value_objects/food_category.dart';
 import '../../features/feeding_table_settings/presentation/pages/feeding_table_settings_page.dart';
 import '../../features/push_notification/presentation/pages/notification_settings_page.dart';
+import '../../features/subscription/presentation/pages/paywall_page.dart';
 
 part 'app_router.g.dart';
 
@@ -358,6 +360,15 @@ GoRouter appRouter(Ref ref) {
           );
         },
       ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '/paywall',
+        name: 'paywall',
+        pageBuilder: (context, state) => const MaterialPage(
+          fullscreenDialog: true,
+          child: PaywallPage(),
+        ),
+      ),
     ],
   );
 }
@@ -392,6 +403,10 @@ class _ScaffoldWithNavBarState extends ConsumerState<_ScaffoldWithNavBar> {
   void _preloadAdsForTab(int tabIndex) {
     if (_lastPreloadedTabIndex == tabIndex) return;
     _lastPreloadedTabIndex = tabIndex;
+
+    // プレミアムユーザーはプリロードしない
+    final premium = ref.read(isPremiumProvider);
+    if (premium) return;
 
     final tab = _indexToTab(tabIndex);
     final screenWidth = MediaQuery.of(context).size.width;

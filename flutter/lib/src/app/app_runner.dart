@@ -13,6 +13,7 @@ import 'package:babymom_diary/src/core/theme/app_theme_provider.dart';
 import 'package:babymom_diary/src/core/theme/theme_mode_provider.dart';
 import 'package:babymom_diary/src/features/ads/infrastructure/services/admob_service.dart';
 import 'package:babymom_diary/src/features/ads/application/services/banner_ad_manager.dart';
+import 'package:babymom_diary/src/features/subscription/application/providers/subscription_providers.dart';
 import 'package:babymom_diary/src/features/menu/children/application/children_local_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_provider.dart';
 import 'package:babymom_diary/src/features/menu/children/application/selected_child_snapshot_provider.dart';
@@ -168,6 +169,10 @@ class _AppState extends ConsumerState<App> {
   void _preloadBannerAds() {
     if (_adPreloadStarted) return;
     _adPreloadStarted = true;
+
+    // プレミアムユーザーはプリロードしない
+    final premium = ref.read(isPremiumProvider);
+    if (premium) return;
 
     // 初期タブのバナー広告のみプリロード（他タブはタブ切り替え時にロード）
     final screenWidth = MediaQuery.of(context).size.width;

@@ -8,6 +8,7 @@ import 'firebase_options_stg.dart';
 import 'src/app/app_runner.dart';
 import 'src/features/ads/infrastructure/services/admob_service.dart';
 import 'src/features/force_update/force_update.dart';
+import 'src/features/subscription/infrastructure/services/revenuecat_service.dart';
 import 'src/features/widget/infrastructure/repositories/widget_data_repository_impl.dart';
 
 Future<void> main() async {
@@ -43,6 +44,9 @@ Future<void> main() async {
     ));
     return;
   }
+
+  // RevenueCat SDK初期化（STG環境）
+  await RevenueCatService.initialize(isProduction: false);
 
   // AdMob SDK初期化（ATT許可は後で最初の画面から呼ぶ）
   await AdMobService.initializeMobileAds();
