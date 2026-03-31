@@ -21,6 +21,8 @@ sealed class PaywallState with _$PaywallState {
     required bool isLoadingOfferings,
     required bool isPurchasing,
     required bool isRestoring,
+    /// Offerings取得に失敗した場合にハードコードのプラン情報で表示するモード
+    @Default(false) bool isFallbackMode,
     String? offeringsError,
     PaywallUiEvent? pendingUiEvent,
   }) = _PaywallState;
@@ -49,10 +51,10 @@ sealed class PaywallState with _$PaywallState {
     }
   }
 
-  /// 購入可能かどうか
+  /// 購入可能かどうか（フォールバック時も購入ボタンを有効にする）
   bool get canPurchase =>
       !isPurchasing &&
       !isRestoring &&
       !isLoadingOfferings &&
-      selectedPackage != null;
+      (selectedPackage != null || isFallbackMode);
 }

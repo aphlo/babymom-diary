@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -24,11 +25,13 @@ class PaywallViewModel extends _$PaywallViewModel {
       state = state.copyWith(
         isLoadingOfferings: false,
         availablePackages: packages,
+        isFallbackMode: packages.isEmpty,
       );
     } catch (e) {
+      debugPrint('[Paywall] Offerings取得失敗、フォールバックモードで表示: $e');
       state = state.copyWith(
         isLoadingOfferings: false,
-        offeringsError: 'プランの読み込みに失敗しました',
+        isFallbackMode: true,
       );
     }
   }
@@ -44,11 +47,41 @@ class PaywallViewModel extends _$PaywallViewModel {
   }
 
   /// 選択中のプランを購入
+  /// フォールバックモードの場合、まずOfferingsの再取得を試みる
   Future<void> purchase() async {
-    final package = state.selectedPackage;
-    if (package == null) return;
-
     state = state.copyWith(isPurchasing: true, pendingUiEvent: null);
+
+    // フォールバックモードの場合、まずOfferingsを取得
+    if (state.isFallbackMode || state.selectedPackage == null) {
+      try {
+        final offerings = await RevenueCatService.instance.getOfferings();
+        final packages = offerings.current?.availablePackages ?? [];
+        state = state.copyWith(
+          availablePackages: packages,
+          isFallbackMode: packages.isEmpty,
+        );
+      } catch (_) {
+        state = state.copyWith(
+          isPurchasing: false,
+          pendingUiEvent: const PaywallUiEvent.showMessage(
+            'ストアに接続できませんでした。通信環境を確認してください。',
+          ),
+        );
+        return;
+      }
+    }
+
+    final package = state.selectedPackage;
+    if (package == null) {
+      state = state.copyWith(
+        isPurchasing: false,
+        pendingUiEvent: const PaywallUiEvent.showMessage(
+          'プランの取得に失敗しました。しばらくしてからお試しください。',
+        ),
+      );
+      return;
+    }
+
     try {
       await RevenueCatService.instance.purchasePackage(package);
       state = state.copyWith(
@@ -58,7 +91,6 @@ class PaywallViewModel extends _$PaywallViewModel {
     } on PlatformException catch (e) {
       final errorCode = PurchasesErrorHelper.getErrorCode(e);
       if (errorCode == PurchasesErrorCode.purchaseCancelledError) {
-        // ユーザーキャンセルは静かに無視
         state = state.copyWith(isPurchasing: false);
         return;
       }

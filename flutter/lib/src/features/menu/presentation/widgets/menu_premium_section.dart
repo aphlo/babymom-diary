@@ -40,7 +40,9 @@ class MenuPremiumSection extends ConsumerWidget {
               title: Text(isPremium ? 'プレミアム加入中' : 'プレミアムプラン'),
               trailing: isPremium ? null : const Icon(Icons.chevron_right),
               enabled: !isPremium,
-              onTap: isPremium ? null : () => context.pushNamed('paywall'),
+              onTap: isPremium
+                  ? null
+                  : () => context.pushNamed('premium_intro'),
             ),
           ],
         ),

@@ -95,6 +95,18 @@ class PaywallPlanCard extends StatelessWidget {
                   color: context.textSecondary,
                 ),
               ),
+              if (_hasFreeTrial(package))
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    _trialText(package!),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: context.primaryColor,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -121,5 +133,22 @@ class PaywallPlanCard extends StatelessWidget {
       SubscriptionPlan.monthly => '/ 月',
       SubscriptionPlan.yearly => '/ 年',
     };
+  }
+
+  static bool _hasFreeTrial(Package? package) {
+    final intro = package?.storeProduct.introductoryPrice;
+    return intro != null && intro.price == 0;
+  }
+
+  static String _trialText(Package package) {
+    final intro = package.storeProduct.introductoryPrice!;
+    final periodUnit = switch (intro.periodUnit) {
+      PeriodUnit.day => '日間',
+      PeriodUnit.week => '週間',
+      PeriodUnit.month => 'ヶ月',
+      PeriodUnit.year => '年間',
+      _ => '',
+    };
+    return '${intro.periodNumberOfUnits}$periodUnit無料';
   }
 }

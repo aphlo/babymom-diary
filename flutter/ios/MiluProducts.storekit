@@ -1,0 +1,139 @@
+{
+  "identifier" : "MiluProducts",
+  "nonRenewableSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "",
+    "_developerTeamID" : "",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : "",
+    "_locale" : "ja",
+    "_storefront" : "JPN",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "milu_premium_group",
+      "localizations" : [
+        {
+          "description" : "milu Premium",
+          "displayName" : "milu Premium",
+          "locale" : "ja"
+        }
+      ],
+      "name" : "milu Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "200",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "milu_premium_monthly_id",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "広告削除、タブの並び替えなどプレミアム機能が使えます",
+              "displayName" : "milu プレミアム（月額）",
+              "locale" : "ja"
+            }
+          ],
+          "productID" : "milu_premium_monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "milu Premium Monthly",
+          "subscriptionGroupID" : "milu_premium_group",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "2000",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "milu_premium_yearly_id",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "広告削除、タブの並び替えなどプレミアム機能が使えます",
+              "displayName" : "milu プレミアム（年額）",
+              "locale" : "ja"
+            }
+          ],
+          "productID" : "milu_premium_yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "milu Premium Yearly",
+          "subscriptionGroupID" : "milu_premium_group",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

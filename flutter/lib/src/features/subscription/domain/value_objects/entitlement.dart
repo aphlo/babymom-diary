@@ -3,5 +3,5 @@ class Entitlement {
   Entitlement._();
 
   /// プレミアムプランのEntitlement ID
-  static const premium = 'premium';
+  static const premium = 'milu Pro';
 }

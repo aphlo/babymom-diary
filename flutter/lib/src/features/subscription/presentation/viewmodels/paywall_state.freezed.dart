@@ -295,6 +295,9 @@ mixin _$PaywallState {
   bool get isLoadingOfferings;
   bool get isPurchasing;
   bool get isRestoring;
+
+  /// Offerings取得に失敗した場合にハードコードのプラン情報で表示するモード
+  bool get isFallbackMode;
   String? get offeringsError;
   PaywallUiEvent? get pendingUiEvent;
 
@@ -321,6 +324,8 @@ mixin _$PaywallState {
                 other.isPurchasing == isPurchasing) &&
             (identical(other.isRestoring, isRestoring) ||
                 other.isRestoring == isRestoring) &&
+            (identical(other.isFallbackMode, isFallbackMode) ||
+                other.isFallbackMode == isFallbackMode) &&
             (identical(other.offeringsError, offeringsError) ||
                 other.offeringsError == offeringsError) &&
             (identical(other.pendingUiEvent, pendingUiEvent) ||
@@ -335,12 +340,13 @@ mixin _$PaywallState {
       isLoadingOfferings,
       isPurchasing,
       isRestoring,
+      isFallbackMode,
       offeringsError,
       pendingUiEvent);
 
   @override
   String toString() {
-    return 'PaywallState(selectedPlan: $selectedPlan, availablePackages: $availablePackages, isLoadingOfferings: $isLoadingOfferings, isPurchasing: $isPurchasing, isRestoring: $isRestoring, offeringsError: $offeringsError, pendingUiEvent: $pendingUiEvent)';
+    return 'PaywallState(selectedPlan: $selectedPlan, availablePackages: $availablePackages, isLoadingOfferings: $isLoadingOfferings, isPurchasing: $isPurchasing, isRestoring: $isRestoring, isFallbackMode: $isFallbackMode, offeringsError: $offeringsError, pendingUiEvent: $pendingUiEvent)';
   }
 }
 
@@ -356,6 +362,7 @@ abstract mixin class $PaywallStateCopyWith<$Res> {
       bool isLoadingOfferings,
       bool isPurchasing,
       bool isRestoring,
+      bool isFallbackMode,
       String? offeringsError,
       PaywallUiEvent? pendingUiEvent});
 
@@ -379,6 +386,7 @@ class _$PaywallStateCopyWithImpl<$Res> implements $PaywallStateCopyWith<$Res> {
     Object? isLoadingOfferings = null,
     Object? isPurchasing = null,
     Object? isRestoring = null,
+    Object? isFallbackMode = null,
     Object? offeringsError = freezed,
     Object? pendingUiEvent = freezed,
   }) {
@@ -402,6 +410,10 @@ class _$PaywallStateCopyWithImpl<$Res> implements $PaywallStateCopyWith<$Res> {
       isRestoring: null == isRestoring
           ? _self.isRestoring
           : isRestoring // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isFallbackMode: null == isFallbackMode
+          ? _self.isFallbackMode
+          : isFallbackMode // ignore: cast_nullable_to_non_nullable
               as bool,
       offeringsError: freezed == offeringsError
           ? _self.offeringsError
@@ -526,6 +538,7 @@ extension PaywallStatePatterns on PaywallState {
             bool isLoadingOfferings,
             bool isPurchasing,
             bool isRestoring,
+            bool isFallbackMode,
             String? offeringsError,
             PaywallUiEvent? pendingUiEvent)?
         $default, {
@@ -540,6 +553,7 @@ extension PaywallStatePatterns on PaywallState {
             _that.isLoadingOfferings,
             _that.isPurchasing,
             _that.isRestoring,
+            _that.isFallbackMode,
             _that.offeringsError,
             _that.pendingUiEvent);
       case _:
@@ -568,6 +582,7 @@ extension PaywallStatePatterns on PaywallState {
             bool isLoadingOfferings,
             bool isPurchasing,
             bool isRestoring,
+            bool isFallbackMode,
             String? offeringsError,
             PaywallUiEvent? pendingUiEvent)
         $default,
@@ -581,6 +596,7 @@ extension PaywallStatePatterns on PaywallState {
             _that.isLoadingOfferings,
             _that.isPurchasing,
             _that.isRestoring,
+            _that.isFallbackMode,
             _that.offeringsError,
             _that.pendingUiEvent);
     }
@@ -606,6 +622,7 @@ extension PaywallStatePatterns on PaywallState {
             bool isLoadingOfferings,
             bool isPurchasing,
             bool isRestoring,
+            bool isFallbackMode,
             String? offeringsError,
             PaywallUiEvent? pendingUiEvent)?
         $default,
@@ -619,6 +636,7 @@ extension PaywallStatePatterns on PaywallState {
             _that.isLoadingOfferings,
             _that.isPurchasing,
             _that.isRestoring,
+            _that.isFallbackMode,
             _that.offeringsError,
             _that.pendingUiEvent);
       case _:
@@ -636,6 +654,7 @@ class _PaywallState extends PaywallState {
       required this.isLoadingOfferings,
       required this.isPurchasing,
       required this.isRestoring,
+      this.isFallbackMode = false,
       this.offeringsError,
       this.pendingUiEvent})
       : _availablePackages = availablePackages,
@@ -658,6 +677,11 @@ class _PaywallState extends PaywallState {
   final bool isPurchasing;
   @override
   final bool isRestoring;
+
+  /// Offerings取得に失敗した場合にハードコードのプラン情報で表示するモード
+  @override
+  @JsonKey()
+  final bool isFallbackMode;
   @override
   final String? offeringsError;
   @override
@@ -686,6 +710,8 @@ class _PaywallState extends PaywallState {
                 other.isPurchasing == isPurchasing) &&
             (identical(other.isRestoring, isRestoring) ||
                 other.isRestoring == isRestoring) &&
+            (identical(other.isFallbackMode, isFallbackMode) ||
+                other.isFallbackMode == isFallbackMode) &&
             (identical(other.offeringsError, offeringsError) ||
                 other.offeringsError == offeringsError) &&
             (identical(other.pendingUiEvent, pendingUiEvent) ||
@@ -700,12 +726,13 @@ class _PaywallState extends PaywallState {
       isLoadingOfferings,
       isPurchasing,
       isRestoring,
+      isFallbackMode,
       offeringsError,
       pendingUiEvent);
 
   @override
   String toString() {
-    return 'PaywallState(selectedPlan: $selectedPlan, availablePackages: $availablePackages, isLoadingOfferings: $isLoadingOfferings, isPurchasing: $isPurchasing, isRestoring: $isRestoring, offeringsError: $offeringsError, pendingUiEvent: $pendingUiEvent)';
+    return 'PaywallState(selectedPlan: $selectedPlan, availablePackages: $availablePackages, isLoadingOfferings: $isLoadingOfferings, isPurchasing: $isPurchasing, isRestoring: $isRestoring, isFallbackMode: $isFallbackMode, offeringsError: $offeringsError, pendingUiEvent: $pendingUiEvent)';
   }
 }
 
@@ -723,6 +750,7 @@ abstract mixin class _$PaywallStateCopyWith<$Res>
       bool isLoadingOfferings,
       bool isPurchasing,
       bool isRestoring,
+      bool isFallbackMode,
       String? offeringsError,
       PaywallUiEvent? pendingUiEvent});
 
@@ -748,6 +776,7 @@ class __$PaywallStateCopyWithImpl<$Res>
     Object? isLoadingOfferings = null,
     Object? isPurchasing = null,
     Object? isRestoring = null,
+    Object? isFallbackMode = null,
     Object? offeringsError = freezed,
     Object? pendingUiEvent = freezed,
   }) {
@@ -771,6 +800,10 @@ class __$PaywallStateCopyWithImpl<$Res>
       isRestoring: null == isRestoring
           ? _self.isRestoring
           : isRestoring // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isFallbackMode: null == isFallbackMode
+          ? _self.isFallbackMode
+          : isFallbackMode // ignore: cast_nullable_to_non_nullable
               as bool,
       offeringsError: freezed == offeringsError
           ? _self.offeringsError

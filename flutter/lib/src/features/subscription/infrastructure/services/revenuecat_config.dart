@@ -8,15 +8,15 @@ class RevenueCatConfig {
   final String iosApiKey;
   final String androidApiKey;
 
-  /// STG環境用（RevenueCatダッシュボードで設定したAPIキーに差し替え）
+  /// STG環境用
   static const stg = RevenueCatConfig(
-    iosApiKey: 'appl_STG_KEY',
-    androidApiKey: 'goog_STG_KEY',
+    iosApiKey: 'appl_lBCNGpvzWigLQyUdRKFLqRgpcYt',
+    androidApiKey: 'goog_MJSCUwAyzwIeQlZVxoFsHYkMgBy',
   );
 
-  /// 本番環境用（RevenueCatダッシュボードで設定したAPIキーに差し替え）
+  /// 本番環境用
   static const prod = RevenueCatConfig(
-    iosApiKey: 'appl_PROD_KEY',
-    androidApiKey: 'goog_PROD_KEY',
+    iosApiKey: 'appl_fbExLydQFNBsAOJBeZXdASOtOUp',
+    androidApiKey: 'goog_REMdpoWGKkDfKrOgpkRiwPoEbd',
   );
 }
