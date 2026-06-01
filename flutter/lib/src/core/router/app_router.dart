@@ -36,7 +36,6 @@ import '../../features/baby_food/domain/value_objects/food_category.dart';
 import '../../features/feeding_table_settings/presentation/pages/feeding_table_settings_page.dart';
 import '../../features/push_notification/presentation/pages/notification_settings_page.dart';
 import '../../features/subscription/presentation/pages/paywall_page.dart';
-import '../../features/subscription/presentation/pages/premium_intro_page.dart';
 
 part 'app_router.g.dart';
 
@@ -367,14 +366,6 @@ GoRouter appRouter(Ref ref) {
         name: 'premium_intro',
         pageBuilder: (context, state) => const MaterialPage(
           fullscreenDialog: true,
-          child: PremiumIntroPage(),
-        ),
-      ),
-      GoRoute(
-        parentNavigatorKey: rootNavigatorKey,
-        path: '/paywall',
-        name: 'paywall',
-        pageBuilder: (context, state) => const MaterialPage(
           child: PaywallPage(),
         ),
       ),

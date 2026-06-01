@@ -20,7 +20,10 @@ class PaywallViewModel extends _$PaywallViewModel {
   Future<void> _loadOfferings() async {
     state = state.copyWith(isLoadingOfferings: true, offeringsError: null);
     try {
-      final offerings = await RevenueCatService.instance.getOfferings();
+      final offerings = await RevenueCatService.instance
+          .getOfferings()
+          .timeout(const Duration(seconds: 4)); // 4秒でタイムアウトを追加
+      if (!ref.mounted) return;
       final packages = offerings.current?.availablePackages ?? [];
       state = state.copyWith(
         isLoadingOfferings: false,
@@ -29,6 +32,7 @@ class PaywallViewModel extends _$PaywallViewModel {
       );
     } catch (e) {
       debugPrint('[Paywall] Offerings取得失敗、フォールバックモードで表示: $e');
+      if (!ref.mounted) return;
       state = state.copyWith(
         isLoadingOfferings: false,
         isFallbackMode: true,
@@ -54,13 +58,17 @@ class PaywallViewModel extends _$PaywallViewModel {
     // フォールバックモードの場合、まずOfferingsを取得
     if (state.isFallbackMode || state.selectedPackage == null) {
       try {
-        final offerings = await RevenueCatService.instance.getOfferings();
+        final offerings = await RevenueCatService.instance
+            .getOfferings()
+            .timeout(const Duration(seconds: 4)); // タイムアウトを追加
+        if (!ref.mounted) return;
         final packages = offerings.current?.availablePackages ?? [];
         state = state.copyWith(
           availablePackages: packages,
           isFallbackMode: packages.isEmpty,
         );
       } catch (_) {
+        if (!ref.mounted) return;
         state = state.copyWith(
           isPurchasing: false,
           pendingUiEvent: const PaywallUiEvent.showMessage(
@@ -84,11 +92,13 @@ class PaywallViewModel extends _$PaywallViewModel {
 
     try {
       await RevenueCatService.instance.purchasePackage(package);
+      if (!ref.mounted) return;
       state = state.copyWith(
         isPurchasing: false,
         pendingUiEvent: const PaywallUiEvent.purchaseCompleted(),
       );
     } on PlatformException catch (e) {
+      if (!ref.mounted) return;
       final errorCode = PurchasesErrorHelper.getErrorCode(e);
       if (errorCode == PurchasesErrorCode.purchaseCancelledError) {
         state = state.copyWith(isPurchasing: false);
@@ -99,6 +109,7 @@ class PaywallViewModel extends _$PaywallViewModel {
         pendingUiEvent: const PaywallUiEvent.showMessage('購入に失敗しました'),
       );
     } catch (_) {
+      if (!ref.mounted) return;
       state = state.copyWith(
         isPurchasing: false,
         pendingUiEvent: const PaywallUiEvent.showMessage('購入に失敗しました'),
@@ -111,6 +122,7 @@ class PaywallViewModel extends _$PaywallViewModel {
     state = state.copyWith(isRestoring: true, pendingUiEvent: null);
     try {
       final status = await RevenueCatService.instance.restorePurchases();
+      if (!ref.mounted) return;
       if (status.isPremium) {
         state = state.copyWith(
           isRestoring: false,
@@ -125,6 +137,7 @@ class PaywallViewModel extends _$PaywallViewModel {
         );
       }
     } catch (_) {
+      if (!ref.mounted) return;
       state = state.copyWith(
         isRestoring: false,
         pendingUiEvent: const PaywallUiEvent.showMessage(

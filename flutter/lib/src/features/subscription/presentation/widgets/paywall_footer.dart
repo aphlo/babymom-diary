@@ -30,57 +30,46 @@ class PaywallFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final style = TextStyle(
+      fontSize: 11,
+      color: context.subtextColor,
+      decoration: TextDecoration.underline,
+    );
+    final dividerStyle = TextStyle(
+      fontSize: 11,
+      color: context.subtextColor.withValues(alpha: 0.5),
+    );
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      child: Column(
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TextButton(
-            onPressed: isRestoring ? null : onRestore,
+          GestureDetector(
+            onTap: isRestoring ? null : onRestore,
             child: isRestoring
                 ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    width: 12,
+                    height: 12,
+                    child: CircularProgressIndicator(strokeWidth: 1.5),
                   )
-                : Text(
-                    '購入を復元',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: context.textSecondary,
-                    ),
-                  ),
+                : Text('購入を復元', style: style),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextButton(
-                onPressed: () => _launchUrl(context, _termsUrl),
-                child: Text(
-                  '利用規約',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: context.subtextColor,
-                  ),
-                ),
-              ),
-              Text(
-                '|',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: context.subtextColor,
-                ),
-              ),
-              TextButton(
-                onPressed: () => _launchUrl(context, _privacyUrl),
-                child: Text(
-                  'プライバシーポリシー',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: context.subtextColor,
-                  ),
-                ),
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Text('|', style: dividerStyle),
+          ),
+          GestureDetector(
+            onTap: () => _launchUrl(context, _termsUrl),
+            child: Text('利用規約', style: style),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Text('|', style: dividerStyle),
+          ),
+          GestureDetector(
+            onTap: () => _launchUrl(context, _privacyUrl),
+            child: Text('プライバシーポリシー', style: style),
           ),
         ],
       ),
