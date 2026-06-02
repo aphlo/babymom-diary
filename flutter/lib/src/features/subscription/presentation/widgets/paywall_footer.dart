@@ -13,10 +13,9 @@ class PaywallFooter extends StatelessWidget {
   final bool isRestoring;
   final VoidCallback onRestore;
 
-  static const _termsUrl =
-      'https://striped-polonium-ee6.notion.site/milu-2b1de238aa6080acb2a3cbe274d05564?source=copy_link';
-  static const _privacyUrl =
-      'https://striped-polonium-ee6.notion.site/milu-2b1de238aa60803697b1f06f3c32d2ec?source=copy_link';
+  static const _termsUrl = 'https://babymom-diary.web.app/terms.html';
+  static const _privacyUrl = 'https://babymom-diary.web.app/privacy.html';
+  static const _legalUrl = 'https://babymom-diary.web.app/tokushoho.html';
 
   Future<void> _launchUrl(BuildContext context, String url) async {
     final uri = Uri.parse(url);
@@ -31,19 +30,22 @@ class PaywallFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = TextStyle(
-      fontSize: 11,
+      fontSize: 10.5,
       color: context.subtextColor,
       decoration: TextDecoration.underline,
     );
     final dividerStyle = TextStyle(
-      fontSize: 11,
-      color: context.subtextColor.withValues(alpha: 0.5),
+      fontSize: 10.5,
+      color: context.subtextColor.withValues(alpha: 0.3),
     );
 
     return Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      padding: const EdgeInsets.only(top: 8, bottom: 4),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 8,
+        runSpacing: 4,
         children: [
           GestureDetector(
             onTap: isRestoring ? null : onRestore,
@@ -53,23 +55,22 @@ class PaywallFooter extends StatelessWidget {
                     height: 12,
                     child: CircularProgressIndicator(strokeWidth: 1.5),
                   )
-                : Text('購入を復元', style: style),
+                : Text('復元', style: style),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Text('|', style: dividerStyle),
-          ),
+          Text('|', style: dividerStyle),
           GestureDetector(
             onTap: () => _launchUrl(context, _termsUrl),
             child: Text('利用規約', style: style),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Text('|', style: dividerStyle),
-          ),
+          Text('|', style: dividerStyle),
           GestureDetector(
             onTap: () => _launchUrl(context, _privacyUrl),
-            child: Text('プライバシーポリシー', style: style),
+            child: Text('プライバシー', style: style),
+          ),
+          Text('|', style: dividerStyle),
+          GestureDetector(
+            onTap: () => _launchUrl(context, _legalUrl),
+            child: Text('特定商取引法', style: style),
           ),
         ],
       ),
