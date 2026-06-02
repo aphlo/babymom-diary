@@ -9,10 +9,9 @@ class MenuAppInfoSection extends StatelessWidget {
   const MenuAppInfoSection({super.key});
 
   static const _aboutUrl = 'https://babymom-diary.web.app/';
-  static const _termsUrl =
-      'https://striped-polonium-ee6.notion.site/milu-2b1de238aa6080acb2a3cbe274d05564?source=copy_link';
-  static const _privacyUrl =
-      'https://striped-polonium-ee6.notion.site/milu-2b1de238aa60803697b1f06f3c32d2ec?source=copy_link';
+  static const _termsUrl = 'https://babymom-diary.web.app/terms.html';
+  static const _privacyUrl = 'https://babymom-diary.web.app/privacy.html';
+  static const _legalUrl = 'https://babymom-diary.web.app/tokushoho.html';
   static const _inquiryUrl =
       'https://koeloop.dev/embed/dddb40ea-a331-4cb9-84bb-b81187047a20?theme=light&locale=ja&primaryColor=%23E87086&showVoting=false&showFeedback=true&showFAQ=true&showEmailField=true';
   static const _operatorUrl = 'https://aphlo.com';
@@ -83,6 +82,13 @@ class MenuAppInfoSection extends StatelessWidget {
               leading: const Icon(Icons.privacy_tip_outlined),
               title: const Text('プライバシーポリシー'),
               onTap: () => _launchExternalUrl(context, _privacyUrl),
+              trailing: const Icon(Icons.open_in_new),
+            ),
+            const Divider(height: 0),
+            ListTile(
+              leading: const Icon(Icons.gavel_outlined),
+              title: const Text('特定商取引法に基づく表記'),
+              onTap: () => _launchExternalUrl(context, _legalUrl),
               trailing: const Icon(Icons.open_in_new),
             ),
             const Divider(height: 0),

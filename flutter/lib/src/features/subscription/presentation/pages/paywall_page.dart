@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -31,41 +32,55 @@ class PaywallPage extends ConsumerWidget {
             );
           },
           purchaseCompleted: (_) {
-            // intro → paywall の2画面を一気に閉じる
-            context.pop();
-            context.pop();
+            context.pop(); // 1画面に統合されたため、popは1回だけ
           },
         );
       },
     );
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final gradientColors = isDark
+        ? [
+            const Color(0xFF2E1A25), // ほんのりピンクがかった極暗色
+            const Color(0xFF19121E), // 深い紫・ゴールド寄り
+            const Color(0xFF121214), // 背景の通常ダークカラー
+          ]
+        : [
+            const Color(0xFFFFECEF), // 柔らかな薄いピンク
+            const Color(0xFFFFF7E6), // やさしいゴールド
+            Colors.white,
+          ];
+
     return Scaffold(
-      backgroundColor: context.surfaceBackground,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // 戻るボタン + 閉じるボタン
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-                    onPressed: () => context.pop(),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: gradientColors,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              // 閉じるボタンのみを右上に配置
+              Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.close,
+                      color: context.textPrimary,
+                    ),
+                    onPressed: () => context.pop(), // popは1回だけ
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      context.pop();
-                      context.pop();
-                    },
-                  ),
-                ],
+                ),
               ),
-            ),
-            Expanded(child: _buildBody(context, state, vm)),
-          ],
+              Expanded(child: _buildBody(context, state, vm)),
+            ],
+          ),
         ),
       ),
     );
@@ -76,12 +91,10 @@ class PaywallPage extends ConsumerWidget {
     PaywallState state,
     PaywallViewModel vm,
   ) {
-    if (state.isLoadingOfferings) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    // offeringsError があり fallback でもない場合のみエラー画面
-    if (state.offeringsError != null && !state.isFallbackMode) {
+    // offeringsError があり fallback でもない場合のみエラー画面（ロード中ではないときのみ判定）
+    if (state.offeringsError != null &&
+        !state.isFallbackMode &&
+        !state.isLoadingOfferings) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -121,15 +134,72 @@ class PaywallPage extends ConsumerWidget {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                _buildCompactHeader(context),
-                const SizedBox(height: 24),
-                _buildPlanCards(context, state, vm),
+                _buildHeader(context),
+                const SizedBox(height: 8),
+                _buildBenefits(context),
                 const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'プランを選択してください',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: context.textPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (state.isLoadingOfferings)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 32),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: context.primaryColor,
+                      ),
+                    ),
+                  )
+                else
+                  _buildPlanCards(context, state, vm),
+                const SizedBox(height: 24),
               ],
             ),
           ),
         ),
-        _buildBottomPurchase(context, state, vm, hasFreeTrial),
+        if (state.isLoadingOfferings)
+          ClipRRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
+                decoration: BoxDecoration(
+                  color: context.surfaceBackground.withValues(alpha: 0.85),
+                  border: Border(
+                    top: BorderSide(
+                      color: context.menuSectionBorder.withValues(alpha: 0.4),
+                      width: 0.5,
+                    ),
+                  ),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: CircularProgressIndicator(
+                        color: context.primaryColor,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          )
+        else
+          _buildBottomPurchase(context, state, vm, hasFreeTrial),
       ],
     );
   }
@@ -140,46 +210,174 @@ class PaywallPage extends ConsumerWidget {
     return intro != null && intro.price == 0;
   }
 
-  Widget _buildCompactHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          const SizedBox(height: 8),
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: context.primaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(18),
-              child: Image.asset(
-                'assets/icons/milu_bear.png',
-                width: 48,
-                height: 48,
+          const SizedBox(height: 24), // 上部余白を増やして王冠の見切れを防ぐ
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: context.primaryColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(22),
+                  boxShadow: [
+                    BoxShadow(
+                      color: context.primaryColor.withValues(alpha: 0.1),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(22),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image.asset(
+                      'assets/icons/milu_bear.png',
+                      width: 64,
+                      height: 64,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: -8, // 少し内側に寄せて見切れを防ぐ
+                right: -8, // 少し内側に寄せて見切れを防ぐ
+                child: Transform.rotate(
+                  angle: 0.15,
+                  child: const Icon(
+                    Icons.workspace_premium,
+                    color: Color(0xFFFBC02D), // ゴールド王冠
+                    size: 32,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(
+              colors: [Color(0xFFE87086), Color(0xFFFFA726)],
+            ).createShader(bounds),
+            child: const Text(
+              'milu プレミアム',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Text(
-            'milu プレミアム',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: context.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'プランを選択してください',
+            '広告なしで快適に。もっと便利に。',
             style: TextStyle(
               fontSize: 14,
+              fontWeight: FontWeight.w500,
               color: context.textSecondary,
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBenefits(BuildContext context) {
+    final benefits = [
+      (
+        icon: Icons.block_outlined,
+        title: '広告を完全削除',
+        description: 'バナー広告を非表示にして、ストレスなく快適に記録ができます',
+      ),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: context.menuSectionBackground.withValues(alpha: 0.65),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: context.menuSectionBorder.withValues(alpha: 0.5),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'プレミアム限定機能',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: context.primaryColor,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ...benefits.map(
+                  (b) => Padding(
+                    padding: EdgeInsets.only(
+                      bottom: b == benefits.last ? 0 : 16,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: context.primaryColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            b.icon,
+                            size: 20,
+                            color: context.primaryColor,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                b.title,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: context.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                b.description,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: context.textSecondary,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -220,63 +418,84 @@ class PaywallPage extends ConsumerWidget {
     PaywallViewModel vm,
     bool hasFreeTrial,
   ) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
-      decoration: BoxDecoration(
-        color: context.surfaceBackground,
-        border: Border(
-          top: BorderSide(
-            color: context.menuSectionBorder,
-            width: 0.5,
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
+          decoration: BoxDecoration(
+            color: context.surfaceBackground.withValues(alpha: 0.85),
+            border: Border(
+              top: BorderSide(
+                color: context.menuSectionBorder.withValues(alpha: 0.4),
+                width: 0.5,
+              ),
+            ),
           ),
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: double.infinity,
-            height: 56,
-            child: FilledButton(
-              onPressed: state.canPurchase ? vm.purchase : null,
-              style: FilledButton.styleFrom(
-                backgroundColor: context.primaryColor,
-                foregroundColor: context.onPrimaryColor,
-                shape: RoundedRectangleBorder(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                height: 56,
+                decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFE87086), Color(0xFFFFA726)],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFE87086).withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: FilledButton(
+                  onPressed: state.canPurchase ? vm.purchase : null,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: state.isPurchasing
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          hasFreeTrial ? '無料トライアルを開始' : 'サブスクリプションに登録',
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
-              child: state.isPurchasing
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Text(
-                      hasFreeTrial ? '無料トライアルを開始' : 'サブスクリプションに登録',
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-            ),
+              const SizedBox(height: 8),
+              Text(
+                hasFreeTrial
+                    ? '1週間のトライアル後、選択したプランで自動更新されます。'
+                    : 'いつでもキャンセルできます。',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: context.subtextColor,
+                ),
+              ),
+              PaywallFooter(
+                isRestoring: state.isRestoring,
+                onRestore: vm.restorePurchases,
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            hasFreeTrial ? '1週間のトライアル後、選択したプランで自動更新されます。' : 'いつでもキャンセルできます。',
-            style: TextStyle(
-              fontSize: 12,
-              color: context.subtextColor,
-            ),
-          ),
-          PaywallFooter(
-            isRestoring: state.isRestoring,
-            onRestore: vm.restorePurchases,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -302,65 +521,110 @@ class _PlanSelectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isYearly = plan == SubscriptionPlan.yearly;
+    final goldColor = const Color(0xFFFFA726);
+
+    Border borderBorderSide() {
+      if (isYearly) {
+        return Border.all(
+          color: isSelected ? goldColor : goldColor.withValues(alpha: 0.4),
+          width: isSelected ? 2.5 : 1,
+        );
+      }
+      return Border.all(
+        color: isSelected
+            ? context.primaryColor
+            : context.menuSectionBorder.withValues(alpha: 0.5),
+        width: isSelected ? 2 : 1,
+      );
+    }
+
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? context.primaryColor.withValues(alpha: 0.06)
-              : context.menuSectionBackground,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color:
-                isSelected ? context.primaryColor : context.menuSectionBorder,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? context.primaryColor.withValues(alpha: 0.08)
+                  : context.menuSectionBackground.withValues(alpha: 0.65),
+              borderRadius: BorderRadius.circular(16),
+              border: borderBorderSide(),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Row(
+                if (isYearly)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        _titleForPlan(plan),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: context.textPrimary,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        margin: const EdgeInsets.only(bottom: 8),
+                        decoration: BoxDecoration(
+                          color: goldColor,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text(
+                          'おすすめ',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                      if (plan == SubscriptionPlan.yearly)
-                        _buildDiscountBadge(context),
                     ],
                   ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Text(
+                            _titleForPlan(plan),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: context.textPrimary,
+                            ),
+                          ),
+                          if (isYearly) _buildDiscountBadge(context),
+                        ],
+                      ),
+                    ),
+                    _buildRadio(context),
+                  ],
                 ),
-                _buildRadio(context),
+                const SizedBox(height: 6),
+                Text(
+                  _priceText(),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected
+                        ? (isYearly ? goldColor : context.primaryColor)
+                        : context.textPrimary,
+                  ),
+                ),
+                if (isYearly) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    _monthlyEquivalentText(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.subtextColor,
+                    ),
+                  ),
+                ],
               ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              _priceText(),
-              style: TextStyle(
-                fontSize: 14,
-                color: context.textSecondary,
-              ),
-            ),
-            if (plan == SubscriptionPlan.yearly) ...[
-              const SizedBox(height: 4),
-              Text(
-                _monthlyEquivalentText(),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: context.subtextColor,
-                ),
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );
@@ -399,17 +663,21 @@ class _PlanSelectionCard extends StatelessWidget {
   }
 
   Widget _buildRadio(BuildContext context) {
+    final goldColor = const Color(0xFFFFA726);
+    final activeColor =
+        plan == SubscriptionPlan.yearly ? goldColor : context.primaryColor;
     return Container(
       width: 24,
       height: 24,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color:
-              isSelected ? context.primaryColor : context.menuSectionBorder,
+          color: isSelected
+              ? activeColor
+              : context.menuSectionBorder.withValues(alpha: 0.5),
           width: 2,
         ),
-        color: isSelected ? context.primaryColor : Colors.transparent,
+        color: isSelected ? activeColor : Colors.transparent,
       ),
       child: isSelected
           ? const Icon(Icons.check, size: 16, color: Colors.white)

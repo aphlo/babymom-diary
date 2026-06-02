@@ -21,6 +21,7 @@ sealed class PaywallState with _$PaywallState {
     required bool isLoadingOfferings,
     required bool isPurchasing,
     required bool isRestoring,
+
     /// Offerings取得に失敗した場合にハードコードのプラン情報で表示するモード
     @Default(false) bool isFallbackMode,
     String? offeringsError,
