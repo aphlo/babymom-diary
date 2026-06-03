@@ -1,0 +1,154 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../domain/entities/subscription_plan.dart';
+import '../../infrastructure/services/revenuecat_service.dart';
+import 'paywall_state.dart';
+
+part 'paywall_view_model.g.dart';
+
+@riverpod
+class PaywallViewModel extends _$PaywallViewModel {
+  @override
+  PaywallState build() {
+    Future.microtask(_loadOfferings);
+    return PaywallState.initial();
+  }
+
+  Future<void> _loadOfferings() async {
+    state = state.copyWith(isLoadingOfferings: true, offeringsError: null);
+    try {
+      final offerings = await RevenueCatService.instance
+          .getOfferings()
+          .timeout(const Duration(seconds: 4)); // 4秒でタイムアウトを追加
+      if (!ref.mounted) return;
+      final packages = offerings.current?.availablePackages ?? [];
+      state = state.copyWith(
+        isLoadingOfferings: false,
+        availablePackages: packages,
+        isFallbackMode: packages.isEmpty,
+      );
+    } catch (e) {
+      debugPrint('[Paywall] Offerings取得失敗、フォールバックモードで表示: $e');
+      if (!ref.mounted) return;
+      state = state.copyWith(
+        isLoadingOfferings: false,
+        isFallbackMode: true,
+      );
+    }
+  }
+
+  /// Offeringsを再読み込み
+  Future<void> reloadOfferings() async {
+    await _loadOfferings();
+  }
+
+  /// プランを選択
+  void selectPlan(SubscriptionPlan plan) {
+    state = state.copyWith(selectedPlan: plan);
+  }
+
+  /// 選択中のプランを購入
+  /// フォールバックモードの場合、まずOfferingsの再取得を試みる
+  Future<void> purchase() async {
+    state = state.copyWith(isPurchasing: true, pendingUiEvent: null);
+
+    // フォールバックモードの場合、まずOfferingsを取得
+    if (state.isFallbackMode || state.selectedPackage == null) {
+      try {
+        final offerings = await RevenueCatService.instance
+            .getOfferings()
+            .timeout(const Duration(seconds: 4)); // タイムアウトを追加
+        if (!ref.mounted) return;
+        final packages = offerings.current?.availablePackages ?? [];
+        state = state.copyWith(
+          availablePackages: packages,
+          isFallbackMode: packages.isEmpty,
+        );
+      } catch (_) {
+        if (!ref.mounted) return;
+        state = state.copyWith(
+          isPurchasing: false,
+          pendingUiEvent: const PaywallUiEvent.showMessage(
+            'ストアに接続できませんでした。通信環境を確認してください。',
+          ),
+        );
+        return;
+      }
+    }
+
+    final package = state.selectedPackage;
+    if (package == null) {
+      state = state.copyWith(
+        isPurchasing: false,
+        pendingUiEvent: const PaywallUiEvent.showMessage(
+          'プランの取得に失敗しました。しばらくしてからお試しください。',
+        ),
+      );
+      return;
+    }
+
+    try {
+      await RevenueCatService.instance.purchasePackage(package);
+      if (!ref.mounted) return;
+      state = state.copyWith(
+        isPurchasing: false,
+        pendingUiEvent: const PaywallUiEvent.purchaseCompleted(),
+      );
+    } on PlatformException catch (e) {
+      if (!ref.mounted) return;
+      final errorCode = PurchasesErrorHelper.getErrorCode(e);
+      if (errorCode == PurchasesErrorCode.purchaseCancelledError) {
+        state = state.copyWith(isPurchasing: false);
+        return;
+      }
+      state = state.copyWith(
+        isPurchasing: false,
+        pendingUiEvent: const PaywallUiEvent.showMessage('購入に失敗しました'),
+      );
+    } catch (_) {
+      if (!ref.mounted) return;
+      state = state.copyWith(
+        isPurchasing: false,
+        pendingUiEvent: const PaywallUiEvent.showMessage('購入に失敗しました'),
+      );
+    }
+  }
+
+  /// 購入をリストア
+  Future<void> restorePurchases() async {
+    state = state.copyWith(isRestoring: true, pendingUiEvent: null);
+    try {
+      final status = await RevenueCatService.instance.restorePurchases();
+      if (!ref.mounted) return;
+      if (status.isPremium) {
+        state = state.copyWith(
+          isRestoring: false,
+          pendingUiEvent: const PaywallUiEvent.purchaseCompleted(),
+        );
+      } else {
+        state = state.copyWith(
+          isRestoring: false,
+          pendingUiEvent: const PaywallUiEvent.showMessage(
+            '復元可能な購入が見つかりませんでした',
+          ),
+        );
+      }
+    } catch (_) {
+      if (!ref.mounted) return;
+      state = state.copyWith(
+        isRestoring: false,
+        pendingUiEvent: const PaywallUiEvent.showMessage(
+          '購入の復元に失敗しました',
+        ),
+      );
+    }
+  }
+
+  /// UiEventをクリア
+  void clearUiEvent() {
+    state = state.copyWith(pendingUiEvent: null);
+  }
+}
