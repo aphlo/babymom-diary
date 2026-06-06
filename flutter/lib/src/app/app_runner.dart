@@ -28,24 +28,34 @@ Future<void> runBabymomDiaryApp({
   required String appTitle,
   bool enableAnalytics = false,
 }) async {
-  await FirebaseAuth.instance.signInAnonymously();
-
   final prefs = await SharedPreferences.getInstance();
-  final householdService = fbcore.HouseholdService(
-    FirebaseAuth.instance,
-    FirebaseFirestore.instance,
-  );
-  final hid = await householdService.ensureHousehold();
+  final currentUser = FirebaseAuth.instance.currentUser;
 
-  final childrenRaw = prefs.getString(ChildrenLocal.prefsKey(hid));
-  final initialChildren = childrenRaw == null
-      ? const <ChildSummary>[]
-      : ChildrenLocal.decodeList(childrenRaw);
+  String hid = '';
+  List<ChildSummary> initialChildren = const [];
+  ChildSummary? initialSnapshot;
 
-  final snapshotRaw = prefs.getString(SelectedChildSnapshot.prefsKey(hid));
-  final initialSnapshot = snapshotRaw == null
-      ? null
-      : SelectedChildSnapshot.decodeSnapshot(snapshotRaw);
+  if (currentUser != null) {
+    final householdService = fbcore.HouseholdService(
+      FirebaseAuth.instance,
+      FirebaseFirestore.instance,
+    );
+    try {
+      hid = await householdService.ensureHousehold();
+
+      final childrenRaw = prefs.getString(ChildrenLocal.prefsKey(hid));
+      initialChildren = childrenRaw == null
+          ? const <ChildSummary>[]
+          : ChildrenLocal.decodeList(childrenRaw);
+
+      final snapshotRaw = prefs.getString(SelectedChildSnapshot.prefsKey(hid));
+      initialSnapshot = snapshotRaw == null
+          ? null
+          : SelectedChildSnapshot.decodeSnapshot(snapshotRaw);
+    } catch (e) {
+      debugPrint('Failed to ensure household on launch: $e');
+    }
+  }
 
   runApp(
     ProviderScope(

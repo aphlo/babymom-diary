@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../firebase/household_service.dart';
 import '../analytics/analytics_service.dart';
 import '../../features/ads/application/services/banner_ad_manager.dart';
 import '../../features/subscription/application/providers/subscription_providers.dart';
@@ -23,6 +25,9 @@ import '../../features/menu/household/presentation/pages/vaccine_visibility_sett
 import '../../features/onboarding/application/onboarding_status_provider.dart';
 import '../../features/onboarding/presentation/pages/onboarding_child_info_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_greeting_page.dart';
+import '../../features/onboarding/presentation/pages/onboarding_decision_page.dart';
+import '../../features/onboarding/presentation/pages/sign_in_page.dart';
+import '../../features/menu/presentation/pages/account_link_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_detail_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_reservation_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_scheduled_details_page.dart';
@@ -51,9 +56,15 @@ final _shellNavigatorKeyCalendar =
 final _shellNavigatorKeyMenu =
     GlobalKey<NavigatorState>(debugLabel: 'shellMenu');
 
+final authStateProvider = StreamProvider<User?>((ref) {
+  return ref.watch(firebaseAuthProvider).authStateChanges();
+});
+
 @Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
   final hasCompletedOnboarding = ref.watch(onboardingStatusProvider);
+  final userAsync = ref.watch(authStateProvider);
+  final user = userAsync.value;
   final analyticsService = ref.watch(analyticsServiceProvider);
 
   return GoRouter(
@@ -69,11 +80,16 @@ GoRouter appRouter(Ref ref) {
 
       final isOnboardingRoute = state.uri.path.startsWith('/onboarding');
 
-      if (!hasCompletedOnboarding && !isOnboardingRoute) {
-        return '/onboarding/greeting';
+      // 未ログイン、またはオンボーディング未完了の場合
+      if ((!hasCompletedOnboarding || user == null) && !isOnboardingRoute) {
+        if (!hasCompletedOnboarding) {
+          return '/onboarding/greeting';
+        }
+        return '/onboarding/decision';
       }
 
-      if (hasCompletedOnboarding && isOnboardingRoute) {
+      // ログイン済みかつオンボーディング完了の状態で、オンボーディングルートを開こうとしたら baby へ
+      if (hasCompletedOnboarding && user != null && isOnboardingRoute) {
         return '/baby';
       }
 
@@ -86,6 +102,20 @@ GoRouter appRouter(Ref ref) {
         name: 'onboarding_greeting',
         pageBuilder: (context, state) =>
             const NoTransitionPage(child: OnboardingGreetingPage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '/onboarding/decision',
+        name: 'onboarding_decision',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: OnboardingDecisionPage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '/onboarding/sign-in',
+        name: 'onboarding_sign-in',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: SignInPage()),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
@@ -220,6 +250,13 @@ GoRouter appRouter(Ref ref) {
         name: 'widget_settings',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: WidgetSettingsPage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '/menu/account-link',
+        name: 'account_link',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: AccountLinkPage()),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,

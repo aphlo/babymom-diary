@@ -66,6 +66,14 @@ class MenuSettingsSection extends StatelessWidget {
           onTap: () => context.push('/notification/settings'),
           trailing: const Icon(Icons.chevron_right),
         ),
+        const Divider(height: 0),
+        ListTile(
+          leading: const Icon(Icons.sync),
+          title: const Text('機種変更・データ引き継ぎ'),
+          subtitle: const Text('アカウントの作成 / ログイン'),
+          onTap: () => context.push('/menu/account-link'),
+          trailing: const Icon(Icons.chevron_right),
+        ),
       ],
     );
   }
