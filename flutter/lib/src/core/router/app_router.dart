@@ -61,12 +61,25 @@ final authStateProvider = StreamProvider<User?>((ref) {
   return ref.watch(firebaseAuthProvider).authStateChanges();
 });
 
+/// ログイン有無の同期フォールバック付きProvider
+///
+/// authStateProviderがロード中の間は、同期的に現在のログイン有無を判定してフォールバックします。
+/// 状態がLoadingからDataに解決された際、ログインの有無（bool）に変化がなければ再ビルドを発生させません。
+final isAuthedProvider = Provider<bool>((ref) {
+  final userAsync = ref.watch(authStateProvider);
+  final user =
+      userAsync.hasValue ? userAsync.value : FirebaseAuth.instance.currentUser;
+  return user != null;
+});
+
 @Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
-  final hasCompletedOnboarding = ref.watch(onboardingStatusProvider);
-  final userAsync = ref.watch(authStateProvider);
-  final user = userAsync.value;
+  final hasCompletedOnboardingRaw = ref.watch(onboardingStatusProvider);
+  final isAuthed = ref.watch(isAuthedProvider);
   final analyticsService = ref.watch(analyticsServiceProvider);
+
+  // ログイン済み（user != null）であれば、セットアップ済みの既存ユーザーとしてオンボーディング完了とみなす
+  final hasCompletedOnboarding = hasCompletedOnboardingRaw || isAuthed;
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
@@ -82,7 +95,7 @@ GoRouter appRouter(Ref ref) {
       final isOnboardingRoute = state.uri.path.startsWith('/onboarding');
 
       // 未ログイン、またはオンボーディング未完了の場合
-      if ((!hasCompletedOnboarding || user == null) && !isOnboardingRoute) {
+      if ((!hasCompletedOnboarding || !isAuthed) && !isOnboardingRoute) {
         if (!hasCompletedOnboarding) {
           return '/onboarding/greeting';
         }
@@ -90,7 +103,7 @@ GoRouter appRouter(Ref ref) {
       }
 
       // ログイン済みかつオンボーディング完了の状態で、オンボーディングルートを開こうとしたら baby へ
-      if (hasCompletedOnboarding && user != null && isOnboardingRoute) {
+      if (hasCompletedOnboarding && isAuthed && isOnboardingRoute) {
         return '/baby';
       }
 
