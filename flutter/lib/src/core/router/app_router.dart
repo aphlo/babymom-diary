@@ -10,6 +10,7 @@ import '../../features/ads/application/services/banner_ad_manager.dart';
 import '../../features/subscription/application/providers/subscription_providers.dart';
 import '../../features/child_record/presentation/pages/record_table_page.dart';
 import '../../features/menu/growth_chart_settings/presentation/pages/growth_chart_settings_page.dart';
+import '../../features/menu/baby_record_settings/presentation/pages/baby_record_settings_page.dart';
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
 import '../../features/mom_record/presentation/pages/mom_record_page.dart';
 import '../../features/calendar/presentation/pages/calendar_page.dart';
@@ -243,6 +244,13 @@ GoRouter appRouter(Ref ref) {
         name: 'growth_chart_settings',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: GrowthChartSettingsPage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '/baby-record/settings',
+        name: 'baby_record_settings',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: BabyRecordSettingsPage()),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
