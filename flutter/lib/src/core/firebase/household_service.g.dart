@@ -220,6 +220,39 @@ final class InitialHouseholdIdProvider
 String _$initialHouseholdIdHash() =>
     r'1c2ab5debb069fb34578d8e934566f4b898e6bb4';
 
+@ProviderFor(authState)
+const authStateProvider = AuthStateProvider._();
+
+final class AuthStateProvider
+    extends $FunctionalProvider<AsyncValue<User?>, User?, Stream<User?>>
+    with $FutureModifier<User?>, $StreamProvider<User?> {
+  const AuthStateProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'authStateProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$authStateHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<User?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<User?> create(Ref ref) {
+    return authState(ref);
+  }
+}
+
+String _$authStateHash() => r'bb1f08243a83d88f3fa41e7632f0637b369f833b';
+
 /// users/{uid}ドキュメントを単一のStreamで購読するプロバイダー
 /// 複数のプロバイダーで同じドキュメントを購読しないよう統合
 
@@ -263,7 +296,7 @@ final class UserDocumentStreamProvider extends $FunctionalProvider<
 }
 
 String _$userDocumentStreamHash() =>
-    r'780c47de990231bab9eadac2fb23ee04e2a8b3d4';
+    r'59d62c4a0d5c5076ffed1fe1d19452a90ed2b9c2';
 
 /// Provider that derives activeHouseholdId from the shared user document stream
 /// Uses select to avoid Stream-of-Streams while sharing the single Firestore listener
@@ -305,7 +338,7 @@ final class CurrentHouseholdIdProvider
 }
 
 String _$currentHouseholdIdHash() =>
-    r'609107f63881994a7775034116aacd41fa7d84c2';
+    r'ee603496fc4d4604e113af2819933eba39c4d92d';
 
 /// Provider that derives membershipType from the shared user document stream
 /// Uses select to avoid Stream-of-Streams while sharing the single Firestore listener
@@ -347,4 +380,4 @@ final class CurrentMembershipTypeProvider
 }
 
 String _$currentMembershipTypeHash() =>
-    r'ac0989537f016b34460db7f2b6cba79cfb2301d2';
+    r'f76eb4aae44803c00f6f295d87c0a85d24f90e55';

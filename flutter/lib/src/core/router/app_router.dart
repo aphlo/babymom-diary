@@ -57,10 +57,6 @@ final _shellNavigatorKeyCalendar =
 final _shellNavigatorKeyMenu =
     GlobalKey<NavigatorState>(debugLabel: 'shellMenu');
 
-final authStateProvider = StreamProvider<User?>((ref) {
-  return ref.watch(firebaseAuthProvider).authStateChanges();
-});
-
 /// ログイン有無の同期フォールバック付きProvider
 ///
 /// authStateProviderがロード中の間は、同期的に現在のログイン有無を判定してフォールバックします。
@@ -74,18 +70,18 @@ final isAuthedProvider = Provider<bool>((ref) {
 
 @Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
-  final hasCompletedOnboardingRaw = ref.watch(onboardingStatusProvider);
-  final isAuthed = ref.watch(isAuthedProvider);
   final analyticsService = ref.watch(analyticsServiceProvider);
 
-  // ログイン済み（user != null）であれば、セットアップ済みの既存ユーザーとしてオンボーディング完了とみなす
-  final hasCompletedOnboarding = hasCompletedOnboardingRaw || isAuthed;
-
-  return GoRouter(
+  final router = GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/baby',
     observers: [analyticsService.observer],
     redirect: (context, state) {
+      final hasCompletedOnboardingRaw = ref.read(onboardingStatusProvider);
+      final isAuthed = ref.read(isAuthedProvider);
+      // ログイン済み（user != null）であれば、セットアップ済みの既存ユーザーとしてオンボーディング完了とみなす
+      final hasCompletedOnboarding = hasCompletedOnboardingRaw || isAuthed;
+
       // ディープリンク（milu://）はDeepLinkServiceで処理するので、
       // ここでは/babyにリダイレクトして、GoExceptionを回避する
       if (state.uri.scheme == 'milu') {
@@ -429,6 +425,15 @@ GoRouter appRouter(Ref ref) {
       ),
     ],
   );
+
+  ref.listen(isAuthedProvider, (_, __) {
+    router.refresh();
+  });
+  ref.listen(onboardingStatusProvider, (_, __) {
+    router.refresh();
+  });
+
+  return router;
 }
 
 // StatefulNavigationShellを使用したスキャフォールドウィジェット

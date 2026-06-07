@@ -228,10 +228,10 @@ class _AccountLinkPageState extends ConsumerState<AccountLinkPage> {
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'メールアドレス',
-                  border: OutlineInputBorder(),
-                  fillColor: Colors.white,
+                  border: const OutlineInputBorder(),
+                  fillColor: context.cardBackground,
                   filled: true,
                 ),
                 validator: (value) {
@@ -248,7 +248,7 @@ class _AccountLinkPageState extends ConsumerState<AccountLinkPage> {
                 decoration: InputDecoration(
                   labelText: 'パスワード（6文字以上）',
                   border: const OutlineInputBorder(),
-                  fillColor: Colors.white,
+                  fillColor: context.cardBackground,
                   filled: true,
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -316,8 +316,8 @@ class _AccountLinkPageState extends ConsumerState<AccountLinkPage> {
           child: OutlinedButton(
             onPressed: _linkWithGoogle,
             style: OutlinedButton.styleFrom(
-              backgroundColor: Colors.white,
-              side: BorderSide(color: Colors.grey.shade300),
+              backgroundColor: context.cardBackground,
+              side: BorderSide(color: context.menuSectionBorder),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -409,17 +409,26 @@ class _AccountLinkPageState extends ConsumerState<AccountLinkPage> {
   Widget _buildLinkedUserView(ThemeData theme, User? user) {
     String providerName = 'メールアドレス';
     String? email = user?.email;
-    IconData providerIcon = Icons.email_outlined;
+    Widget iconWidget =
+        Icon(Icons.email_outlined, size: 36, color: context.primaryColor);
 
     if (user != null && user.providerData.isNotEmpty) {
       final providerId = user.providerData.first.providerId;
       if (providerId == 'google.com') {
         providerName = 'Google';
-        providerIcon = Icons.g_mobiledata;
+        iconWidget = Image.asset(
+          'assets/icons/google_logo.png',
+          width: 32,
+          height: 32,
+        );
         email = user.providerData.first.email;
       } else if (providerId == 'apple.com') {
         providerName = 'Apple';
-        providerIcon = Icons.apple;
+        iconWidget = Icon(
+          Icons.apple,
+          size: 36,
+          color: context.isDarkMode ? Colors.white : Colors.black,
+        );
         email = user.providerData.first.email;
       }
     }
@@ -460,16 +469,20 @@ class _AccountLinkPageState extends ConsumerState<AccountLinkPage> {
         // 現在のアカウント情報カード
         Card(
           elevation: 0,
-          color: Colors.white,
+          color: context.cardBackground,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Colors.grey.shade200),
+            side: BorderSide(color: context.menuSectionBorder),
           ),
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Row(
               children: [
-                Icon(providerIcon, size: 36, color: context.primaryColor),
+                SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: Center(child: iconWidget),
+                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -477,8 +490,10 @@ class _AccountLinkPageState extends ConsumerState<AccountLinkPage> {
                     children: [
                       Text(
                         '連携方式: $providerName',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: context.textPrimary),
                       ),
                       if (email != null && email.isNotEmpty) ...[
                         const SizedBox(height: 4),

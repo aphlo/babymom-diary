@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -55,13 +56,45 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   Future<void> _onSignInSuccess() async {
     // 1. 世帯（Household）の確保/確認
     final householdService = ref.read(householdServiceProvider);
-    await householdService.ensureHousehold();
+    final hid = await householdService.ensureHousehold();
 
-    // 2. オンボーディング完了の保存
+    // 2. 世帯情報の同期が完了するのを待機（タイムアウト5秒）
+    final completer = Completer<void>();
+    final subscription = ref.listenManual<AsyncValue<UserDocumentData>>(
+      userDocumentStreamProvider,
+      (previous, next) {
+        final data = next.value;
+        if (data != null && data.activeHouseholdId == hid) {
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
+        }
+      },
+    );
+
+    // すでに同期が完了している場合は即座に完了とする
+    final currentVal = ref.read(userDocumentStreamProvider).value;
+    if (currentVal != null && currentVal.activeHouseholdId == hid) {
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+    }
+
+    try {
+      // 最大15秒間同期を待機する
+      await completer.future.timeout(const Duration(seconds: 15));
+    } catch (e) {
+      // 同期が完了しなかった場合は例外をスローしてログインを安全に失敗させる
+      throw Exception('データの同期に失敗しました。電波の良い場所で再度お試しください。');
+    } finally {
+      subscription.close();
+    }
+
+    // 3. オンボーディング完了の保存
     await ref.read(onboardingStatusProvider.notifier).complete();
 
     if (mounted) {
-      // 3. メイン画面へ遷移
+      // 4. メイン画面へ遷移
       context.go('/baby');
     }
   }
