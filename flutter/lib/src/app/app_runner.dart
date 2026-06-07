@@ -23,6 +23,7 @@ import 'package:babymom_diary/src/features/widget/application/providers/widget_p
 import 'package:babymom_diary/src/core/deeplink/deep_link_service.dart';
 import 'package:babymom_diary/src/features/review_prompt/review_prompt.dart';
 import 'package:babymom_diary/src/features/push_notification/infrastructure/services/push_notification_service.dart';
+import 'package:babymom_diary/src/features/onboarding/application/onboarding_status_provider.dart';
 
 Future<void> runBabymomDiaryApp({
   required String appTitle,
@@ -194,8 +195,22 @@ class _AppState extends ConsumerState<App> {
 
   @override
   Widget build(BuildContext context) {
-    final householdAsync = ref.watch(fbcore.currentHouseholdIdProvider);
-    final householdId = householdAsync.value ?? widget.initialHouseholdId;
+    final isAuthed = ref.watch(isAuthedProvider);
+    final hasCompletedOnboarding = ref.watch(onboardingStatusProvider);
+
+    // ユーザードキュメントのストリームをwatchし、アクティブな世帯IDが存在するか判定
+    final userDocAsync = ref.watch(fbcore.userDocumentStreamProvider);
+    final hasActiveHousehold = userDocAsync.value?.activeHouseholdId != null;
+
+    String householdId = widget.initialHouseholdId;
+    AsyncValue<String>? householdAsync;
+
+    // ログイン済み、実際に世帯が存在、かつオンボーディング完了の場合のみ、安全に世帯IDをwatchする
+    if (isAuthed && hasActiveHousehold && hasCompletedOnboarding) {
+      householdAsync = ref.watch(fbcore.currentHouseholdIdProvider);
+      householdId = householdAsync?.value ?? widget.initialHouseholdId;
+    }
+
     final router = ref.watch(appRouterProvider);
     final theme = ref.watch(appThemeProvider(householdId));
     final darkTheme = ref.watch(appDarkThemeProvider(householdId));
@@ -212,8 +227,8 @@ class _AppState extends ConsumerState<App> {
       });
     }
 
-    if (householdAsync.hasError) {
-      final e = householdAsync.error;
+    if (householdAsync?.hasError == true) {
+      final e = householdAsync!.error;
       return MaterialApp(
         title: widget.appTitle,
         theme: theme,
