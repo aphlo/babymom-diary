@@ -63,7 +63,9 @@ class _OnboardingDecisionPageState
             padding: const EdgeInsets.symmetric(horizontal: 32.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                const SizedBox(width: double.infinity),
                 const Spacer(),
                 // アプリのロゴか可愛いアイコン
                 Container(

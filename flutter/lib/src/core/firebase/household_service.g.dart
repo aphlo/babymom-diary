@@ -305,7 +305,7 @@ final class CurrentHouseholdIdProvider
 }
 
 String _$currentHouseholdIdHash() =>
-    r'97ae9c111d73f938c6868a51f4d7d603c58947af';
+    r'609107f63881994a7775034116aacd41fa7d84c2';
 
 /// Provider that derives membershipType from the shared user document stream
 /// Uses select to avoid Stream-of-Streams while sharing the single Firestore listener

@@ -233,12 +233,16 @@ Stream<UserDocumentData> userDocumentStream(Ref ref) {
 /// Uses select to avoid Stream-of-Streams while sharing the single Firestore listener
 @Riverpod(keepAlive: true)
 Future<String> currentHouseholdId(Ref ref) async {
-  final userDocAsync = await ref.watch(userDocumentStreamProvider.future);
-  final householdId = userDocAsync.activeHouseholdId;
-  if (householdId == null) {
-    throw StateError('No active household found.');
+  final userDoc = await ref.watch(userDocumentStreamProvider.future);
+  if (userDoc.activeHouseholdId != null) {
+    return userDoc.activeHouseholdId!;
   }
-  return householdId;
+
+  // 世帯IDがまだ設定されていない過渡期（ログイン直後など）は、非Nullの値が流れてくるまで待機する
+  final stream = userDocumentStream(ref);
+  final targetDoc =
+      await stream.firstWhere((doc) => doc.activeHouseholdId != null);
+  return targetDoc.activeHouseholdId!;
 }
 
 /// Provider that derives membershipType from the shared user document stream
