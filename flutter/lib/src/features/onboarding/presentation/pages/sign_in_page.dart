@@ -27,6 +27,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
   bool _isLoading = false;
   bool _isSignUp = false; // ログインと新規登録の切り替えフラグ
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -76,6 +77,46 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     }
   }
 
+  void _showSuccess(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
+  // パスワード再設定メール送信
+  Future<void> _handlePasswordReset() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      _showError('メールアドレスを入力してください。入力されたメールアドレス宛てに再設定メールを送信します。');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      _showSuccess('パスワード再設定メールを送信しました。メールボックスをご確認ください。');
+    } on FirebaseAuthException catch (e) {
+      String message = '送信に失敗しました';
+      if (e.code == 'user-not-found') {
+        message = 'このメールアドレスは登録されていません';
+      } else if (e.code == 'invalid-email') {
+        message = 'メールアドレスの形式が正しくありません';
+      } else if (e.code == 'network-request-failed') {
+        message = '通信エラーが発生しました。ネットワーク接続を確認してください。';
+      }
+      _showError(message);
+    } catch (e) {
+      _showError('送信に失敗しました: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   // メールアドレスでのログイン・新規登録
   Future<void> _handleEmailAuth() async {
     if (!_formKey.currentState!.validate()) return;
@@ -122,7 +163,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
     try {
-      final googleSignIn = GoogleSignIn();
+      final googleSignIn = GoogleSignIn(
+        clientId: FirebaseAuth.instance.app.options.iosClientId,
+      );
       final googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         setState(() => _isLoading = false);
@@ -231,10 +274,22 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                 // パスワード入力
                 TextFormField(
                   controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
                     labelText: 'パスワード',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -246,6 +301,27 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                     return null;
                   },
                 ),
+                if (!_isSignUp) ...[
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _isLoading ? null : _handlePasswordReset,
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(50, 30),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        'パスワードを忘れた場合',
+                        style: TextStyle(
+                          color: context.primaryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 24),
 
                 // 実行ボタン

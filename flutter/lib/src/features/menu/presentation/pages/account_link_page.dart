@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:babymom_diary/src/core/theme/semantic_colors.dart';
 
@@ -23,6 +24,7 @@ class _AccountLinkPageState extends ConsumerState<AccountLinkPage> {
   final _passwordController = TextEditingController();
 
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -112,7 +114,9 @@ class _AccountLinkPageState extends ConsumerState<AccountLinkPage> {
   // Googleで連携（昇格）
   Future<void> _linkWithGoogle() async {
     try {
-      final googleSignIn = GoogleSignIn();
+      final googleSignIn = GoogleSignIn(
+        clientId: FirebaseAuth.instance.app.options.iosClientId,
+      );
       final googleUser = await googleSignIn.signIn();
       if (googleUser == null) return; // キャンセル時
 
@@ -148,40 +152,6 @@ class _AccountLinkPageState extends ConsumerState<AccountLinkPage> {
       await _linkWithCredential(credential);
     } catch (e) {
       _showError('Apple連携に失敗しました: $e');
-    }
-  }
-
-  // ログアウト処理
-  Future<void> _handleSignOut() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('ログアウト'),
-        content: const Text(
-            'アプリからログアウトしますか？\n（連携済みのアカウントであれば、次回ログイン時に同じデータを引き継げます）'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('キャンセル'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('ログアウト', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      setState(() => _isLoading = true);
-      try {
-        await FirebaseAuth.instance.signOut();
-        // routerのリダイレクトにより、自動的に/onboarding/decisionへ戻る
-      } catch (e) {
-        _showError('ログアウトに失敗しました: $e');
-      } finally {
-        if (mounted) setState(() => _isLoading = false);
-      }
     }
   }
 
@@ -274,12 +244,24 @@ class _AccountLinkPageState extends ConsumerState<AccountLinkPage> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: _obscurePassword,
+                decoration: InputDecoration(
                   labelText: 'パスワード（6文字以上）',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                   fillColor: Colors.white,
                   filled: true,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -383,6 +365,42 @@ class _AccountLinkPageState extends ConsumerState<AccountLinkPage> {
               ),
             ),
           ),
+        const SizedBox(height: 48),
+        Row(
+          children: [
+            const Expanded(child: Divider()),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                'すでにアカウントをお持ちの方',
+                style: TextStyle(color: context.textSecondary, fontSize: 13),
+              ),
+            ),
+            const Expanded(child: Divider()),
+          ],
+        ),
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: OutlinedButton(
+            onPressed: () => context.push('/onboarding/sign-in'),
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: context.primaryColor),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+            ),
+            child: Text(
+              'ログインしてデータを引き継ぐ',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+                color: context.primaryColor,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -474,28 +492,6 @@ class _AccountLinkPageState extends ConsumerState<AccountLinkPage> {
                   ),
                 ),
               ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 48),
-
-        // ログアウトボタン
-        SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: OutlinedButton.icon(
-            onPressed: _handleSignOut,
-            icon: const Icon(Icons.logout, color: Colors.red),
-            label: const Text(
-              'ログアウト',
-              style: TextStyle(
-                  color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Colors.red),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
             ),
           ),
         ),
