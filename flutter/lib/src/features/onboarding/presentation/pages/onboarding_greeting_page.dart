@@ -22,8 +22,8 @@ class _OnboardingGreetingPageState extends State<OnboardingGreetingPage> {
     ),
     OnboardingStep(
       imagePath: 'assets/icons/onboarding_record.png',
-      title: '授乳や睡眠をかんたん記録',
-      description: '授乳表をはじめ、睡眠や排泄、離乳食などの大切な成長記録を、見やすくシンプルな操作で記録できます。',
+      title: '授乳や離乳食をかんたん記録',
+      description: '授乳やミルクの記録、離乳食の食材管理、身長や体重などの成長記録を、見やすくシンプルな操作で記録できます。',
     ),
     OnboardingStep(
       imagePath: 'assets/icons/onboarding_vaccine.png',
