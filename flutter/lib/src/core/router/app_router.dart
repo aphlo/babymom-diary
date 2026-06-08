@@ -29,6 +29,7 @@ import '../../features/onboarding/presentation/pages/onboarding_greeting_page.da
 import '../../features/onboarding/presentation/pages/onboarding_decision_page.dart';
 import '../../features/onboarding/presentation/pages/sign_in_page.dart';
 import '../../features/menu/presentation/pages/account_link_page.dart';
+import '../../features/menu/presentation/pages/withdraw_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_detail_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_reservation_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_scheduled_details_page.dart';
@@ -274,6 +275,13 @@ GoRouter appRouter(Ref ref) {
         name: 'account_link',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: AccountLinkPage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '/menu/withdraw',
+        name: 'withdraw',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: WithdrawPage()),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
