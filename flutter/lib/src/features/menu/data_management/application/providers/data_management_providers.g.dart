@@ -105,3 +105,48 @@ final class DeleteAllHouseholdDataProvider extends $FunctionalProvider<
 
 String _$deleteAllHouseholdDataHash() =>
     r'b1f330c8f221aec19328af60f84d29132eee84d7';
+
+/// Provider for WithdrawUseCase
+
+@ProviderFor(withdrawUseCase)
+const withdrawUseCaseProvider = WithdrawUseCaseProvider._();
+
+/// Provider for WithdrawUseCase
+
+final class WithdrawUseCaseProvider extends $FunctionalProvider<WithdrawUseCase,
+    WithdrawUseCase, WithdrawUseCase> with $Provider<WithdrawUseCase> {
+  /// Provider for WithdrawUseCase
+  const WithdrawUseCaseProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'withdrawUseCaseProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$withdrawUseCaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<WithdrawUseCase> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  WithdrawUseCase create(Ref ref) {
+    return withdrawUseCase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(WithdrawUseCase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<WithdrawUseCase>(value),
+    );
+  }
+}
+
+String _$withdrawUseCaseHash() => r'66688a90b1a608179f6a6e9e2440aefd419b490e';

@@ -243,6 +243,22 @@
 					<string>milu</string>
 				</array>
 			</dict>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.googleusercontent.apps.33914175229-1lrtsc2foc5998p43opa0mhlmbmh4qup</string>
+				</array>
+			</dict>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.googleusercontent.apps.555077550828-m7g01vcnepmbvtjlhrpbtp4ov6tqcsm8</string>
+				</array>
+			</dict>
 		</array>
 		<key>UILaunchStoryboardName</key>
 		<string>LaunchScreen</string>

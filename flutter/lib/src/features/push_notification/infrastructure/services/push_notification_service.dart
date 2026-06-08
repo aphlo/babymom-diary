@@ -6,20 +6,25 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../application/usecases/register_fcm_token.dart';
 import '../repositories/notification_repository_impl.dart';
+import '../../../../core/firebase/household_service.dart';
 
 part 'push_notification_service.g.dart';
 
 class PushNotificationService {
   PushNotificationService({
+    required FirebaseAuth auth,
     required FirebaseMessaging messaging,
     required FlutterLocalNotificationsPlugin localNotifications,
     required RegisterFcmToken registerFcmToken,
-  })  : _messaging = messaging,
+  })  : _auth = auth,
+        _messaging = messaging,
         _localNotifications = localNotifications,
         _registerFcmToken = registerFcmToken;
 
+  final FirebaseAuth _auth;
   final FirebaseMessaging _messaging;
   final FlutterLocalNotificationsPlugin _localNotifications;
   final RegisterFcmToken _registerFcmToken;
@@ -41,7 +46,16 @@ class PushNotificationService {
       _registerToken();
     });
 
-    // 4. プッシュ通知の許可をリクエスト（ダイアログ表示）
+    // 4. 認証状態の変化をリッスンして、ログイン時に自動登録
+    _auth.authStateChanges().listen((user) {
+      if (user != null) {
+        debugPrint(
+            '[PushNotification] Auth state changed: user is logged in, registering token...');
+        _registerToken();
+      }
+    });
+
+    // 5. プッシュ通知の許可をリクエスト（ダイアログ表示）
     await _messaging.requestPermission(
       alert: true,
       badge: true,
@@ -49,10 +63,10 @@ class PushNotificationService {
       provisional: false,
     );
 
-    // 5. 許可後に再度トークン登録を試みる（iOSでは許可前にトークン取得できない場合がある）
+    // 6. 許可後に再度トークン登録を試みる（iOSでは許可前にトークン取得できない場合がある）
     await _registerToken();
 
-    // 6. フォアグラウンド通知設定
+    // 7. フォアグラウンド通知設定
     await _messaging.setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
@@ -95,6 +109,13 @@ class PushNotificationService {
 
   Future<void> _registerToken() async {
     debugPrint('[PushNotification] _registerToken started');
+
+    if (_auth.currentUser == null) {
+      debugPrint(
+          '[PushNotification] User is not signed in, skipping token registration');
+      return;
+    }
+
     String? token;
 
     // iOSではAPNSトークンが設定されるまで待つ（最大10秒）
@@ -207,7 +228,9 @@ FlutterLocalNotificationsPlugin flutterLocalNotifications(Ref ref) {
 
 @Riverpod(keepAlive: true)
 PushNotificationService pushNotificationService(Ref ref) {
+  final auth = ref.watch(firebaseAuthProvider);
   return PushNotificationService(
+    auth: auth,
     messaging: ref.watch(firebaseMessagingProvider),
     localNotifications: ref.watch(flutterLocalNotificationsProvider),
     registerFcmToken:

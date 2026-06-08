@@ -1,13 +1,16 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../firebase/household_service.dart';
 import '../analytics/analytics_service.dart';
 import '../../features/ads/application/services/banner_ad_manager.dart';
 import '../../features/subscription/application/providers/subscription_providers.dart';
 import '../../features/child_record/presentation/pages/record_table_page.dart';
 import '../../features/menu/growth_chart_settings/presentation/pages/growth_chart_settings_page.dart';
+import '../../features/menu/baby_record_settings/presentation/pages/baby_record_settings_page.dart';
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
 import '../../features/mom_record/presentation/pages/mom_record_page.dart';
 import '../../features/calendar/presentation/pages/calendar_page.dart';
@@ -23,6 +26,10 @@ import '../../features/menu/household/presentation/pages/vaccine_visibility_sett
 import '../../features/onboarding/application/onboarding_status_provider.dart';
 import '../../features/onboarding/presentation/pages/onboarding_child_info_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_greeting_page.dart';
+import '../../features/onboarding/presentation/pages/onboarding_decision_page.dart';
+import '../../features/onboarding/presentation/pages/sign_in_page.dart';
+import '../../features/menu/presentation/pages/account_link_page.dart';
+import '../../features/menu/presentation/pages/withdraw_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_detail_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_reservation_page.dart';
 import '../../features/vaccines/presentation/pages/vaccine_scheduled_details_page.dart';
@@ -51,16 +58,31 @@ final _shellNavigatorKeyCalendar =
 final _shellNavigatorKeyMenu =
     GlobalKey<NavigatorState>(debugLabel: 'shellMenu');
 
+/// ログイン有無の同期フォールバック付きProvider
+///
+/// authStateProviderがロード中の間は、同期的に現在のログイン有無を判定してフォールバックします。
+/// 状態がLoadingからDataに解決された際、ログインの有無（bool）に変化がなければ再ビルドを発生させません。
+final isAuthedProvider = Provider<bool>((ref) {
+  final userAsync = ref.watch(authStateProvider);
+  final user =
+      userAsync.hasValue ? userAsync.value : FirebaseAuth.instance.currentUser;
+  return user != null;
+});
+
 @Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
-  final hasCompletedOnboarding = ref.watch(onboardingStatusProvider);
   final analyticsService = ref.watch(analyticsServiceProvider);
 
-  return GoRouter(
+  final router = GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/baby',
     observers: [analyticsService.observer],
     redirect: (context, state) {
+      final hasCompletedOnboardingRaw = ref.read(onboardingStatusProvider);
+      final isAuthed = ref.read(isAuthedProvider);
+      // ログイン済み（user != null）であれば、セットアップ済みの既存ユーザーとしてオンボーディング完了とみなす
+      final hasCompletedOnboarding = hasCompletedOnboardingRaw || isAuthed;
+
       // ディープリンク（milu://）はDeepLinkServiceで処理するので、
       // ここでは/babyにリダイレクトして、GoExceptionを回避する
       if (state.uri.scheme == 'milu') {
@@ -69,11 +91,16 @@ GoRouter appRouter(Ref ref) {
 
       final isOnboardingRoute = state.uri.path.startsWith('/onboarding');
 
-      if (!hasCompletedOnboarding && !isOnboardingRoute) {
-        return '/onboarding/greeting';
+      // 未ログイン、またはオンボーディング未完了の場合
+      if ((!hasCompletedOnboarding || !isAuthed) && !isOnboardingRoute) {
+        if (!hasCompletedOnboarding) {
+          return '/onboarding/greeting';
+        }
+        return '/onboarding/decision';
       }
 
-      if (hasCompletedOnboarding && isOnboardingRoute) {
+      // ログイン済みかつオンボーディング完了の状態で、オンボーディングルートを開こうとしたら baby へ
+      if (hasCompletedOnboarding && isAuthed && isOnboardingRoute) {
         return '/baby';
       }
 
@@ -86,6 +113,20 @@ GoRouter appRouter(Ref ref) {
         name: 'onboarding_greeting',
         pageBuilder: (context, state) =>
             const NoTransitionPage(child: OnboardingGreetingPage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '/onboarding/decision',
+        name: 'onboarding_decision',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: OnboardingDecisionPage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '/onboarding/sign-in',
+        name: 'onboarding_sign-in',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: SignInPage()),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
@@ -216,10 +257,31 @@ GoRouter appRouter(Ref ref) {
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
+        path: '/baby-record/settings',
+        name: 'baby_record_settings',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: BabyRecordSettingsPage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
         path: '/widget/settings',
         name: 'widget_settings',
         pageBuilder: (context, state) =>
             const CupertinoPage(child: WidgetSettingsPage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '/menu/account-link',
+        name: 'account_link',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: AccountLinkPage()),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '/menu/withdraw',
+        name: 'withdraw',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: WithdrawPage()),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
@@ -371,6 +433,15 @@ GoRouter appRouter(Ref ref) {
       ),
     ],
   );
+
+  ref.listen(isAuthedProvider, (_, __) {
+    router.refresh();
+  });
+  ref.listen(onboardingStatusProvider, (_, __) {
+    router.refresh();
+  });
+
+  return router;
 }
 
 // StatefulNavigationShellを使用したスキャフォールドウィジェット
