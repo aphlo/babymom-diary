@@ -1,0 +1,82 @@
+name: Deploy to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'official-site/**'
+      - '.github/workflows/deploy-hosting.yml'
+      - 'firebase.json'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'official-site/**'
+      - '.github/workflows/deploy-hosting.yml'
+      - 'firebase.json'
+
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v4
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('official-site/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: official-site
+
+      - name: Build Next.js site
+        run: pnpm build
+        working-directory: official-site
+
+      # develop ブランチ または develop に対する PR の場合は stg 環境にデプロイ
+      - name: Deploy to Firebase Hosting (STG)
+        if: github.ref == 'refs/heads/develop' || github.base_ref == 'develop'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BABYMOM_DIARY_STG }}
+          projectId: babymom-diary-stg
+          channelId: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'live' }}
+
+      # main ブランチ または main に対する PR の場合は prod 環境にデプロイ
+      - name: Deploy to Firebase Hosting (PROD)
+        if: github.ref == 'refs/heads/main' || github.base_ref == 'main'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BABYMOM_DIARY }}
+          projectId: babymom-diary
+          channelId: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'live' }}
