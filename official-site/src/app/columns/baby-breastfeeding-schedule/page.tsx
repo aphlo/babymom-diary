@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import CtaCard from "../../../components/CtaCard";
 import ArticleSidebar from "../../../components/ArticleSidebar";
+import SupervisorProfile from "../../../components/SupervisorProfile";
 
 export const metadata: Metadata = {
   title: "赤ちゃんの授乳スケジュールと目安量について",
@@ -109,6 +110,9 @@ export default function BreastfeedingSchedule() {
               ぜひ、便利なアプリを活用して、毎日の育児をもっとシンプルに、楽しく進めましょう！
             </p>
           </article>
+
+          {/* 監修者プロフィール */}
+          <SupervisorProfile />
 
           {/* 流入導線 CTA */}
           <CtaCard />

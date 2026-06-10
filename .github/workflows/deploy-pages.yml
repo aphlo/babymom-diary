@@ -3,18 +3,20 @@ name: Deploy to Cloudflare Pages
 on:
   push:
     branches:
-      - main
       - develop
     paths:
       - 'official-site/**'
       - '.github/workflows/deploy-pages.yml'
-  pull_request:
-    branches:
-      - main
-      - develop
-    paths:
-      - 'official-site/**'
-      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'デプロイ先環境 (preview: プレビュー環境, production: 本番環境)'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+          - preview
+          - production
 
 permissions:
   contents: read
@@ -58,9 +60,9 @@ jobs:
         run: pnpm build
         working-directory: official-site
 
-      # develop ブランチ または develop に対する PR の場合は preview チャンネルにデプロイ
+      # developブランチへの自動プッシュ時、または手動起動でpreviewを選択した場合にプレビューデプロイ
       - name: Deploy to Cloudflare Pages (Preview)
-        if: github.ref == 'refs/heads/develop' || github.base_ref == 'develop'
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'preview')
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -68,9 +70,9 @@ jobs:
           command: pages deploy official-site/out --project-name=milu-official-site --branch=develop
           working-directory: official-site
 
-      # main ブランチ または main に対する PR の場合は production（本番）環境にデプロイ
+      # 手動起動でproductionを選択した場合に本番環境へデプロイ
       - name: Deploy to Cloudflare Pages (Production)
-        if: github.ref == 'refs/heads/main' || github.base_ref == 'main'
+        if: github.event_name == 'workflow_dispatch' && inputs.environment == 'production'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

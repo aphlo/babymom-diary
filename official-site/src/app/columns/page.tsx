@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "お役立ちコラム",
-  description: "育児の不安や悩みを解決する、miluのお役立ちコラム一覧です。授乳や予防接種スケジュールなど専門知識に基づいた記事を掲載しています。",
+  title: "お役立ち記事・コラム",
+  description: "育児の不安や悩みを解決する、miluのお役立ち記事・コラム一覧です。授乳や予防接種スケジュールなど専門知識に基づいた記事を掲載しています。",
 };
 
 export default function ColumnsIndex() {
@@ -31,7 +31,7 @@ export default function ColumnsIndex() {
       <div className="bg-gradient-to-b from-bg-pink to-white/50 py-14 px-6 text-center border-b border-border-pink">
         <div className="max-w-[800px] mx-auto animate-fade-in">
           <span className="inline-block bg-primary text-white py-1 px-3 rounded-full text-xs font-bold mb-3">milu コラム</span>
-          <h1 className="text-3xl md:text-4xl text-text-main font-bold leading-snug mb-4 font-fredoka">お役立ちコラム</h1>
+          <h1 className="text-3xl md:text-4xl text-text-main font-bold leading-snug mb-4 font-fredoka">お役立ち記事・コラム</h1>
           <p className="text-text-light text-base max-w-[600px] mx-auto leading-relaxed">
             赤ちゃんの授乳スケジュールから、複雑な予防接種スケジュール管理まで。パパ・ママの毎日の育児をスマートにサポートするお役立ち情報を配信しています。
           </p>

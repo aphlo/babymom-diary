@@ -275,9 +275,9 @@ export default function Home() {
         <section className="py-24 px-6 bg-bg-pink border-t border-b border-border-pink">
           <div className="section-header animate-fade-in text-center max-w-[600px] mx-auto mb-16">
             <h2 className="section-title text-3xl md:text-4xl font-bold mb-4 text-text-main font-fredoka">
-              <span className="text-primary">お役立ち</span>コラム
+              <span className="text-primary">お役立ち</span>記事・コラム
             </h2>
-            <p className="section-description text-base text-text-light">育児の不安を解消する、お役立ちコラムを配信中</p>
+            <p className="section-description text-base text-text-light">育児の不安を解消する、お役立ち記事・コラムを配信中</p>
           </div>
           <div className="features-grid max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
             {latestArticles.map((art, idx) => (

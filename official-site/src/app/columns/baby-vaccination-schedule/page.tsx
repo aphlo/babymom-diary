@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import CtaCard from "../../../components/CtaCard";
 import ArticleSidebar from "../../../components/ArticleSidebar";
+import SupervisorProfile from "../../../components/SupervisorProfile";
 
 export const metadata: Metadata = {
   title: "赤ちゃんの予防接種スケジュール管理と進め方のコツ",
@@ -100,6 +101,9 @@ export default function VaccinationSchedule() {
               スマートにスケジュールを組んで、お子さまの大切な予防接種を漏れなく進めましょう！
             </p>
           </article>
+
+          {/* 監修者プロフィール */}
+          <SupervisorProfile />
 
           {/* 流入導線 CTA */}
           <CtaCard />
