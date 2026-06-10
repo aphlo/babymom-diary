@@ -68,7 +68,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy official-site/out --project-name=milu-official-site --branch=develop
-          working-directory: official-site
+          workingDirectory: official-site
 
       # 手動起動でproductionを選択した場合に本番環境へデプロイ
       - name: Deploy to Cloudflare Pages (Production)
@@ -78,4 +78,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy official-site/out --project-name=milu-official-site --branch=main
-          working-directory: official-site
+          workingDirectory: official-site
