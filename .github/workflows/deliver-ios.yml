@@ -28,7 +28,7 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
 
           if [ -z "$IOS_MAIN_PROVISIONING_PROFILE_BASE64" ]; then
-            echo "Error: IOS_MAIN_PROVISIONING_PROFILE_BASE64 secret not set (or legacy IOS_PROVISIONING_PROFILE_BASE64)."
+            echo "Error: IOS_MAIN_PROVISIONING_PROFILE_BASE64 secret not set."
             exit 1
           fi
           if [ -z "$IOS_WIDGET_PROVISIONING_PROFILE_BASE64" ]; then

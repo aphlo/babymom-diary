@@ -20,16 +20,17 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "public": "public",
+    "public": "firebase-public",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
-    "rewrites": [
+    "redirects": [
       {
-        "source": "**",
-        "destination": "/index.html"
+        "source": "/**",
+        "destination": "https://milu-baby.app/:splat",
+        "type": 301
       }
     ]
   }

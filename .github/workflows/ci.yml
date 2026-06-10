@@ -6,6 +6,7 @@ on:
     paths:
       - 'cloud-functions/**'
       - 'flutter/**'
+      - 'official-site/**'
       - '.github/workflows/ci.yml'
 
 jobs:
@@ -93,3 +94,45 @@ jobs:
 
       - name: Test
         run: flutter test
+
+  official-site:
+    name: Official Site Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: official-site
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v4
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('official-site/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting and lint (Biome)
+        run: pnpm biome:ci
+
+      - name: Build
+        run: pnpm build
