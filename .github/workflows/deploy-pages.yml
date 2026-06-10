@@ -1,4 +1,4 @@
-name: Deploy to Firebase Hosting
+name: Deploy to Cloudflare Pages
 
 on:
   push:
@@ -7,21 +7,18 @@ on:
       - develop
     paths:
       - 'official-site/**'
-      - '.github/workflows/deploy-hosting.yml'
-      - 'firebase.json'
+      - '.github/workflows/deploy-pages.yml'
   pull_request:
     branches:
       - main
       - develop
     paths:
       - 'official-site/**'
-      - '.github/workflows/deploy-hosting.yml'
-      - 'firebase.json'
+      - '.github/workflows/deploy-pages.yml'
 
 permissions:
-  checks: write
   contents: read
-  pull-requests: write
+  deployments: write
 
 jobs:
   build_and_deploy:
@@ -61,22 +58,22 @@ jobs:
         run: pnpm build
         working-directory: official-site
 
-      # develop ブランチ または develop に対する PR の場合は stg 環境にデプロイ
-      - name: Deploy to Firebase Hosting (STG)
+      # develop ブランチ または develop に対する PR の場合は preview チャンネルにデプロイ
+      - name: Deploy to Cloudflare Pages (Preview)
         if: github.ref == 'refs/heads/develop' || github.base_ref == 'develop'
-        uses: FirebaseExtended/action-hosting-deploy@v0
+        uses: cloudflare/wrangler-action@v3
         with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BABYMOM_DIARY_STG }}
-          projectId: babymom-diary-stg
-          channelId: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'live' }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy official-site/out --project-name=milu-official-site --branch=develop
+          working-directory: official-site
 
-      # main ブランチ または main に対する PR の場合は prod 環境にデプロイ
-      - name: Deploy to Firebase Hosting (PROD)
+      # main ブランチ または main に対する PR の場合は production（本番）環境にデプロイ
+      - name: Deploy to Cloudflare Pages (Production)
         if: github.ref == 'refs/heads/main' || github.base_ref == 'main'
-        uses: FirebaseExtended/action-hosting-deploy@v0
+        uses: cloudflare/wrangler-action@v3
         with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BABYMOM_DIARY }}
-          projectId: babymom-diary
-          channelId: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'live' }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy official-site/out --project-name=milu-official-site --branch=main
+          working-directory: official-site
