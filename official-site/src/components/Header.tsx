@@ -8,7 +8,10 @@ export default function Header() {
           milu
         </Link>
         <nav className="flex items-center gap-6">
-          <Link href="/columns" className="text-text-main hover:text-primary-dark font-semibold text-sm transition-colors">
+          <Link
+            href="/columns"
+            className="text-text-main hover:text-primary-dark font-semibold text-sm transition-colors"
+          >
             お役立ち記事・コラム
           </Link>
         </nav>

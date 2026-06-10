@@ -1,7 +1,9 @@
 export default function CtaCard() {
   return (
     <div className="mt-14 bg-gradient-to-br from-bg-pink to-secondary rounded-lg p-6 md:p-8 border border-border-pink text-center shadow-soft animate-fade-in">
-      <div className="inline-block bg-primary text-white py-1 px-3 rounded-full text-xs font-bold mb-3">育児管理アプリ</div>
+      <div className="inline-block bg-primary text-white py-1 px-3 rounded-full text-xs font-bold mb-3">
+        育児管理アプリ
+      </div>
       <h2 className="text-2xl text-text-main font-bold mb-3 font-fredoka">
         赤ちゃんをmilu あなたをmilu <span className="text-primary-dark">「milu」</span>
       </h2>

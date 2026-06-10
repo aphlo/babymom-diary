@@ -2,14 +2,17 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "プライバシーポリシー",
-  description: "miluのプライバシーポリシー。ユーザーの個人情報や育児記録データ等の収集目的、サードパーティモジュール（Firebase、RevenueCat、AdMob）による外部送信、データの取り扱いについて掲載しています。",
+  description:
+    "miluのプライバシーポリシー。ユーザーの個人情報や育児記録データ等の収集目的、サードパーティモジュール（Firebase、RevenueCat、AdMob）による外部送信、データの取り扱いについて掲載しています。",
 };
 
 export default function PrivacyPolicy() {
   return (
     <section className="pt-[120px] pb-[60px] px-5 min-h-[calc(100vh-180px)] bg-linear-to-br from-bg-pink to-white flex justify-center">
       <div className="w-full max-w-[800px] bg-white/80 rounded-lg p-6 md:p-10 shadow-soft backdrop-blur-md border border-border-pink">
-        <h1 className="text-center mb-8 text-text-main font-fredoka text-3xl md:text-4xl font-bold">プライバシーポリシー</h1>
+        <h1 className="text-center mb-8 text-text-main font-fredoka text-3xl md:text-4xl font-bold">
+          プライバシーポリシー
+        </h1>
 
         <div className="article-body">
           <p>
@@ -41,43 +44,64 @@ export default function PrivacyPolicy() {
             本サービスには、サービスの提供、アクセス分析、および広告配信のために、以下のサードパーティ製SDK（電気通信事業法上の外部送信規律に関連するもの）が組み込まれています。これらのモジュールを通じて、ユーザーのデータが外部へ送信される場合があります。
           </p>
 
-          <h3 className="text-base font-bold mt-4 mb-2 text-text-main">
-            ① Firebase（Google LLC）
-          </h3>
+          <h3 className="text-base font-bold mt-4 mb-2 text-text-main">① Firebase（Google LLC）</h3>
           <ul className="list-disc pl-6 mb-4">
-            <li className="mb-1"><strong>送信目的</strong>: データのクラウド同期・保存、プッシュ通知の配信、クラッシュ分析および利用状況の分析。</li>
-            <li className="mb-1"><strong>送信データ</strong>: ユーザーのアカウント識別子、アプリ動作ログ、端末情報、クラッシュログ。</li>
             <li className="mb-1">
-              <a href="https://policies.google.com/privacy?hl=ja" target="_blank" rel="noopener noreferrer" className="text-primary-dark hover:underline">
+              <strong>送信目的</strong>:
+              データのクラウド同期・保存、プッシュ通知の配信、クラッシュ分析および利用状況の分析。
+            </li>
+            <li className="mb-1">
+              <strong>送信データ</strong>: ユーザーのアカウント識別子、アプリ動作ログ、端末情報、クラッシュログ。
+            </li>
+            <li className="mb-1">
+              <a
+                href="https://policies.google.com/privacy?hl=ja"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-dark hover:underline"
+              >
                 Google プライバシーポリシー
               </a>
             </li>
           </ul>
 
-          <h3 className="text-base font-bold mt-4 mb-2 text-text-main">
-            ② RevenueCat（RevenueCat, Inc.）
-          </h3>
+          <h3 className="text-base font-bold mt-4 mb-2 text-text-main">② RevenueCat（RevenueCat, Inc.）</h3>
           <ul className="list-disc pl-6 mb-4">
-            <li className="mb-1"><strong>送信目的</strong>: 有料プラン（定期購読・サブスクリプション）のステータス管理、購入状態の同期。</li>
+            <li className="mb-1">
+              <strong>送信目的</strong>: 有料プラン（定期購読・サブスクリプション）のステータス管理、購入状態の同期。
+            </li>
             <li className="mb-1">
               <strong>送信データ</strong>:
               匿名化されたユーザー識別子、アプリストア内でのトランザクション情報（購入履歴、領収書データ）。※クレジットカード情報等は直接収集・送信されません。
             </li>
             <li className="mb-1">
-              <a href="https://www.revenuecat.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary-dark hover:underline">
+              <a
+                href="https://www.revenuecat.com/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-dark hover:underline"
+              >
                 RevenueCat プライバシーポリシー（英語）
               </a>
             </li>
           </ul>
 
-          <h3 className="text-base font-bold mt-4 mb-2 text-text-main">
-            ③ Google AdMob（Google LLC）
-          </h3>
+          <h3 className="text-base font-bold mt-4 mb-2 text-text-main">③ Google AdMob（Google LLC）</h3>
           <ul className="list-disc pl-6 mb-4">
-            <li className="mb-1"><strong>送信目的</strong>: 無料プランユーザーに対する最適化された広告の配信。</li>
-            <li className="mb-1"><strong>送信データ</strong>: 広告識別子（IDFA / AAID）、端末情報、位置情報、アプリ内での広告タップ等の行動履歴。</li>
             <li className="mb-1">
-              <a href="https://policies.google.com/technologies/ads?hl=ja" target="_blank" rel="noopener noreferrer" className="text-primary-dark hover:underline">
+              <strong>送信目的</strong>: 無料プランユーザーに対する最適化された広告の配信。
+            </li>
+            <li className="mb-1">
+              <strong>送信データ</strong>: 広告識別子（IDFA /
+              AAID）、端末情報、位置情報、アプリ内での広告タップ等の行動履歴。
+            </li>
+            <li className="mb-1">
+              <a
+                href="https://policies.google.com/technologies/ads?hl=ja"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-dark hover:underline"
+              >
                 Google 広告テクノロジー規約
               </a>
             </li>
@@ -115,7 +139,10 @@ export default function PrivacyPolicy() {
           <p className="bg-bg-pink/50 p-4 rounded-md border border-border-pink">
             <strong>aphlo サポート窓口</strong>
             <br />
-            メールアドレス: <a href="mailto:support@aphlo.com" className="text-primary-dark hover:underline">support@aphlo.com</a>
+            メールアドレス:{" "}
+            <a href="mailto:support@aphlo.com" className="text-primary-dark hover:underline">
+              support@aphlo.com
+            </a>
           </p>
 
           <p className="text-right mt-10">制定日：2025年6月1日</p>

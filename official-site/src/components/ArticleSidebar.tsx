@@ -29,9 +29,17 @@ export default function ArticleSidebar({ currentSlug }: Props) {
           <h3 className="text-lg font-bold text-text-main mb-5 border-l-4 border-primary pl-2.5">おすすめの記事</h3>
           <div className="flex flex-col gap-4">
             {relatedArticles.map((art) => (
-              <Link href={`/columns/${art.slug}`} key={art.slug} className="block pb-4 border-b border-border-pink last:border-b-0 last:pb-0 transition-colors group">
-                <span className="text-[11px] bg-bg-pink text-primary-dark py-0.5 px-2 rounded-full font-bold inline-block mb-1.5">{art.category}</span>
-                <h4 className="text-sm font-semibold text-text-main leading-snug mb-1 group-hover:text-primary-dark transition-colors">{art.title}</h4>
+              <Link
+                href={`/columns/${art.slug}`}
+                key={art.slug}
+                className="block pb-4 border-b border-border-pink last:border-b-0 last:pb-0 transition-colors group"
+              >
+                <span className="text-[11px] bg-bg-pink text-primary-dark py-0.5 px-2 rounded-full font-bold inline-block mb-1.5">
+                  {art.category}
+                </span>
+                <h4 className="text-sm font-semibold text-text-main leading-snug mb-1 group-hover:text-primary-dark transition-colors">
+                  {art.title}
+                </h4>
                 <time className="text-xs text-text-muted">{art.publishedAt}</time>
               </Link>
             ))}
@@ -39,7 +47,11 @@ export default function ArticleSidebar({ currentSlug }: Props) {
         </div>
       )}
       <div className="bg-gradient-to-br from-bg-pink to-white border border-border-pink rounded-md p-8 text-center shadow-soft">
-        <img src="/assets/images/favicon.png" alt="miluアイコン" className="w-16 h-16 rounded-xl mx-auto mb-4 shadow-soft" />
+        <img
+          src="/assets/images/favicon.png"
+          alt="miluアイコン"
+          className="w-16 h-16 rounded-xl mx-auto mb-4 shadow-soft"
+        />
         <h4 className="text-base font-bold text-text-main mb-1">育児記録アプリ「milu」</h4>
         <p className="text-xs text-text-light mb-5">これひとつで育児記録がまとまる</p>
         <div className="flex gap-3 justify-center items-center">

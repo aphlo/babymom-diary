@@ -19,9 +19,7 @@ export default function SupervisorProfile() {
           <span className="text-xs font-bold text-primary bg-white py-1 px-3.5 rounded-full border border-border-pink shadow-xs w-max">
             記事監修
           </span>
-          <h4 className="text-xl font-bold text-text-main font-fredoka">
-            現役助産師えるみ
-          </h4>
+          <h4 className="text-xl font-bold text-text-main font-fredoka">現役助産師えるみ</h4>
         </div>
         <p className="text-sm text-text-light leading-relaxed">
           キャリア5年目の現役助産師。多くの出産に立ち会い、妊娠期・分娩期・産褥期のママのケア、新生児ケアや産後ケアに尽力。現在は病院にて助産師として勤務しながら、アプリ「milu」の監修を担当しています。パパとママが納得して育児ができる世の中を目指しています。好きな分野は授乳支援。
@@ -39,12 +37,7 @@ export default function SupervisorProfile() {
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </Link>
         </div>

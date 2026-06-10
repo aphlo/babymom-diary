@@ -5,11 +5,13 @@ import CtaCard from "../../../components/CtaCard";
 
 export const metadata: Metadata = {
   title: "監修助産師 えるみのプロフィール",
-  description: "育児記録アプリ「milu」のコラム・コンテンツ監修を担当する現役助産師「えるみ」の公式プロフィール。保有資格やキャリア、授乳支援や産後ケアにかける想いをご紹介します。",
+  description:
+    "育児記録アプリ「milu」のコラム・コンテンツ監修を担当する現役助産師「えるみ」の公式プロフィール。保有資格やキャリア、授乳支援や産後ケアにかける想いをご紹介します。",
   keywords: "助産師, えるみ, 監修者, プロフィール, 授乳支援, 産後ケア, milu",
   openGraph: {
     title: "監修助産師 えるみのプロフィール | milu",
-    description: "育児記録アプリ「milu」のコラム・コンテンツ監修を担当する現役助産師「えるみ」の公式プロフィール。保有資格やキャリア, 授乳支援や産後ケアにかける想いをご紹介します。",
+    description:
+      "育児記録アプリ「milu」のコラム・コンテンツ監修を担当する現役助産師「えるみ」の公式プロフィール。保有資格やキャリア, 授乳支援や産後ケアにかける想いをご紹介します。",
     type: "profile",
   },
 };
@@ -36,10 +38,8 @@ export default function ElmiProfile() {
             <h1 className="text-3xl md:text-5xl text-text-main font-bold mt-4 mb-2 font-fredoka leading-tight">
               現役助産師 えるみ
             </h1>
-            <p className="text-primary-dark font-semibold text-lg mb-6">
-              看護師・助産師（キャリア5年目）
-            </p>
-            
+            <p className="text-primary-dark font-semibold text-lg mb-6">看護師・助産師（キャリア5年目）</p>
+
             <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-6">
               <span className="bg-white border border-border-pink text-text-light text-xs font-semibold py-1 px-3.5 rounded-full shadow-xs">
                 看護師免許
@@ -95,17 +95,25 @@ export default function ElmiProfile() {
               <li className="relative pl-6 before:content-[''] before:absolute before:left-0 before:top-2 before:w-2 before:h-2 before:bg-primary before:rounded-full">
                 <span className="block text-xs text-text-muted font-semibold">Clinical Experience</span>
                 <span className="font-bold text-text-main block mt-0.5">総合病院勤務</span>
-                <p className="text-sm text-text-light mt-1">分娩介助をはじめ、妊娠期から産褥期までのケア、新生児ケアに幅広く従事。多くの家族のスタートラインをサポート。</p>
+                <p className="text-sm text-text-light mt-1">
+                  分娩介助をはじめ、妊娠期から産褥期までのケア、新生児ケアに幅広く従事。多くの家族のスタートラインをサポート。
+                </p>
               </li>
               <li className="relative pl-6 before:content-[''] before:absolute before:left-0 before:top-2 before:w-2 before:h-2 before:bg-primary before:rounded-full">
                 <span className="block text-xs text-text-muted font-semibold">Certifications</span>
-                <span className="font-bold text-text-main block mt-0.5">新生児蘇生法（NCPR）・日本母体救命システム普及協議会（J-CIMERS）修了</span>
-                <p className="text-sm text-text-light mt-1">赤ちゃんとママの安全を守るため、新生児の心肺蘇生技術（NCPR）および妊産婦の救命救急プログラム（J-CIMERS）を修了しています。</p>
+                <span className="font-bold text-text-main block mt-0.5">
+                  新生児蘇生法（NCPR）・日本母体救命システム普及協議会（J-CIMERS）修了
+                </span>
+                <p className="text-sm text-text-light mt-1">
+                  赤ちゃんとママの安全を守るため、新生児の心肺蘇生技術（NCPR）および妊産婦の救命救急プログラム（J-CIMERS）を修了しています。
+                </p>
               </li>
               <li className="relative pl-6 before:content-[''] before:absolute before:left-0 before:top-2 before:w-2 before:h-2 before:bg-primary before:rounded-full">
                 <span className="block text-xs text-text-muted font-semibold">Postpartum Care & Clinical</span>
                 <span className="font-bold text-text-main block mt-0.5">産後ケア事業・現役臨床助産師として活動</span>
-                <p className="text-sm text-text-light mt-1">特に生後4ヶ月未満の母子を対象とした産後ケア活動に尽力。現在も産科医療機関にて臨床助産師として勤務し、ママと赤ちゃんを日々サポートしています。</p>
+                <p className="text-sm text-text-light mt-1">
+                  特に生後4ヶ月未満の母子を対象とした産後ケア活動に尽力。現在も産科医療機関にて臨床助産師として勤務し、ママと赤ちゃんを日々サポートしています。
+                </p>
               </li>
             </ul>
           </div>
@@ -144,12 +152,16 @@ export default function ElmiProfile() {
                 <div className="p-3 bg-bg-cream rounded-xl border border-border-pink/40 text-center">
                   <span className="text-2xl block mb-1">🏀</span>
                   <span className="font-bold text-xs text-text-main block">バスケ・Bリーグ観戦</span>
-                  <span className="text-[10px] text-text-light block mt-0.5">プレーするのもプロの試合を見るのも大好きです！</span>
+                  <span className="text-[10px] text-text-light block mt-0.5">
+                    プレーするのもプロの試合を見るのも大好きです！
+                  </span>
                 </div>
                 <div className="p-3 bg-bg-cream rounded-xl border border-border-pink/40 text-center">
                   <span className="text-2xl block mb-1">🎭</span>
                   <span className="font-bold text-xs text-text-main block">ミュージカル鑑賞</span>
-                  <span className="text-[10px] text-text-light block mt-0.5">舞台からパワーをもらっています。お気に入りの作品が多数あります。</span>
+                  <span className="text-[10px] text-text-light block mt-0.5">
+                    舞台からパワーをもらっています。お気に入りの作品が多数あります。
+                  </span>
                 </div>
               </div>
             </div>

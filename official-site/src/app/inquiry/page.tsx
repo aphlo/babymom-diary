@@ -1,6 +1,6 @@
 "use client";
-import { useEffect } from "react";
 import Script from "next/script";
+import { useEffect } from "react";
 
 export default function Inquiry() {
   const initWidget = () => {
@@ -24,6 +24,7 @@ export default function Inquiry() {
     }
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: initWidget is a stable function for loading script callback
   useEffect(() => {
     if (typeof window !== "undefined" && (window as any).KoeLoopWidget) {
       initWidget();
@@ -38,11 +39,7 @@ export default function Inquiry() {
           <div id="koeloop-widget-dddb40ea-a331-4cb9-84bb-b81187047a20" className="min-h-[400px]"></div>
         </div>
       </section>
-      <Script
-        src="https://koeloop.dev/widget.js"
-        onLoad={initWidget}
-        strategy="afterInteractive"
-      />
+      <Script src="https://koeloop.dev/widget.js" onLoad={initWidget} strategy="afterInteractive" />
     </>
   );
 }

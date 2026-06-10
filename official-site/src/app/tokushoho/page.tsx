@@ -9,20 +9,30 @@ export default function Tokushoho() {
   return (
     <section className="pt-[120px] pb-[60px] px-5 min-h-[calc(100vh-180px)] bg-linear-to-br from-bg-pink to-white flex justify-center">
       <div className="w-full max-w-[800px] bg-white/80 rounded-lg p-6 md:p-10 shadow-soft backdrop-blur-md border border-border-pink">
-        <h1 className="text-center mb-8 text-text-main font-fredoka text-3xl md:text-4xl font-bold">特定商取引法に基づく表記</h1>
+        <h1 className="text-center mb-8 text-text-main font-fredoka text-3xl md:text-4xl font-bold">
+          特定商取引法に基づく表記
+        </h1>
 
         <table className="w-full border-collapse mt-5 text-[0.95rem] text-text-light leading-relaxed">
           <tbody>
             <tr className="block md:table-row">
-              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">事業者の名称</th>
+              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
+                事業者の名称
+              </th>
               <td className="p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">aphlo</td>
             </tr>
             <tr className="block md:table-row">
-              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">代表者または運営責任者</th>
-              <td className="p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">巨海　宏向</td>
+              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
+                代表者または運営責任者
+              </th>
+              <td className="p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
+                巨海　宏向
+              </td>
             </tr>
             <tr className="block md:table-row">
-              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">所在地</th>
+              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
+                所在地
+              </th>
               <td className="p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
                 〒150-0044
                 <br />
@@ -30,15 +40,22 @@ export default function Tokushoho() {
               </td>
             </tr>
             <tr className="block md:table-row">
-              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">連絡先</th>
+              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
+                連絡先
+              </th>
               <td className="p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
-                メールアドレス: <a href="mailto:support@aphlo.com" className="text-primary-dark hover:underline">support@aphlo.com</a>
+                メールアドレス:{" "}
+                <a href="mailto:support@aphlo.com" className="text-primary-dark hover:underline">
+                  support@aphlo.com
+                </a>
                 <br />
                 電話番号: 090-7044-8919
               </td>
             </tr>
             <tr className="block md:table-row">
-              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">販売価格</th>
+              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
+                販売価格
+              </th>
               <td className="p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
                 プレミアムプラン（月額）: 200円 / 月（税込）
                 <br />
@@ -48,17 +65,25 @@ export default function Tokushoho() {
               </td>
             </tr>
             <tr className="block md:table-row">
-              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">商品代金以外の必要料金</th>
+              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
+                商品代金以外の必要料金
+              </th>
               <td className="p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
                 アプリのダウンロード、利用、アップデートに必要なインターネット接続料金、パケット通信料等はお客様の負担となります。
               </td>
             </tr>
             <tr className="block md:table-row">
-              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">引き渡し時期</th>
-              <td className="p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">購入手続き完了後、即時にご利用いただけます。</td>
+              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
+                引き渡し時期
+              </th>
+              <td className="p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
+                購入手続き完了後、即時にご利用いただけます。
+              </td>
             </tr>
             <tr className="block md:table-row">
-              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">お支払方法および支払時期</th>
+              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
+                お支払方法および支払時期
+              </th>
               <td className="p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
                 ・App Store決済（Apple Inc.の規約に基づきます）
                 <br />
@@ -66,7 +91,9 @@ export default function Tokushoho() {
               </td>
             </tr>
             <tr className="block md:table-row">
-              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">返品・交換・キャンセル等</th>
+              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
+                返品・交換・キャンセル等
+              </th>
               <td className="p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
                 デジタルコンテンツの特性上、購入手続き完了後の返品・返金・キャンセルはお受けできません。
                 <br />
@@ -75,7 +102,9 @@ export default function Tokushoho() {
               </td>
             </tr>
             <tr className="block md:table-row">
-              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">動作環境</th>
+              <th className="w-full md:w-[30%] bg-bg-pink/30 text-text-main font-bold p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
+                動作環境
+              </th>
               <td className="p-4 border-b border-border-pink text-left block md:table-cell md:vertical-top">
                 iOS 17.0 以降を搭載した iPhone/iPad
                 <br />

@@ -20,7 +20,8 @@ export default function Home() {
     {
       slug: "baby-vaccination-schedule",
       title: "赤ちゃんの予防接種スケジュール管理と進め方のコツ",
-      description: "生後2ヶ月から始まる赤ちゃんの予防接種。種類が多くて複雑な予防接種スケジュールを漏れなくスムーズに進めるための方法を解説します。",
+      description:
+        "生後2ヶ月から始まる赤ちゃんの予防接種。種類が多くて複雑な予防接種スケジュールを漏れなくスムーズに進めるための方法を解説します。",
       category: "予防接種",
       publishedAt: "2026/06/09",
     },
@@ -42,11 +43,15 @@ export default function Home() {
               赤ちゃんをmilu あなたをmilu
             </div>
             <h1 className="hero-title animate-fade-in delay-100 text-[36px] md:text-[56px] font-bold leading-tight mb-6 text-text-main tracking-tight font-fredoka">
-              <span className="text-primary relative">milu</span>だけで<br />
-              <span className="relative after:content-[''] after:absolute after:bottom-1 after:left-0 after:right-0 after:h-3 after:bg-secondary after:rounded-sm after:-z-10">育児がまとまる</span>
+              <span className="text-primary relative">milu</span>だけで
+              <br />
+              <span className="relative after:content-[''] after:absolute after:bottom-1 after:left-0 after:right-0 after:h-3 after:bg-secondary after:rounded-sm after:-z-10">
+                育児がまとまる
+              </span>
             </h1>
             <p className="hero-description animate-fade-in delay-200 text-lg text-text-light mb-10 max-w-[480px] mx-auto lg:mx-0 leading-relaxed">
-              授乳も成長曲線も予防接種も、まとめて管理。<br />
+              授乳も成長曲線も予防接種も、まとめて管理。
+              <br />
               忙しい毎日の育児をシンプルにサポートします。
             </p>
             <div className="store-buttons animate-fade-in delay-300 flex gap-3 justify-center lg:justify-start items-center">
@@ -89,7 +94,11 @@ export default function Home() {
               </div>
               <div className="phone-mockup relative w-[280px] h-[580px] md:w-[320px] md:h-[660px] bg-gradient-to-br from-[#2D2D2D] to-[#1A1A1A] rounded-[44px] p-3 shadow-[0_50px_100px_rgba(31,41,55,0.3),0_20px_60px_rgba(255,143,163,0.15)] border border-white/10">
                 <div className="phone-screen w-full h-full bg-white rounded-[36px] overflow-hidden flex items-center justify-center relative">
-                  <img src="/assets/images/home_page.png" alt="miluホーム画面" className="w-full h-full object-cover object-top" />
+                  <img
+                    src="/assets/images/home_page.png"
+                    alt="miluホーム画面"
+                    className="w-full h-full object-cover object-top"
+                  />
                 </div>
               </div>
             </div>
@@ -108,7 +117,13 @@ export default function Home() {
         <div className="features-grid max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="feature-card animate-fade-in delay-100 bg-white border border-border-pink rounded-lg p-8 transition-all hover:-translate-y-1 hover:shadow-hover hover:border-primary-light cursor-pointer">
             <div className="feature-icon w-14 h-14 bg-gradient-to-br from-bg-pink to-secondary rounded-md flex items-center justify-center mb-5 text-primary-dark">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                className="w-7 h-7"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -124,7 +139,13 @@ export default function Home() {
           </div>
           <div className="feature-card animate-fade-in delay-200 bg-white border border-border-pink rounded-lg p-8 transition-all hover:-translate-y-1 hover:shadow-hover hover:border-primary-light cursor-pointer">
             <div className="feature-icon w-14 h-14 bg-gradient-to-br from-bg-pink to-secondary rounded-md flex items-center justify-center mb-5 text-primary-dark">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                className="w-7 h-7"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -140,7 +161,13 @@ export default function Home() {
           </div>
           <div className="feature-card animate-fade-in delay-300 bg-white border border-border-pink rounded-lg p-8 transition-all hover:-translate-y-1 hover:shadow-hover hover:border-primary-light cursor-pointer">
             <div className="feature-icon w-14 h-14 bg-gradient-to-br from-bg-pink to-secondary rounded-md flex items-center justify-center mb-5 text-primary-dark">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                className="w-7 h-7"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -156,7 +183,13 @@ export default function Home() {
           </div>
           <div className="feature-card animate-fade-in delay-100 bg-white border border-border-pink rounded-lg p-8 transition-all hover:-translate-y-1 hover:shadow-hover hover:border-primary-light cursor-pointer">
             <div className="feature-icon w-14 h-14 bg-gradient-to-br from-bg-pink to-secondary rounded-md flex items-center justify-center mb-5 text-primary-dark">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                className="w-7 h-7"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -172,7 +205,13 @@ export default function Home() {
           </div>
           <div className="feature-card animate-fade-in delay-200 bg-white border border-border-pink rounded-lg p-8 transition-all hover:-translate-y-1 hover:shadow-hover hover:border-primary-light cursor-pointer">
             <div className="feature-icon w-14 h-14 bg-gradient-to-br from-bg-pink to-secondary rounded-md flex items-center justify-center mb-5 text-primary-dark">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                className="w-7 h-7"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -188,7 +227,13 @@ export default function Home() {
           </div>
           <div className="feature-card animate-fade-in delay-300 bg-white border border-border-pink rounded-lg p-8 transition-all hover:-translate-y-1 hover:shadow-hover hover:border-primary-light cursor-pointer">
             <div className="feature-icon w-14 h-14 bg-gradient-to-br from-bg-pink to-secondary rounded-md flex items-center justify-center mb-5 text-primary-dark">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                className="w-7 h-7"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -211,17 +256,25 @@ export default function Home() {
           <div className="showcase-grid grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="showcase-content order-2 lg:order-1 animate-fade-in">
               <h2 className="showcase-title text-2xl md:text-3xl font-bold mb-6 text-text-main font-fredoka leading-snug">
-                すべての育児記録を<br />
+                すべての育児記録を
+                <br />
                 <span className="text-primary">ひとつのアプリで</span>
               </h2>
               <p className="showcase-description text-base text-text-light mb-8 leading-relaxed">
-                複数のアプリを使い分ける必要はありません。<br />
+                複数のアプリを使い分ける必要はありません。
+                <br />
                 miluだけで、育児のすべてを管理できます。
               </p>
               <div className="benefit-list flex flex-col gap-4">
                 <div className="benefit-item flex items-start gap-4 p-4 px-5 bg-white rounded-md shadow-soft transition-transform hover:translate-x-1 hover:shadow-card cursor-pointer">
                   <div className="benefit-icon w-11 h-11 bg-gradient-to-br from-primary-light to-primary rounded-md flex items-center justify-center flex-shrink-0 text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5.5 h-5.5">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      className="w-5.5 h-5.5"
+                    >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
@@ -232,7 +285,13 @@ export default function Home() {
                 </div>
                 <div className="benefit-item flex items-start gap-4 p-4 px-5 bg-white rounded-md shadow-soft transition-transform hover:translate-x-1 hover:shadow-card cursor-pointer">
                   <div className="benefit-icon w-11 h-11 bg-gradient-to-br from-primary-light to-primary rounded-md flex items-center justify-center flex-shrink-0 text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5.5 h-5.5">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      className="w-5.5 h-5.5"
+                    >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
@@ -243,7 +302,13 @@ export default function Home() {
                 </div>
                 <div className="benefit-item flex items-start gap-4 p-4 px-5 bg-white rounded-md shadow-soft transition-transform hover:translate-x-1 hover:shadow-card cursor-pointer">
                   <div className="benefit-icon w-11 h-11 bg-gradient-to-br from-primary-light to-primary rounded-md flex items-center justify-center flex-shrink-0 text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5.5 h-5.5">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      className="w-5.5 h-5.5"
+                    >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
@@ -257,12 +322,20 @@ export default function Home() {
             <div className="showcase-visual order-1 lg:order-2 flex justify-center gap-6 flex-wrap animate-fade-in delay-200">
               <div className="showcase-phone w-[220px] h-[460px] bg-gradient-to-br from-[#2D2D2D] to-[#1A1A1A] rounded-[36px] p-2 shadow-card">
                 <div className="showcase-phone-screen w-full h-full bg-white rounded-[30px] overflow-hidden flex items-center justify-center">
-                  <img src="/assets/images/growth_curve.png" alt="成長曲線" className="w-full h-full object-cover object-top" />
+                  <img
+                    src="/assets/images/growth_curve.png"
+                    alt="成長曲線"
+                    className="w-full h-full object-cover object-top"
+                  />
                 </div>
               </div>
               <div className="showcase-phone w-[220px] h-[460px] bg-gradient-to-br from-[#2D2D2D] to-[#1A1A1A] rounded-[36px] p-2 shadow-card mt-10">
                 <div className="showcase-phone-screen w-full h-full bg-white rounded-[30px] overflow-hidden flex items-center justify-center">
-                  <img src="/assets/images/vaccine_page.png" alt="予防接種管理" className="w-full h-full object-cover object-top" />
+                  <img
+                    src="/assets/images/vaccine_page.png"
+                    alt="予防接種管理"
+                    className="w-full h-full object-cover object-top"
+                  />
                 </div>
               </div>
             </div>
@@ -277,18 +350,31 @@ export default function Home() {
             <h2 className="section-title text-3xl md:text-4xl font-bold mb-4 text-text-main font-fredoka">
               <span className="text-primary">お役立ち</span>記事・コラム
             </h2>
-            <p className="section-description text-base text-text-light">育児の不安を解消する、お役立ち記事・コラムを配信中</p>
+            <p className="section-description text-base text-text-light">
+              育児の不安を解消する、お役立ち記事・コラムを配信中
+            </p>
           </div>
           <div className="features-grid max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
             {latestArticles.map((art, idx) => (
-              <div key={art.slug} className={`feature-card animate-fade-in delay-${(idx + 1) * 100} bg-white border border-border-pink rounded-lg p-8 transition-all hover:-translate-y-1 hover:shadow-hover hover:border-primary-light cursor-pointer flex flex-col justify-between h-full`} style={{ minHeight: "260px" }}>
+              <div
+                key={art.slug}
+                className={`feature-card animate-fade-in delay-${(idx + 1) * 100} bg-white border border-border-pink rounded-lg p-8 transition-all hover:-translate-y-1 hover:shadow-hover hover:border-primary-light cursor-pointer flex flex-col justify-between h-full`}
+                style={{ minHeight: "260px" }}
+              >
                 <div>
-                  <span className="text-[11px] bg-bg-pink text-primary-dark py-0.5 px-2.5 rounded-full font-bold inline-block mb-3">{art.category}</span>
+                  <span className="text-[11px] bg-bg-pink text-primary-dark py-0.5 px-2.5 rounded-full font-bold inline-block mb-3">
+                    {art.category}
+                  </span>
                   <h3 className="feature-title text-lg font-bold mb-3 text-text-main font-fredoka">{art.title}</h3>
-                  <p className="feature-description text-sm text-text-light leading-relaxed line-clamp-3 mb-4">{art.description}</p>
+                  <p className="feature-description text-sm text-text-light leading-relaxed line-clamp-3 mb-4">
+                    {art.description}
+                  </p>
                 </div>
                 <div className="mt-4">
-                  <Link href={`/columns/${art.slug}`} className="text-primary-dark font-bold hover:underline inline-flex items-center gap-1">
+                  <Link
+                    href={`/columns/${art.slug}`}
+                    className="text-primary-dark font-bold hover:underline inline-flex items-center gap-1"
+                  >
                     詳しく読む →
                   </Link>
                 </div>
@@ -304,8 +390,12 @@ export default function Home() {
         <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.1)_0%,transparent_50%)] pointer-events-none"></div>
 
         <div className="cta-content max-w-[600px] mx-auto relative z-10 animate-fade-in">
-          <h2 className="cta-title text-3xl md:text-4xl font-bold mb-4 font-fredoka leading-snug">今すぐmiluをはじめよう</h2>
-          <p className="cta-description text-lg mb-10 opacity-90 leading-relaxed">無料でダウンロードして、育児をもっとシンプルに。</p>
+          <h2 className="cta-title text-3xl md:text-4xl font-bold mb-4 font-fredoka leading-snug">
+            今すぐmiluをはじめよう
+          </h2>
+          <p className="cta-description text-lg mb-10 opacity-90 leading-relaxed">
+            無料でダウンロードして、育児をもっとシンプルに。
+          </p>
           <div className="store-buttons flex gap-3 justify-center items-center">
             <a
               href="https://apps.apple.com/jp/app/milu-%E8%B5%A4%E3%81%A1%E3%82%83%E3%82%93%E3%81%AE%E6%8E%88%E4%B9%B3%E8%A8%98%E9%8C%B2%E3%81%A8%E4%BA%88%E9%98%B2%E6%8E%A5%E7%A8%AE%E7%AE%A1%E7%90%86/id6754955821?l=en-US"

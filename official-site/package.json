@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "biome:format": "biome format .",
+    "biome:lint": "biome lint .",
+    "biome:check": "biome check --write .",
+    "biome:ci": "biome ci ."
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.0",
@@ -16,6 +20,7 @@
     "tailwindcss": "^4.3.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.16",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

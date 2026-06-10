@@ -36,7 +36,10 @@ body {
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: var(--font-fredoka);
   font-weight: 600;
 }
@@ -54,8 +57,13 @@ h1, h2, h3, h4 {
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .animate-fade-in {
@@ -63,11 +71,21 @@ h1, h2, h3, h4 {
   opacity: 0;
 }
 
-.delay-100 { animation-delay: 0.1s; }
-.delay-200 { animation-delay: 0.2s; }
-.delay-300 { animation-delay: 0.3s; }
-.delay-400 { animation-delay: 0.4s; }
-.delay-500 { animation-delay: 0.5s; }
+.delay-100 {
+  animation-delay: 0.1s;
+}
+.delay-200 {
+  animation-delay: 0.2s;
+}
+.delay-300 {
+  animation-delay: 0.3s;
+}
+.delay-400 {
+  animation-delay: 0.4s;
+}
+.delay-500 {
+  animation-delay: 0.5s;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in {
@@ -83,11 +101,25 @@ h1, h2, h3, h4 {
 .phone-mockup {
   animation: float 6s ease-in-out infinite;
 }
-.decoration-1 { animation: float 8s ease-in-out infinite; animation-delay: 1s; }
-.decoration-2 { animation: float 7s ease-in-out infinite; animation-delay: 2s; }
-.decoration-3 { animation: float 5s ease-in-out infinite; }
-.mascot-bear { animation: float 6s ease-in-out infinite; animation-delay: 0.5s; }
-.mascot-cat { animation: float 7s ease-in-out infinite; animation-delay: 1.5s; }
+.decoration-1 {
+  animation: float 8s ease-in-out infinite;
+  animation-delay: 1s;
+}
+.decoration-2 {
+  animation: float 7s ease-in-out infinite;
+  animation-delay: 2s;
+}
+.decoration-3 {
+  animation: float 5s ease-in-out infinite;
+}
+.mascot-bear {
+  animation: float 6s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+.mascot-cat {
+  animation: float 7s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
 
 /* Markdown body rendering styles (Tailwind Preflight overrides) */
 .article-body {
