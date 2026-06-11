@@ -8,10 +8,10 @@ import 'menu_section.dart';
 class MenuAppInfoSection extends StatelessWidget {
   const MenuAppInfoSection({super.key});
 
-  static const _aboutUrl = 'https://https://milu-baby.app/';
-  static const _termsUrl = 'https://https://milu-baby.app/terms';
-  static const _privacyUrl = 'https://https://milu-baby.app/privacy';
-  static const _legalUrl = 'https://https://milu-baby.app/tokushoho';
+  static const _aboutUrl = 'https://milu-baby.app/';
+  static const _termsUrl = 'https://milu-baby.app/terms';
+  static const _privacyUrl = 'https://milu-baby.app/privacy';
+  static const _legalUrl = 'https://milu-baby.app/tokushoho';
   static const _inquiryUrl =
       'https://koeloop.dev/embed/dddb40ea-a331-4cb9-84bb-b81187047a20?theme=light&locale=ja&primaryColor=%23E87086&showVoting=false&showFeedback=true&showFAQ=true&showEmailField=true';
   static const _operatorUrl = 'https://aphlo.com';
