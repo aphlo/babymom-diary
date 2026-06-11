@@ -8,15 +8,6 @@ on:
       - 'official-site/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'デプロイ先環境 (preview: プレビュー環境, production: 本番環境)'
-        required: true
-        default: 'preview'
-        type: choice
-        options:
-          - preview
-          - production
 
 permissions:
   contents: read
@@ -60,22 +51,22 @@ jobs:
         run: pnpm build
         working-directory: official-site
 
-      # developブランチへの自動プッシュ時、または手動起動でpreviewを選択した場合にプレビューデプロイ
-      - name: Deploy to Cloudflare Pages (Preview)
-        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'preview')
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy out --project-name=milu-official-site --branch=${{ github.ref_name }}
-          workingDirectory: official-site
-
-      # 手動起動でproductionを選択した場合に本番環境へデプロイ
+      # developブランチへの自動プッシュ（マージ）時に本番環境へデプロイ
       - name: Deploy to Cloudflare Pages (Production)
-        if: github.event_name == 'workflow_dispatch' && inputs.environment == 'production'
+        if: github.event_name == 'push'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy out --project-name=milu-official-site --branch=develop
+          workingDirectory: official-site
+
+      # 手動起動時にプレビュー環境へデプロイ
+      - name: Deploy to Cloudflare Pages (Preview)
+        if: github.event_name == 'workflow_dispatch'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy out --project-name=milu-official-site --branch=${{ github.ref_name }}
           workingDirectory: official-site
