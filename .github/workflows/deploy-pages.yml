@@ -1,0 +1,72 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'official-site/**'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v4
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('official-site/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: official-site
+
+      - name: Build Next.js site
+        run: pnpm build
+        working-directory: official-site
+
+      # developブランチへの自動プッシュ（マージ）時に本番環境へデプロイ
+      - name: Deploy to Cloudflare Pages (Production)
+        if: github.event_name == 'push'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy out --project-name=milu-official-site --branch=develop
+          workingDirectory: official-site
+
+      # 手動起動時にプレビュー環境へデプロイ
+      - name: Deploy to Cloudflare Pages (Preview)
+        if: github.event_name == 'workflow_dispatch'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy out --project-name=milu-official-site --branch=${{ github.ref_name }}
+          workingDirectory: official-site

@@ -57,6 +57,32 @@ fvm flutter test --name "test name pattern"   # Run specific test by name
 fvm flutter run --flavor stg -t lib/main_stg.dart --device-id <device>
 ```
 
+### Official Site (via pnpm)
+
+**NOTE:** All commands must be run from the `official-site/` directory.
+
+```bash
+cd official-site
+pnpm run dev          # Run dev server
+pnpm run build        # Build production site
+pnpm run biome:check  # Format and lint code with Biome (auto-fix)
+pnpm run biome:ci     # Run Biome CI checks (read-only verification)
+pnpm run lint         # Run ESLint check
+```
+
+### Cloud Functions (via npm/pnpm)
+
+**NOTE:** All commands must be run from the `cloud-functions/` directory.
+
+```bash
+cd cloud-functions
+pnpm run build        # Build functions (TypeScript)
+pnpm run lint         # Lint functions with Biome
+pnpm run format       # Format functions with Biome
+pnpm run check        # Run Biome check (check:fix for auto-fix)
+pnpm run test         # Run Jest unit tests
+```
+
 ### Testing
 - Unit tests mirror feature structure: `flutter/test/features/{feature}/{layer}/{file}_test.dart`
 - Focus on domain services and use cases for business logic validation
@@ -365,7 +391,11 @@ firebase deploy --only firestore:rules,firestore:indexes
 
 ## Code Review Guidelines (Codex for milu)
 
-- Quality & Verification (CRITICAL): When modifying any Flutter code, you MUST run `rake format && rake lint && rake test` in the `flutter/` directory and ensure all of them pass without errors before finishing the task. Never skip this validation step.
+- Quality & Verification (CRITICAL): Verify modified code before finishing the task:
+  - Flutter: Run `rake format && rake lint && rake test` in the `flutter/` directory.
+  - Official Site: Run `pnpm run biome:ci && pnpm run lint` in the `official-site/` directory.
+  - Cloud Functions: Run `pnpm run check && pnpm run lint && pnpm run test` in the `cloud-functions/` directory.
+  Ensure all validation tasks pass without errors. Never skip this validation step.
 - Security/Privacy: Never log PII (child/household IDs, birthdays, names), tokens, or Firebase configs; avoid persisting secrets or auth artifacts in plain text.
 - Error handling: Do not swallow exceptions; surface user-impacting failures with safe copy and recovery paths; prefer typed errors over generic catches.
 - Flutter/Riverpod: Enforce null-safety, check mounted/cancellation before updating UI state, avoid unnecessary rebuilds (prefer `ConsumerWidget` splits/select), and keep providers slim.

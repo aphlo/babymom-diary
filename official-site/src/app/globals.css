@@ -1,0 +1,188 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #FF8FA3;
+  --color-primary-light: #FFB5C2;
+  --color-primary-dark: #E57A8C;
+  --color-secondary: #FFD4DB;
+  --color-accent: #7C3AED;
+  --color-text-main: #1F2937;
+  --color-text-light: #6B7280;
+  --color-text-muted: #9CA3AF;
+  --color-bg-cream: #FFFBF7;
+  --color-bg-pink: #FFF5F7;
+  --color-bg-card: #FFFFFF;
+  --color-border-pink: #FFE4E9;
+
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-xl: 40px;
+
+  --shadow-soft: 0 4px 20px rgba(255, 143, 163, 0.15);
+  --shadow-card: 0 8px 32px rgba(255, 143, 163, 0.12);
+  --shadow-hover: 0 12px 40px rgba(255, 143, 163, 0.2);
+
+  --font-nunito: var(--font-nunito), 'Nunito', sans-serif;
+  --font-fredoka: var(--font-fredoka), 'Fredoka', sans-serif;
+}
+
+/* Base resets & Fonts */
+body {
+  font-family: var(--font-nunito);
+  color: var(--color-text-main);
+  line-height: 1.7;
+  background: var(--color-bg-cream);
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-fredoka);
+  font-weight: 600;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+.delay-200 {
+  animation-delay: 0.2s;
+}
+.delay-300 {
+  animation-delay: 0.3s;
+}
+.delay-400 {
+  animation-delay: 0.4s;
+}
+.delay-500 {
+  animation-delay: 0.5s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in {
+    animation: none;
+    opacity: 1;
+  }
+  .phone-mockup {
+    animation: none !important;
+  }
+}
+
+/* Specific component styles not easily Tailwind-ed */
+.phone-mockup {
+  animation: float 6s ease-in-out infinite;
+}
+.decoration-1 {
+  animation: float 8s ease-in-out infinite;
+  animation-delay: 1s;
+}
+.decoration-2 {
+  animation: float 7s ease-in-out infinite;
+  animation-delay: 2s;
+}
+.decoration-3 {
+  animation: float 5s ease-in-out infinite;
+}
+.mascot-bear {
+  animation: float 6s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+.mascot-cat {
+  animation: float 7s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+
+/* Markdown body rendering styles (Tailwind Preflight overrides) */
+.article-body {
+  color: var(--color-text-main);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.article-body h2 {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  margin-top: 40px !important;
+  margin-bottom: 20px !important;
+  color: var(--color-text-main);
+  border-bottom: 2px solid var(--color-secondary);
+  padding-bottom: 8px;
+}
+
+.article-body h3 {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  margin-top: 32px !important;
+  margin-bottom: 16px !important;
+  color: var(--color-text-main);
+}
+
+.article-body p {
+  margin-bottom: 20px !important;
+}
+
+.article-body ul {
+  list-style-type: disc !important;
+  margin-bottom: 24px !important;
+  padding-left: 24px !important;
+}
+
+.article-body ol {
+  list-style-type: decimal !important;
+  margin-bottom: 24px !important;
+  padding-left: 24px !important;
+}
+
+.article-body li {
+  margin-bottom: 8px !important;
+  list-style: inherit !important;
+}
+
+.article-body strong {
+  font-weight: 700 !important;
+  color: var(--color-primary-dark);
+}
+
+.article-body a {
+  color: var(--color-primary-dark) !important;
+  text-decoration: underline !important;
+}
+
+.article-body a:hover {
+  color: var(--color-primary) !important;
+}
+
+.article-body hr {
+  margin: 40px 0 !important;
+  border: 0;
+  border-top: 1px dashed var(--color-border-pink) !important;
+}

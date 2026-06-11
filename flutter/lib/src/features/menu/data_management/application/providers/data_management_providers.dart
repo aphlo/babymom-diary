@@ -3,6 +3,7 @@ import 'package:babymom_diary/src/core/firebase/household_service.dart';
 import 'package:babymom_diary/src/features/menu/data_management/domain/repositories/data_management_repository.dart';
 import 'package:babymom_diary/src/features/menu/data_management/infrastructure/repositories/data_management_repository_impl.dart';
 import 'package:babymom_diary/src/features/menu/data_management/application/usecases/delete_all_household_data.dart';
+import 'package:babymom_diary/src/features/menu/data_management/application/usecases/withdraw_usecase.dart';
 
 part 'data_management_providers.g.dart';
 
@@ -18,4 +19,12 @@ DataManagementRepository dataManagementRepository(Ref ref) {
 DeleteAllHouseholdData deleteAllHouseholdData(Ref ref) {
   final repository = ref.watch(dataManagementRepositoryProvider);
   return DeleteAllHouseholdData(repository);
+}
+
+/// Provider for WithdrawUseCase
+@riverpod
+WithdrawUseCase withdrawUseCase(Ref ref) {
+  final auth = ref.watch(firebaseAuthProvider);
+  final functions = ref.watch(firebaseFunctionsProvider);
+  return WithdrawUseCase(auth, functions);
 }

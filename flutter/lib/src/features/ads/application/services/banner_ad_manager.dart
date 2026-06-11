@@ -38,6 +38,7 @@ enum BannerAdSlot {
   feedingTableSettings,
   notificationSettings,
   vaccineVisibilitySettings,
+  babyRecordSettings,
 }
 
 /// ボトムナビゲーションのタブ
@@ -75,6 +76,7 @@ extension BannerAdSlotExtension on BannerAdSlot {
       case BannerAdSlot.feedingTableSettings:
       case BannerAdSlot.notificationSettings:
       case BannerAdSlot.vaccineVisibilitySettings:
+      case BannerAdSlot.babyRecordSettings:
         return null;
     }
   }

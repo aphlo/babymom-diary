@@ -5,6 +5,7 @@ import { registerFcmToken } from "./notifications/registerFcmToken";
 import { sendDailyEncouragement } from "./notifications/sendDailyEncouragement";
 import { sendVaccineReminder } from "./notifications/sendVaccineReminder";
 import { unregisterFcmToken } from "./notifications/unregisterFcmToken";
+import { deleteAccount } from "./users/deleteAccount";
 
 // Initialize Firebase Admin SDK
 admin.initializeApp();
@@ -17,4 +18,5 @@ export {
   sendDailyEncouragement,
   sendVaccineReminder,
   unregisterFcmToken,
+  deleteAccount,
 };

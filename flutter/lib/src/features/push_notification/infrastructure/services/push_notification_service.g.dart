@@ -140,4 +140,4 @@ final class PushNotificationServiceProvider extends $FunctionalProvider<
 }
 
 String _$pushNotificationServiceHash() =>
-    r'c4502d130ede23f79afa64255286319da2b3268e';
+    r'2fff6aeae7b7f05736c9be3767aa721dd90703b6';
