@@ -8,9 +8,7 @@ export default function Article1() {
         この記事では、月齢別の授乳スケジュールの目安や量、そして日々の記録を簡単にするコツを紹介します。
       </p>
 
-      <h2 className="text-2xl font-bold mt-10 mb-4 border-b-2 border-secondary pb-2">
-        1. 月齢別の授乳・ミルクの目安
-      </h2>
+      <h2 className="text-2xl font-bold mt-10 mb-4 border-b-2 border-secondary pb-2">1. 月齢別の授乳・ミルクの目安</h2>
       <p className="mb-6">赤ちゃんの成長スピードや飲む量には個人差がありますが、一般的な目安は以下の通りです。</p>
 
       <h3 className="text-xl font-bold mt-6 mb-3 text-primary-dark">新生児期（生後0〜1ヶ月頃）</h3>

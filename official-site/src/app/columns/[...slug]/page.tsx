@@ -1,11 +1,11 @@
-import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import ArticleSidebar from "../../../components/ArticleSidebar";
+import Article1 from "../../../components/articles/Article1";
+import Article2 from "../../../components/articles/Article2";
 import CtaCard from "../../../components/CtaCard";
 import SupervisorProfile from "../../../components/SupervisorProfile";
 import { articles, LARGE_CATEGORIES, SUB_CATEGORIES } from "../../../data/articles";
-import Article1 from "../../../components/articles/Article1";
-import Article2 from "../../../components/articles/Article2";
 
 type Props = {
   params: Promise<{ slug: string[] }>;
@@ -24,10 +24,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!article) {
     return {};
   }
-
-  const categoryLabel = article.subCategory
-    ? `${LARGE_CATEGORIES[article.largeCategory]} > ${SUB_CATEGORIES[article.subCategory as keyof typeof SUB_CATEGORIES]}`
-    : LARGE_CATEGORIES[article.largeCategory];
 
   return {
     title: article.title,
@@ -70,9 +66,7 @@ export default async function ArticlePage({ params }: Props) {
       <div className="bg-gradient-to-b from-bg-pink to-white/50 py-14 px-6 text-center border-b border-border-pink">
         <div className="max-w-[800px] mx-auto animate-fade-in">
           <div className="flex justify-center items-center gap-3 mb-4 text-sm">
-            <span className="bg-primary text-white py-1 px-3 rounded-full font-semibold text-xs">
-              {categoryName}
-            </span>
+            <span className="bg-primary text-white py-1 px-3 rounded-full font-semibold text-xs">{categoryName}</span>
             <time className="text-text-light" dateTime={article.publishedAt.replace(/\//g, "-")}>
               {article.publishedAt}
             </time>

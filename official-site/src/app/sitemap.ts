@@ -3,7 +3,6 @@ import { articles } from "src/data/articles";
 
 export const dynamic = "force-static";
 
-
 export default function sitemap(): MetadataRoute.Sitemap {
   // 環境変数 NEXT_PUBLIC_SITE_URL を使用し、無ければデフォルトの仮ドメインを使用
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://milu-baby.app";
@@ -11,15 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
 
   // 静的ページの一覧
-  const staticPaths = [
-    "",
-    "/about",
-    "/inquiry",
-    "/privacy",
-    "/terms",
-    "/tokushoho",
-    "/columns",
-  ];
+  const staticPaths = ["", "/about", "/inquiry", "/privacy", "/terms", "/tokushoho", "/columns"];
 
   const staticEntries = staticPaths.map((path) => ({
     url: `${baseUrl}${path}`,

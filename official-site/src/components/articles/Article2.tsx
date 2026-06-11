@@ -35,9 +35,7 @@ export default function Article2() {
           <strong>B型肝炎</strong>: 将来的な肝炎や肝がんへの移行を防ぎます。
         </li>
       </ul>
-      <p className="mb-6">
-        生後2ヶ月の時点では、これら多くのワクチンを複数同時に接種することが推奨されています。
-      </p>
+      <p className="mb-6">生後2ヶ月の時点では、これら多くのワクチンを複数同時に接種することが推奨されています。</p>
 
       <hr className="my-10 border-t border-dashed border-border-pink" />
 
