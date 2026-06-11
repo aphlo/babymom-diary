@@ -89,7 +89,7 @@ export default function Article2() {
         </li>
       </ul>
       <p className="mb-6">
-        スケジュール管理だけでなく、日々の授乳・睡眠・おむつ替えの記録や成長曲線も一元管理できます。
+        スケジュール管理だけでなく、日々の授乳・おむつ替えの記録や成長曲線も一元管理できます。
       </p>
       <p className="mb-6 font-bold text-primary-dark">
         スマートにスケジュールを組んで、お子さまの大切な予防接種を漏れなく進めましょう！

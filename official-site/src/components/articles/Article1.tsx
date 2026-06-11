@@ -14,26 +14,29 @@ export default function Article1() {
       <h3 className="text-xl font-bold mt-6 mb-3 text-primary-dark">新生児期（生後0〜1ヶ月頃）</h3>
       <ul className="list-disc pl-6 mb-6 flex flex-col gap-2">
         <li>
-          <strong>回数の目安</strong>: 1日8〜12回（欲しがるだけ与える）
+          <strong>回数の目安</strong>: 1日8回以上（母乳は欲しがるだけ与える）
         </li>
         <li>
-          <strong>1回の量</strong>: 母乳は左右10分ずつ程度、ミルクは80ml〜120ml程度
+          <strong>1回の量</strong>: 母乳は赤ちゃんが離すまで、ミルクは最大120ml程度
         </li>
         <li>
           <strong>特徴</strong>: 胃が小さいため、一度にたくさん飲めません。こまめな授乳が必要です。
+        </li>
+        <li>
+          <strong>注意</strong>: ミルクの量は産院からの指導を参考にしてください。
         </li>
       </ul>
 
       <h3 className="text-xl font-bold mt-6 mb-3 text-primary-dark">生後2〜3ヶ月頃</h3>
       <ul className="list-disc pl-6 mb-6 flex flex-col gap-2">
         <li>
-          <strong>回数の目安</strong>: 1日6〜8回（授乳間隔が3〜4時間あくようになる）
+          <strong>回数の目安</strong>: 1日6〜8回（授乳間隔が3〜4時間あくようになることもある）
         </li>
         <li>
           <strong>1回の量</strong>: ミルクの場合は140ml〜160ml程度
         </li>
         <li>
-          <strong>特徴</strong>: 飲む力が強くなり、一度に飲める量が増えます。
+          <strong>特徴</strong>: 飲む力が強くなり、一度に飲める量が増えます。遊び飲みが始まるので飲みムラが出てきやすいです。1日のトータルで必要量が飲めていればOK。
         </li>
       </ul>
 
@@ -87,11 +90,11 @@ export default function Article1() {
       <h3 className="text-xl font-bold mt-6 mb-3 text-primary-dark">miluでできること</h3>
       <ul className="list-disc pl-6 mb-6 flex flex-col gap-2">
         <li>
-          <strong>ワンタップ簡単記録</strong>:
-          授乳タイマー機能で左右の授乳時間をスマートに計測。ミルクの量も数値入力するだけで保存完了。
+          <strong>簡単記録</strong>:
+          授乳時間やミルクの量も数値入力するだけで保存完了。
         </li>
         <li>
-          <strong>自動グラフ化</strong>: 毎日の授乳リズムやトータル量が自动でグラフになり、一目で確認可能。
+          <strong>自動グラフ化</strong>: 毎日の授乳リズムやトータル量が自動でグラフになり、一目で確認可能。
         </li>
         <li>
           <strong>パートナーとリアルタイム共有</strong>:
