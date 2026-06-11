@@ -36,7 +36,8 @@ export default function Article1() {
           <strong>1回の量</strong>: ミルクの場合は140ml〜160ml程度
         </li>
         <li>
-          <strong>特徴</strong>: 飲む力が強くなり、一度に飲める量が増えます。遊び飲みが始まるので飲みムラが出てきやすいです。1日のトータルで必要量が飲めていればOK。
+          <strong>特徴</strong>:
+          飲む力が強くなり、一度に飲める量が増えます。遊び飲みが始まるので飲みムラが出てきやすいです。1日のトータルで必要量が飲めていればOK。
         </li>
       </ul>
 
@@ -90,8 +91,7 @@ export default function Article1() {
       <h3 className="text-xl font-bold mt-6 mb-3 text-primary-dark">miluでできること</h3>
       <ul className="list-disc pl-6 mb-6 flex flex-col gap-2">
         <li>
-          <strong>簡単記録</strong>:
-          授乳時間やミルクの量も数値入力するだけで保存完了。
+          <strong>簡単記録</strong>: 授乳時間やミルクの量も数値入力するだけで保存完了。
         </li>
         <li>
           <strong>自動グラフ化</strong>: 毎日の授乳リズムやトータル量が自動でグラフになり、一目で確認可能。
