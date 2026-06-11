@@ -13,9 +13,9 @@ class PaywallFooter extends StatelessWidget {
   final bool isRestoring;
   final VoidCallback onRestore;
 
-  static const _termsUrl = 'https://babymom-diary.web.app/terms.html';
-  static const _privacyUrl = 'https://babymom-diary.web.app/privacy.html';
-  static const _legalUrl = 'https://babymom-diary.web.app/tokushoho.html';
+  static const _termsUrl = 'https://milu-baby.app/terms';
+  static const _privacyUrl = 'https://milu-baby.app/privacy';
+  static const _legalUrl = 'https://milu-baby.app/tokushoho';
 
   Future<void> _launchUrl(BuildContext context, String url) async {
     final uri = Uri.parse(url);

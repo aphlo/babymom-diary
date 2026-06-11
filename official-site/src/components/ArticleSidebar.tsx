@@ -1,26 +1,12 @@
 import Link from "next/link";
+import { articles, LARGE_CATEGORIES, SUB_CATEGORIES } from "../data/articles";
 
 interface Props {
   currentSlug: string;
 }
 
 export default function ArticleSidebar({ currentSlug }: Props) {
-  const allArticles = [
-    {
-      slug: "baby-breastfeeding-schedule",
-      title: "赤ちゃんの授乳スケジュールと目安量について",
-      category: "授乳・食事",
-      publishedAt: "2026/06/09",
-    },
-    {
-      slug: "baby-vaccination-schedule",
-      title: "赤ちゃんの予防接種スケジュール管理と進め方のコツ",
-      category: "予防接種",
-      publishedAt: "2026/06/09",
-    },
-  ];
-
-  const relatedArticles = allArticles.filter((art) => art.slug !== currentSlug);
+  const relatedArticles = articles.filter((art) => art.slugs.join("/") !== currentSlug);
 
   return (
     <aside className="flex flex-col gap-6">
@@ -28,21 +14,28 @@ export default function ArticleSidebar({ currentSlug }: Props) {
         <div className="bg-white border border-border-pink rounded-md p-6 shadow-soft">
           <h3 className="text-lg font-bold text-text-main mb-5 border-l-4 border-primary pl-2.5">おすすめの記事</h3>
           <div className="flex flex-col gap-4">
-            {relatedArticles.map((art) => (
-              <Link
-                href={`/columns/${art.slug}`}
-                key={art.slug}
-                className="block pb-4 border-b border-border-pink last:border-b-0 last:pb-0 transition-colors group"
-              >
-                <span className="text-[11px] bg-bg-pink text-primary-dark py-0.5 px-2 rounded-full font-bold inline-block mb-1.5">
-                  {art.category}
-                </span>
-                <h4 className="text-sm font-semibold text-text-main leading-snug mb-1 group-hover:text-primary-dark transition-colors">
-                  {art.title}
-                </h4>
-                <time className="text-xs text-text-muted">{art.publishedAt}</time>
-              </Link>
-            ))}
+            {relatedArticles.map((art) => {
+              const categoryName = art.subCategory
+                ? SUB_CATEGORIES[art.subCategory as keyof typeof SUB_CATEGORIES]
+                : LARGE_CATEGORIES[art.largeCategory];
+              const articlePath = `/columns/${art.slugs.join("/")}`;
+
+              return (
+                <Link
+                  href={articlePath}
+                  key={art.id}
+                  className="block pb-4 border-b border-border-pink last:border-b-0 last:pb-0 transition-colors group"
+                >
+                  <span className="text-[11px] bg-bg-pink text-primary-dark py-0.5 px-2 rounded-full font-bold inline-block mb-1.5">
+                    {categoryName}
+                  </span>
+                  <h4 className="text-sm font-semibold text-text-main leading-snug mb-1 group-hover:text-primary-dark transition-colors">
+                    {art.title}
+                  </h4>
+                  <time className="text-xs text-text-muted">{art.publishedAt}</time>
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}

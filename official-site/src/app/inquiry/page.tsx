@@ -2,11 +2,17 @@
 import Script from "next/script";
 import { useEffect } from "react";
 
+declare global {
+  interface Window {
+    KoeLoopWidget?: new (options: Record<string, unknown>) => unknown;
+  }
+}
+
 export default function Inquiry() {
   const initWidget = () => {
-    if (typeof window !== "undefined" && (window as any).KoeLoopWidget) {
+    if (typeof window !== "undefined" && window.KoeLoopWidget) {
       try {
-        new (window as any).KoeLoopWidget({
+        new window.KoeLoopWidget({
           productId: "dddb40ea-a331-4cb9-84bb-b81187047a20",
           containerId: "koeloop-widget-dddb40ea-a331-4cb9-84bb-b81187047a20",
           theme: "light",
@@ -26,7 +32,7 @@ export default function Inquiry() {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: initWidget is a stable function for loading script callback
   useEffect(() => {
-    if (typeof window !== "undefined" && (window as any).KoeLoopWidget) {
+    if (typeof window !== "undefined" && window.KoeLoopWidget) {
       initWidget();
     }
   }, []);

@@ -1,16 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export default function ScrollAnimate() {
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-
     const observerOptions = {
       threshold: 0.1,
       rootMargin: "0px 0px -50px 0px",
@@ -36,7 +28,7 @@ export default function ScrollAnimate() {
     });
 
     return () => observer.disconnect();
-  }, [mounted]);
+  }, []);
 
   return null;
 }

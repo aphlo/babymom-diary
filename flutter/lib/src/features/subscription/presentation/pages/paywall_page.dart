@@ -422,7 +422,7 @@ class PaywallPage extends ConsumerWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
           decoration: BoxDecoration(
             color: context.surfaceBackground.withValues(alpha: 0.85),
             border: Border(
@@ -432,68 +432,72 @@ class PaywallPage extends ConsumerWidget {
               ),
             ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: double.infinity,
-                height: 56,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFE87086), Color(0xFFFFA726)],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFE87086).withValues(alpha: 0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+          child: SafeArea(
+            top: false,
+            minimum: const EdgeInsets.only(bottom: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFE87086), Color(0xFFFFA726)],
                     ),
-                  ],
-                ),
-                child: FilledButton(
-                  onPressed: state.canPurchase ? vm.purchase : null,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFE87086).withValues(alpha: 0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  child: state.isPurchasing
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
+                  child: FilledButton(
+                    onPressed: state.canPurchase ? vm.purchase : null,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: state.isPurchasing
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            hasFreeTrial ? '無料トライアルを開始' : 'サブスクリプションに登録',
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
                           ),
-                        )
-                      : Text(
-                          hasFreeTrial ? '無料トライアルを開始' : 'サブスクリプションに登録',
-                          style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                hasFreeTrial
-                    ? '1週間のトライアル後、選択したプランで自動更新されます。'
-                    : 'いつでもキャンセルできます。',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: context.subtextColor,
+                const SizedBox(height: 8),
+                Text(
+                  hasFreeTrial
+                      ? '1週間のトライアル後、選択したプランで自動更新されます。'
+                      : 'いつでもキャンセルできます。',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: context.subtextColor,
+                  ),
                 ),
-              ),
-              PaywallFooter(
-                isRestoring: state.isRestoring,
-                onRestore: vm.restorePurchases,
-              ),
-            ],
+                PaywallFooter(
+                  isRestoring: state.isRestoring,
+                  onRestore: vm.restorePurchases,
+                ),
+              ],
+            ),
           ),
         ),
       ),
