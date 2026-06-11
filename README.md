@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <a href="https://babymom-diary.web.app/">
+  <a href="https://https://milu-baby.app/">
     <strong>公式サイトはこちら</strong>
   </a>
 </p>
