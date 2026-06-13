@@ -129,7 +129,7 @@ class _OnboardingDecisionPageState
                     width: double.infinity,
                     height: 56,
                     child: OutlinedButton(
-                      onPressed: () => context.go('/onboarding/sign-in'),
+                      onPressed: () => context.push('/onboarding/sign-in'),
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: context.primaryColor, width: 2),
                         shape: RoundedRectangleBorder(

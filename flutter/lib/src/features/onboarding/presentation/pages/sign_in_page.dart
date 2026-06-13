@@ -27,7 +27,6 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   final _passwordController = TextEditingController();
 
   bool _isLoading = false;
-  bool _isSignUp = false; // ログインと新規登録の切り替えフラグ
   bool _obscurePassword = true;
 
   @override
@@ -157,19 +156,11 @@ class _SignInPageState extends ConsumerState<SignInPage> {
     setState(() => _isLoading = true);
 
     try {
-      if (_isSignUp) {
-        // 新規登録
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
-      } else {
-        // ログイン
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
-      }
+      // ログイン
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
       await _onSignInSuccess();
     } on FirebaseAuthException catch (e) {
       String message = 'エラーが発生しました';
@@ -256,9 +247,16 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: context.textPrimary),
-          onPressed: () => context.go('/onboarding/decision'),
+        leading: BackButton(
+          color: context.textPrimary,
+          onPressed: () => context.pop(),
+        ),
+        title: Text(
+          'データの引き継ぎ / ログイン',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: context.textPrimary,
+          ),
         ),
       ),
       body: SafeArea(
@@ -270,17 +268,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _isSignUp ? '引き継ぎアカウントの作成' : 'データの引き継ぎ / ログイン',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: context.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _isSignUp
-                      ? 'メールアドレスとパスワードを入力して新規作成します'
-                      : '以前登録したアカウント情報でログインしてデータを引き継ぎます',
+                  '以前登録したアカウント情報でログインしてデータを引き継ぎます',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: context.textSecondary,
                   ),
@@ -334,27 +322,25 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                     return null;
                   },
                 ),
-                if (!_isSignUp) ...[
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: _isLoading ? null : _handlePasswordReset,
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size(50, 30),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        'パスワードを忘れた場合',
-                        style: TextStyle(
-                          color: context.primaryColor,
-                          fontWeight: FontWeight.bold,
-                        ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: _isLoading ? null : _handlePasswordReset,
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(50, 30),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      'パスワードを忘れた場合',
+                      style: TextStyle(
+                        color: context.primaryColor,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                ],
+                ),
                 const SizedBox(height: 24),
 
                 // 実行ボタン
@@ -372,34 +358,13 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                     ),
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : Text(
-                            _isSignUp ? 'アカウントを作成してはじめる' : 'ログインして引き継ぐ',
-                            style: const TextStyle(
+                        : const Text(
+                            'ログインして引き継ぐ',
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // ログイン/新規登録モード切り替え
-                Center(
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _isSignUp = !_isSignUp;
-                      });
-                    },
-                    child: Text(
-                      _isSignUp
-                          ? 'すでにアカウントをお持ちの方（ログイン）'
-                          : '新しく引き継ぎ用のアカウントを作成する',
-                      style: TextStyle(
-                        color: context.primaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
                   ),
                 ),
                 const SizedBox(height: 32),
