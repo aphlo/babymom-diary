@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/semantic_colors.dart';
 import '../../../subscription/application/providers/subscription_providers.dart';
 
 class MenuPremiumSection extends ConsumerWidget {
@@ -12,28 +11,10 @@ class MenuPremiumSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isPremium = ref.watch(isPremiumProvider);
 
-    Widget buildHeader() {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            'プレミアム',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: context.subtextColor,
-            ),
-          ),
-        ),
-      );
-    }
-
     if (isPremium) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          buildHeader(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Container(
@@ -121,7 +102,6 @@ class MenuPremiumSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        buildHeader(),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Container(
