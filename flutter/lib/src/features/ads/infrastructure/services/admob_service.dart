@@ -94,4 +94,23 @@ class AdMobService {
         : 'ca-app-pub-6548153014267210/8481091445';
     return adUnitId;
   }
+
+  /// リワード広告ユニットIDを取得
+  /// stgフレーバー: テスト広告ID
+  /// prodフレーバー: 本番広告ID
+  static String getRewardedAdUnitId() {
+    if (isTestAdFlavor) {
+      // テスト用リワード広告ユニットID
+      final adUnitId = Platform.isAndroid
+          ? 'ca-app-pub-3940256099942544/5224354917'
+          : 'ca-app-pub-3940256099942544/1712485313';
+      return adUnitId;
+    }
+
+    // 本番用リワード広告ユニットID（後で手動で書き換えてください）
+    final adUnitId = Platform.isAndroid
+        ? 'ca-app-pub-6548153014267210/1947279128'
+        : 'ca-app-pub-6548153014267210/2784842369';
+    return adUnitId;
+  }
 }

@@ -16,6 +16,7 @@ import 'package:babymom_diary/src/features/menu/presentation/widgets/menu_app_in
 import 'package:babymom_diary/src/features/menu/presentation/widgets/menu_children_section.dart';
 
 import 'package:babymom_diary/src/features/menu/presentation/widgets/menu_premium_section.dart';
+import 'package:babymom_diary/src/features/menu/presentation/widgets/menu_ad_free_reward_section.dart';
 import 'package:babymom_diary/src/features/menu/presentation/widgets/menu_settings_section.dart';
 import 'package:babymom_diary/src/features/menu/presentation/widgets/menu_user_id_section.dart';
 
@@ -70,6 +71,8 @@ class _MenuListView extends StatelessWidget {
         MenuChildrenSection(children: children),
         const SizedBox(height: 24),
         const MenuPremiumSection(),
+        const SizedBox(height: 12),
+        const MenuAdFreeRewardSection(),
         const SizedBox(height: 24),
         const MenuSettingsSection(),
         const SizedBox(height: 24),

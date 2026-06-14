@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../../subscription/application/providers/subscription_providers.dart';
+import '../../application/providers/ad_free_providers.dart';
 import '../../application/services/banner_ad_manager.dart';
 
 /// アダプティブバナー広告を表示するウィジェット
@@ -76,7 +77,8 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
   @override
   Widget build(BuildContext context) {
     final premium = ref.watch(isPremiumProvider);
-    if (premium) return const SizedBox.shrink();
+    final isAdFree = ref.watch(isAdFreeActiveProvider);
+    if (premium || isAdFree) return const SizedBox.shrink();
 
     // デフォルトの高さ
     final double bannerHeight = _adSize?.height.toDouble() ?? 60.0;
