@@ -26,6 +26,29 @@ export default function ColumnsIndex() {
         </div>
       </div>
 
+      {/* Local Support Banner */}
+      <div className="max-w-[1000px] mx-auto px-6 pt-12">
+        <div className="bg-gradient-to-r from-bg-pink to-white border border-border-pink rounded-2xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-soft">
+          <div>
+            <span className="bg-primary text-white py-0.5 px-2.5 rounded-full text-xs font-bold inline-block mb-3">
+              地域限定情報
+            </span>
+            <h2 className="text-xl md:text-2xl font-bold text-text-main font-fredoka mb-2">
+              自治体別の子育て支援・助成制度まとめ
+            </h2>
+            <p className="text-sm text-text-light leading-relaxed max-w-[600px]">
+              世田谷区、港区、渋谷区、新宿区、横浜市など、各市区町村ごとの「子ども医療費助成の対象年齢・所得制限」や「おたふくかぜ予防接種の助成額」、「独自の出産祝い品」などをまとめて比較・チェックできます。
+            </p>
+          </div>
+          <Link
+            href="/support"
+            className="whitespace-nowrap bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-full text-sm transition-all shadow-soft text-center w-full md:w-auto"
+          >
+            自治体から探す →
+          </Link>
+        </div>
+      </div>
+
       {/* Grid List */}
       <div className="max-w-[1000px] mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

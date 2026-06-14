@@ -31,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className={`${nunito.variable} ${fredoka.variable}`} suppressHydrationWarning>
-      <body>
+      <body suppressHydrationWarning>
         <Header />
         {children}
         <Footer />

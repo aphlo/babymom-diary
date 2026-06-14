@@ -28,6 +28,10 @@
 }
 
 /* Base resets & Fonts */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-nunito);
   color: var(--color-text-main);
