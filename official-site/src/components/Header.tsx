@@ -25,14 +25,7 @@ export default function Header() {
           milu
         </Link>
 
-        {/* PC用ナビゲーション */}
         <nav className="hidden md:flex items-center gap-6">
-          <Link
-            href="/support"
-            className="text-text-main hover:text-primary-dark font-semibold text-sm transition-colors"
-          >
-            自治体支援情報
-          </Link>
           <Link
             href="/columns"
             className="text-text-main hover:text-primary-dark font-semibold text-sm transition-colors"
@@ -67,20 +60,12 @@ export default function Header() {
         </button>
       </div>
 
-      {/* スマホ用アコーディオンメニュー */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ${
-          isOpen ? "max-h-[140px] opacity-100 mt-4 border-t border-border-pink/40 pt-4" : "max-h-0 opacity-0"
+          isOpen ? "max-h-[80px] opacity-100 mt-4 border-t border-border-pink/40 pt-4" : "max-h-0 opacity-0"
         }`}
       >
         <nav className="flex flex-col gap-4">
-          <Link
-            href="/support"
-            onClick={closeMenu}
-            className="text-text-main hover:text-primary font-semibold text-base py-1 transition-colors"
-          >
-            自治体支援情報
-          </Link>
           <Link
             href="/columns"
             onClick={closeMenu}

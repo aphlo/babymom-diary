@@ -44,6 +44,9 @@ export interface Municipality {
 
   // 現金給付・手当一覧
   cashBenefits: CashBenefit[];
+
+  // 自治体固有のカスタムコメント（オプショナル）
+  customComment?: string;
 }
 
 export const municipalities: Municipality[] = [
