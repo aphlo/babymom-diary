@@ -25,7 +25,6 @@ import '../../features/menu/household/presentation/pages/household_share_page.da
 import '../../features/menu/household/presentation/pages/vaccine_visibility_settings_page.dart';
 import '../../features/onboarding/application/onboarding_status_provider.dart';
 import '../../features/onboarding/presentation/pages/onboarding_child_info_page.dart';
-import '../../features/onboarding/presentation/pages/onboarding_greeting_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_decision_page.dart';
 import '../../features/onboarding/presentation/pages/sign_in_page.dart';
 import '../../features/menu/presentation/pages/account_link_page.dart';
@@ -93,9 +92,6 @@ GoRouter appRouter(Ref ref) {
 
       // 未ログイン、またはオンボーディング未完了の場合
       if ((!hasCompletedOnboarding || !isAuthed) && !isOnboardingRoute) {
-        if (!hasCompletedOnboarding) {
-          return '/onboarding/greeting';
-        }
         return '/onboarding/decision';
       }
 
@@ -107,13 +103,6 @@ GoRouter appRouter(Ref ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        parentNavigatorKey: rootNavigatorKey,
-        path: '/onboarding/greeting',
-        name: 'onboarding_greeting',
-        pageBuilder: (context, state) =>
-            const NoTransitionPage(child: OnboardingGreetingPage()),
-      ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
         path: '/onboarding/decision',

@@ -116,15 +116,16 @@ class _MenuAdFreeRewardSectionState
     Widget wrapInPadding(Widget child) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Container(
-          decoration: BoxDecoration(
-            color: context.menuSectionBackground,
+        child: Material(
+          color: context.menuSectionBackground,
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
+            side: BorderSide(
               color: context.menuSectionBorder,
               width: 1.0,
             ),
           ),
+          clipBehavior: Clip.antiAlias,
           child: child,
         ),
       );

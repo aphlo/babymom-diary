@@ -48,7 +48,7 @@ class GrowthChartSettingsPage extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Container(
+                Material(
                   color: context.cardBackground,
                   child: SwitchListTile(
                     title: const Text('修正月齢で表示する'),

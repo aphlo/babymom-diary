@@ -55,7 +55,7 @@ class PaywallFooter extends StatelessWidget {
                     height: 12,
                     child: CircularProgressIndicator(strokeWidth: 1.5),
                   )
-                : Text('復元', style: style),
+                : Text('購入を復元', style: style),
           ),
           Text('|', style: dividerStyle),
           GestureDetector(

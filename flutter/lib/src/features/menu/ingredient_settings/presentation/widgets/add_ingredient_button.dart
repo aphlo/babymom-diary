@@ -20,18 +20,20 @@ class AddIngredientButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
-        color: context.cardBackground,
         border: Border(
           bottom: BorderSide(color: context.menuSectionBorder),
         ),
       ),
-      child: ListTile(
-        leading: Icon(Icons.add, color: context.accentPink),
-        title: Text(
-          '食材を追加',
-          style: TextStyle(color: context.accentPink),
+      child: Material(
+        color: context.cardBackground,
+        child: ListTile(
+          leading: Icon(Icons.add, color: context.accentPink),
+          title: Text(
+            '食材を追加',
+            style: TextStyle(color: context.accentPink),
+          ),
+          onTap: () => _showAddIngredientDialog(context, ref),
         ),
-        onTap: () => _showAddIngredientDialog(context, ref),
       ),
     );
   }

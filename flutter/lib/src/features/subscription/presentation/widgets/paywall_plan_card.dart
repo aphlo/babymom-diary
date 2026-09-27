@@ -116,22 +116,31 @@ class PaywallPlanCard extends StatelessWidget {
 
   static IconData _iconForPlan(SubscriptionPlan plan) {
     return switch (plan) {
+      // ignore: deprecated_member_use_from_same_package
       SubscriptionPlan.monthly => Icons.calendar_month,
+      // ignore: deprecated_member_use_from_same_package
       SubscriptionPlan.yearly => Icons.star,
+      SubscriptionPlan.lifetime => Icons.all_inclusive,
     };
   }
 
   static String _labelForPlan(SubscriptionPlan plan) {
     return switch (plan) {
+      // ignore: deprecated_member_use_from_same_package
       SubscriptionPlan.monthly => '月額',
+      // ignore: deprecated_member_use_from_same_package
       SubscriptionPlan.yearly => '年額',
+      SubscriptionPlan.lifetime => '買い切り',
     };
   }
 
   static String _periodForPlan(SubscriptionPlan plan) {
     return switch (plan) {
+      // ignore: deprecated_member_use_from_same_package
       SubscriptionPlan.monthly => '/ 月',
+      // ignore: deprecated_member_use_from_same_package
       SubscriptionPlan.yearly => '/ 年',
+      SubscriptionPlan.lifetime => '',
     };
   }
 

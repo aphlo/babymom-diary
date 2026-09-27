@@ -85,9 +85,14 @@ class RevenueCatService {
 
   /// プロダクトIDからSubscriptionPlanへマッピング
   SubscriptionPlan? _mapProductIdentifier(String productId) {
+    if (productId.contains('ad_free') || productId.contains('lifetime')) {
+      return SubscriptionPlan.lifetime;
+    }
+    // ignore: deprecated_member_use_from_same_package
     if (productId.contains('monthly')) return SubscriptionPlan.monthly;
+    // ignore: deprecated_member_use_from_same_package
     if (productId.contains('yearly')) return SubscriptionPlan.yearly;
-    return null;
+    return SubscriptionPlan.lifetime;
   }
 
   /// リソース解放

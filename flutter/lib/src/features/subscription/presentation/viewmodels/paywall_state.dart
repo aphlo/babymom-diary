@@ -16,46 +16,56 @@ sealed class PaywallState with _$PaywallState {
   const PaywallState._();
 
   const factory PaywallState({
-    required SubscriptionPlan selectedPlan,
+    @Default(SubscriptionPlan.lifetime) SubscriptionPlan selectedPlan,
     required List<Package> availablePackages,
     required bool isLoadingOfferings,
     required bool isPurchasing,
     required bool isRestoring,
 
-    /// Offerings取得に失敗した場合にハードコードのプラン情報で表示するモード
+    /// Offerings取得に失敗した場合にハードコードの情報で表示するモード
     @Default(false) bool isFallbackMode,
     String? offeringsError,
     PaywallUiEvent? pendingUiEvent,
   }) = _PaywallState;
 
   factory PaywallState.initial() => const PaywallState(
-        selectedPlan: SubscriptionPlan.yearly,
+        selectedPlan: SubscriptionPlan.lifetime,
         availablePackages: [],
         isLoadingOfferings: true,
         isPurchasing: false,
         isRestoring: false,
       );
 
-  /// 選択中のプランに対応するPackageを取得
-  Package? get selectedPackage => packageForPlan(selectedPlan);
-
-  /// 指定プランに対応するPackageを取得
-  Package? packageForPlan(SubscriptionPlan plan) {
-    final packageType = switch (plan) {
-      SubscriptionPlan.monthly => PackageType.monthly,
-      SubscriptionPlan.yearly => PackageType.annual,
-    };
+  /// 広告削除用のPackageを取得
+  Package? get adFreePackage {
+    if (availablePackages.isEmpty) return null;
+    // 1. lifetime タイプを優先
     try {
-      return availablePackages.firstWhere((p) => p.packageType == packageType);
-    } catch (_) {
-      return null;
-    }
+      return availablePackages.firstWhere(
+        (p) => p.packageType == PackageType.lifetime,
+      );
+    } catch (_) {}
+
+    // 2. identifier に ad_free または lifetime が含まれるものを探す
+    try {
+      return availablePackages.firstWhere(
+        (p) =>
+            p.identifier.toLowerCase().contains('ad_free') ||
+            p.identifier.toLowerCase().contains('lifetime'),
+      );
+    } catch (_) {}
+
+    // 3. なければ最初のパッケージ
+    return availablePackages.firstOrNull;
   }
+
+  /// 選択中のプランに対応するPackageを取得（後方互換性）
+  Package? get selectedPackage => adFreePackage;
 
   /// 購入可能かどうか（フォールバック時も購入ボタンを有効にする）
   bool get canPurchase =>
       !isPurchasing &&
       !isRestoring &&
       !isLoadingOfferings &&
-      (selectedPackage != null || isFallbackMode);
+      (adFreePackage != null || isFallbackMode);
 }

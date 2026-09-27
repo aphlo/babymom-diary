@@ -43,7 +43,7 @@ class GrowthRecordListTile extends StatelessWidget {
       color: context.primaryColor,
     );
 
-    return Container(
+    return Material(
       color: context.menuSectionBackground,
       child: Column(
         children: [

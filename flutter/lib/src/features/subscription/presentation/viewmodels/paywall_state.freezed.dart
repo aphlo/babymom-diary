@@ -296,7 +296,7 @@ mixin _$PaywallState {
   bool get isPurchasing;
   bool get isRestoring;
 
-  /// Offerings取得に失敗した場合にハードコードのプラン情報で表示するモード
+  /// Offerings取得に失敗した場合にハードコードの情報で表示するモード
   bool get isFallbackMode;
   String? get offeringsError;
   PaywallUiEvent? get pendingUiEvent;
@@ -649,7 +649,7 @@ extension PaywallStatePatterns on PaywallState {
 
 class _PaywallState extends PaywallState {
   const _PaywallState(
-      {required this.selectedPlan,
+      {this.selectedPlan = SubscriptionPlan.lifetime,
       required final List<Package> availablePackages,
       required this.isLoadingOfferings,
       required this.isPurchasing,
@@ -661,6 +661,7 @@ class _PaywallState extends PaywallState {
         super._();
 
   @override
+  @JsonKey()
   final SubscriptionPlan selectedPlan;
   final List<Package> _availablePackages;
   @override
@@ -678,7 +679,7 @@ class _PaywallState extends PaywallState {
   @override
   final bool isRestoring;
 
-  /// Offerings取得に失敗した場合にハードコードのプラン情報で表示するモード
+  /// Offerings取得に失敗した場合にハードコードの情報で表示するモード
   @override
   @JsonKey()
   final bool isFallbackMode;

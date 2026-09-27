@@ -6,7 +6,7 @@ import app_links
 #endif
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   private let deepLinkScheme = "milu"
 
   private func configureFirebaseIfNeeded() {
@@ -35,8 +35,11 @@ import app_links
     // Handle widget quick actions that arrive before Dart initializes Firebase.
     configureFirebaseIfNeeded()
 
-    GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
   }
 
   override func application(

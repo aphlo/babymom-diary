@@ -77,6 +77,7 @@ class FeedingTableSettingsPage extends ConsumerWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: state.visibleCategories.length,
+            // ignore: deprecated_member_use
             onReorder: viewModel.reorderCategories,
             proxyDecorator: (child, index, animation) {
               return Material(

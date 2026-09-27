@@ -14,15 +14,17 @@ class MenuSection extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor,
         border: Border(
           top: BorderSide(color: borderColor, width: 0.5),
           bottom: BorderSide(color: borderColor, width: 0.5),
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: children,
+      child: Material(
+        color: backgroundColor,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: children,
+        ),
       ),
     );
   }

@@ -107,6 +107,7 @@ class _CategoryList extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         buildDefaultDragHandles: false,
         itemCount: categories.length,
+        // ignore: deprecated_member_use
         onReorder: onReorder,
         itemBuilder: (context, index) {
           final category = categories[index];

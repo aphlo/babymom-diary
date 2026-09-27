@@ -67,7 +67,7 @@ class MenuPremiumSection extends ConsumerWidget {
                   title: Row(
                     children: [
                       const Text(
-                        'プレミアムメンバー',
+                        '広告非表示',
                         style: TextStyle(
                           color: Color(0xFF4E2C33), // 深みのある色合いで可読性を担保
                           fontWeight: FontWeight.bold,
@@ -77,14 +77,14 @@ class MenuPremiumSection extends ConsumerWidget {
                       ),
                       const SizedBox(width: 6),
                       Icon(
-                        Icons.auto_awesome,
+                        Icons.check_circle,
                         color: const Color(0xFFE65100).withValues(alpha: 0.7),
                         size: 14,
                       ),
                     ],
                   ),
                   subtitle: const Text(
-                    'いつもご利用ありがとうございます！',
+                    '広告削除プランが適用されています',
                     style: TextStyle(
                       color: Color(0xFF6B4A51),
                       fontSize: 12,
@@ -127,12 +127,12 @@ class MenuPremiumSection extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 leading: const Icon(
-                  Icons.workspace_premium,
-                  color: Color(0xFFFFD700), // ゴールド王冠
+                  Icons.block_outlined,
+                  color: Colors.white,
                   size: 28,
                 ),
                 title: const Text(
-                  'プレミアムプラン',
+                  '広告を非表示にする',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -140,7 +140,7 @@ class MenuPremiumSection extends ConsumerWidget {
                   ),
                 ),
                 subtitle: Text(
-                  '広告なしで快適に。もっと便利に。',
+                  '買い切り ¥100 でずっと広告なし',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.85),
                     fontSize: 12,

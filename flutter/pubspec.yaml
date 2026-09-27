@@ -2,7 +2,7 @@ name: babymom_diary
 description: "A Flutter app for tracking baby care activities"
 publish_to: 'none'
 
-version: 2.0.1+19
+version: 2.1.0+20
 
 environment:
   sdk: '>=3.6.0 <4.0.0'
@@ -46,7 +46,7 @@ dependencies:
   home_widget: ^0.8.1
   app_links: ^6.3.3
   in_app_review: ^2.0.10
-  purchases_flutter: ^9.12.0
+  purchases_flutter: ^10.13.2
   google_sign_in: ^6.2.1
   sign_in_with_apple: ^6.1.1
   crypto: ^3.0.3

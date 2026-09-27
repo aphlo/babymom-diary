@@ -62,7 +62,7 @@ class _NotificationSettingsPageState
                         context,
                         '予防接種の予約日が近づくと通知でお知らせします。',
                       ),
-                      Container(
+                      Material(
                         color: context.cardBackground,
                         child: Column(
                           children: [
@@ -94,7 +94,7 @@ class _NotificationSettingsPageState
                         context,
                         '毎日夜に、育児を頑張るあなたへ励ましのメッセージをお届けします。',
                       ),
-                      Container(
+                      Material(
                         color: context.cardBackground,
                         child: SwitchListTile(
                           title: const Text('エールを受け取る'),

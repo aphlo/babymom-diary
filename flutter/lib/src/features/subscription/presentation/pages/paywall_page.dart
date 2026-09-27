@@ -2,15 +2,13 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../../../../core/theme/semantic_colors.dart';
-import '../../domain/entities/subscription_plan.dart';
 import '../viewmodels/paywall_state.dart';
 import '../viewmodels/paywall_view_model.dart';
 import '../widgets/paywall_footer.dart';
 
-/// プラン選択 + 購入ページ（2画面目）
+/// 広告削除プラン（買い切り）購入ページ
 class PaywallPage extends ConsumerWidget {
   const PaywallPage({super.key});
 
@@ -32,7 +30,7 @@ class PaywallPage extends ConsumerWidget {
             );
           },
           purchaseCompleted: (_) {
-            context.pop(); // 1画面に統合されたため、popは1回だけ
+            context.pop();
           },
         );
       },
@@ -64,7 +62,6 @@ class PaywallPage extends ConsumerWidget {
           bottom: false,
           child: Column(
             children: [
-              // 閉じるボタンのみを右上に配置
               Align(
                 alignment: Alignment.topRight,
                 child: Padding(
@@ -74,7 +71,7 @@ class PaywallPage extends ConsumerWidget {
                       Icons.close,
                       color: context.textPrimary,
                     ),
-                    onPressed: () => context.pop(), // popは1回だけ
+                    onPressed: () => context.pop(),
                   ),
                 ),
               ),
@@ -91,7 +88,6 @@ class PaywallPage extends ConsumerWidget {
     PaywallState state,
     PaywallViewModel vm,
   ) {
-    // offeringsError があり fallback でもない場合のみエラー画面（ロード中ではないときのみ判定）
     if (state.offeringsError != null &&
         !state.isFallbackMode &&
         !state.isLoadingOfferings) {
@@ -126,7 +122,9 @@ class PaywallPage extends ConsumerWidget {
       );
     }
 
-    final hasFreeTrial = _hasFreeTrial(state);
+    final priceString = state.isFallbackMode
+        ? '¥100'
+        : (state.adFreePackage?.storeProduct.priceString ?? '¥100');
 
     return Column(
       children: [
@@ -135,7 +133,7 @@ class PaywallPage extends ConsumerWidget {
             child: Column(
               children: [
                 _buildHeader(context),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 _buildBenefits(context),
                 const SizedBox(height: 16),
                 Padding(
@@ -143,7 +141,7 @@ class PaywallPage extends ConsumerWidget {
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'プランを選択してください',
+                      'プラン内容',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -163,7 +161,7 @@ class PaywallPage extends ConsumerWidget {
                     ),
                   )
                 else
-                  _buildPlanCards(context, state, vm),
+                  _buildPlanCard(context, priceString),
                 const SizedBox(height: 24),
               ],
             ),
@@ -199,15 +197,9 @@ class PaywallPage extends ConsumerWidget {
             ),
           )
         else
-          _buildBottomPurchase(context, state, vm, hasFreeTrial),
+          _buildBottomPurchase(context, state, vm, priceString),
       ],
     );
-  }
-
-  bool _hasFreeTrial(PaywallState state) {
-    if (state.isFallbackMode) return true; // フォールバック時はトライアルありと仮定
-    final intro = state.selectedPackage?.storeProduct.introductoryPrice;
-    return intro != null && intro.price == 0;
   }
 
   Widget _buildHeader(BuildContext context) {
@@ -215,7 +207,7 @@ class PaywallPage extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          const SizedBox(height: 24), // 上部余白を増やして王冠の見切れを防ぐ
+          const SizedBox(height: 16),
           Stack(
             clipBehavior: Clip.none,
             children: [
@@ -246,13 +238,13 @@ class PaywallPage extends ConsumerWidget {
                 ),
               ),
               Positioned(
-                top: -8, // 少し内側に寄せて見切れを防ぐ
-                right: -8, // 少し内側に寄せて見切れを防ぐ
+                top: -8,
+                right: -8,
                 child: Transform.rotate(
                   angle: 0.15,
                   child: const Icon(
                     Icons.workspace_premium,
-                    color: Color(0xFFFBC02D), // ゴールド王冠
+                    color: Color(0xFFFBC02D),
                     size: 32,
                   ),
                 ),
@@ -265,7 +257,7 @@ class PaywallPage extends ConsumerWidget {
               colors: [Color(0xFFE87086), Color(0xFFFFA726)],
             ).createShader(bounds),
             child: const Text(
-              'milu プレミアム',
+              '広告削除プラン',
               style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
@@ -275,9 +267,9 @@ class PaywallPage extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '広告なしで快適に。もっと便利に。',
+            '一度の購入でずっと広告なし。ストレスフリーな記録体験を。',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: FontWeight.w500,
               color: context.textSecondary,
             ),
@@ -291,13 +283,18 @@ class PaywallPage extends ConsumerWidget {
     final benefits = [
       (
         icon: Icons.block_outlined,
-        title: '広告を完全削除',
-        description: 'バナー広告を非表示にして、ストレスなく快適に記録ができます',
+        title: 'すべてのバナー広告を完全削除',
+        description: '授乳表やカレンダー、記録画面のバナー広告を非表示にします',
+      ),
+      (
+        icon: Icons.all_inclusive_outlined,
+        title: '買い切りでずっと快適',
+        description: '月額や年額の定期料金は一切かかりません。1回の購入でずっと有効です',
       ),
     ];
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: BackdropFilter(
@@ -316,9 +313,9 @@ class PaywallPage extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'プレミアム限定機能',
+                  'プランの特徴',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: context.primaryColor,
                   ),
@@ -382,32 +379,100 @@ class PaywallPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildPlanCards(
-    BuildContext context,
-    PaywallState state,
-    PaywallViewModel vm,
-  ) {
+  Widget _buildPlanCard(BuildContext context, String priceString) {
+    const goldColor = Color(0xFFFFA726);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        children: [
-          _PlanSelectionCard(
-            plan: SubscriptionPlan.yearly,
-            package: state.packageForPlan(SubscriptionPlan.yearly),
-            monthlyPackage: state.packageForPlan(SubscriptionPlan.monthly),
-            isSelected: state.selectedPlan == SubscriptionPlan.yearly,
-            isFallbackMode: state.isFallbackMode,
-            onTap: () => vm.selectPlan(SubscriptionPlan.yearly),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+          child: Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: context.primaryColor.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: context.primaryColor,
+                width: 2,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: goldColor,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text(
+                        '買い切り',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: context.primaryColor,
+                      ),
+                      child: const Icon(
+                        Icons.check,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      '広告削除',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: context.textPrimary,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      priceString,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: context.primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '追加料金なし / 永久有効',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: context.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
-          _PlanSelectionCard(
-            plan: SubscriptionPlan.monthly,
-            package: state.packageForPlan(SubscriptionPlan.monthly),
-            isSelected: state.selectedPlan == SubscriptionPlan.monthly,
-            isFallbackMode: state.isFallbackMode,
-            onTap: () => vm.selectPlan(SubscriptionPlan.monthly),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -416,7 +481,7 @@ class PaywallPage extends ConsumerWidget {
     BuildContext context,
     PaywallState state,
     PaywallViewModel vm,
-    bool hasFreeTrial,
+    String priceString,
   ) {
     return ClipRRect(
       child: BackdropFilter(
@@ -473,9 +538,9 @@ class PaywallPage extends ConsumerWidget {
                             ),
                           )
                         : Text(
-                            hasFreeTrial ? '無料トライアルを開始' : 'サブスクリプションに登録',
+                            '$priceString で広告を非表示にする',
                             style: const TextStyle(
-                              fontSize: 17,
+                              fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
                             ),
@@ -484,9 +549,7 @@ class PaywallPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  hasFreeTrial
-                      ? '1週間のトライアル後、選択したプランで自動更新されます。'
-                      : 'いつでもキャンセルできます。',
+                  '一度のご購入で永久に広告が非表示になります。',
                   style: TextStyle(
                     fontSize: 11,
                     color: context.subtextColor,
@@ -502,220 +565,5 @@ class PaywallPage extends ConsumerWidget {
         ),
       ),
     );
-  }
-}
-
-/// プラン選択カード（縦並び・リッチ版）
-class _PlanSelectionCard extends StatelessWidget {
-  const _PlanSelectionCard({
-    required this.plan,
-    required this.package,
-    required this.isSelected,
-    required this.onTap,
-    this.monthlyPackage,
-    this.isFallbackMode = false,
-  });
-
-  final SubscriptionPlan plan;
-  final Package? package;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final Package? monthlyPackage;
-  final bool isFallbackMode;
-
-  @override
-  Widget build(BuildContext context) {
-    final isYearly = plan == SubscriptionPlan.yearly;
-    final goldColor = const Color(0xFFFFA726);
-
-    Border borderBorderSide() {
-      if (isYearly) {
-        return Border.all(
-          color: isSelected ? goldColor : goldColor.withValues(alpha: 0.4),
-          width: isSelected ? 2.5 : 1,
-        );
-      }
-      return Border.all(
-        color: isSelected
-            ? context.primaryColor
-            : context.menuSectionBorder.withValues(alpha: 0.5),
-        width: isSelected ? 2 : 1,
-      );
-    }
-
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? context.primaryColor.withValues(alpha: 0.08)
-                  : context.menuSectionBackground.withValues(alpha: 0.65),
-              borderRadius: BorderRadius.circular(16),
-              border: borderBorderSide(),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (isYearly)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
-                        margin: const EdgeInsets.only(bottom: 8),
-                        decoration: BoxDecoration(
-                          color: goldColor,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Text(
-                          'おすすめ',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Text(
-                            _titleForPlan(plan),
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: context.textPrimary,
-                            ),
-                          ),
-                          if (isYearly) _buildDiscountBadge(context),
-                        ],
-                      ),
-                    ),
-                    _buildRadio(context),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  _priceText(),
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: isSelected
-                        ? (isYearly ? goldColor : context.primaryColor)
-                        : context.textPrimary,
-                  ),
-                ),
-                if (isYearly) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    _monthlyEquivalentText(),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: context.subtextColor,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDiscountBadge(BuildContext context) {
-    final int discount;
-    if (!isFallbackMode && package != null && monthlyPackage != null) {
-      final yearlyPrice = package!.storeProduct.price;
-      final monthlyPrice = monthlyPackage!.storeProduct.price;
-      if (monthlyPrice == 0) return const SizedBox();
-      discount = ((1 - yearlyPrice / (monthlyPrice * 12)) * 100).round();
-    } else {
-      // フォールバック: ¥2,000/年 vs ¥200/月 → 約17%
-      discount = 17;
-    }
-
-    if (discount <= 0) return const SizedBox();
-
-    return Container(
-      margin: const EdgeInsets.only(left: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: context.primaryColor,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        '-$discount%',
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRadio(BuildContext context) {
-    final goldColor = const Color(0xFFFFA726);
-    final activeColor =
-        plan == SubscriptionPlan.yearly ? goldColor : context.primaryColor;
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: isSelected
-              ? activeColor
-              : context.menuSectionBorder.withValues(alpha: 0.5),
-          width: 2,
-        ),
-        color: isSelected ? activeColor : Colors.transparent,
-      ),
-      child: isSelected
-          ? const Icon(Icons.check, size: 16, color: Colors.white)
-          : null,
-    );
-  }
-
-  String _titleForPlan(SubscriptionPlan plan) {
-    return switch (plan) {
-      SubscriptionPlan.yearly => '年割プラン',
-      SubscriptionPlan.monthly => '月額プラン',
-    };
-  }
-
-  String _priceText() {
-    if (isFallbackMode) {
-      return switch (plan) {
-        SubscriptionPlan.yearly => '¥2,000/年',
-        SubscriptionPlan.monthly => '¥200/月',
-      };
-    }
-    if (package == null) return '-';
-    final price = package!.storeProduct.priceString;
-    return switch (plan) {
-      SubscriptionPlan.yearly => '$price/年',
-      SubscriptionPlan.monthly => '$price/月',
-    };
-  }
-
-  String _monthlyEquivalentText() {
-    if (isFallbackMode) return '(1ヶ月あたり約167円)';
-    if (package == null) return '';
-    final yearlyPrice = package!.storeProduct.price;
-    final monthlyEquiv = (yearlyPrice / 12).ceil();
-    return '(1ヶ月あたり約$monthlyEquiv円)';
   }
 }
