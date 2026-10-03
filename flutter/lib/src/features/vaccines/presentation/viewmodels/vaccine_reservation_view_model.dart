@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../menu/children/application/child_context_provider.dart';
 import '../../../review_prompt/presentation/viewmodels/review_prompt_view_model.dart';
+import '../../../subscription/presentation/viewmodels/paywall_prompt_view_model.dart';
 import '../../application/usecases/create_vaccine_reservation.dart';
 import '../../application/usecases/get_vaccines_for_simulataneous_reservation.dart';
 import '../../application/vaccine_catalog_providers.dart';
@@ -193,9 +194,13 @@ class VaccineReservationViewModel extends _$VaccineReservationViewModel {
       }
 
       // レビュープロンプトのカウント増加
-      await ref
+      final wasReviewPromptTriggered = await ref
           .read(reviewPromptViewModelProvider.notifier)
           .incrementRecordCountOnly();
+      // レビューが表示されない場合にPaywallプロンプトをチェック
+      await ref
+          .read(paywallPromptViewModelProvider.notifier)
+          .onRecordAdded(wasReviewPromptTriggered: wasReviewPromptTriggered);
 
       state = state.copyWith(
         isSubmitting: false,

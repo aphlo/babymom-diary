@@ -6,6 +6,7 @@ import 'package:babymom_diary/src/core/firebase/household_service.dart'
     as fbcore;
 
 import '../../../review_prompt/presentation/viewmodels/review_prompt_view_model.dart';
+import '../../../subscription/presentation/viewmodels/paywall_prompt_view_model.dart';
 import '../../application/mom_record_controller.dart';
 import '../../application/usecases/get_mom_monthly_records.dart';
 import '../../application/usecases/save_mom_daily_record.dart';
@@ -154,9 +155,13 @@ class MomRecordViewModel extends _$MomRecordViewModel {
     await saveUseCase(record);
 
     // レビュープロンプトのカウント増加
-    await ref
+    final wasReviewPromptTriggered = await ref
         .read(reviewPromptViewModelProvider.notifier)
         .incrementRecordCountOnly();
+    // レビューが表示されない場合にPaywallプロンプトをチェック
+    await ref
+        .read(paywallPromptViewModelProvider.notifier)
+        .onRecordAdded(wasReviewPromptTriggered: wasReviewPromptTriggered);
 
     // 編集中の日付ならリアルタイム更新される
     // そうでなければ手動で月間データを再取得

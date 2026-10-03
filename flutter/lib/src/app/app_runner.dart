@@ -24,6 +24,7 @@ import 'package:babymom_diary/src/core/deeplink/deep_link_service.dart';
 import 'package:babymom_diary/src/features/review_prompt/review_prompt.dart';
 import 'package:babymom_diary/src/features/push_notification/infrastructure/services/push_notification_service.dart';
 import 'package:babymom_diary/src/features/onboarding/application/onboarding_status_provider.dart';
+import 'package:babymom_diary/src/features/subscription/presentation/viewmodels/paywall_prompt_view_model.dart';
 
 Future<void> runBabymomDiaryApp({
   required String appTitle,
@@ -96,6 +97,7 @@ class _AppState extends ConsumerState<App> {
   String? _previousHouseholdId;
   bool _adPreloadStarted = false;
   ProviderSubscription<ReviewPromptViewState>? _reviewPromptSub;
+  ProviderSubscription<PaywallPromptViewState>? _paywallPromptSub;
 
   @override
   void initState() {
@@ -108,6 +110,7 @@ class _AppState extends ConsumerState<App> {
       _initializePushNotifications();
       _incrementAppLaunchCount();
       _setupReviewPromptListener();
+      _setupPaywallPromptListener();
     });
   }
 
@@ -146,9 +149,33 @@ class _AppState extends ConsumerState<App> {
     );
   }
 
+  /// Paywallプロンプトの状態を監視
+  void _setupPaywallPromptListener() {
+    debugPrint('[PaywallPrompt] Setting up listener');
+    _paywallPromptSub = ref.listenManual<PaywallPromptViewState>(
+      paywallPromptViewModelProvider,
+      (previous, next) {
+        debugPrint(
+            '[PaywallPrompt] Listener triggered: previous=${previous?.shouldShowPaywall}, next=${next.shouldShowPaywall}');
+        if (next.shouldShowPaywall && mounted) {
+          debugPrint('[PaywallPrompt] Showing paywall...');
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final navigatorContext = rootNavigatorKey.currentContext;
+            if (mounted && navigatorContext != null) {
+              ref
+                  .read(paywallPromptViewModelProvider.notifier)
+                  .showPaywallIfNeeded(navigatorContext);
+            }
+          });
+        }
+      },
+    );
+  }
+
   @override
   void dispose() {
     _reviewPromptSub?.close();
+    _paywallPromptSub?.close();
     super.dispose();
   }
 

@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../child_record.dart';
 import '../../../menu/children/application/child_context_provider.dart';
 import '../../../review_prompt/presentation/viewmodels/review_prompt_view_model.dart';
+import '../../../subscription/presentation/viewmodels/paywall_prompt_view_model.dart';
 import '../mappers/record_ui_mapper.dart';
 import '../models/record_draft.dart';
 import '../models/record_item_model.dart';
@@ -72,9 +73,13 @@ class RecordViewModel extends _$RecordViewModel {
         await deleteRecordWithSync(childId: childId, id: previousId);
       }
       // レビュープロンプトのカウント増加
-      await ref
+      final wasReviewPromptTriggered = await ref
           .read(reviewPromptViewModelProvider.notifier)
           .incrementRecordCountOnly();
+      // レビューが表示されない場合にPaywallプロンプトをチェック
+      await ref
+          .read(paywallPromptViewModelProvider.notifier)
+          .onRecordAdded(wasReviewPromptTriggered: wasReviewPromptTriggered);
 
       state = state.copyWith(
         isProcessing: false,

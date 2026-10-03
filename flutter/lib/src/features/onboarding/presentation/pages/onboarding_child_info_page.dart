@@ -10,6 +10,7 @@ import 'package:babymom_diary/src/features/menu/children/application/selected_ch
 import 'package:babymom_diary/src/features/menu/children/data/infrastructure/child_firestore_data_source.dart';
 import 'package:babymom_diary/src/features/menu/children/presentation/widgets/child_form.dart';
 import 'package:babymom_diary/src/features/onboarding/application/onboarding_status_provider.dart';
+import 'package:babymom_diary/src/features/subscription/presentation/viewmodels/paywall_prompt_view_model.dart';
 
 class OnboardingChildInfoPage extends ConsumerStatefulWidget {
   const OnboardingChildInfoPage({super.key});
@@ -29,6 +30,9 @@ class _OnboardingChildInfoPageState
     if (context.mounted) {
       context.go('/baby');
     }
+    await ref
+        .read(paywallPromptViewModelProvider.notifier)
+        .onOnboardingCompleted();
   }
 
   @override
@@ -95,6 +99,9 @@ class _OnboardingChildInfoPageState
                         if (context.mounted) {
                           context.go('/baby');
                         }
+                        await ref
+                            .read(paywallPromptViewModelProvider.notifier)
+                            .onOnboardingCompleted();
                       } on FirebaseException catch (e) {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(

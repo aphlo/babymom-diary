@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -79,8 +80,11 @@ GoRouter appRouter(Ref ref) {
     redirect: (context, state) {
       final hasCompletedOnboardingRaw = ref.read(onboardingStatusProvider);
       final isAuthed = ref.read(isAuthedProvider);
-      // ログイン済み（user != null）であれば、セットアップ済みの既存ユーザーとしてオンボーディング完了とみなす
-      final hasCompletedOnboarding = hasCompletedOnboardingRaw || isAuthed;
+      final user = FirebaseAuth.instance.currentUser;
+      final isNonAnonymousUser = user != null && !user.isAnonymous;
+      // ログイン済みかつ匿名でない場合（データ引き継ぎ）、またはオンボーディング完了フラグがある場合
+      final hasCompletedOnboarding =
+          hasCompletedOnboardingRaw || isNonAnonymousUser;
 
       // ディープリンク（milu://）はDeepLinkServiceで処理するので、
       // ここでは/babyにリダイレクトして、GoExceptionを回避する
@@ -499,36 +503,135 @@ class _ScaffoldWithNavBarState extends ConsumerState<_ScaffoldWithNavBar> {
     }
   }
 
+  Widget _buildNavItem({
+    required int index,
+    required IconData icon,
+    required IconData selectedIcon,
+    required String label,
+    required Color foregroundColor,
+  }) {
+    final isSelected = widget.navigationShell.currentIndex == index;
+    final color =
+        isSelected ? foregroundColor : foregroundColor.withValues(alpha: 0.72);
+
+    return Expanded(
+      child: Semantics(
+        button: true,
+        selected: isSelected,
+        label: label,
+        child: InkResponse(
+          onTap: () => _onDestinationSelected(index),
+          radius: 36,
+          highlightColor: Colors.transparent,
+          splashColor: foregroundColor.withValues(alpha: 0.15),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(isSelected ? selectedIcon : icon, color: color, size: 23),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 10.5,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  height: 1.2,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomNavigationBar(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor = theme.navigationBarTheme.backgroundColor ??
+        (isDark ? const Color(0xFF1E1E1E) : theme.colorScheme.primary);
+    final foregroundColor = theme.appBarTheme.foregroundColor ??
+        (isDark ? theme.colorScheme.primary : Colors.white);
+
+    final isIOS = defaultTargetPlatform == TargetPlatform.iOS;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
+    // YouTubeアプリのようにスリムかつ洗練された高さ設定
+    // iOS: ホームインジケータ（通常34px）を踏まえつつコンパクト(22px)に抑え、全体高さを約71.5pxにする
+    // Android: 3ボタンナビやジェスチャーナビのSafeAreaを適切に考慮
+    final effectiveBottomPadding = isIOS
+        ? (bottomPadding > 0 ? 22.0 : 4.0)
+        : (bottomPadding > 0 ? bottomPadding : 6.0);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        border: Border(
+          top: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.12)
+                : Colors.white.withValues(alpha: 0.18),
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.only(top: 5.0, bottom: effectiveBottomPadding),
+        child: SizedBox(
+          height: 44.0, // コンテンツ領域（アイコン + ラベル）
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _buildNavItem(
+                index: 0,
+                icon: Icons.child_care_outlined,
+                selectedIcon: Icons.child_care,
+                label: 'ベビーの記録',
+                foregroundColor: foregroundColor,
+              ),
+              _buildNavItem(
+                index: 1,
+                icon: Icons.vaccines_outlined,
+                selectedIcon: Icons.vaccines,
+                label: '予防接種',
+                foregroundColor: foregroundColor,
+              ),
+              _buildNavItem(
+                index: 2,
+                icon: Icons.face_4_outlined,
+                selectedIcon: Icons.face_4,
+                label: 'ママの記録',
+                foregroundColor: foregroundColor,
+              ),
+              _buildNavItem(
+                index: 3,
+                icon: Icons.calendar_month_outlined,
+                selectedIcon: Icons.calendar_month,
+                label: 'カレンダー',
+                foregroundColor: foregroundColor,
+              ),
+              _buildNavItem(
+                index: 4,
+                icon: Icons.menu,
+                selectedIcon: Icons.menu,
+                label: 'メニュー',
+                foregroundColor: foregroundColor,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: widget.navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: widget.navigationShell.currentIndex,
-        onDestinationSelected: _onDestinationSelected,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.child_care),
-            label: 'ベビーの記録',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.vaccines),
-            label: '予防接種',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.face_4),
-            label: 'ママの記録',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.calendar_today),
-            label: 'カレンダー',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.menu),
-            label: 'メニュー',
-          ),
-        ],
-      ),
+      bottomNavigationBar: _buildBottomNavigationBar(context),
     );
   }
 }

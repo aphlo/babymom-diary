@@ -51,6 +51,7 @@ class BabyFoodIngredientList extends StatelessWidget {
           // 食材リスト
           Expanded(
             child: TabBarView(
+              physics: const NeverScrollableScrollPhysics(),
               children: FoodCategory.values.map((category) {
                 return CategoryIngredientList(
                   householdId: householdId,

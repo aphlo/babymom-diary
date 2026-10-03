@@ -152,6 +152,10 @@ void main() {
 
       // 各カテゴリのラベルが表示されていることを確認
       expect(find.text('米・パン・麺'), findsOneWidget);
+
+      // 親タブのスワイプを妨げないよう、子タブのTabBarViewの横スワイプが無効化されていることを確認
+      final tabBarView = tester.widget<TabBarView>(find.byType(TabBarView));
+      expect(tabBarView.physics, isA<NeverScrollableScrollPhysics>());
     });
   });
 }
