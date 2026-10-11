@@ -1,11 +1,17 @@
 import * as fs from "fs";
 import * as path from "path";
-import { municipalities as existingMunicipalities } from "../src/data/municipalities";
+import {
+  type CashBenefit,
+  municipalities as existingMunicipalities,
+  type Municipality,
+} from "../src/data/municipalities";
+
+type ExcelRow = Record<string, string>;
 
 // ExcelからパースしたJSONデータのパス
 const dataJsonPath = "/Users/koumi/.gemini/antigravity/brain/272bd092-9166-437b-97c1-cc73c2ad74f6/scratch/data.json";
 const rawData = fs.readFileSync(dataJsonPath, "utf-8");
-const excelData = JSON.parse(rawData);
+const excelData: ExcelRow[] = JSON.parse(rawData);
 
 // ローマ字・Slugのマッピング辞書
 const PREFECTURE_SLUGS: Record<string, string> = {
@@ -65,7 +71,7 @@ const CITY_SLUGS: Record<string, string> = {
 };
 
 // 共通給付金（都道府県別）
-const COMMON_BENEFITS: Record<string, any[]> = {
+const COMMON_BENEFITS: Record<string, CashBenefit[]> = {
   tokyo: [
     {
       source: "国",
@@ -340,7 +346,7 @@ const COMMON_BENEFITS: Record<string, any[]> = {
 };
 
 // Excel データの市区町村別グループ化
-const excelByCity: Record<string, any[]> = {};
+const excelByCity: Record<string, ExcelRow[]> = {};
 for (const row of excelData) {
   const city = row["市区町村"];
   if (city.includes("全域")) continue;
@@ -350,7 +356,7 @@ for (const row of excelData) {
   excelByCity[city].push(row);
 }
 
-const finalMunicipalities: any[] = [];
+const finalMunicipalities: Municipality[] = [];
 const existingCities = existingMunicipalities.map((m) => m.cityJa);
 
 // 1. 既存の自治体オブジェクトのアップデートと追加
