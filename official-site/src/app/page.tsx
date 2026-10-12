@@ -11,14 +11,14 @@ export default function Home() {
   // 静的記事データ定義
   const latestArticles = [
     {
-      slug: "baby-breastfeeding-schedule",
+      slug: "childcare/breastfeeding/1",
       title: "赤ちゃんの授乳スケジュールと目安量について",
       description: "新生児から1歳頃までの授乳回数やミルクの量の目安、スケジュール調整のコツを分かりやすく解説します。",
       category: "授乳・食事",
       publishedAt: "2026/06/09",
     },
     {
-      slug: "baby-vaccination-schedule",
+      slug: "childcare/vaccination/2",
       title: "赤ちゃんの予防接種スケジュール管理と進め方のコツ",
       description:
         "生後2ヶ月から始まる赤ちゃんの予防接種。種類が多くて複雑な予防接種スケジュールを漏れなくスムーズに進めるための方法を解説します。",
