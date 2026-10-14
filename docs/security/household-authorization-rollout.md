@@ -42,3 +42,6 @@ MILU-01/02/03への対応。デプロイや実データ移行はこの変更で�
 `cloud-functions/src/households/authorization.test.ts` は実際のCallable `.run` をJestから呼び、Firestoreのみを合成データのtest doubleにする。正常作成/参加/復帰/owner削除/member退会、未検証所有権、旧ID加入、期限切れ・再利用・失効済みコード、ownerの世帯移動、改ざんされた表示項目、退会後の通知登録を確認する。読取り後書込み順序もtest doubleで検査する。テストは実Firestoreの並行transaction・Rules評価・IAM・配備状態を実証しない。
 
 Rulesの用途別matchと認可フィールド制限はソースで確認した。Rules emulatorは利用していない。Flutter SDKのDart artifactダウンロードが環境のHTTP CONNECT 403で拒否され、Rakeも未インストール（`rake format`, `rake lint`, `rake test` はcommand not found）で、ローカルformat/analyze/testは実行できないためCIで実行する必要がある。本番/実データ/API呼出し・課金操作・secret値出力は行っていない。MILU-05のFCM数/速度制限は別対応であり、本PRでは解決済みとしない。
+
+
+追加確認: Node 22.23.3（公式配布・SHA256確認）でもTypeScript buildと合成データの通常回帰テストが通過した。Hugは22件、miluは8 suites/80件。Flutter SDK取得403と実Rules/DB検証の限界は残る。
