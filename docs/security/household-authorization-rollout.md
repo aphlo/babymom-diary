@@ -26,22 +26,54 @@ MILU-01/02/03への対応。デプロイや実データ移行はこの変更で�
 
 承認済み移行manifestには世帯ID、独立証拠への参照、owner UID、認可するmember UID/role、各ユーザーのactive/original世帯、レビュー担当、承認日を記録する。ownerは一名、originalは本人所有かnull、activeはmemberのいる世帯かnullを検査する。private registryを作成するだけではなく、member一覧を承認済み内容で再構成し、古い余分なmemberを除去、createdByとusers表示項目を正規記録へ合わせる。曖昧なレコードを自動採用するスクリプトは含めていない。移行は別途承認された運用作業として、バックアップとレビュー済みmanifestを用い実施する。
 
-## 配備順序と互換性
+## 段階配備・停止期間・旧アプリの互換性
 
-1. このPRのCallable実装をTerraformで配備する。`create-household` → `createHousehold`、`create-invitation` → `createInvitation` の新規entry point/IAMも同モジュールに含める。既存 `accept-invitation`, `remove-member`, `delete-account`, `register-fcm-token` と日次通知の改修も同時に更新する。旧ID加入はここから利用不可となる。未検証世帯の管理操作もfail closedとなる。
-2. 移行前にメンテナンス時間を確保し、旧クライアントのhousehold/member書込みおよびusers認可項目の書込みを一時Rulesで停止する。旧包括writeを残したまま承認memberを移行すると、移行と最終Rules切替の間に再び変更され得る。メンテナンスRulesを別途レビューして適用し、以後の書込み停止を確認してから証拠照合を確定する。
-3. バックアップを取得し、上記承認済みmanifestからprivate registry・member・users表示項目を移行する。未承認世帯は登録しない。この段階で元世帯の新しいコードが発行されていないこと、private collectionへのclient権限がないことも確認する。
-4. 新Flutter版を配布し最小サポート版を切り替える。世帯作成はCallable、共有画面は世帯IDから招待コードへ切替。新API名はasia-northeast1のTerraform名と一致する。旧アプリの直接世帯作成・直接所属変更は最終Rulesで拒否されるため、移行案内とアプリ更新を必須にする。
-5. 本PRの最終Rulesを配備してメンテナンスを解除する。確認済みregistryとmemberを持つ正規ユーザーは、現在世帯で従来の子ども/育児/成長/離乳食/予防接種/カレンダー/ママ記録/設定/タグの共同編集を維持する。owner/memberの管理情報、世帯削除はCallableのみ。未登録世帯は読取り・書込みとも拒否され、既存キャッシュの削除は自動実行しない。
-6. 合成データだけの通常受入確認で、新規onboard、owner招待、member共同編集、削除後復帰、旧コード/旧世帯IDの拒否、owner/memberの退会、途中失敗の再試行を確認する。
+**本PRはメンテナンスを伴う切替であり、完全無停止のrolling配備ではない。**
+未移行の本番へFunctionsだけ、または最終Rulesだけを先に適用すると正規の既存操作も拒否される。
+本PRには本番maintenance switch・強制更新の運用gate・自動的に信用できる移行処理は含めていない。
+それらを別途レビュー・非本番で確認してから配備する。
 
-一時write freezeがあるため完全無停止の移行ではない。未検証世帯が最終Rulesで拒否される影響は事前案内が必要。既存正規ユーザーの確認済み移行をRules切替前に完了すれば、最終状態での閲覧・共同編集を維持できる。rollback時に旧包括writeやIDのみ加入を復活させない。問題があればメンテナンス状態に戻し新しい境界のまま修正する。
+1. 独立証拠による移行manifest案、バックアップ/復旧方針、事前案内、サポート受付、
+   一時maintenance Rulesを準備する。新アプリの審査・配布準備も先に進めるが、
+   新API未配備時に新版を単独で有効化すると新規作成等が使えないため、公開時点を切替計画と合わせる。
+   Terraform名だけでなくFirebase CLI配備名などの旧Admin処理・別名・重複endpoint、
+   移行に干渉する通知登録/スケジュール処理を棚卸しする。本PRでは本番の棚卸し・設定読取りはしていない。
+2. **live Functions変更や移行内容の最終確定より先にmaintenanceへ入る。**
+   旧household/member・users認可項目の包括writeを一時Rulesで置き換え、影響するオンライン操作を停止する。
+   denyを旧allowへ追加するだけではOR評価により停止できない。旧Admin mutator/別名も停止する。
+   Rulesだけでは旧Admin SDKの削除・所属書込みを止められない。停止確認後にバックアップと証拠照合を確定する。
+3. clientと旧Adminの変更を停止したまま、承認済みmanifestからprivate registry・正規member一覧・
+   users表示項目を整合させる。未承認世帯は登録せず保持する。現在値・自己申告だけからownerを採用しない。
+   旧世帯IDによる加入と旧招待を失効させ、確認済みactive/original・owner/memberを検査する。
+4. maintenance内で全Callable実装と最終Rulesを配備する。`create-household` → `createHousehold`、
+   `create-invitation` → `createInvitation` の新規entry point/IAMも同モジュールで配備し、
+   既存accept/remove/delete/FCM登録/日次処理も更新する。外部操作・干渉するwriterはまだ停止したまま、
+   private collectionのclient拒否、直接所属変更拒否、旧別名の無効化を確認する。
+   旧public項目を認可のfallbackにする並行期間は設けない。
+5. 新Flutter版・最小対応版の運用gateを有効にし、合成データの非本番受入で新規作成、
+   共同編集、招待、削除後復帰、owner/member退会、失効拒否、途中失敗の再試行を確認する。
+   移行・server/rules・新版配布が揃ってからmaintenanceを解除する。
+   store審査・反映・利用者更新に要する時間は本PRで保証できず、停止時間の上限は約束しない。
+6. 未確認世帯・旧版エラー・deleting再試行を監視する。gateが満たせなければmaintenanceを維持する。
+   rollbackで旧包括write・旧ID加入・未検証owner権限や古い削除処理を復活させない。
+
+| 時期・利用者 | 利用への影響 |
+|---|---|
+| maintenance中・旧版/新版 | 対象のオンライン記録/管理操作は意図的に停止。既存の端末キャッシュが表示される場合があり、遠隔消去は保証しない。 |
+| 切替後・新版・確認済み世帯 | 現在世帯の従来の記録共同編集と正規管理フローを維持し、ownerが新コードを発行する。 |
+| 切替後・旧版 | 直接世帯作成・直接所属変更・世帯IDのみ加入は更新まで利用不可。表示mirror/記録pathは保つが旧配布binaryの起動/再認証挙動は未検証で、旧版全体の互換性を保証しない。 |
+| いずれの版でも未確認世帯 | 一般maintenance終了後も読取り・書込み/管理の拒否が続く。独立確認とサポート対応までデータを保持する。 |
+
+安全に段階配備できるのは、上記の停止・独立確認・更新gateを満たす場合に限る。
+新版を一部ユーザーへ配布するだけのphased rolloutでは旧操作の安全な互換期間にならない。
+強制更新画面は利用案内でありセキュリティ境界ではない。本手順は将来の運用計画であり、
+merge・本番配備・IAM変更・実データ移行は実施していない。
 
 ## 検証と限界
 
 `cloud-functions/src/households/authorization.test.ts` は実際のCallable `.run` をJestから呼び、Firestoreのみを合成データのtest doubleにする。正常作成/参加/復帰/owner削除/member退会、未検証所有権、旧ID加入、期限切れ・再利用・失効済みコード、ownerの世帯移動、改ざんされた表示項目、退会後の通知登録を確認する。読取り後書込み順序もtest doubleで検査する。テストは実Firestoreの並行transaction・Rules評価・IAM・配備状態を実証しない。
 
-Rulesの用途別matchと認可フィールド制限はソースで確認した。Rules emulatorは利用していない。Flutter SDKのDart artifactダウンロードが環境のHTTP CONNECT 403で拒否され、Rakeも未インストール（`rake format`, `rake lint`, `rake test` はcommand not found）で、ローカルformat/analyze/testは実行できないためCIで実行する必要がある。本番/実データ/API呼出し・課金操作・secret値出力は行っていない。MILU-05のFCM数/速度制限は別対応であり、本PRでは解決済みとしない。
+Rulesの用途別matchと認可フィールド制限はソースで確認した。Rules emulatorは利用していない。Flutter SDKのDart artifactダウンロードが環境のHTTP CONNECT 403で拒否され、Rakeも未インストール（`rake format`, `rake lint`, `rake test` はcommand not found）で、ローカルformat/analyze/testは実行できない。整形修正後のCI run38594189534ではFunctions・公式サイト・Flutter format/analyze/testが全て通過した。本番/実データ/API呼出し・課金操作・secret値出力は行っていない。MILU-05のFCM数/速度制限は別対応であり、本PRでは解決済みとしない。
 
 
 追加確認: Node 22.23.3（公式配布・SHA256確認）でもTypeScript buildと合成データの通常回帰テストが通過した。Hugは22件、miluは8 suites/80件。Flutter SDK取得403と実Rules/DB検証の限界は残る。
