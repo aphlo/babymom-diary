@@ -45,35 +45,32 @@ export const registerFcmToken = functions
     const now = admin.firestore.FieldValue.serverTimestamp();
 
     try {
-      // 3. Save FCM token to subcollection: users/{uid}/fcm_tokens/{deviceId}
-      const tokenRef = db.doc(`users/${userId}/fcm_tokens/${deviceId}`);
-      await tokenRef.set(
-        {
-          token,
-          platform,
-          createdAt: now,
-          updatedAt: now,
-        },
-        { merge: true }
-      );
-
-      // 4. Ensure notification settings exist with defaults
-      const settingsRef = db.doc(`users/${userId}/notification_settings/settings`);
-      const settingsSnapshot = await settingsRef.get();
-
-      if (!settingsSnapshot.exists) {
-        await settingsRef.set({
-          vaccineReminder: {
-            enabled: true,
-            daysBefore: [0, 1],
-          },
-          dailyEncouragement: {
-            enabled: true,
-          },
-          createdAt: now,
-          updatedAt: now,
-        });
-      }
+      // Read lifecycle and write tokens in one transaction so withdrawal conflicts and retries safely.
+      await db.runTransaction(async (transaction) => {
+        const account = await transaction.get(db.doc(`user_authorizations/${userId}`));
+        if (account.exists && account.data()?.state !== "active") {
+          throw new functions.https.HttpsError(
+            "failed-precondition",
+            "退会処理中は通知を登録できません"
+          );
+        }
+        const tokenRef = db.doc(`users/${userId}/fcm_tokens/${deviceId}`);
+        const settingsRef = db.doc(`users/${userId}/notification_settings/settings`);
+        const settings = await transaction.get(settingsRef);
+        transaction.set(
+          tokenRef,
+          { token, platform, createdAt: now, updatedAt: now },
+          { merge: true }
+        );
+        if (!settings.exists) {
+          transaction.set(settingsRef, {
+            vaccineReminder: { enabled: true, daysBefore: [0, 1] },
+            dailyEncouragement: { enabled: true },
+            createdAt: now,
+            updatedAt: now,
+          });
+        }
+      });
 
       return {
         success: true,
@@ -83,7 +80,7 @@ export const registerFcmToken = functions
       if (error instanceof functions.https.HttpsError) {
         throw error;
       }
-      console.error("Error registering FCM token:", error);
+      console.error("FCM token registration failed.");
       throw new functions.https.HttpsError("internal", "FCMトークンの登録中にエラーが発生しました");
     }
   });

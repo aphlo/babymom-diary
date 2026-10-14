@@ -164,3 +164,76 @@ resource "google_cloud_run_service_iam_member" "delete_account_invoker" {
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
+
+# Cloud Function: createHousehold
+resource "google_cloudfunctions2_function" "create_household" {
+  name        = "create-household"
+  location    = var.region
+  description = "createHousehold"
+
+  build_config {
+    runtime     = var.runtime
+    entry_point = "createHousehold"
+    source {
+      storage_source {
+        bucket = module.source_bucket.bucket_name
+        object = google_storage_bucket_object.source.name
+      }
+    }
+  }
+
+  service_config {
+    max_instance_count    = var.max_instance_count
+    min_instance_count    = var.min_instance_count
+    available_memory      = var.available_memory
+    timeout_seconds       = var.timeout_seconds
+    service_account_email = module.service_account.email
+    environment_variables = var.environment_variables
+  }
+
+  labels = var.labels
+}
+
+resource "google_cloud_run_service_iam_member" "create_household_invoker" {
+  location = var.region
+  service  = google_cloudfunctions2_function.create_household.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
+
+
+# Cloud Function: createInvitation
+resource "google_cloudfunctions2_function" "create_invitation" {
+  name        = "create-invitation"
+  location    = var.region
+  description = "createInvitation"
+
+  build_config {
+    runtime     = var.runtime
+    entry_point = "createInvitation"
+    source {
+      storage_source {
+        bucket = module.source_bucket.bucket_name
+        object = google_storage_bucket_object.source.name
+      }
+    }
+  }
+
+  service_config {
+    max_instance_count    = var.max_instance_count
+    min_instance_count    = var.min_instance_count
+    available_memory      = var.available_memory
+    timeout_seconds       = var.timeout_seconds
+    service_account_email = module.service_account.email
+    environment_variables = var.environment_variables
+  }
+
+  labels = var.labels
+}
+
+resource "google_cloud_run_service_iam_member" "create_invitation_invoker" {
+  location = var.region
+  service  = google_cloudfunctions2_function.create_invitation.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}

@@ -8,13 +8,13 @@ class AcceptInvitation {
   final FirebaseFunctions _functions;
 
   Future<String> call({
-    required String householdId,
+    required String token,
     required String displayName,
   }) async {
     try {
       final callable = _functions.httpsCallable('accept-invitation');
       final result = await callable.call<Map<String, dynamic>>({
-        'householdId': householdId.trim(),
+        'token': token.trim(),
         'displayName': displayName.trim(),
       });
 

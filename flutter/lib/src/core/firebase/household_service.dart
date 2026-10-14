@@ -23,151 +23,31 @@ FirebaseFunctions firebaseFunctions(Ref ref) {
 }
 
 class HouseholdService {
-  HouseholdService(this._auth, this._db);
+  HouseholdService(this._auth, this._db, this._functions);
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _db;
+  final FirebaseFunctions _functions;
 
   DocumentReference<Map<String, dynamic>> _userRef(String uid) {
     return _db.collection('users').doc(uid);
   }
 
-  // Find an existing household where current user is a member
-  // Uses users/{uid} document to determine household membership (no collectionGroup query)
-  Future<String?> findExistingHouseholdForCurrentUser() async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) return null;
-
-    final userSnap = await _ensureUserDocument(uid);
-    final userData = userSnap.data();
-
-    final activeHouseholdId = userData?['activeHouseholdId'] as String?;
-    final membershipType = userData?['membershipType'] as String?;
-
-    // No household info stored - user needs to create or join a household
-    if (activeHouseholdId == null || membershipType == null) {
-      return null;
-    }
-
-    // Verify the household still exists and user is still a member
-    final membershipRef = _db
-        .collection('households')
-        .doc(activeHouseholdId)
-        .collection('members')
-        .doc(uid);
-    final membershipSnapshot = await membershipRef.get();
-
-    if (membershipSnapshot.exists) {
-      return activeHouseholdId;
-    }
-
-    // Membership no longer valid - clear the stored data
-    await _clearActiveHousehold(uid);
-    return null;
-  }
-
-  // Create a new household and add current user as admin member
-  Future<String> createHouseholdForCurrentUser() async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
-      throw StateError('User is not signed in.');
-    }
-    await _ensureUserDocument(uid);
-    final hRef = _db.collection('households').doc();
-    try {
-      await hRef.set({
-        'createdBy': uid,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-    } on FirebaseException catch (e) {
-      throw Exception(
-          'Failed to create ${hRef.path}: [${e.code}] ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to create ${hRef.path}: $e');
-    }
-
-    final mRef = hRef.collection('members').doc(uid);
-    try {
-      await mRef.set({
-        'role': 'admin',
-        'displayName': '管理者',
-        'joinedAt': FieldValue.serverTimestamp(),
-        'joinToken': null,
-        'uid': uid,
-      });
-    } on FirebaseException catch (e) {
-      throw Exception(
-          'Failed to create ${mRef.path}: [${e.code}] ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to create ${mRef.path}: $e');
-    }
-    await _setActiveHousehold(
-      uid: uid,
-      householdId: hRef.id,
-      membershipType: 'owner',
-    );
-    return hRef.id;
-  }
-
-  // Ensure there is at least one household and return its id
+  // Server verification prevents legacy profile fields from becoming authority.
   Future<String> ensureHousehold() async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
-      throw StateError('User is not signed in.');
-    }
-    final existing = await findExistingHouseholdForCurrentUser();
-    if (existing != null) {
-      return existing;
-    }
-    return createHouseholdForCurrentUser();
+    if (_auth.currentUser == null) throw StateError('User is not signed in.');
+    final result = await _functions
+        .httpsCallable('create-household')
+        .call<Map<String, dynamic>>();
+    return result.data['householdId'] as String;
   }
 
-  Future<DocumentSnapshot<Map<String, dynamic>>> _ensureUserDocument(
-      String uid) async {
-    final userRef = _userRef(uid);
-    final snap = await userRef.get();
-    if (snap.exists) {
-      return snap;
-    }
-    await userRef.set({
-      'createdAt': FieldValue.serverTimestamp(),
-    }).catchError((e, _) {
-      throw Exception('Failed to create ${userRef.path}: $e');
-    });
-    return userRef.get();
+  Future<String?> findExistingHouseholdForCurrentUser() async {
+    if (_auth.currentUser == null) return null;
+    return ensureHousehold();
   }
 
-  Future<void> _setActiveHousehold({
-    required String uid,
-    required String householdId,
-    required String membershipType,
-  }) async {
-    final userRef = _userRef(uid);
-    await userRef.set(
-      {
-        'activeHouseholdId': householdId,
-        'membershipType': membershipType,
-        'updatedAt': FieldValue.serverTimestamp(),
-      },
-      SetOptions(merge: true),
-    ).catchError((e, _) {
-      throw Exception('Failed to update ${userRef.path}: $e');
-    });
-  }
-
-  Future<void> _clearActiveHousehold(String uid) async {
-    final userRef = _userRef(uid);
-    await userRef.set(
-      {
-        'activeHouseholdId': FieldValue.delete(),
-        'membershipType': FieldValue.delete(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      },
-      SetOptions(merge: true),
-    ).catchError((e, _) {
-      throw Exception('Failed to update ${userRef.path}: $e');
-    });
-  }
+  Future<String> createHouseholdForCurrentUser() => ensureHousehold();
 
   // Get membership type for current user
   Future<String?> getMembershipType() async {
@@ -187,6 +67,7 @@ HouseholdService householdService(Ref ref) {
   return HouseholdService(
     ref.watch(firebaseAuthProvider),
     ref.watch(firebaseFirestoreProvider),
+    ref.watch(firebaseFunctionsProvider),
   );
 }
 

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../../../../core/firebase/household_service.dart';
 import '../../../../../core/theme/semantic_colors.dart';
 import '../../../../ads/application/services/banner_ad_manager.dart';
 import '../../../../ads/presentation/widgets/banner_ad_widget.dart';
+import '../../application/usecases/create_invitation.dart';
 import '../../domain/entities/household_member.dart';
 import '../../domain/errors/invitation_errors.dart';
 import '../providers/invitation_providers.dart';
@@ -21,14 +21,14 @@ class HouseholdSharePage extends ConsumerStatefulWidget {
 }
 
 class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
-  final TextEditingController _householdIdCtrl = TextEditingController();
+  final TextEditingController _invitationTokenCtrl = TextEditingController();
   final TextEditingController _displayNameCtrl = TextEditingController();
   bool _isProcessing = false;
   bool _loadingDialogVisible = false;
 
   @override
   void dispose() {
-    _householdIdCtrl.dispose();
+    _invitationTokenCtrl.dispose();
     _displayNameCtrl.dispose();
     super.dispose();
   }
@@ -102,7 +102,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'あなたは他のユーザーの世帯に参加しています。\n世帯IDの共有は世帯の作成者のみが行えます。',
+                  'あなたは他のユーザーの世帯に参加しています。\n招待コードの共有は世帯の作成者のみが行えます。',
                   style: TextStyle(color: context.textSecondary),
                 ),
               ],
@@ -125,7 +125,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _buildHouseholdIdSection(householdId),
+            _buildInvitationSection(householdId),
             if (hasOtherMembers)
               _buildMembersSectionContent(otherMembers, householdId),
             if (!hasOtherMembers) _buildJoinInvitationSection(),
@@ -137,7 +137,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
     );
   }
 
-  Widget _buildHouseholdIdSection(String householdId) {
+  Widget _buildInvitationSection(String householdId) {
     return Card(
       color: context.cardBackground,
       child: Padding(
@@ -145,73 +145,56 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                const Icon(Icons.share),
-                const SizedBox(width: 12),
-                Text('世帯ID', style: Theme.of(context).textTheme.titleMedium),
-              ],
-            ),
+            Text('世帯への招待', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            Text(
-              '他のユーザーとこの世帯IDを共有することで、世帯にメンバーを追加できます。',
-              style: TextStyle(color: context.textSecondary),
+            const Text(
+              '招待コードは24時間・1回のみ有効です。新しく発行すると以前のコードは失効します。信頼できる相手にのみ渡してください。',
             ),
             const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: context.pageBackground,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: context.tableBorderColor,
-                  width: 0.5,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: SelectableText(
-                      householdId,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontFamily: 'monospace',
-                          ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.copy),
-                    onPressed: () => _copyHouseholdId(householdId),
-                    tooltip: 'コピー',
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: Builder(
-                builder: (buttonContext) => ElevatedButton(
-                  onPressed: () =>
-                      _shareHouseholdId(buttonContext, householdId),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.primaryColor,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  child: const Text(
-                    '世帯IDを共有する',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
+            ElevatedButton(
+              onPressed:
+                  _isProcessing ? null : () => _issueInvitation(householdId),
+              child: const Text('招待コードを発行'),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _issueInvitation(String householdId) async {
+    setState(() => _isProcessing = true);
+    try {
+      final createInvitation = CreateInvitation(
+        ref.read(firebaseFunctionsProvider),
+      );
+      final token = await createInvitation(householdId);
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('招待コード'),
+          content: SelectableText(token),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                await Clipboard.setData(ClipboardData(text: token));
+                if (dialogContext.mounted) Navigator.of(dialogContext).pop();
+              },
+              child: const Text('コピー'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('閉じる'),
+            ),
+          ],
+        ),
+      );
+    } catch (_) {
+      await _showErrorDialog('招待を発行できませんでした。世帯の確認後、もう一度お試しください。');
+    } finally {
+      if (mounted) setState(() => _isProcessing = false);
+    }
   }
 
   Widget _buildMembersSectionContent(
@@ -286,7 +269,7 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
               ),
               const SizedBox(height: 8),
               Text(
-                '他のユーザーから受け取った世帯IDを入力して世帯に参加します。',
+                '他のユーザーから受け取った招待コードを入力して世帯に参加します。',
                 style: TextStyle(color: context.textSecondary),
               ),
               const SizedBox(height: 16),
@@ -302,10 +285,10 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
               ),
               const SizedBox(height: 12),
               TextField(
-                controller: _householdIdCtrl,
+                controller: _invitationTokenCtrl,
                 decoration: const InputDecoration(
-                  labelText: '世帯ID',
-                  hintText: '参加する世帯のID',
+                  labelText: '招待コード',
+                  hintText: '受け取った招待コード',
                   border: OutlineInputBorder(),
                 ),
                 enabled: !_isProcessing,
@@ -329,46 +312,8 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
     );
   }
 
-  void _copyHouseholdId(String householdId) {
-    Clipboard.setData(ClipboardData(text: householdId));
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('世帯IDをコピーしました')),
-    );
-  }
-
-  void _shareHouseholdId(BuildContext context, String householdId) {
-    final box = context.findRenderObject() as RenderBox?;
-    final sharePositionOrigin =
-        box != null ? box.localToGlobal(Offset.zero) & box.size : null;
-
-    Share.share(
-      '''⋅⋅⊱∘──────────∘⊰⋅⋆
-　「milu」への招待が届きました
-⋅⋅⊱∘──────────∘⊰⋅⋆
-
-「milu」をご利用いただき、
-ありがとうこざいます😌
-
-世帯に参加して赤ちゃんやママの情報を共有してみましょう!♡
-
-・世帯への参加方法
-1.メニューから「世帯の共有」をタップ
-2.「世帯に参加」の表示名に自分の名前、世帯IDに「$householdId」を入力
-3.参加ボタンをタップ
-
-アプリのインストールがまだの方は下記からインストールをお願いいたします
-
-iOS: https://apps.apple.com/jp/app/%E8%82%B2%E5%85%90%E8%A8%98%E9%8C%B2-%E4%BA%88%E9%98%B2%E6%8E%A5%E7%A8%AE%E7%AE%A1%E7%90%86-milu/id6754955821
-
-Android: https://play.google.com/store/apps/details?id=com.aphlo.babymomdiary''',
-      subject: '「milu」への招待が届きました',
-      sharePositionOrigin: sharePositionOrigin,
-    );
-  }
-
   Future<void> _acceptInvitation() async {
-    final householdId = _householdIdCtrl.text.trim();
+    final token = _invitationTokenCtrl.text.trim();
     final displayName = _displayNameCtrl.text.trim();
 
     if (displayName.isEmpty) {
@@ -376,8 +321,8 @@ Android: https://play.google.com/store/apps/details?id=com.aphlo.babymomdiary'''
       return;
     }
 
-    if (householdId.isEmpty) {
-      await _showErrorDialog('世帯IDを入力してください');
+    if (token.isEmpty) {
+      await _showErrorDialog('招待コードを入力してください');
       return;
     }
 
@@ -388,13 +333,13 @@ Android: https://play.google.com/store/apps/details?id=com.aphlo.babymomdiary'''
 
       final acceptInvitation = ref.read(acceptInvitationUseCaseProvider);
       await acceptInvitation(
-        householdId: householdId,
+        token: token,
         displayName: displayName,
       );
 
       if (!mounted) return;
 
-      _householdIdCtrl.clear();
+      _invitationTokenCtrl.clear();
       _displayNameCtrl.clear();
 
       ScaffoldMessenger.of(context).showSnackBar(

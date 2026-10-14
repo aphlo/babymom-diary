@@ -121,6 +121,9 @@ async function getEnabledUserTokens(db: admin.firestore.Firestore): Promise<Map<
 
   // 各ユーザーの通知設定を確認
   for (const [userId, tokens] of userTokensTemp) {
+    const user = await db.doc(`users/${userId}`).get();
+    const account = await db.doc(`user_authorizations/${userId}`).get();
+    if (!user.exists || (account.exists && account.data()?.state !== "active")) continue;
     const settingsRef = db.doc(`users/${userId}/notification_settings/settings`);
     const settingsSnapshot = await settingsRef.get();
 

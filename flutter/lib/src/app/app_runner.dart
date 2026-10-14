@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -41,6 +42,7 @@ Future<void> runBabymomDiaryApp({
     final householdService = fbcore.HouseholdService(
       FirebaseAuth.instance,
       FirebaseFirestore.instance,
+      FirebaseFunctions.instanceFor(region: 'asia-northeast1'),
     );
     try {
       hid = await householdService.ensureHousehold();
