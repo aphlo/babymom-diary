@@ -1,150 +1,93 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
-
-interface AcceptInvitationData {
-  householdId: string;
-  displayName: string;
-}
-
-interface AcceptInvitationResult {
-  householdId: string;
-  success: boolean;
-  message: string;
-}
+import { membershipFields, requireActive, requireAuth } from "../households/authorization";
+import { tokenHash } from "./createInvitation";
 
 export const acceptInvitation = functions
   .region("asia-northeast1")
-  .https.onCall(async (data: AcceptInvitationData, context): Promise<AcceptInvitationResult> => {
-    // 1. Authentication check
-    if (!context.auth) {
-      throw new functions.https.HttpsError("unauthenticated", "認証が必要です");
-    }
-
-    const userId = context.auth.uid;
-    const householdId = data.householdId?.trim();
-    const displayName = data.displayName?.trim();
-
-    // 2. Input validation
-    if (!householdId) {
-      throw new functions.https.HttpsError("invalid-argument", "世帯IDを入力してください");
-    }
-
-    if (!displayName || displayName.length === 0) {
-      throw new functions.https.HttpsError("invalid-argument", "表示名を入力してください");
-    }
-
-    if (displayName.length > 50) {
+  .https.onCall(async (data, context) => {
+    const uid = requireAuth(context);
+    const hash = tokenHash(data?.token); // The legacy householdId-only protocol is deliberately rejected.
+    const displayName = typeof data?.displayName === "string" ? data.displayName.trim() : "";
+    if (!displayName || displayName.length > 50) {
       throw new functions.https.HttpsError(
         "invalid-argument",
-        "表示名は50文字以内で入力してください"
+        "表示名を50文字以内で入力してください"
       );
     }
-
     const db = admin.firestore();
-
-    try {
-      // 3. Execute transaction
-      return await db.runTransaction(async (transaction) => {
-        const userRef = db.doc(`users/${userId}`);
-        const userSnapshot = await transaction.get(userRef);
-
-        if (!userSnapshot.exists) {
-          transaction.set(userRef, {
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-        }
-
-        const userData = userSnapshot.data() as
-          | {
-              activeHouseholdId?: string;
-              membershipType?: string;
-            }
-          | undefined;
-        const previousHouseholdId = userData?.activeHouseholdId;
-        const previousMembershipType = userData?.membershipType;
-
-        // 3-1. Get target household document
-        const householdRef = db.doc(`households/${householdId}`);
-        const householdSnapshot = await transaction.get(householdRef);
-
-        if (!householdSnapshot.exists) {
-          throw new functions.https.HttpsError("not-found", "世帯が見つかりません");
-        }
-
-        const householdData = householdSnapshot.data();
-        if (!householdData) {
-          throw new functions.https.HttpsError("not-found", "世帯データが見つかりません");
-        }
-
-        // 3-2. Self-invitation check
-        if (householdData.createdBy === userId) {
-          throw new functions.https.HttpsError(
-            "invalid-argument",
-            "自分が作成した世帯には参加できません"
+    return db.runTransaction(async (transaction) => {
+      const invitationRef = db.doc(`household_invitations/${hash}`);
+      const invitation = await transaction.get(invitationRef);
+      const invite = invitation.data();
+      if (
+        !invite ||
+        !(invite.expiresAt instanceof admin.firestore.Timestamp) ||
+        invite.expiresAt.toMillis() <= Date.now()
+      ) {
+        throw new functions.https.HttpsError("not-found", "招待が無効または期限切れです");
+      }
+      const householdId = invite.householdId as string;
+      const authority = await transaction.get(db.doc(`household_authorizations/${householdId}`));
+      requireActive(authority.data());
+      if (
+        authority.data()?.ownerUid !== invite.issuerUid ||
+        authority.data()?.invitationGeneration !== invite.generation
+      ) {
+        throw new functions.https.HttpsError("not-found", "招待が失効しています");
+      }
+      const issuer = await transaction.get(db.doc(`user_authorizations/${invite.issuerUid}`));
+      if (issuer.data()?.state !== "active" || issuer.data()?.activeHouseholdId !== householdId) {
+        throw new functions.https.HttpsError("not-found", "招待が失効しています");
+      }
+      const accountRef = db.doc(`user_authorizations/${uid}`);
+      const account = await transaction.get(accountRef);
+      requireActive(account.data());
+      const previousId = account.data()?.activeHouseholdId;
+      if (previousId) {
+        const previousAuthority = await transaction.get(
+          db.doc(`household_authorizations/${previousId}`)
+        );
+        requireActive(previousAuthority.data());
+        if (previousAuthority.data()?.ownerUid === uid) {
+          const members = await transaction.get(
+            db.collection(`households/${previousId}/members`).limit(2)
           );
-        }
-
-        // 3-3. Check if already a member
-        const memberRef = householdRef.collection("members").doc(userId);
-        const memberSnapshot = await transaction.get(memberRef);
-
-        if (memberSnapshot.exists) {
-          throw new functions.https.HttpsError("already-exists", "既にこの世帯のメンバーです");
-        }
-
-        // 3-4. Check if user is owner of current household with other members
-        if (previousHouseholdId && previousMembershipType === "owner") {
-          // Check if there are other members in the current household
-          // Get all members and filter out current user (avoids != query which requires index)
-          const currentMembersSnapshot = await db
-            .collection(`households/${previousHouseholdId}/members`)
-            .limit(2)
-            .get();
-
-          const hasOtherMembers = currentMembersSnapshot.docs.some((doc) => doc.id !== userId);
-
-          if (hasOtherMembers) {
+          if (members.docs.some((member) => member.id !== uid)) {
             throw new functions.https.HttpsError(
               "failed-precondition",
-              "他のメンバーがいる世帯の管理者は、別の世帯に参加できません"
+              "他のメンバーがいる世帯の管理者は参加できません"
             );
           }
         }
-
-        // Note: We do NOT remove the user from previous household here.
-        // The user's original household data is preserved so they can return to it
-        // if they are removed from the joined household later.
-
-        // 3-5. Add as member with display name
-        transaction.set(memberRef, {
-          role: "member",
-          displayName: displayName,
-          joinedAt: admin.firestore.FieldValue.serverTimestamp(),
-          uid: userId,
-        });
-
-        // 3-6. Update user document
-        transaction.set(
-          userRef,
-          {
-            activeHouseholdId: householdId,
-            membershipType: "member",
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          },
-          { merge: true }
-        );
-
-        return {
-          householdId,
-          success: true,
-          message: "世帯への参加が完了しました",
-        };
-      });
-    } catch (error) {
-      if (error instanceof functions.https.HttpsError) {
-        throw error;
       }
-      console.error("Error accepting invitation:", error);
-      throw new functions.https.HttpsError("internal", "招待の承認中にエラーが発生しました");
-    }
+      if (authority.data()?.ownerUid === uid) {
+        throw new functions.https.HttpsError("invalid-argument", "自分の世帯には参加できません");
+      }
+      const memberRef = db.doc(`households/${householdId}/members/${uid}`);
+      const member = await transaction.get(memberRef);
+      if (member.exists)
+        throw new functions.https.HttpsError("already-exists", "既にこの世帯のメンバーです");
+      // Every move revokes prior invitations, including the preserved original household.
+      if (previousId) {
+        if (previousId !== account.data()?.originalHouseholdId) {
+          transaction.delete(db.doc(`households/${previousId}/members/${uid}`));
+        }
+        transaction.update(db.doc(`household_authorizations/${previousId}`), {
+          invitationGeneration: admin.firestore.FieldValue.increment(1),
+        });
+      }
+      transaction.create(memberRef, {
+        uid,
+        role: "member",
+        displayName,
+        joinedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      transaction.update(accountRef, { activeHouseholdId: householdId });
+      transaction.set(db.doc(`users/${uid}`), membershipFields(householdId, false), {
+        merge: true,
+      });
+      transaction.delete(invitationRef); // Atomic consumption: concurrent redemption can only succeed once.
+      return { householdId, success: true, message: "世帯への参加が完了しました" };
+    });
   });

@@ -2,81 +2,69 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function authed() { return request.auth != null; }
-
-    function activeHouseholdMatches(hid) {
-      return authed() &&
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.activeHouseholdId == hid;
-    }
-
     function isMember(hid) {
-      return authed() &&
-             activeHouseholdMatches(hid) &&
-             exists(/databases/$(database)/documents/households/$(hid)/members/$(request.auth.uid));
+      return authed()
+        && get(/databases/$(database)/documents/user_authorizations/$(request.auth.uid)).data.state == 'active'
+        && get(/databases/$(database)/documents/user_authorizations/$(request.auth.uid)).data.activeHouseholdId == hid
+        && get(/databases/$(database)/documents/household_authorizations/$(hid)).data.state == 'active'
+        && exists(/databases/$(database)/documents/households/$(hid)/members/$(request.auth.uid));
     }
-
-    // households/{hid} の作成者かどうか
-    function isCreator(hid) {
-      return authed() &&
-             get(/databases/$(database)/documents/households/$(hid)).data.createdBy == request.auth.uid;
+    function ownAccountWritable(uid) {
+      return authed() && request.auth.uid == uid
+        && (!exists(/databases/$(database)/documents/user_authorizations/$(uid))
+          || get(/databases/$(database)/documents/user_authorizations/$(uid)).data.state == 'active');
     }
+    // Authority, lifecycle and invitations are server-only. Missing registry fails closed.
+    match /user_authorizations/{uid} { allow read, write: if false; }
+    match /household_authorizations/{hid} { allow read, write: if false; }
+    match /household_invitations/{hash} { allow read, write: if false; }
 
     match /households/{hid} {
-      // 作成者の記録
-      allow create: if authed() && request.resource.data.createdBy == request.auth.uid;
-      // household 本体の閲覧・更新・削除はメンバーのみ
-      allow read, update, delete: if isMember(hid);
-
-      // メンバー管理：ドキュメント = uid
-      // 非メンバーが自分のメンバードキュメントを作成できるようにする（作成者 or 有効トークン）
+      allow read: if isMember(hid);
+      allow create, delete: if false;
+      allow update: if isMember(hid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['vaccineVisibilitySettings']);
       match /members/{uid} {
         allow read: if isMember(hid);
-        allow create: if authed() && request.auth.uid == uid && isCreator(hid);
-        // 既存メンバーなら自由に更新/削除可（下の包括ルールでも許可されるが明示）
-        allow update, delete: if isMember(hid);
+        allow write: if false;
       }
-
-      match /children/{childId}/events/{eventId} {
-        allow read: if isMember(hid);
-        allow create, update: if isMember(hid)
-          && request.resource.data.householdId is string
-          && request.resource.data.childId is string
-          && request.resource.data.householdId == hid
-          && request.resource.data.childId == childId;
-        allow delete: if isMember(hid);
-      }
-
-      // households 配下はメンバーであれば全て読み書き可能（包括ルール）
-      match /{document=**} {
+      match /children/{childId} {
         allow read, write: if isMember(hid);
+        match /events/{eventId} {
+          allow read, delete: if isMember(hid);
+          allow create, update: if isMember(hid)
+            && request.resource.data.householdId == hid
+            && request.resource.data.childId == childId;
+        }
+        match /{collection}/{document} {
+          allow read, write: if isMember(hid)
+            && collection in ['childRecords', 'growthRecords', 'babyFoodRecords', 'vaccination_records', 'reservation_groups', 'vaccination_schedules'];
+        }
+      }
+      match /{collection}/{document} {
+        allow read, write: if isMember(hid)
+          && collection in ['events', 'momRecords', 'momDiary', 'custom_ingredients', 'settings', 'tags'];
       }
     }
-
-    // collectionGroup('members') から "自分の" メンバーシップだけ読めるようにする
-    // クエリ互換のため、ドキュメントID(uid)ではなく resource.data.uid で判定する
-    // → クライアントは必ず where('uid', '==', request.auth.uid) を付与する必要がある
     match /{path=**}/members/{uid} {
       allow read: if authed() && resource.data.uid == request.auth.uid;
     }
-
     match /users/{uid} {
-      allow read, write: if authed() && request.auth.uid == uid;
-
-      // FCMトークン：本人のみ読み書き可能
+      allow read: if authed() && request.auth.uid == uid;
+      allow create: if ownAccountWritable(uid)
+        && request.resource.data.keys().hasOnly(['createdAt', 'updatedAt', 'displayName']);
+      allow update: if ownAccountWritable(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['updatedAt', 'displayName']);
+      allow delete: if false;
       match /fcm_tokens/{deviceId} {
-        allow read, write: if authed() && request.auth.uid == uid;
+        allow read: if authed() && request.auth.uid == uid;
+        allow write: if ownAccountWritable(uid);
       }
-
-      // 通知設定：本人のみ読み書き可能
       match /notification_settings/{docId} {
-        allow read, write: if authed() && request.auth.uid == uid;
+        allow read: if authed() && request.auth.uid == uid;
+        allow write: if ownAccountWritable(uid);
       }
     }
-
-    // カレンダーイベントを collectionGroup クエリで取得できるようにする
-    match /{path=**}/events/{eventId} {
-      allow read: if authed() && resource.data.householdId is string
-        && isMember(resource.data.householdId);
-    }
+    // Application queries household events directly; no data-field-only collection-group grant.
   }
 }
