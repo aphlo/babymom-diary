@@ -152,7 +152,8 @@ class _HouseholdSharePageState extends ConsumerState<HouseholdSharePage> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _isProcessing ? null : () => _issueInvitation(householdId),
+              onPressed:
+                  _isProcessing ? null : () => _issueInvitation(householdId),
               child: const Text('招待コードを発行'),
             ),
           ],

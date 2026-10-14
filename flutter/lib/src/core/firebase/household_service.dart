@@ -36,7 +36,8 @@ class HouseholdService {
   // Server verification prevents legacy profile fields from becoming authority.
   Future<String> ensureHousehold() async {
     if (_auth.currentUser == null) throw StateError('User is not signed in.');
-    final result = await _functions.httpsCallable('create-household')
+    final result = await _functions
+        .httpsCallable('create-household')
         .call<Map<String, dynamic>>();
     return result.data['householdId'] as String;
   }
